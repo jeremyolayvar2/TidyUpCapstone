@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace TidyUp.Models.Entities
+namespace TidyUpCapstone.Models.Entities
 {
     public class ItemPost
     {

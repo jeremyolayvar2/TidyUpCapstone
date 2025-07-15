@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace TidyUp.Models.Entities
+namespace TidyUpCapstone.Models.Entities
 {
     [Table("Message")]
     public class Messages

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using TidyUp.Models.Entities;
+using TidyUpCapstone.Models.Entities;
 
 namespace TidyUp.Data  
 {

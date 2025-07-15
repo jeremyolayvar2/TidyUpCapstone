@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace TidyUp.Models.Entities
+namespace TidyUpCapstone.Models.Entities
 {
     public class ItemCategory
     {
