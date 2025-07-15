@@ -3,48 +3,227 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - TidyUpCapstone</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] Tidy Up</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/TidyUpCapstone.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/main.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/style1.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/TidyUp.styles.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link href="~/assets/logo-tidyup.png" rel="shortcut icon" type="image/svg" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">TidyUpCapstone</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+<body data-userid="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value"
+      data-username="@User.Identity?.Name">
+        <div class="layout-wrapper d-flex">
+
+            @if (ViewBag.HideNavigation == null || ViewBag.HideNavigation == false) 
+            {
+
+                
+            <!-- Sidebar Navigation - Default -->
+
+                <nav id="sidebar" class="close">
+               
+                <ul>
+                    <li class="toggle-container">
+                        <button onclick="toggleSidebar()" id="icon-toggle">
+                            <img class="toggle" alt="Toggle" src="~/assets/Toggle.svg" />
+                        </button>
+                    </li>
+                </ul>
+
+                
+                <div class="nav-profile-container">
+                    <div class="property-1default-child" id="rectangle2"> </div>
+                    <img id="verification-v2" alt="Verified" src="~/assets/verified-icon.svg" />
+                </div>
+
+          
+                <ul id="tab-container">
+                    <li>
+                        <a href="#">
+                            <img class="icon" alt="Home" src="~/assets/VectorHome.svg" />
+                            <span>Home</span>
+                        </a>
+                    </li>
+                        <li>
+                        <a href="#">
+                            <img class="icon" alt="Browse" src="~/assets/VectorBrowse.svg" />
+                            <span>Browse Items</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <img class="icon" alt="Claimed" src="~/assets/VectorClaimed.svg" />
+                            <span>Claimed Items</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <img class="icon" alt="Community" src="~/assets/VectorComm.svg" />
+                            <span>Community</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a id="openCreateModal">
+                            <img class="icon" alt="Create" src="~/assets/VectorCreate.svg" />
+                            <span>Create</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="open-token">
+                            <img class="icon" alt="Token" src="~/assets/VectorToken.svg" />
+                            <span>Token Balance</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <img class="icon" alt="Shop" src="~/assets/VectorShop.svg" />
+                            <span>Shop</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <img class="icon" alt="Message" src="~/assets/VectorMsg.svg" />
+                            <span>Messages</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <img class="icon" alt="Notifications" src="~/assets/VectorNotif.svg" />
+                            <span>Notifications</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <img class="icon" alt="Leaderboard" src="~/assets/VectorLB.svg" />
+                            <span>Leaderboards</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <img class="icon" alt="Quest/Milestone" src="~/assets/VectorQuests.svg" />
+                            <span>Quest & Milestones</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <img class="icon" alt="Settings" src="~/assets/VectorSettings.svg" />
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+
+            <div class="dock-outer">
+                <div class="dock-panel" id="dockPanel">
+                    <div class="dock-item" data-label="Home">
+                        <div class="dock-icon">
+                            <img src="~/assets/VectorHome.svg" />
+                        </div>
+                        <div class="dock-label">Home</div>
+                    </div>
+                    <div class="dock-item" data-label="Browse">
+                        <div class="dock-icon">
+                            <img src="~/assets/VectorBrowse.svg" />
+                        </div>
+                        <div class="dock-label">Browse Item</div>
+                    </div>
+                    <div class="dock-item" data-label="Claimed">
+                        <div class="dock-icon">
+                            <img src="~/assets/VectorClaimed.svg" />
+                        </div>
+                        <div class="dock-label">Claimed</div>
+                    </div>
+                    <div class="dock-item" data-label="Community">
+                        <div class="dock-icon">
+                            <img src="~/assets/VectorComm.svg" />
+                        </div>
+                        <div class="dock-label">Community</div>
+                    </div>
+                    <div class="dock-item" data-label="Create">
+                        <div class="dock-icon">
+                            <img src="~/assets/VectorCreate.svg" />
+                        </div>
+                        <div class="dock-label">Create</div>
+                    </div>
+                    <div class="dock-item open-token" data-label="Token">
+                        <div class="dock-icon">
+                            <img src="~/assets/VectorToken.svg" />
+                        </div>
+                        <div class="dock-label">Token</div>
+                    </div>
+                    <div class="dock-item" data-label="Shop">
+                        <div class="dock-icon">
+                            <img src="~/assets/VectorShop.svg" />
+                        </div>
+                        <div class="dock-label">Shop</div>
+                    </div>
+                    <div class="dock-item" data-label="Message">
+                        <div class="dock-icon">
+                            <img src="~/assets/VectorMsg.svg" />
+                        </div>
+                        <div class="dock-label">Message</div>
+                    </div>
+                    <div class="dock-item" data-label="Notification">
+                        <div class="dock-icon">
+                            <img src="~/assets/VectorNotif.svg" />
+                        </div>
+                        <div class="dock-label">Notification</div>
+                    </div>
+                    <div class="dock-item" data-label="Leaderboards">
+                        <div class="dock-icon">
+                            <img src="~/assets/VectorLB.svg" />
+                        </div>
+                        <div class="dock-label">Leaderboards</div>
+                    </div>
+                    <div class="dock-item" data-label="Quests/Milestone">
+                        <div class="dock-icon">
+                            <img src="~/assets/VectorQuests.svg" />
+                        </div>
+                        <div class="dock-label">Quests & Milestone</div>
+                    </div>
+                    <div class="dock-item" data-label="Settings">
+                        <div class="dock-icon">
+                            <img src="~/assets/VectorSettings.svg" />
+                        </div>
+                        <div class="dock-label">Settings</div>
+                    </div>
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - TidyUpCapstone - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            }
+
+
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <main role="main" class="pb-3">
+                    @RenderBody()
+                    <script src="~/js/openModal.js"></script>
+                </main>
+
+                <footer class="border-top footer text-muted mt-5">
+                    <div class="container">
+                        &copy; 2025 - Tidy Up - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                    </div>
+                </footer>
+            </div>
         </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
-</body>
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="~/js/site.js" asp-append-version="true"></script>
+        
+
+        @await RenderSectionAsync("Scripts", required: false)
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAF_C-FLyLhoGKOAmfQH5sB6ySBQffrvdo&libraries=places"></script>
+        <script src="https://cdn.jsdelivr.net/npm/motion@12.16.0/dist/motion.umd.min.js"></script>
+        
+        <!--Open a modal for posting-->
+      
+
+    </body>
 </html>
