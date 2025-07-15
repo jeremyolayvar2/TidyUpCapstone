@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace TidyUp.Models.Entities
+namespace TidyUpCapstone.Models.Entities
 {
     public class ApplicationUser : IdentityUser
     {
