@@ -1,8 +1,89 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using TidyUp.Models.ViewModels;
+
+@model MainPageViewModel
+@{
+    ViewBag.HideNavigation = true;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+<div class="main-container">
+    <div class="container1">
+        <div class="title">Tidy<br />Up</div>
+
+        <div class="block reuse">Reuse</div>
+        <div class="block mindful">Mindful</div>
+        <div class="block empty1"></div>
+        <div class="block unload">Unload</div>
+        <div class="block letgo">Let go</div>
+        <div class="block clearout">Clear out</div>
+        <div class="block organize">Organize</div>
+        <div class="block empty2"></div>
+        <div class="block empty3"></div>
+        <div class="block empty5"></div>
+
+    </div>
+
+    <div class="container2">
+        <div class="form-wrapper">
+            <form class="login-form active">
+                <div class="input-box">
+                    <input type="text" id="log-username" class="username" />
+                    <label class="label" for="log-username">Username</label>
+                </div>
+
+                <div class="input-box">
+                    <input type="password" id="log-password" class="username" />
+                    <label class="label" for="log-password">Password</label>
+                </div>
+
+                <div class="forgotP-col">
+                    <a href="#">Forgot password</a>
+                </div>
+
+                <div class="input-box">
+                    <button type="button" class="login" id="login-btn">Login</button>
+                </div>
+
+                <div class="input-box">
+                    <button type="button" class="signup" id="signup-btn">Sign up</button>
+                </div>
+            </form>
+
+            <form class="signup-form">
+                <div class="signup-header">
+                    <h2>Create an Account</h2>
+                </div>
+
+                <div class="input-box">
+                    <input type="text" id="sign-username" class="username" />
+                    <label class="label" for="sign-username">Username</label>
+                </div>
+
+                <div class="input-box">
+                    <input type="text" id="sign-email" class="email" />
+                    <label class="label" for="sign-email">Email</label>
+                </div>
+
+                <div class="input-box">
+                    <input type="password" id="sign-password" class="username" />
+                    <label class="label" for="sign-password">Password</label>
+                </div>
+
+                <div class="input-box">
+                    <input type="password" id="confirm-password" class="password" />
+                    <label class="label" for="confirm-password">Confirm Password</label>
+                </div>
+
+                <div class="input-box">
+                    <button type="button" class="create" id="create-account-btn">Get Started</button>
+                </div>
+
+                <div class="input-box">
+                    <button type="button" class="back-login" id="back-login-btn">Back to Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
+
+<script src="~/js/loginToSignUp.js"></script>
