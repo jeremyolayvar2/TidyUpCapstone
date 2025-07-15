@@ -1,0 +1,379 @@
+﻿@model TidyUpCapstone.Models.ViewModels.MainPageViewModel
+@using TidyUpCapstone.Helpers
+
+@{
+    ViewBag.HideNavigation = false;
+
+    string currentUserId = "";
+    string currentUserName = "";
+
+    if (User.Identity.IsAuthenticated)
+    {
+        currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "";
+        currentUserName = User.Identity.Name ?? "";
+    }
+}
+
+<script>
+    window.currentUserId = '@currentUserId';
+    window.currentUserName = '@currentUserName';
+
+    // Update the getCurrentUserId and getCurrentUserName functions
+    function getCurrentUserId() {
+        return window.currentUserId || document.body.dataset.userid || null;
+    }
+
+    function getCurrentUserName() {
+        return window.currentUserName || document.body.dataset.username || "Anonymous";
+    }
+</script>
+
+<form id="antiForgeryForm" style="display:none;">
+    @Html.AntiForgeryToken()
+</form>
+
+<!-- POST CONTAINER ================================================================================================================================ -->
+<div class="main-container-main">
+
+    @if (Model?.ItemPosts != null && Model.ItemPosts.Any())
+    {
+        @foreach (var item in Model.ItemPosts)
+        {
+            <div id="mid-container">
+                <div id="item-@item.Id" class="mid-container-child">
+                    <div class="listing-container1">
+                        <div class="listing-container1-child1">
+                            <img src="~/assets/person-image.svg" alt="person" />
+                            <span>@(item.User?.UserName ?? "Unknown User")</span>
+                            <img src="~/assets/verified-icon.svg" alt="verified" />
+                            <span class="date-span">@item.CreatedAt.ToLocalTime().ToTimeAgo()</span>
+
+                        </div>
+
+                        <!-- Only show dropdown if current user owns the item -->
+                        @if (User.Identity.IsAuthenticated && User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == item.UserId)
+                        {
+                            <div class="dropdown-menu">
+                                <button class="dropdown-btn" onclick="toggleDropdown(this)">
+                                    <img src="~/assets/dot-horiz.svg" alt="dot-horiz" />
+                                </button>
+                                <div class="dropdown-content">
+                                    <button class="dropdown-item" onclick="openEditModal(@item.Id)">Edit</button>
+                                    <button class="dropdown-item delete" onclick="deleteItem(@item.Id)">Delete</button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="listing-container2">
+                        @if (!string.IsNullOrEmpty(item.ImageFileName))
+                        {
+                            <img src="~/ItemPosts/@item.ImageFileName" alt="@item.ItemTitle" />
+                        }
+                        else
+                        {
+                            <div class="no-image-placeholder">No Image Available</div>
+                        }
+                    </div>
+
+                    <div class="listing-container3">
+                        <div class="listing-container3-child1">
+                            <span class="material-symbols-outlined">category</span>
+                            <span>@(item.Category?.Name ?? "No Category")</span>
+                        </div>
+
+                        <div class="listing-container3-child2">
+                            <span class="material-symbols-outlined">action_key</span>
+                            <span>@(item.Condition?.Name ?? "No Condition")</span>
+                        </div>
+
+                        <div class="listing-container3-child3">
+                            <span class="material-symbols-outlined">location_on</span>
+                            <span>@(item.Location?.Name ?? "No Location")</span>
+                        </div>
+                    </div>
+
+                    <div class="listing-container4">
+                        <h3>@item.ItemTitle</h3>
+                        <p>@item.Description</p>
+                    </div>
+
+                    <div class="listing-container5">
+                        <div class="listing-container5-child1">
+                            <span>
+                                @{
+                                    string currentUserIdForPrice = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+                                    if (string.IsNullOrEmpty(currentUserIdForPrice) || !User.Identity.IsAuthenticated)
+                                    {
+                                        @item.AdjustedTokenPrice.ToString("0.##")
+                                    }
+                                    else if (currentUserIdForPrice == item.UserId)
+                                    {
+                                        @item.FinalTokenPrice.ToString("0.##")
+                                    }
+                                    else
+                                    {
+                                        @item.AdjustedTokenPrice.ToString("0.##")
+                                    }
+                                }
+                            </span>
+                            <img src="~/assets/game-icons_token.svg" alt="token" />
+                        </div>
+
+                        <button class="interested-btn" onclick="createChatBubble('@item.UserId', '@item.User?.UserName', @item.Id, '@item.ItemTitle')">
+                            <span>Interested</span>
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="container" id="mid-container">
+            <div class="listing-container0">
+                <p>No items available at the moment.</p>
+                @if (Model?.ItemPosts == null)
+                {
+                    <p>Debug: ItemPosts is null</p>
+                }
+                else
+                {
+                    <p>Debug: ItemPosts count is @Model.ItemPosts.Count</p>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<!-- CHAT  ==================================================================================================================================== -->
+<!--Chat Bubble-->
+
+<button class="new-message-btn" id="newMessageBtn" aria-label="New Message" title="New Message">
+    <span>Messages</span>
+</button>
+
+<div class="messaging-overlay">
+
+    <!-- App Container (Messages Panel) -->
+    <div class="app-container" role="application" aria-label="Instagram Messages Panel">
+        <header>
+            <h1>Messages</h1>
+            <div class="header-controls">
+                <button class="icon-btn" id="expandBtn" title="Expand">
+                    <span class="material-symbols-outlined">open_in_full</span>
+                </button>
+                <button class="icon-btn" id="closeAppBtn" title="Close">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+        </header>
+        <main>
+            <div class="messages-list" tabindex="0" aria-label="Messages list" role="list">
+            </div>
+        </main>
+    </div>
+
+    <div class="chat-window">
+        <div class="header-chat">
+            <div class="header-chat-child1">
+                <h2>Item Owner</h2>
+                <p>Active 24m ago</p>
+            </div>
+            <button class="icon-btn" id="closeChatBtn" title="Back to Messages">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+        </div>
+        <div class="message-log">
+            @{
+                string? lastTimestamp = null;
+            }
+
+            @foreach (var msg in Model.Messages)
+            {
+                var currentTimestamp = msg.Timestamp.ToString("t");
+
+                if (currentTimestamp != lastTimestamp)
+                {
+                    <div class="message timestamp">
+                        <p>@currentTimestamp</p>
+                    </div>
+                    lastTimestamp = currentTimestamp;
+                }
+
+                <div class="message received">
+                    <p>@msg.Text</p>
+                </div>
+            }
+        </div>
+
+        <div class="message-input">
+            <input type="text" id="chatMessageInput" placeholder="Message..." />
+            <button type="button" id="sendMessage" class="send-btn" aria-label="Send message">
+                <span class="material-symbols-outlined">send</span>
+            </button>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+        <script src="~/js/SignalRConnection.js"></script>
+    </div>
+</div>
+
+<!-- Token wallet modal ===========================================================================================================================-->
+
+<div class="card-spotlight" id="tokenModal">
+    <div class="card-spotlight-child1">
+        <h2>@Model.CurrentUserTokenBalance</h2>
+        <img src="~/assets/token-symbol.svg" alt="Token" />
+    </div>
+    <div class="card-spotlight-child2">
+        <p>This is your current token balance</p>
+    </div>
+</div>
+
+<!-- Modal for Posting an Item ====================================================================================================================== -->
+<div id="createPostModal" class="modal" enctype="multipart/form-data">
+
+    <div class="modal-content">
+        <h2>Post an Item</h2>
+
+        <div class="modal-content-child1">
+            <div class="upload-section">
+                <label for="imageInput">
+                    <img src="~/assets/upload-image-input.svg" alt="Upload" class="upload-image-btn" name="ImageFile">
+                </label>
+                <input type="file" id="imageInput" name="ImageFile">
+            </div>
+
+            <div class="cat-con-price">
+                <select id="categoryInput" name="CategoryId">
+                    <option value="" disabled selected hidden>Select a category</option>
+                    <option value="1">Books & Stationery</option>
+                    <option value="2">Electronics & Gadgets</option>
+                    <option value="3">Toys & Games</option>
+                    <option value="4">Home & Kitchen</option>
+                    <option value="5">Furniture</option>
+                    <option value="6">Appliances</option>
+                    <option value="7">Health & Beauty</option>
+                    <option value="8">Crafts & DIY Supplies</option>
+                    <option value="9">School & Office Supplies</option>
+                </select>
+                <select id="conditionInput" name="ConditionId">
+                    <option value="" disabled selected hidden>Select condition</option>
+                    <option value="1">Brand New</option>
+                    <option value="2">Like New</option>
+                    <option value="3">Gently Used</option>
+                    <option value="4">Visible Wear</option>
+                    <option value="5">For Repair/Parts</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="modal-content-child2">
+            <div class="item-info">
+                <input class="input-form" type="text" id="titleInput" placeholder="Item Title" name="ItemTitle" />
+                <textarea class="input-form" id="descriptionInput" placeholder="Description" name="Description"></textarea>
+
+                <input class="input-form" type="text" id="locationInput" placeholder="Location" name="LocationName" />
+                <input type="hidden" name="Latitude" id="Latitude" />
+                <input type="hidden" name="Longitude" id="Longitude" />
+            </div>
+
+            <div class="token-post">
+                <div>
+                    <span class="token-count" id="finalPrice">0.00</span>
+                    <img src="~/assets/game-icons_token.svg" alt="token" />
+                </div>
+                <button type="submit" class="post-btn" id="submitPost" disabled>Post</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Original Edit Modal for Posting an Item ===================================================================================================== -->
+<div id="editPostModal" class="modal">
+    <div class="modal-content">
+        <h2>Post an Item</h2>
+
+        <div class="modal-content-child1">
+            <div class="upload-section">
+                <label for="editImageInput">
+                    <img src="~/assets/upload-image-input.svg" alt="Upload" class="upload-image-btn">
+                </label>
+                <input type="file" id="editImageInput" />
+            </div>
+
+            <div class="cat-con-price">
+                <select id="editCategoryInput">
+                    <option value="" disabled selected hidden>Select a category</option>
+                    <option value="1">Books & Stationery</option>
+                    <option value="2">Electronics & Gadgets</option>
+                    <option value="3">Toys & Games</option>
+                    <option value="4">Home & Kitchen</option>
+                    <option value="5">Furniture</option>
+                    <option value="6">Appliances</option>
+                    <option value="7">Health & Beauty</option>
+                    <option value="8">Crafts & DIY Supplies</option>
+                    <option value="9">School & Office Supplies</option>
+                </select>
+                <select id="editConditionInput">
+                    <option value="" disabled selected hidden>Select condition</option>
+                    <option value="1">Brand New</option>
+                    <option value="2">Like New</option>
+                    <option value="3">Gently Used</option>
+                    <option value="4">Visible Wear</option>
+                    <option value="5">For Repair/Parts</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="modal-content-child2">
+            <div class="item-info">
+                <input type="hidden" id="editItemId" />
+                <input class="input-form" type="text" id="editTitleInput" placeholder="Item Title" />
+                <textarea class="input-form" id="editDescriptionInput" placeholder="Description"></textarea>
+
+                <input class="input-form" type="text" id="editLocationInput" placeholder="Location" />
+                <input type="hidden" id="editLatitude" name="Latitude" />
+                <input type="hidden" id="editLongitude" name="Longitude" />
+            </div>
+
+            <div class="token-post">
+                <div>
+                    <span class="token-count" id="editFinalPrice"></span>
+                    <img src="~/assets/game-icons_token.svg" alt="token" />
+                </div>
+                <button class="post-btn" id="submitEdit">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- dropdown for edit and delete a post -->
+<script src="~/js/toggleEditDelete.js"></script>
+
+<!-- for showing the after taxed token price before posting -->
+<script src="~/js/afterTax.js"></script>
+
+<!--Open a modal for posting-->
+<script src="~/js/openModal.js"> </script>
+
+<!-- for editing post-->
+<script src="~/js/editingPost.js"></script>
+
+<!--for delete post-->
+<script src="~/js/deletePost.js"></script>
+
+<!--for modal token-->
+<script src="~/js/tokenModal.js"></script>
+
+<!--for alert-->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!--Message Script-->
+<script src="~/js/messageScript.js"></script>
+
+<!--Chat Bubble Script-->
+<script src="~/js/createChatBubble.js"></script>
