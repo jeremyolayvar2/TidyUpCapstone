@@ -1,6 +1,6 @@
-﻿using TidyUp.Services.Interfaces;
+﻿using TidyUpCapstone.Services.Interfaces;
 
-namespace TidyUp.Services.Interfaces
+namespace TidyUpCapstone.Services.Interfaces
 {
     public interface IEmailService
     {

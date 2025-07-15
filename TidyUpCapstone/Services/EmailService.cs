@@ -1,9 +1,9 @@
 ﻿using System.Net;
 using System.Net.Mail;
 using Microsoft.Extensions.Configuration;
-using TidyUp.Services.Interfaces;
+using TidyUpCapstone.Services.Interfaces;
 
-namespace TidyUp.Services
+namespace TidyUpCapstone.Services
 {
     public class EmailService : IEmailService
     {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace TidyUp.Models.Authentication
+namespace TidyUpCapstone.Models.Authentication
 {
     public class RegisterView
     {

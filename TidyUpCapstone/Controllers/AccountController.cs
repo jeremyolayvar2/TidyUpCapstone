@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Win32;
 using System.Text;
 using System.Text.Encodings.Web;
-using TidyUp.Models.Authentication;
-using TidyUp.Models.Entities;
-using TidyUp.Services.Interfaces;
+using TidyUpCapstone.Models.Authentication;
+using TidyUpCapstone.Models.Entities;
+using TidyUpCapstone.Services.Interfaces;
 
 namespace TidyUp.Controllers
 {
