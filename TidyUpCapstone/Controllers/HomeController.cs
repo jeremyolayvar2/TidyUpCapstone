@@ -12,19 +12,19 @@ namespace TidyUp.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        //private readonly IItemPostService _itemPostService;
-        //private readonly IUserService _userService;
+        private readonly IItemPostService _itemPostService;
+        private readonly IUserService _userService;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public HomeController(
             ILogger<HomeController> logger,
-            //IItemPostService itemPostService,
-            //IUserService userService,
+            IItemPostService itemPostService,
+            IUserService userService,
             UserManager<ApplicationUser> userManager)
         {
             _logger = logger;
-            //_itemPostService = itemPostService;
-            //_userService = userService;
+            _itemPostService = itemPostService;
+            _userService = userService;
             _userManager = userManager;
         }
 
