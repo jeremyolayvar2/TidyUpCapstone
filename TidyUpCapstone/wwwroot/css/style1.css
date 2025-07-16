@@ -28,6 +28,7 @@ body {
     margin: 7rem auto;
     display: flex;
     flex-wrap: wrap;
+    width: 100vw;
     align-items: center;
     justify-content: space-around;
 }
