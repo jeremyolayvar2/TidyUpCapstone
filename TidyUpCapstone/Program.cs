@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using TidyUp.Services;
-using TidyUp.Services.Interfaces;
-using TidyUp.Hubs;
-using TidyUp.Models.Entities;
-using TidyUp.Data;
+//using TidyUpCapstone.Services;
+//using TidyUpCapstone.Services.Interfaces;
+//using TidyUpCapstone.Hubs;
+//using TidyUpCapstone.Models.Entities;
+//using TidyUpCapstone.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,11 +31,11 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 // Register your services using dependency injection
-builder.Services.AddScoped<IPricingService, PricingService>();
-builder.Services.AddScoped<IFileService, FileService>();
-builder.Services.AddScoped<IItemPostService, ItemPostService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
+//builder.Services.AddScoped<IPricingService, PricingService>();
+//builder.Services.AddScoped<IFileService, FileService>();
+//builder.Services.AddScoped<IItemPostService, ItemPostService>();
+//builder.Services.AddScoped<IUserService, UserService>();
+//builder.Services.AddScoped<IEmailService, EmailService>();
 
 var app = builder.Build();
 
@@ -61,6 +61,6 @@ app.MapControllerRoute(
 app.MapRazorPages();
 
 // Map the ChatHub
-app.MapHub<ChatHub>("/chathub");
+//app.MapHub<ChatHub>("/chathub");
 
 app.Run();
