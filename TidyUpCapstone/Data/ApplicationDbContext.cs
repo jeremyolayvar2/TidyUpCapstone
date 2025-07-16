@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using TidyUpCapstone.Models.Entities;
 
-namespace TidyUp.Data  
+namespace TidyUpCapstone.Data  
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
