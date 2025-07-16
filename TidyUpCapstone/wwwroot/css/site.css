@@ -33,6 +33,7 @@ body {
 
 .layout-wrapper {
     width: 100vw;
+    justify-content: space-around;
 }
 
 
