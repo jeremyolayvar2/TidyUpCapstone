@@ -1,0 +1,14 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace TidyUpCapstone.Models.Entities
+{
+    public class ItemCategory
+    {
+        public int Id { get; set; }
+
+        [Required, MaxLength(100)]
+        public string Name { get; set; } = string.Empty;
+
+        public ICollection<ItemPost> ItemPosts { get; set; } = new List<ItemPost>();
+    }
+}
