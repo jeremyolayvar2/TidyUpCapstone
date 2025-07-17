@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 //using TidyUpCapstone.Services.Interfaces;
 //using TidyUpCapstone.Hubs;
 //using TidyUpCapstone.Models.Entities;
-//using TidyUpCapstone.Data;
+using TidyUpCapstone.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
