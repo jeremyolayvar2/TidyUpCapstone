@@ -34,6 +34,13 @@ namespace TidyUp.Controllers
             return View();
         }
 
+        public IActionResult QuestPage()
+        {
+            ViewData["Title"] = "Daily Quests";
+            ViewData["PageType"] = "quest";
+            return View();
+        }
+
         //[Authorize]
         //public async Task<IActionResult> Main()
         //{

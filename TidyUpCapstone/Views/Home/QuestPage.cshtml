@@ -3,3 +3,298 @@
 *@
 @{
 }
+
+<div id="reactApp"></div>
+
+<script src="~/js/bundle.js"></script>
+
+
+@{
+    ViewData["Title"] = "Daily Quests";
+    ViewData["PageType"] = "quest"; // Add this to identify page type
+}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Righteous&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="~/css/QuestPage.css" asp-append-version="true" />
+
+<style>
+    /* Quest Page Specific Styles */
+    body.quest-page {
+        background: var(--primary-color);
+    }
+
+        body.quest-page #sidebar {
+            background-color: var(--background);
+        }
+
+            body.quest-page #sidebar a {
+                color: var(--primary-color);
+            }
+
+                body.quest-page #sidebar a:hover {
+                    background-color: var(--hover-effect);
+                }
+
+        body.quest-page .dock-panel {
+            background-color: var(--background);
+        }
+
+        body.quest-page .dock-item {
+            background-color: var(--background);
+        }
+
+            body.quest-page .dock-item:hover {
+                background-color: var(--hover-effect);
+            }
+
+        body.quest-page .dock-icon img {
+            filter: brightness(0.4); /* Make icons darker for light background */
+        }
+
+        body.quest-page .toggle {
+            background-color: var(--background);
+        }
+
+            body.quest-page .toggle img {
+                filter: brightness(0.4);
+            }
+
+    .righteous-font {
+        font-family: "Righteous", sans-serif;
+    }
+
+    .quest-card {
+        background: var(--accent-color);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+        .quest-card:hover {
+            background: var(--hover-effect);
+        }
+
+    .category-tag {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 20px;
+        padding: 8px 16px;
+        color: white;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+        .category-tag:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+    .achievement-card {
+        background: var(--accent-color);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+        .achievement-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+    .profile-avatar {
+        border: 4px solid white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .progress-bar {
+        background: var(--secondary-color);
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        background: var(--primary-color);
+        height: 100%;
+        transition: width 0.3s ease;
+    }
+
+    .sidebar-icon {
+        width: 24px;
+        height: 24px;
+        fill: white;
+        opacity: 0.7;
+        transition: opacity 0.3s ease;
+    }
+
+        .sidebar-icon:hover {
+            opacity: 1;
+        }
+
+    .cluttered-illustration {
+        background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIiBmaWxsPSJ0cmFuc3BhcmVudCIvPgo8L3N2Zz4=') no-repeat center;
+        background-size: contain;
+    }
+</style>
+
+<script>
+    // Add page-specific class to body
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.classList.add('quest-page');
+    });
+</script>
+
+<!-- Main Content -->
+<div class="main-content" style="margin-left: 0; padding: 1.5rem; min-height: 100vh;">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+            <h1 class="righteous-font text-6xl md:text-8xl text-white font-bold">DAILY QUESTS</h1>
+
+            <!-- Cluttered Illustration -->
+            <div class="hidden lg:block relative">
+                <div class="w-80 h-60 cluttered-illustration">
+                    <!-- Placeholder for cluttered room illustration -->
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="text-white text-lg opacity-50">Cluttered Room Illustration</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quest Cards and Content Grid -->
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            <!-- Left Column - Quest Cards -->
+            <div class="xl:col-span-2 space-y-6">
+                <!-- Quest Card 1 -->
+                <div class="quest-card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <div class="text-sm text-gray-600 mb-1">24 HOURS REMAINING</div>
+                            <h3 class="righteous-font text-2xl text-black font-bold mb-2">Declutter Dash</h3>
+                            <p class="text-gray-700">Upload 3 items today</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-2xl font-bold text-black">+15</span>
+                            <button class="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-lg transition-colors">
+                                Start
+                            </button>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 60%"></div>
+                    </div>
+                </div>
+
+                <!-- Quest Card 2 -->
+                <div class="quest-card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <div class="text-sm text-gray-600 mb-1">21 HOURS REMAINING</div>
+                            <h3 class="righteous-font text-2xl text-black font-bold mb-2">Declutter Dash</h3>
+                            <p class="text-gray-700">Upload 3 items today</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-2xl font-bold text-black">+15</span>
+                            <button class="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-lg transition-colors">
+                                Claim
+                            </button>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%"></div>
+                    </div>
+                </div>
+
+                <!-- Category Tags -->
+                <div class="flex flex-wrap gap-3 my-8">
+                    <span class="category-tag">T-Shirts</span>
+                    <span class="category-tag">Dresses / Skirts</span>
+                    <span class="category-tag">School textbooks</span>
+                    <span class="category-tag">Dolls / Action figures</span>
+                    <span class="category-tag">Jeans / Pants</span>
+                    <span class="category-tag">Novels / Fiction</span>
+                    <span class="category-tag">Board games</span>
+                    <span class="category-tag">Cups / Mugs</span>
+                    <span class="category-tag">Speakers</span>
+                    <span class="category-tag">Shoes / Footwear</span>
+                    <span class="category-tag">Miscellaneous items</span>
+                </div>
+            </div>
+
+            <!-- Right Column - Profile and Achievements -->
+            <div class="space-y-6">
+                <!-- Profile Section -->
+                <div class="text-center">
+                    <div class="inline-block relative mb-4">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
+                             alt="Profile"
+                             class="w-24 h-24 rounded-full profile-avatar object-cover">
+                    </div>
+                    <div class="achievement-card p-6">
+                        <h3 class="righteous-font text-xl text-black mb-2">Fresh Starter</h3>
+                        <p class="text-gray-600 text-sm italic mb-4">Every journey begins with a single item!</p>
+                        <div class="bg-white rounded-lg p-3 text-gray-500 text-sm">
+                            You've let go of your first item - small steps, big change.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Achievement Card -->
+                <div class="achievement-card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="righteous-font text-xl text-black">7-Day Log in Streak</h3>
+                        <div class="w-16 h-16 bg-gray-300 rounded-lg flex items-center justify-center">
+                            <span class="text-2xl">📷</span>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 text-sm">You've shown up for 7 days straight! Consistency is key. +10 tokens</p>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="achievement-card p-4 text-center">
+                        <div class="text-2xl font-bold text-black mb-1">50</div>
+                        <div class="text-sm text-gray-600">Tokens Collected</div>
+                    </div>
+                    <div class="achievement-card p-4 text-center">
+                        <div class="text-2xl font-bold text-black mb-1">5</div>
+                        <div class="text-sm text-gray-600">Uploaded 5 Unique Items</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+    <script>
+        // Add interactivity
+        document.querySelectorAll('.quest-card').forEach(card => {
+            card.addEventListener('click', function() {
+                this.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+        });
+
+        // Category tag interactions
+        document.querySelectorAll('.category-tag').forEach(tag => {
+            tag.addEventListener('click', function() {
+                this.style.background = 'rgba(255, 255, 255, 0.4)';
+                setTimeout(() => {
+                    this.style.background = 'rgba(255, 255, 255, 0.2)';
+                }, 200);
+            });
+        });
+
+        // Button interactions
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation();
+                // Add your ASP.NET Core MVC action calls here
+                console.log('Button clicked:', this.textContent);
+            });
+        });
+    </script>

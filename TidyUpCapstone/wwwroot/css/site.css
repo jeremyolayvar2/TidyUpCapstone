@@ -14,7 +14,6 @@ html {
     display: none;
 }
 
-
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
     box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
@@ -27,30 +26,58 @@ body {
     display: grid;
     grid-template-columns: auto 1fr 1fr;
     justify-content: center;
+    /* Default body background */
+    background-color: var(--background);
+    transition: background-color 0.3s ease;
 }
 
+    /* Page-specific body styles */
+    body.main-page {
+        background-color: var(--background);
+    }
 
+    body.quest-page {
+        background-color: var(--primary-color);
+    }
+
+    /* Add more page types as needed */
+    body.shop-page {
+        background-color: var(--secondary-color);
+    }
 
 .layout-wrapper {
     width: 100vw;
 }
-
 
 /*SideBar - Default -----------------------------*/
 #sidebar {
     height: 100vh;
     width: 250px;
     padding: 20px 1em;
+    /* Default sidebar background */
     background-color: var(--primary-color);
     position: fixed;
     top: 0;
     align-self: start;
     border-top-right-radius: 20px;
     border-bottom-right-radius: 20px;
-    transition: 300ms ease-in-out;
+    transition: all 300ms ease-in-out;
     overflow: hidden;
     text-wrap: nowrap;
     display: block;
+}
+
+/* Sidebar styles for different page types */
+body.main-page #sidebar {
+    background-color: var(--primary-color);
+}
+
+body.quest-page #sidebar {
+    background-color: var(--background);
+}
+
+body.shop-page #sidebar {
+    background-color: var(--accent-color);
 }
 
 .active a {
@@ -77,13 +104,27 @@ body {
     border: none;
     border-radius: 0.5em;
     background: none;
-    background-color: var(--primary-color);
+    background-color: inherit;
     cursor: pointer;
+    transition: all 0.3s ease;
 }
 
     .toggle:hover {
         background-color: var(--hover-effect);
     }
+
+/* Toggle styles for different page types */
+body.quest-page .toggle {
+    background-color: var(--background);
+}
+
+    body.quest-page .toggle img {
+        filter: brightness(0.4); /* Make toggle icon darker for light background */
+    }
+
+body.main-page .toggle {
+    background-color: var(--primary-color);
+}
 
 #tab-container {
     margin-top: 50px;
@@ -94,8 +135,6 @@ body {
     scrollbar-color: var(--background) transparent;
 }
 
-
-    /*di pa to naganaa*/
     #tab-container li span {
         width: 200px;
     }
@@ -109,6 +148,16 @@ body {
     width: 20px;
     height: 20px;
     object-fit: contain;
+    transition: filter 0.3s ease;
+}
+
+/* Icon styles for different page types */
+body.quest-page .icon {
+    filter: brightness(0.4); /* Make icons darker for light sidebar */
+}
+
+body.main-page .icon {
+    filter: brightness(1); /* Normal brightness for dark sidebar */
 }
 
 .nav-profile-container {
@@ -135,27 +184,35 @@ body {
     border-radius: 8px;
 }
 
-
 .toggle-container {
     display: flex;
     justify-content: flex-end;
 }
 
-
 #sidebar a {
     border-radius: 0.5em;
     text-decoration: none;
+    /* Default link color */
     color: var(--background);
     display: flex;
     align-items: center;
     gap: 1em;
     padding: 0.85em;
+    transition: all 0.3s ease;
 }
 
     #sidebar a:hover {
         background-color: var(--hover-effect);
     }
 
+/* Link styles for different page types */
+body.quest-page #sidebar a {
+    color: var(--primary-color);
+}
+
+body.main-page #sidebar a {
+    color: var(--background);
+}
 
 #sidebar.close #verification-v2 {
     background-color: var(--background);
@@ -195,10 +252,6 @@ body {
     transition: 300ms ease-in-out;
 }
 
-
-
-
-
 @media (max-width: 800px) {
     body {
         grid-template-columns: 1fr;
@@ -207,87 +260,7 @@ body {
     main {
         /*        padding: 2em 1em 60px 1em;*/
     }
-
-    /*      #sidebar {
-        height: 60px;
-        width: 100%;
-        padding: 0;
-        position: fixed;
-        bottom: 0;
-        top: unset;
-        z-index: 999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-top-left-radius: 10px;
-        border-top-right-radius: 10px;
-        border-bottom-right-radius: 0;
-        transition: none;
-        background-color: var(--primary-color); 
-    }
-
-        #sidebar ul {
-            width: 100%;
-            margin: 0;
-            margin-bottom: 40px;
-            padding: 0;
-            display: grid;
-            grid-auto-columns: 60px;
-            grid-auto-flow: column;
-            overflow-x: scroll;
-        }
-
-            #sidebar ul li {
-                height: 100%;
-            }
-
-
-        #sidebar > ul > li:first-child {
-            display: none;
-        }
-
-    .nav-profile-container {
-        margin: 0;
-        display: none;
-    }
-
-  
-
-    #verification-v2 {
-        display: none;
-    }
-
-    #sidebar.close {
-        height: 80px;
-        width: 100%;
-        padding: 0;
-
-    }
-
-        #sidebar.close .icon {
-            width: 30px;
-            height: 30px;
-        }
-
-    #tab-container {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-around;
-        margin-top: 0;
-        padding: 10px;
-        max-height: 100%;
-        overflow: visible;
-        gap: 19px;
-    }
-
-        #tab-container li {
-            text-align: center;
-        }
-*/
-
 }
-
 
 /*Phone nav bar ------------------------------------------------*/
 
@@ -306,10 +279,21 @@ body {
     pointer-events: auto;
     display: flex;
     gap: 2rem;
+    /* Default dock background */
     background-color: var(--primary-color);
     border-radius: 8px;
     padding: 0.5rem 1rem;
     align-items: flex-end;
+    transition: background-color 0.3s ease;
+}
+
+/* Dock styles for different page types */
+body.quest-page .dock-panel {
+    background-color: var(--background);
+}
+
+body.main-page .dock-panel {
+    background-color: var(--primary-color);
 }
 
 .dock-item {
@@ -318,20 +302,39 @@ body {
     align-items: center;
     justify-content: center;
     border-radius: 10px;
+    /* Default dock item background */
     background-color: var(--primary-color);
     cursor: pointer;
-    transition: transform 0.15s ease;
+    transition: all 0.15s ease;
 }
 
     .dock-item:hover {
         background-color: var(--hover-effect);
     }
 
+/* Dock item styles for different page types */
+body.quest-page .dock-item {
+    background-color: var(--background);
+}
+
+body.main-page .dock-item {
+    background-color: var(--primary-color);
+}
+
 .dock-icon img {
     padding: 10px;
     width: 40px;
     height: 40px;
-    transition: transform 0.2s ease;
+    transition: all 0.2s ease;
+}
+
+/* Dock icon styles for different page types */
+body.quest-page .dock-icon img {
+    filter: brightness(0.4); /* Make icons darker for light background */
+}
+
+body.main-page .dock-icon img {
+    filter: brightness(1); /* Normal brightness for dark background */
 }
 
 .dock-label {
@@ -374,4 +377,17 @@ body {
     .dock-item {
         flex: 0 0 auto;
     }
+}
+
+/* Main content adjustments for different page types */
+.main-content {
+    transition: all 0.3s ease;
+}
+
+body.quest-page .main-content {
+    background-color: var(--primary-color);
+}
+
+body.main-page .main-content {
+    background-color: var(--background);
 }
