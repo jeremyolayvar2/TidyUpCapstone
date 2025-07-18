@@ -1,3 +1,7 @@
+* {
+    scroll-behavior: smooth;
+}
+
 html {
     background-color: var(--background);
     font-size: 14px;
@@ -23,30 +27,55 @@ body {
     line-height: normal;
     min-height: 100vh;
     min-height: 100dvh;
-    display: grid;
-    grid-template-columns: auto 1fr 1fr;
-    justify-content: center;
     /* Default body background */
     background-color: var(--background);
     transition: background-color 0.3s ease;
 }
 
-    /* Page-specific body styles */
-    body.main-page {
-        background-color: var(--background);
-    }
-
-    body.quest-page {
-        background-color: var(--primary-color);
-    }
-
-    /* Add more page types as needed */
-    body.shop-page {
-        background-color: var(--secondary-color);
-    }
-
+/* Layout wrapper for pages WITH navigation */
 .layout-wrapper {
     width: 100vw;
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Main content adjustments ONLY when sidebar is present AND on desktop */
+.layout-wrapper .main-content {
+    flex: 1;
+    transition: all 0.3s ease-in-out;
+    min-height: 100vh;
+    padding: 0;
+    /* Remove default margin - will be added only on desktop */
+    margin-left: 0;
+}
+
+/* Desktop styles - ONLY apply sidebar margins on screens larger than 768px */
+@media (min-width: 769px) {
+    .layout-wrapper .main-content {
+        margin-left: 250px; /* Default expanded sidebar width */
+    }
+
+    /* When sidebar is closed - ONLY for desktop */
+    .layout-wrapper:has(#sidebar.close) .main-content,
+    .layout-wrapper.sidebar-closed .main-content {
+        margin-left: 82px; /* Collapsed sidebar width */
+    }
+}
+
+/* Page-specific body styles - ONLY apply when navigation is present */
+.layout-wrapper body.main-page,
+body:has(.layout-wrapper).main-page {
+    background-color: var(--background);
+}
+
+.layout-wrapper body.quest-page,
+body:has(.layout-wrapper).quest-page {
+    background-color: var(--primary-color);
+}
+
+.layout-wrapper body.shop-page,
+body:has(.layout-wrapper).shop-page {
+    background-color: var(--secondary-color);
 }
 
 /*SideBar - Default -----------------------------*/
@@ -65,18 +94,19 @@ body {
     overflow: hidden;
     text-wrap: nowrap;
     display: block;
+    z-index: 1000;
 }
 
-/* Sidebar styles for different page types */
-body.main-page #sidebar {
+/* Sidebar styles for different page types - ONLY for pages with navigation */
+body:has(.layout-wrapper).main-page #sidebar {
     background-color: var(--primary-color);
 }
 
-body.quest-page #sidebar {
+body:has(.layout-wrapper).quest-page #sidebar {
     background-color: var(--background);
 }
 
-body.shop-page #sidebar {
+body:has(.layout-wrapper).shop-page #sidebar {
     background-color: var(--accent-color);
 }
 
@@ -109,18 +139,18 @@ body.shop-page #sidebar {
     transition: all 0.3s ease;
 }
 
-    .toggle:hover {
-        background-color: var(--hover-effect);
-    }
+.toggle:hover {
+    background-color: var(--hover-effect);
+}
 
 /* Toggle styles for different page types */
 body.quest-page .toggle {
     background-color: var(--background);
 }
 
-    body.quest-page .toggle img {
-        filter: brightness(0.4); /* Make toggle icon darker for light background */
-    }
+body.quest-page .toggle img {
+    filter: brightness(0.4); /* Make toggle icon darker for light background */
+}
 
 body.main-page .toggle {
     background-color: var(--primary-color);
@@ -135,9 +165,9 @@ body.main-page .toggle {
     scrollbar-color: var(--background) transparent;
 }
 
-    #tab-container li span {
-        width: 200px;
-    }
+#tab-container li span {
+    width: 200px;
+}
 
 #sidebar ul {
     list-style: none;
@@ -151,12 +181,12 @@ body.main-page .toggle {
     transition: filter 0.3s ease;
 }
 
-/* Icon styles for different page types */
-body.quest-page .icon {
+/* Icon styles for different page types - ONLY for pages with navigation */
+body:has(.layout-wrapper).quest-page .icon {
     filter: brightness(0.4); /* Make icons darker for light sidebar */
 }
 
-body.main-page .icon {
+body:has(.layout-wrapper).main-page .icon {
     filter: brightness(1); /* Normal brightness for dark sidebar */
 }
 
@@ -201,16 +231,16 @@ body.main-page .icon {
     transition: all 0.3s ease;
 }
 
-    #sidebar a:hover {
-        background-color: var(--hover-effect);
-    }
+#sidebar a:hover {
+    background-color: var(--hover-effect);
+}
 
-/* Link styles for different page types */
-body.quest-page #sidebar a {
+/* Link styles for different page types - ONLY for pages with navigation */
+body:has(.layout-wrapper).quest-page #sidebar a {
     color: var(--primary-color);
 }
 
-body.main-page #sidebar a {
+body:has(.layout-wrapper).main-page #sidebar a {
     color: var(--background);
 }
 
@@ -252,13 +282,25 @@ body.main-page #sidebar a {
     transition: 300ms ease-in-out;
 }
 
-@media (max-width: 800px) {
-    body {
-        grid-template-columns: 1fr;
+/* Mobile styles - 768px and below */
+@media (max-width: 768px) {
+    /* Hide sidebar completely on mobile */
+    #sidebar {
+        display: none;
     }
 
-    main {
-        /*        padding: 2em 1em 60px 1em;*/
+    /* Ensure NO margin on mobile - this is the key fix */
+    .layout-wrapper .main-content {
+        margin-left: 0 !important; /* Force no sidebar margin on mobile */
+        padding-bottom: 80px; /* Space for mobile dock */
+        width: 100vw;
+    }
+
+    /* Keep pages without navigation unaffected */
+    .main-container {
+        width: 100vw;
+        margin: 0;
+        padding: 0;
     }
 }
 
@@ -273,6 +315,7 @@ body.main-page #sidebar a {
     justify-content: center;
     width: 100%;
     pointer-events: none;
+    z-index: 1000;
 }
 
 .dock-panel {
@@ -287,12 +330,12 @@ body.main-page #sidebar a {
     transition: background-color 0.3s ease;
 }
 
-/* Dock styles for different page types */
-body.quest-page .dock-panel {
+/* Dock styles for different page types - ONLY for pages with navigation */
+body:has(.layout-wrapper).quest-page .dock-panel {
     background-color: var(--background);
 }
 
-body.main-page .dock-panel {
+body:has(.layout-wrapper).main-page .dock-panel {
     background-color: var(--primary-color);
 }
 
@@ -308,16 +351,16 @@ body.main-page .dock-panel {
     transition: all 0.15s ease;
 }
 
-    .dock-item:hover {
-        background-color: var(--hover-effect);
-    }
+.dock-item:hover {
+    background-color: var(--hover-effect);
+}
 
-/* Dock item styles for different page types */
-body.quest-page .dock-item {
+/* Dock item styles for different page types - ONLY for pages with navigation */
+body:has(.layout-wrapper).quest-page .dock-item {
     background-color: var(--background);
 }
 
-body.main-page .dock-item {
+body:has(.layout-wrapper).main-page .dock-item {
     background-color: var(--primary-color);
 }
 
@@ -328,12 +371,12 @@ body.main-page .dock-item {
     transition: all 0.2s ease;
 }
 
-/* Dock icon styles for different page types */
-body.quest-page .dock-icon img {
+/* Dock icon styles for different page types - ONLY for pages with navigation */
+body:has(.layout-wrapper).quest-page .dock-icon img {
     filter: brightness(0.4); /* Make icons darker for light background */
 }
 
-body.main-page .dock-icon img {
+body:has(.layout-wrapper).main-page .dock-icon img {
     filter: brightness(1); /* Normal brightness for dark background */
 }
 
@@ -353,11 +396,8 @@ body.main-page .dock-icon img {
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
+/* Mobile dock display */
 @media (max-width: 768px) {
-    #sidebar {
-        display: none;
-    }
-
     .dock-outer {
         display: block;
         width: 100%;
@@ -372,6 +412,7 @@ body.main-page .dock-icon img {
         overflow-x: auto;
         justify-content: space-around;
         padding: 0.5em;
+        margin: 0 0.5rem 0.5rem 0.5rem;
     }
 
     .dock-item {
@@ -379,15 +420,24 @@ body.main-page .dock-icon img {
     }
 }
 
-/* Main content adjustments for different page types */
-.main-content {
-    transition: all 0.3s ease;
+/* Pages WITHOUT navigation should not be affected */
+.main-container {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    /* Ensure it uses full viewport */
 }
 
-body.quest-page .main-content {
-    background-color: var(--primary-color);
-}
+/* Theme-specific backgrounds for pages WITH navigation - Desktop only */
+@media (min-width: 769px) {
+    .layout-wrapper body.quest-page .main-content,
+    body:has(.layout-wrapper).quest-page .main-content {
+        background-color: var(--primary-color);
+    }
 
-body.main-page .main-content {
-    background-color: var(--background);
+    .layout-wrapper body.main-page .main-content,
+    body:has(.layout-wrapper).main-page .main-content {
+        background-color: var(--background);
+    }
 }

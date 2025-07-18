@@ -2,16 +2,8 @@
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
-}
-
-<div id="reactApp"></div>
-
-<script src="~/js/bundle.js"></script>
-
-
-@{
     ViewData["Title"] = "Daily Quests";
-    ViewData["PageType"] = "quest"; // Add this to identify page type
+    ViewData["PageType"] = "quest"; // This integrates with your layout system
 }
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,282 +11,166 @@
 <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="~/css/QuestPage.css" asp-append-version="true" />
 
-<style>
-    /* Quest Page Specific Styles */
-    body.quest-page {
-        background: var(--primary-color);
-    }
-
-        body.quest-page #sidebar {
-            background-color: var(--background);
-        }
-
-            body.quest-page #sidebar a {
-                color: var(--primary-color);
-            }
-
-                body.quest-page #sidebar a:hover {
-                    background-color: var(--hover-effect);
-                }
-
-        body.quest-page .dock-panel {
-            background-color: var(--background);
-        }
-
-        body.quest-page .dock-item {
-            background-color: var(--background);
-        }
-
-            body.quest-page .dock-item:hover {
-                background-color: var(--hover-effect);
-            }
-
-        body.quest-page .dock-icon img {
-            filter: brightness(0.4); /* Make icons darker for light background */
-        }
-
-        body.quest-page .toggle {
-            background-color: var(--background);
-        }
-
-            body.quest-page .toggle img {
-                filter: brightness(0.4);
-            }
-
-    .righteous-font {
-        font-family: "Righteous", sans-serif;
-    }
-
-    .quest-card {
-        background: var(--accent-color);
-        border-radius: 12px;
-        transition: all 0.3s ease;
-    }
-
-        .quest-card:hover {
-            background: var(--hover-effect);
-        }
-
-    .category-tag {
-        background: rgba(255, 255, 255, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 20px;
-        padding: 8px 16px;
-        color: white;
-        font-size: 14px;
-        transition: all 0.3s ease;
-    }
-
-        .category-tag:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-
-    .achievement-card {
-        background: var(--accent-color);
-        border-radius: 12px;
-        transition: all 0.3s ease;
-    }
-
-        .achievement-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-
-    .profile-avatar {
-        border: 4px solid white;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
-
-    .progress-bar {
-        background: var(--secondary-color);
-        height: 8px;
-        border-radius: 4px;
-        overflow: hidden;
-    }
-
-    .progress-fill {
-        background: var(--primary-color);
-        height: 100%;
-        transition: width 0.3s ease;
-    }
-
-    .sidebar-icon {
-        width: 24px;
-        height: 24px;
-        fill: white;
-        opacity: 0.7;
-        transition: opacity 0.3s ease;
-    }
-
-        .sidebar-icon:hover {
-            opacity: 1;
-        }
-
-    .cluttered-illustration {
-        background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIiBmaWxsPSJ0cmFuc3BhcmVudCIvPgo8L3N2Zz4=') no-repeat center;
-        background-size: contain;
-    }
-</style>
-
 <script>
-    // Add page-specific class to body
+    // Add page-specific class to body - this works with your layout system
     document.addEventListener('DOMContentLoaded', function() {
         document.body.classList.add('quest-page');
     });
 </script>
 
-<!-- Main Content -->
-<div class="main-content" style="margin-left: 0; padding: 1.5rem; min-height: 100vh;">
-    <div class="max-w-7xl mx-auto">
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-8">
-            <h1 class="righteous-font text-6xl md:text-8xl text-white font-bold">DAILY QUESTS</h1>
+<!-- Quest Page Content - No main-content wrapper since it's in _Layout.cshtml -->
+<div class="quest-page-container">
+    <!-- Header Section -->
+    <div class="quest-header">
+        <h1 class="quest-title righteous-font">DAILY QUESTS</h1>
+    </div>
 
-            <!-- Cluttered Illustration -->
-            <div class="hidden lg:block relative">
-                <div class="w-80 h-60 cluttered-illustration">
-                    <!-- Placeholder for cluttered room illustration -->
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <div class="text-white text-lg opacity-50">Cluttered Room Illustration</div>
-                    </div>
-                </div>
-            </div>
+    <!-- Main Content Area -->
+    <div class="quest-content-wrapper">
+        <!-- Quest Illustration - Hidden on mobile, shown on desktop -->
+        <div class="quest-illustration-container">
+            <img src="~/assets/quest_image1.png" alt="Quest Illustration" class="quest-illustration" />
         </div>
 
-        <!-- Quest Cards and Content Grid -->
-        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-            <!-- Left Column - Quest Cards -->
-            <div class="xl:col-span-2 space-y-6">
-                <!-- Quest Card 1 -->
-                <div class="quest-card p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <div class="text-sm text-gray-600 mb-1">24 HOURS REMAINING</div>
-                            <h3 class="righteous-font text-2xl text-black font-bold mb-2">Declutter Dash</h3>
-                            <p class="text-gray-700">Upload 3 items today</p>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <span class="text-2xl font-bold text-black">+15</span>
-                            <button class="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-lg transition-colors">
-                                Start
-                            </button>
-                        </div>
+        <!-- Quest Cards Container -->
+        <div class="quest-cards-container">
+            <!-- Quest Card 1 -->
+            <div class="quest-card">
+                <div class="quest-card-content">
+                    <div class="quest-info">
+                        <div class="quest-timer">24 HOURS REMAINING</div>
+                        <h3 class="quest-name righteous-font">Declutter Dash</h3>
+                        <p class="quest-description">Upload 3 items today</p>
                     </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 60%"></div>
+                    <div class="quest-reward">
+                        <span class="reward-points">+15</span>
+                        <button class="claim-button claim-disabled">
+                            Claim
+                        </button>
                     </div>
                 </div>
-
-                <!-- Quest Card 2 -->
-                <div class="quest-card p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <div class="text-sm text-gray-600 mb-1">21 HOURS REMAINING</div>
-                            <h3 class="righteous-font text-2xl text-black font-bold mb-2">Declutter Dash</h3>
-                            <p class="text-gray-700">Upload 3 items today</p>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <span class="text-2xl font-bold text-black">+15</span>
-                            <button class="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-lg transition-colors">
-                                Claim
-                            </button>
-                        </div>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 100%"></div>
-                    </div>
-                </div>
-
-                <!-- Category Tags -->
-                <div class="flex flex-wrap gap-3 my-8">
-                    <span class="category-tag">T-Shirts</span>
-                    <span class="category-tag">Dresses / Skirts</span>
-                    <span class="category-tag">School textbooks</span>
-                    <span class="category-tag">Dolls / Action figures</span>
-                    <span class="category-tag">Jeans / Pants</span>
-                    <span class="category-tag">Novels / Fiction</span>
-                    <span class="category-tag">Board games</span>
-                    <span class="category-tag">Cups / Mugs</span>
-                    <span class="category-tag">Speakers</span>
-                    <span class="category-tag">Shoes / Footwear</span>
-                    <span class="category-tag">Miscellaneous items</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 60%"></div>
                 </div>
             </div>
 
-            <!-- Right Column - Profile and Achievements -->
-            <div class="space-y-6">
-                <!-- Profile Section -->
-                <div class="text-center">
-                    <div class="inline-block relative mb-4">
-                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
-                             alt="Profile"
-                             class="w-24 h-24 rounded-full profile-avatar object-cover">
+            <!-- Quest Card 2 -->
+            <div class="quest-card">
+                <div class="quest-card-content">
+                    <div class="quest-info">
+                        <div class="quest-timer">21 HOURS REMAINING</div>
+                        <h3 class="quest-name righteous-font">Declutter Dash</h3>
+                        <p class="quest-description">Upload 3 items today</p>
                     </div>
-                    <div class="achievement-card p-6">
-                        <h3 class="righteous-font text-xl text-black mb-2">Fresh Starter</h3>
-                        <p class="text-gray-600 text-sm italic mb-4">Every journey begins with a single item!</p>
-                        <div class="bg-white rounded-lg p-3 text-gray-500 text-sm">
-                            You've let go of your first item - small steps, big change.
-                        </div>
+                    <div class="quest-reward">
+                        <span class="reward-points">+15</span>
+                        <button class="claim-button claim-active">
+                            Claim
+                        </button>
                     </div>
                 </div>
-
-                <!-- Achievement Card -->
-                <div class="achievement-card p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="righteous-font text-xl text-black">7-Day Log in Streak</h3>
-                        <div class="w-16 h-16 bg-gray-300 rounded-lg flex items-center justify-center">
-                            <span class="text-2xl">📷</span>
-                        </div>
-                    </div>
-                    <p class="text-gray-600 text-sm">You've shown up for 7 days straight! Consistency is key. +10 tokens</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 100%"></div>
                 </div>
+            </div>
 
-                <!-- Stats Cards -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="achievement-card p-4 text-center">
-                        <div class="text-2xl font-bold text-black mb-1">50</div>
-                        <div class="text-sm text-gray-600">Tokens Collected</div>
+            <!-- Quest Card 3 -->
+            <div class="quest-card">
+                <div class="quest-card-content">
+                    <div class="quest-info">
+                        <div class="quest-timer">21 HOURS REMAINING</div>
+                        <h3 class="quest-name righteous-font">Declutter Dash</h3>
+                        <p class="quest-description">Upload 3 items today</p>
                     </div>
-                    <div class="achievement-card p-4 text-center">
-                        <div class="text-2xl font-bold text-black mb-1">5</div>
-                        <div class="text-sm text-gray-600">Uploaded 5 Unique Items</div>
+                    <div class="quest-reward">
+                        <span class="reward-points">+15</span>
+                        <button class="claim-button claim-active">
+                            Claim
+                        </button>
                     </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 100%"></div>
+                </div>
+            </div>
+
+            <!-- Quest Card 4 -->
+            <div class="quest-card">
+                <div class="quest-card-content">
+                    <div class="quest-info">
+                        <div class="quest-timer">21 HOURS REMAINING</div>
+                        <h3 class="quest-name righteous-font">Declutter Dash</h3>
+                        <p class="quest-description">Upload 3 items today</p>
+                    </div>
+                    <div class="quest-reward">
+                        <span class="reward-points">+15</span>
+                        <button class="claim-button claim-active">
+                            Claim
+                        </button>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 100%"></div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Achievements Section -->
+    <div class="achievements-section">
+        <div class="achievement-container">
+            <!-- Profile Avatar -->
+            <div class="profile-avatar-section">
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
+                     alt="Profile"
+                     class="profile-avatar">
+            </div>
+
+            <!-- Achievement Title -->
+            <div class="achievement-title-section">
+                <h3 class="achievement-badge righteous-font">Fresh Starter</h3>
+                <div class="achievement-subtitle">Every journey begins with a single item!</div>
+            </div>
+
+            <!-- Main Achievement -->
+            <div class="achievement-main-section">
+                <div class="achievement-text-card">
+                    <p>You've let go of your first item - small steps, big change.</p>
+                </div>
+                <div class="achievement-icon-wrapper">
+                    <img src="~/items/first_uploaded.png" alt="First Upload Achievement" />
+                </div>
+                <div class="streak-card">
+                    <h3 class="streak-title righteous-font">7-Day Log in Streak</h3>
+                    <p class="streak-description">You've shown up for 7 days straight! Consistency is key. +10 tokens</p>
+                </div>
+            </div>
+
+            <!-- Stats Section -->
+            <div class="achievement-stats-section">
+                <div class="token-stats-card">
+                    <div class="token-number">50</div>
+                    <div class="token-label">Tokens Collected</div>
+                </div>
+                <div class="items-stats">
+                    <div class="items-text">Uploaded 5 Unique Items</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flowing Menu Integration -->
+    <div class="quest-flowing-menu">
+        <div class="flowing-menu-container">
+            <nav class="flowing-nav" id="flowing-menu">
+                <!-- Menu items will be populated by JavaScript -->
+            </nav>
+        </div>
+    </div>
 </div>
-</div>
 
-    <script>
-        // Add interactivity
-        document.querySelectorAll('.quest-card').forEach(card => {
-            card.addEventListener('click', function() {
-                this.style.transform = 'scale(1.02)';
-                setTimeout(() => {
-                    this.style.transform = 'scale(1)';
-                }, 150);
-            });
-        });
-
-        // Category tag interactions
-        document.querySelectorAll('.category-tag').forEach(tag => {
-            tag.addEventListener('click', function() {
-                this.style.background = 'rgba(255, 255, 255, 0.4)';
-                setTimeout(() => {
-                    this.style.background = 'rgba(255, 255, 255, 0.2)';
-                }, 200);
-            });
-        });
-
-        // Button interactions
-        document.querySelectorAll('button').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.stopPropagation();
-                // Add your ASP.NET Core MVC action calls here
-                console.log('Button clicked:', this.textContent);
-            });
-        });
-    </script>
+<script src="~/js/QuestPage.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="~/js/questPageFlowMenu.js"></script>
+<!-- Quest-specific functionality -->
+<script src="~/js/questInteractions.js" asp-append-version="true"></script>
