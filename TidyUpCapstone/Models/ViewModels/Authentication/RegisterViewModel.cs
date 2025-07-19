@@ -2,7 +2,7 @@
 
 namespace TidyUpCapstone.Models.ViewModels.Authentication
 {
-    public class RegisterViewModel
+    public class UserManagementViewModel
     {
         [Required(ErrorMessage = "Username is required")]
         [StringLength(50, MinimumLength = 3, ErrorMessage = "Username must be between 3 and 50 characters")]
