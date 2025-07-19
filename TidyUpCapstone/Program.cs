@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using TidyUpCapstone.Services;
-using TidyUpCapstone.Services.Interfaces;
-using TidyUpCapstone.Models.Entities;
-using TidyUp.Data;
+//using TidyUpCapstone.Services;
+//using TidyUpCapstone.Services.Interfaces;
+//using TidyUpCapstone.Hubs;
+using TidyUpCapstone.Models.Entities.Authentication;
+using TidyUpCapstone.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +17,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Configure Identity with custom ApplicationUser
-builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
+builder.Services.AddDefaultIdentity<AppUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
 })
@@ -34,7 +35,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 //builder.Services.AddScoped<IFileService, FileService>();
 //builder.Services.AddScoped<IItemPostService, ItemPostService>();
 //builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
+//builder.Services.AddScoped<IEmailService, EmailService>();
 
 var app = builder.Build();
 
