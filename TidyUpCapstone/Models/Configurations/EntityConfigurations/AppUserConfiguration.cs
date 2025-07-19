@@ -14,7 +14,7 @@ namespace TidyUpCapstone.Models.Configurations.EntityConfigurations
             builder.HasKey(e => e.UserId);
 
             // Configure properties
-            builder.Property(e => e.Username)
+            builder.Property(e => e.UserName)
                 .IsRequired()
                 .HasMaxLength(255);
 
@@ -26,7 +26,7 @@ namespace TidyUpCapstone.Models.Configurations.EntityConfigurations
                 .HasPrecision(10, 2);
 
             // Configure indexes
-            builder.HasIndex(e => e.Username).IsUnique();
+            builder.HasIndex(e => e.UserName).IsUnique();
             builder.HasIndex(e => e.Email).IsUnique();
             builder.HasIndex(e => e.Status);
             builder.HasIndex(e => e.Role);

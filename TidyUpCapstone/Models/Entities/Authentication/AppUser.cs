@@ -1,43 +1,66 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using TidyUpCapstone.Models.Entities.AI;
-using TidyUpCapstone.Models.Entities.Authentication;
-using TidyUpCapstone.Models.Entities.Community;
-using TidyUpCapstone.Models.Entities.Customization;
-using TidyUpCapstone.Models.Entities.Gamification;
+using Microsoft.AspNetCore.Identity;
 using TidyUpCapstone.Models.Entities.Items;
-using TidyUpCapstone.Models.Entities.Leaderboards;
+using TidyUpCapstone.Models.Entities.Transactions;
+using TidyUpCapstone.Models.Entities.SSO;
+using TidyUpCapstone.Models.Entities.Gamification;
+using TidyUpCapstone.Models.Entities.Community;
 using TidyUpCapstone.Models.Entities.Notifications;
 using TidyUpCapstone.Models.Entities.Search;
-using TidyUpCapstone.Models.Entities.SSO;
-using TidyUpCapstone.Models.Entities.Transactions;
 using TidyUpCapstone.Models.Entities.Reports;
-
+using TidyUpCapstone.Models.Entities.Customization;
+using TidyUpCapstone.Models.Entities.Leaderboards;
+using TidyUpCapstone.Models.Entities.AI;
 
 namespace TidyUpCapstone.Models.Entities.Authentication
 {
     [Table("app_user")]
-    public class AppUser
+    public class AppUser : IdentityUser  // Inherit from IdentityUser with int as key type
     {
+        // Override the Id property to match your UserId naming
         [Key]
         [Column("user_id")]
-        public int UserId { get; set; }
+        public override string Id { get; set; } = Guid.NewGuid().ToString();
 
         [Required]
         [StringLength(255)]
         [Column("username")]
-        public string Username { get; set; } = string.Empty;
+        public override string UserName { get; set; } = string.Empty;
 
         [Required]
         [StringLength(255)]
         [EmailAddress]
         [Column("email")]
-        public string Email { get; set; } = string.Empty;
+        public override string Email { get; set; } = string.Empty;
 
-        [StringLength(255)]
+        // Map IdentityUser properties to your column names
         [Column("password_hash")]
-        public string? PasswordHash { get; set; }
+        public override string? PasswordHash { get; set; }
 
+        [Column("email_confirmed")]
+        public override bool EmailConfirmed { get; set; } = false;
+
+        [StringLength(20)]
+        [Column("phone_number")]
+        public override string? PhoneNumber { get; set; }
+
+        [Column("phone_number_confirmed")]
+        public override bool PhoneNumberConfirmed { get; set; } = false;
+
+        [Column("two_factor_enabled")]
+        public override bool TwoFactorEnabled { get; set; } = false;
+
+        [Column("lockout_end")]
+        public override DateTimeOffset? LockoutEnd { get; set; }
+
+        [Column("lockout_enabled")]
+        public override bool LockoutEnabled { get; set; } = true;
+
+        [Column("access_failed_count")]
+        public override int AccessFailedCount { get; set; } = 0;
+
+        // Your custom properties
         [Column("is_verified")]
         public bool IsVerified { get; set; } = false;
 
@@ -83,29 +106,6 @@ namespace TidyUpCapstone.Models.Entities.Authentication
         [Column("avatar_url")]
         public string? AvatarUrl { get; set; }
 
-        // Enhanced authentication fields
-        [Column("email_confirmed")]
-        public bool EmailConfirmed { get; set; } = false;
-
-        [StringLength(20)]
-        [Column("phone_number")]
-        public string? PhoneNumber { get; set; }
-
-        [Column("phone_number_confirmed")]
-        public bool PhoneNumberConfirmed { get; set; } = false;
-
-        [Column("two_factor_enabled")]
-        public bool TwoFactorEnabled { get; set; } = false;
-
-        [Column("lockout_end")]
-        public DateTime? LockoutEnd { get; set; }
-
-        [Column("lockout_enabled")]
-        public bool LockoutEnabled { get; set; } = true;
-
-        [Column("access_failed_count")]
-        public int AccessFailedCount { get; set; } = 0;
-
         // User preferences
         [Required]
         [StringLength(50)]
@@ -150,9 +150,11 @@ namespace TidyUpCapstone.Models.Entities.Authentication
         public virtual ICollection<UserVisualsPurchase> VisualsPurchases { get; set; } = new List<UserVisualsPurchase>();
         public virtual ICollection<LeaderboardEntry> LeaderboardEntries { get; set; } = new List<LeaderboardEntry>();
         public virtual ICollection<UserNotificationPreference> NotificationPreferences { get; set; } = new List<UserNotificationPreference>();
+
+        // Convenience property to access UserId
+        public string UserId => Id;
     }
 }
-
 
 //using Microsoft.AspNetCore.Identity;
 

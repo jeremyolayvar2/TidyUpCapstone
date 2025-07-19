@@ -14,7 +14,7 @@ using TidyUpCapstone.Models.Entities.System;
 using TidyUpCapstone.Models.Entities.Transactions;
 
 
-namespace YourApp.Models.Configurations
+namespace TidyUpCapstone.Models.Configurations
 {
     public static class ModelBuilderExtensions
     {

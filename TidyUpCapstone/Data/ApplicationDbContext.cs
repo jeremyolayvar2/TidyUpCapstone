@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using TidyUpCapstone.Models.Configurations;
 using TidyUpCapstone.Models.Entities;
 using TidyUpCapstone.Models.Entities.AI;
 using TidyUpCapstone.Models.Entities.Authentication;
@@ -24,12 +23,12 @@ namespace TidyUpCapstone.Data
     {
         public ApplicationDbContext(DbContextOptions options) : base(options) { }
 
-        //// Legacy entities (keep for backward compatibility)
-        //public DbSet<Item> ItemPosts { get; set; }
+        // Legacy entities (keep for backward compatibility)
+        //public DbSet<ItemPost> ItemPosts { get; set; }
         //public DbSet<ItemCategory> ItemCategories { get; set; }
         //public DbSet<ItemCondition> ItemConditions { get; set; }
         //public DbSet<ItemLocation> ItemLocations { get; set; }
-        //public DbSet<Chat> Message { get; set; }
+        //public DbSet<Messages> Message { get; set; }
 
         // New comprehensive entities
         // Authentication & User Management
@@ -101,76 +100,76 @@ namespace TidyUpCapstone.Data
         public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<SystemSetting> SystemSettings { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
+        //protected override void OnModelCreating(ModelBuilder modelBuilder)
+        //{
+        //    base.OnModelCreating(modelBuilder);
 
-            // Legacy seed data (keep existing)
-            modelBuilder.Entity<ItemCategory>().HasData(
-                new ItemCategory { Id = 1, Name = "Books & Stationery" },
-                new ItemCategory { Id = 2, Name = "Electronics & Gadgets" },
-                new ItemCategory { Id = 3, Name = "Toys & Games" },
-                new ItemCategory { Id = 4, Name = "Home & Kitchen" },
-                new ItemCategory { Id = 5, Name = "Furniture" },
-                new ItemCategory { Id = 6, Name = "Appliances" },
-                new ItemCategory { Id = 7, Name = "Health & Beauty" },
-                new ItemCategory { Id = 8, Name = "Crafts & DIY Supplies" },
-                new ItemCategory { Id = 9, Name = "School & Office Supplies" }
-            );
+        //    //// Legacy seed data (keep existing)
+        //    //modelBuilder.Entity<ItemCategory>().HasData(
+        //    //    new ItemCategory { Id = 1, Name = "Books & Stationery" },
+        //    //    new ItemCategory { Id = 2, Name = "Electronics & Gadgets" },
+        //    //    new ItemCategory { Id = 3, Name = "Toys & Games" },
+        //    //    new ItemCategory { Id = 4, Name = "Home & Kitchen" },
+        //    //    new ItemCategory { Id = 5, Name = "Furniture" },
+        //    //    new ItemCategory { Id = 6, Name = "Appliances" },
+        //    //    new ItemCategory { Id = 7, Name = "Health & Beauty" },
+        //    //    new ItemCategory { Id = 8, Name = "Crafts & DIY Supplies" },
+        //    //    new ItemCategory { Id = 9, Name = "School & Office Supplies" }
+        //    //);
 
-            modelBuilder.Entity<ItemCondition>().HasData(
-                new ItemCondition { Id = 1, Name = "Brand New" },
-                new ItemCondition { Id = 2, Name = "Like New" },
-                new ItemCondition { Id = 3, Name = "Gently Used" },
-                new ItemCondition { Id = 4, Name = "Visible Wear" },
-                new ItemCondition { Id = 5, Name = "For Repair/Parts" }
-            );
+        //    //modelBuilder.Entity<ItemCondition>().HasData(
+        //    //    new ItemCondition { Id = 1, Name = "Brand New" },
+        //    //    new ItemCondition { Id = 2, Name = "Like New" },
+        //    //    new ItemCondition { Id = 3, Name = "Gently Used" },
+        //    //    new ItemCondition { Id = 4, Name = "Visible Wear" },
+        //    //    new ItemCondition { Id = 5, Name = "For Repair/Parts" }
+        //    );
 
-            // Legacy configurations (keep existing)
-            modelBuilder.Entity<AppUser>()
-                .Property(u => u.TokenBalance)
-                .HasPrecision(18, 2);
+        //    //// Legacy configurations (keep existing)
+        //    //modelBuilder.Entity<ApplicationUser>()
+        //    //    .Property(u => u.TokenBalance)
+        //    //    .HasPrecision(18, 2);
 
-            modelBuilder.Entity<Chat>().ToTable("Message");
-            modelBuilder.Entity<Chat>()
-                .HasOne(m => m.Buyer)
-                .WithMany()
-                .HasForeignKey(m => m.BuyerId)
-                .OnDelete(DeleteBehavior.Restrict);
+        //    //modelBuilder.Entity<Messages>().ToTable("Message");
+        //    //modelBuilder.Entity<Messages>()
+        //    //    .HasOne(m => m.Buyer)
+        //    //    .WithMany()
+        //    //    .HasForeignKey(m => m.BuyerId)
+        //    //    .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Chat>()
-                .HasOne(m => m.Seller)
-                .WithMany()
-                .HasForeignKey(m => m.SellerId)
-                .OnDelete(DeleteBehavior.Restrict);
+        //    //modelBuilder.Entity<Messages>()
+        //    //    .HasOne(m => m.Seller)
+        //    //    .WithMany()
+        //    //    .HasForeignKey(m => m.SellerId)
+        //    //    .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Messages>()
-                .HasOne(m => m.Sender)
-                .WithMany()
-                .HasForeignKey(m => m.SenderId)
-                .OnDelete(DeleteBehavior.Restrict);
+        //    //modelBuilder.Entity<Messages>()
+        //    //    .HasOne(m => m.Sender)
+        //    //    .WithMany()
+        //    //    .HasForeignKey(m => m.SenderId)
+        //    //    .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Messages>()
-                .HasOne(m => m.ItemPost)
-                .WithMany()
-                .HasForeignKey(m => m.ItemPostId)
-                .OnDelete(DeleteBehavior.Cascade);
+        //    //modelBuilder.Entity<Messages>()
+        //    //    .HasOne(m => m.ItemPost)
+        //    //    .WithMany()
+        //    //    .HasForeignKey(m => m.ItemPostId)
+        //    //    .OnDelete(DeleteBehavior.Cascade);
 
-            // New comprehensive configurations
-            ConfigureNewEntities(modelBuilder);
+        //    // New comprehensive configurations
+        //    ConfigureNewEntities(modelBuilder);
 
-            // Apply all entity configurations from assembly
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+        //    // Apply all entity configurations from assembly
+        //    modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
-            // Configure new relationships and constraints
-            modelBuilder.ConfigureCustomRelationships();
-            modelBuilder.ConfigureComplexRelationships();
-            modelBuilder.ConfigureReportingRelationships();
-            modelBuilder.ConfigureBusinessConstraints();
+        //    // Configure new relationships and constraints
+        //    modelBuilder.ConfigureCustomRelationships();
+        //    modelBuilder.ConfigureComplexRelationships();
+        //    modelBuilder.ConfigureReportingRelationships();
+        //    modelBuilder.ConfigureBusinessConstraints();
 
-            // Seed initial data for new entities
-            modelBuilder.SeedInitialData();
-        }
+        //    // Seed initial data for new entities
+        //    modelBuilder.SeedInitialData();
+        //}
 
         private void ConfigureNewEntities(ModelBuilder modelBuilder)
         {
@@ -183,7 +182,7 @@ namespace TidyUpCapstone.Data
 
             // Configure unique constraints for new entities
             modelBuilder.Entity<AppUser>()
-                .HasIndex(u => u.Username)
+                .HasIndex(u => u.UserName)
                 .IsUnique();
 
             modelBuilder.Entity<AppUser>()
