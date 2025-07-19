@@ -1,19 +1,20 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using TidyUpCapstone.Models.Entities.Items;
-using TidyUpCapstone.Models.Entities.Transactions;
-using TidyUpCapstone.Models.Entities.SSO;
-using TidyUpCapstone.Models.Entities.Gamification;
+using TidyUpCapstone.Models.Entities.AI;
+using TidyUpCapstone.Models.Entities.Authentication;
 using TidyUpCapstone.Models.Entities.Community;
+using TidyUpCapstone.Models.Entities.Customization;
+using TidyUpCapstone.Models.Entities.Gamification;
+using TidyUpCapstone.Models.Entities.Items;
+using TidyUpCapstone.Models.Entities.Leaderboards;
 using TidyUpCapstone.Models.Entities.Notifications;
 using TidyUpCapstone.Models.Entities.Search;
+using TidyUpCapstone.Models.Entities.SSO;
+using TidyUpCapstone.Models.Entities.Transactions;
 using TidyUpCapstone.Models.Entities.Reports;
-using TidyUpCapstone.Models.Entities.Customization;
-using TidyUpCapstone.Models.Entities.Leaderboards;
-using TidyUpCapstone.Models.Entities.AI;
-using TidyUpCapstone.Models.Entities.System;
 
-namespace YourApp.Models.Entities.Authentication
+
+namespace TidyUpCapstone.Models.Entities.Authentication
 {
     [Table("app_user")]
     public class AppUser
@@ -151,3 +152,17 @@ namespace YourApp.Models.Entities.Authentication
         public virtual ICollection<UserNotificationPreference> NotificationPreferences { get; set; } = new List<UserNotificationPreference>();
     }
 }
+
+
+//using Microsoft.AspNetCore.Identity;
+
+//namespace TidyUpCapstone.Models.Entities
+//{
+//    public class ApplicationUser : IdentityUser
+//    {
+
+//        public decimal TokenBalance { get; set; }
+//        public bool WelcomeTokenGranted { get; set; } = false;
+//        public ICollection<ItemPost> ItemPosts { get; set; } = new List<ItemPost>();
+//    }
+//}
