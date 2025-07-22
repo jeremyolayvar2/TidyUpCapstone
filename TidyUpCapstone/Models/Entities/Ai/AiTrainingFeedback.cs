@@ -1,48 +1,38 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using TidyUpCapstone.Models.Entities.Authentication;
 using TidyUpCapstone.Models.Entities.Items;
+using TidyUpCapstone.Models.Entities.User;
 
 namespace TidyUpCapstone.Models.Entities.AI
 {
-    [Table("ai_training_feedback")]
     public class AiTrainingFeedback
     {
         [Key]
-        [Column("ai_feedback_id")]
         public int AiFeedbackId { get; set; }
 
         [Required]
-        [Column("item_id")]
         public int ItemId { get; set; }
 
         [Required]
-        [Column("user_id")]
         public int UserId { get; set; }
 
         [StringLength(100)]
-        [Column("ai_predicted_category")]
         public string? AiPredictedCategory { get; set; }
 
         [StringLength(100)]
-        [Column("user_corrected_category")]
         public string? UserCorrectedCategory { get; set; }
 
-        [Column("ai_predicted_price", TypeName = "decimal(10,2)")]
+        [Column(TypeName = "decimal(10,2)")]
         public decimal? AiPredictedPrice { get; set; }
 
-        [Column("user_set_price", TypeName = "decimal(10,2)")]
+        [Column(TypeName = "decimal(10,2)")]
         public decimal? UserSetPrice { get; set; }
 
         [Required]
-        [StringLength(50)]
-        [Column("feedback_type")]
-        public string FeedbackType { get; set; } = string.Empty; // price, category, both
+        public FeedbackType FeedbackType { get; set; }
 
-        [Column("confidence_rating")]
         public int? ConfidenceRating { get; set; }
 
-        [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation properties
@@ -51,5 +41,12 @@ namespace TidyUpCapstone.Models.Entities.AI
 
         [ForeignKey("UserId")]
         public virtual AppUser User { get; set; } = null!;
+    }
+
+    public enum FeedbackType
+    {
+        Price,
+        Category,
+        Both
     }
 }
