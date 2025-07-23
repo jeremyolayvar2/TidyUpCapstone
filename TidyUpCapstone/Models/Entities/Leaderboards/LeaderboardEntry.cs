@@ -1,42 +1,32 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using TidyUpCapstone.Models.Entities.Authentication;
+using TidyUpCapstone.Models.Entities.Gamification;
+using TidyUpCapstone.Models.Entities.User;
 
-
-namespace TidyUpCapstone.Models.Entities.Leaderboards
+namespace TidyUpCapstone.Models.Entities.Gamification
 {
-    [Table("leaderboard_entries")]
     public class LeaderboardEntry
     {
         [Key]
-        [Column("entry_id")]
         public int EntryId { get; set; }
 
         [Required]
-        [Column("user_id")]
         public int UserId { get; set; }
 
         [Required]
-        [Column("leaderboard_id")]
         public int LeaderboardId { get; set; }
 
         [Required]
-        [Column("rank_position")]
         public int RankPosition { get; set; }
 
-        [Required]
-        [Column("score", TypeName = "decimal(15,2)")]
+        [Column(TypeName = "decimal(15,2)")]
         public decimal Score { get; set; } = 0.00m;
 
-        [Column("previous_rank")]
         public int? PreviousRank { get; set; }
 
         [Required]
-        [StringLength(50)]
-        [Column("rank_change")]
-        public string RankChange { get; set; } = "new"; // up, down, same, new
+        public RankChange RankChange { get; set; } = RankChange.New;
 
-        [Column("last_updated")]
         public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
 
         // Navigation properties
@@ -45,5 +35,13 @@ namespace TidyUpCapstone.Models.Entities.Leaderboards
 
         [ForeignKey("LeaderboardId")]
         public virtual Leaderboard Leaderboard { get; set; } = null!;
+    }
+
+    public enum RankChange
+    {
+        Up,
+        Down,
+        Same,
+        New
     }
 }

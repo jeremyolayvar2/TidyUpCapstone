@@ -1,102 +1,66 @@
-﻿using System.ComponentModel.DataAnnotations;
-using TidyUpCapstone.Models.ViewModels.Items;
+﻿using TidyUpCapstone.Models.DTOs.Items;
+using TidyUpCapstone.Models.DTOs.Transactions;
+using TidyUpCapstone.Models.ViewModels.Shared;
+
 
 namespace TidyUpCapstone.Models.ViewModels.Items
 {
     public class ItemListViewModel
     {
-        public List<ItemSummaryViewModel> Items { get; set; } = new List<ItemSummaryViewModel>();
-        public ItemSearchFilterViewModel Filter { get; set; } = new ItemSearchFilterViewModel();
+        public List<ItemDto> Items { get; set; } = new List<ItemDto>();
+        public ItemSearchDto SearchCriteria { get; set; } = new ItemSearchDto();
+        public List<ItemCategoryDto> Categories { get; set; } = new List<ItemCategoryDto>();
+        public List<ItemLocationDto> Locations { get; set; } = new List<ItemLocationDto>();
+        public List<ItemConditionDto> Conditions { get; set; } = new List<ItemConditionDto>();
         public PaginationViewModel Pagination { get; set; } = new PaginationViewModel();
-
-        // Summary statistics
         public int TotalItems { get; set; }
-        public decimal? MinPrice { get; set; }
-        public decimal? MaxPrice { get; set; }
-        public decimal? AveragePrice { get; set; }
+        public string? PageTitle { get; set; }
+        public string? PageDescription { get; set; }
+        public bool ShowFilters { get; set; } = true;
+        public bool ShowMap { get; set; } = false;
+        public decimal? UserLatitude { get; set; }
+        public decimal? UserLongitude { get; set; }
     }
 
-    public class ItemSummaryViewModel
+    public class ItemDetailsViewModel
     {
+        public ItemDto Item { get; set; } = null!;
+        public List<ItemDto> RelatedItems { get; set; } = new List<ItemDto>();
+        public List<ItemDto> SellerOtherItems { get; set; } = new List<ItemDto>();
+        public bool CanEdit { get; set; }
+        public bool CanPurchase { get; set; }
+        public bool IsOwner { get; set; }
+        public bool HasActiveTransaction { get; set; }
+        public string? ActiveTransactionStatus { get; set; }
+        public CreateTransactionDto TransactionRequest { get; set; } = new CreateTransactionDto();
+        public List<string> ImageGallery { get; set; } = new List<string>();
+        public bool ShowContactSeller { get; set; }
+        public decimal? DistanceFromUser { get; set; }
+    }
+
+    public class CreateItemViewModel
+    {
+        public CreateItemDto Item { get; set; } = new CreateItemDto();
+        public List<ItemCategoryDto> Categories { get; set; } = new List<ItemCategoryDto>();
+        public List<ItemConditionDto> Conditions { get; set; } = new List<ItemConditionDto>();
+        public List<ItemLocationDto> Locations { get; set; } = new List<ItemLocationDto>();
+        public decimal? SuggestedPrice { get; set; }
+        public bool ShowPriceGuidance { get; set; } = true;
+        public string? AiProcessingStatus { get; set; }
+        public List<string> PricingTips { get; set; } = new List<string>();
+    }
+
+    public class EditItemViewModel
+    {
+        public UpdateItemDto Item { get; set; } = new UpdateItemDto();
         public int ItemId { get; set; }
-        public string ItemTitle { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public decimal FinalTokenPrice { get; set; }
-        public string? ImageFileName { get; set; }
-        public string Status { get; set; } = string.Empty;
-        public DateTime DatePosted { get; set; }
+        public List<ItemCategoryDto> Categories { get; set; } = new List<ItemCategoryDto>();
+        public List<ItemConditionDto> Conditions { get; set; } = new List<ItemConditionDto>();
+        public List<ItemLocationDto> Locations { get; set; } = new List<ItemLocationDto>();
+        public string? CurrentImageUrl { get; set; }
+        public bool IsActive { get; set; }
         public int ViewCount { get; set; }
-
-        // Category and Location
-        public string CategoryName { get; set; } = string.Empty;
-        public string LocationName { get; set; } = string.Empty;
-        public string ConditionName { get; set; } = string.Empty;
-
-        // User info
-        public string Username { get; set; } = string.Empty;
-        public string? UserAvatarUrl { get; set; }
-
-        // Distance (if location search is used)
-        public double? DistanceKm { get; set; }
-
-        // AI confidence
-        public decimal? AiConfidenceLevel { get; set; }
-    }
-
-    public class ItemSearchFilterViewModel
-    {
-        [Display(Name = "Search")]
-        public string? SearchQuery { get; set; }
-
-        [Display(Name = "Category")]
-        public int? CategoryId { get; set; }
-
-        [Display(Name = "Location")]
-        public int? LocationId { get; set; }
-
-        [Display(Name = "Condition")]
-        public int? ConditionId { get; set; }
-
-        [Display(Name = "Min Price")]
-        [Range(0, 999999.99)]
-        public decimal? MinPrice { get; set; }
-
-        [Display(Name = "Max Price")]
-        [Range(0, 999999.99)]
-        public decimal? MaxPrice { get; set; }
-
-        [Display(Name = "Sort By")]
-        public string SortBy { get; set; } = "DatePosted"; // DatePosted, Price, Distance, Popularity
-
-        [Display(Name = "Sort Order")]
-        public string SortOrder { get; set; } = "Desc"; // Asc, Desc
-
-        [Display(Name = "Status")]
-        public string? Status { get; set; } = "available";
-
-        // Location-based search
-        public decimal? Latitude { get; set; }
-        public decimal? Longitude { get; set; }
-
-        [Display(Name = "Radius (km)")]
-        [Range(1, 100)]
-        public int? RadiusKm { get; set; }
-
-        // Available options for filters
-        public List<CategoryOption> Categories { get; set; } = new List<CategoryOption>();
-        public List<LocationOption> Locations { get; set; } = new List<LocationOption>();
-        public List<ConditionOption> Conditions { get; set; } = new List<ConditionOption>();
-    }
-
-    public class PaginationViewModel
-    {
-        public int CurrentPage { get; set; } = 1;
-        public int PageSize { get; set; } = 20;
-        public int TotalPages { get; set; }
-        public int TotalItems { get; set; }
-        public bool HasPreviousPage => CurrentPage > 1;
-        public bool HasNextPage => CurrentPage < TotalPages;
-        public int StartItem => (CurrentPage - 1) * PageSize + 1;
-        public int EndItem => Math.Min(CurrentPage * PageSize, TotalItems);
+        public DateTime DatePosted { get; set; }
+        public bool HasActiveTransactions { get; set; }
     }
 }
