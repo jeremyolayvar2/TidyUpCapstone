@@ -1,10 +1,10 @@
-﻿using TidyUpCapstone.Models.Entities;
+﻿using TidyUpCapstone.Models.Entities.User;
 
 namespace TidyUpCapstone.Services.Interfaces
 {
     public interface IUserService
     {
-        Task<ApplicationUser?> GetUserByIdAsync(string userId);
+        Task<AppUser?> GetUserByIdAsync(string userId);
         Task<decimal> GetUserTokenBalanceAsync(string userId); 
     }
 }

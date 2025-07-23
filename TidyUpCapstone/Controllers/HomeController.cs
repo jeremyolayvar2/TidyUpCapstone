@@ -14,23 +14,28 @@ namespace TidyUp.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly IItemPostService _itemPostService;
+        //private readonly IItemPostService _itemPostService;
         private readonly IUserService _userService;
         private readonly UserManager<AppUser> _userManager; // Changed from ApplicationUser to AppUser
 
         public HomeController(
             ILogger<HomeController> logger,
-            IItemPostService itemPostService,
-            IUserService userService,
+            //IItemPostService itemPostService,
+            //IUserService userService,
             UserManager<AppUser> userManager) // Changed from ApplicationUser to AppUser
         {
             _logger = logger;
-            _itemPostService = itemPostService;
-            _userService = userService;
-            _userManager = userManager;
+            //_itemPostService = itemPostService;
+            //_userService = userService;
+            //_userManager = userManager;
         }
 
         public IActionResult Index()
+        {
+            return View();
+        }
+
+        public IActionResult Main()
         {
             return View();
         }

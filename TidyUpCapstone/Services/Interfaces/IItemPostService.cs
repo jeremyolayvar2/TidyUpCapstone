@@ -1,18 +1,18 @@
-﻿using TidyUpCapstone.Models.DTOs;
-using TidyUpCapstone.Models.Entities;
+﻿//using TidyUpCapstone.Models.DTOs.Items;
+//using TidyUpCapstone.Models.Entities.Items;
 
 
-namespace TidyUpCapstone.Services.Interfaces
-{
-    public interface IItemPostService
-    {
-        Task<ItemPost> CreateItemPostAsync(ItemPostDto dto, string userId, int locationId);
-        Task<ItemPost?> GetItemPostByIdAsync(int id);
-        Task<List<ItemPost>> GetAllItemPostsAsync();
-        Task<List<ItemPost>> GetItemPostsByUserIdAsync(string userId);
-        Task<ItemPost> UpdateItemPostAsync(int id, ItemPostDto dto);
-        Task<bool> DeleteItemPostAsync(int id);
+//namespace TidyUpCapstone.Services.Interfaces
+//{
+//    public interface IItemPostService
+//    {
+//        Task<Item> CreateItemPostAsync(ItemDto dto, string userId, int locationId);
+//        Task<Item?> GetItemPostByIdAsync(int id);
+//        Task<List<Item>> GetAllItemPostsAsync();
+//        Task<List<Item>> GetItemPostsByUserIdAsync(string userId);
+//        Task<Item> UpdateItemPostAsync(int id, ItemDto dto);
+//        Task<bool> DeleteItemPostAsync(int id);
 
-        Task<ItemLocation> ResolveOrCreateLocationAsync(string locationName);
-    }
-}
+//        Task<ItemLocation> ResolveOrCreateLocationAsync(string locationName);
+//    }
+//}
