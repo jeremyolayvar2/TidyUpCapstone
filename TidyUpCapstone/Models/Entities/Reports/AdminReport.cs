@@ -26,10 +26,10 @@ namespace TidyUpCapstone.Models.Entities.Reporting
 
         public string? ReportDescription { get; set; }
 
-        [Column(TypeName = "json")]
+     
         public string? ReportData { get; set; }
 
-        [Column(TypeName = "json")]
+ 
         public string? ReportParameters { get; set; }
 
         [Required]

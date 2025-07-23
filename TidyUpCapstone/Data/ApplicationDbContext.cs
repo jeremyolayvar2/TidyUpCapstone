@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TidyUpCapstone.Models.Entities.AI;
 using TidyUpCapstone.Models.Entities.Community;
-using TidyUpCapstone.Models.Entities.Customization;
 using TidyUpCapstone.Models.Entities.Gamification;
 using TidyUpCapstone.Models.Entities.Items;
 using TidyUpCapstone.Models.Entities.Notifications;
@@ -13,7 +12,6 @@ using TidyUpCapstone.Models.Entities.System;
 using TidyUpCapstone.Models.Entities.Transactions;
 using TidyUpCapstone.Models.Entities.User;
 using TidyUpCapstone.Models.Entities.Core;
-
 
 namespace TidyUpCapstone.Data
 {
@@ -97,6 +95,12 @@ namespace TidyUpCapstone.Data
                 entity.Property(e => e.UserName).HasColumnName("username");
                 entity.Property(e => e.Email).HasColumnName("email");
                 entity.Property(e => e.PasswordHash).HasColumnName("password_hash");
+                entity.Property(e => e.TokenBalance).HasColumnName("token_balance");
+                entity.Property(e => e.DateCreated).HasColumnName("date_created");
+                entity.Property(e => e.ManagedByAdminId).HasColumnName("managed_by_admin_id");
+                entity.Property(e => e.AdminNotes).HasColumnName("admin_notes");
+                entity.Property(e => e.Status).HasColumnName("status");
+                entity.Property(e => e.LastLogin).HasColumnName("last_login");
             });
 
             builder.Entity<IdentityRole<int>>().ToTable("AspNetRoles");
@@ -185,6 +189,35 @@ namespace TidyUpCapstone.Data
             // Reporting entities
             builder.Entity<UserReport>().ToTable("user_reports");
             builder.Entity<AdminReport>().ToTable("admin_reports");
+
+            // Configure JSON columns as nvarchar(max) for compatibility
+            builder.Entity<Admin>()
+                .Property(a => a.AdminPermissions)
+                .HasColumnType("nvarchar(max)");
+
+            builder.Entity<SsoAuditLog>()
+                .Property(sal => sal.AdditionalData)
+                .HasColumnType("nvarchar(max)");
+
+            builder.Entity<AdminReport>()
+                .Property(ar => ar.ReportData)
+                .HasColumnType("nvarchar(max)");
+
+            builder.Entity<AdminReport>()
+                .Property(ar => ar.ReportParameters)
+                .HasColumnType("nvarchar(max)");
+
+            builder.Entity<UserReport>()
+                .Property(ur => ur.EvidenceUrls)
+                .HasColumnType("nvarchar(max)");
+
+            builder.Entity<AuditLog>()
+                .Property(al => al.OldValues)
+                .HasColumnType("nvarchar(max)");
+
+            builder.Entity<AuditLog>()
+                .Property(al => al.NewValues)
+                .HasColumnType("nvarchar(max)");
         }
 
         private void ConfigureRelationships(ModelBuilder builder)
@@ -194,7 +227,7 @@ namespace TidyUpCapstone.Data
                 .HasOne(u => u.ManagedByAdmin)
                 .WithMany(u => u.ManagedUsers)
                 .HasForeignKey(u => u.ManagedByAdminId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.NoAction);
 
             // Admin relationship
             builder.Entity<Admin>()
@@ -223,14 +256,52 @@ namespace TidyUpCapstone.Data
                 .HasForeignKey<Chat>(c => c.TransactionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Comment self-referencing relationship
+            // Comment relationships - ALL set to NoAction to prevent cascade cycles
+            builder.Entity<Comment>()
+                .HasOne(c => c.User)
+                .WithMany(u => u.Comments)
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<Comment>()
+                .HasOne(c => c.Post)
+                .WithMany(p => p.Comments)
+                .HasForeignKey(c => c.PostId)
+                .OnDelete(DeleteBehavior.NoAction);
+
             builder.Entity<Comment>()
                 .HasOne(c => c.ParentComment)
                 .WithMany(c => c.Replies)
                 .HasForeignKey(c => c.ParentCommentId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Post relationships
+            builder.Entity<Post>()
+                .HasOne(p => p.Author)
+                .WithMany(u => u.Posts)
+                .HasForeignKey(p => p.AuthorId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Reaction relationships
+            builder.Entity<Reaction>()
+                .HasOne(r => r.User)
+                .WithMany(u => u.Reactions)
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<Reaction>()
+                .HasOne(r => r.Post)
+                .WithMany(p => p.Reactions)
+                .HasForeignKey(r => r.PostId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             // UserSsoLink relationships
+            builder.Entity<UserSsoLink>()
+                .HasOne(usl => usl.User)
+                .WithMany(u => u.SsoHistory)
+                .HasForeignKey(usl => usl.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             builder.Entity<UserSsoLink>()
                 .HasOne(usl => usl.Provider)
                 .WithMany(sp => sp.UserSsoLinks)
@@ -238,18 +309,107 @@ namespace TidyUpCapstone.Data
                 .HasPrincipalKey(sp => sp.ProviderName)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // AI Processing Pipeline relationships
+            // SsoAuditLog relationship with SsoProvider
+            builder.Entity<SsoAuditLog>()
+                .HasOne(sal => sal.Provider)
+                .WithMany(sp => sp.SsoAuditLogs)
+                .HasForeignKey(sal => sal.ProviderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<SsoAuditLog>()
+                .HasOne(sal => sal.User)
+                .WithMany()
+                .HasForeignKey(sal => sal.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Item relationships
+            builder.Entity<Item>()
+                .HasOne(i => i.User)
+                .WithMany(u => u.Items)
+                .HasForeignKey(i => i.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // AI Analysis and Prediction relationships
+            builder.Entity<AzureCvAnalysis>()
+                .HasOne(aca => aca.Item)
+                .WithMany(i => i.AzureCvAnalyses)
+                .HasForeignKey(aca => aca.ItemId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<TensorflowPrediction>()
+                .HasOne(tp => tp.Item)
+                .WithMany(i => i.TensorflowPredictions)
+                .HasForeignKey(tp => tp.ItemId)
+                .OnDelete(DeleteBehavior.NoAction);
             builder.Entity<AiProcessingPipeline>()
                 .HasOne(app => app.Analysis)
                 .WithMany(aca => aca.ProcessingPipelines)
                 .HasForeignKey(app => app.AnalysisId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.NoAction);
 
             builder.Entity<AiProcessingPipeline>()
                 .HasOne(app => app.Prediction)
                 .WithMany(tp => tp.ProcessingPipelines)
                 .HasForeignKey(app => app.PredictionId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<AiProcessingPipeline>()
+                .HasOne(app => app.Item)
+                .WithMany(i => i.AiProcessingPipelines)
+                .HasForeignKey(app => app.ItemId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // AI Training Feedback relationships
+            builder.Entity<AiTrainingFeedback>()
+                .HasOne(atf => atf.User)
+                .WithMany(u => u.AiTrainingFeedbacks)
+                .HasForeignKey(atf => atf.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<AiTrainingFeedback>()
+                .HasOne(atf => atf.Item)
+                .WithMany(i => i.AiTrainingFeedbacks)
+                .HasForeignKey(atf => atf.ItemId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Notification relationships
+            builder.Entity<Notification>()
+                .HasOne(n => n.User)
+                .WithMany(u => u.Notifications)
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // ChatMessage relationships
+            builder.Entity<ChatMessage>()
+                .HasOne(cm => cm.Sender)
+                .WithMany(u => u.ChatMessages)
+                .HasForeignKey(cm => cm.SenderId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Gamification relationships
+            builder.Entity<UserQuest>()
+                .HasOne(uq => uq.User)
+                .WithMany(u => u.UserQuests)
+                .HasForeignKey(uq => uq.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<UserAchievement>()
+                .HasOne(ua => ua.User)
+                .WithMany(u => u.UserAchievements)
+                .HasForeignKey(ua => ua.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<UserStreak>()
+                .HasOne(us => us.User)
+                .WithMany(u => u.UserStreaks)
+                .HasForeignKey(us => us.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<UserVisualsPurchase>()
+                .HasOne(uvp => uvp.User)
+                .WithMany(u => u.UserVisualsPurchases)
+                .HasForeignKey(uvp => uvp.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // UserLevel relationship (one-to-one)
             builder.Entity<UserLevel>()
@@ -270,13 +430,54 @@ namespace TidyUpCapstone.Data
                 .HasOne(ur => ur.Reporter)
                 .WithMany(u => u.ReportsMade)
                 .HasForeignKey(ur => ur.ReporterId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
 
             builder.Entity<UserReport>()
                 .HasOne(ur => ur.ReportedUser)
                 .WithMany(u => u.ReportsReceived)
                 .HasForeignKey(ur => ur.ReportedUserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // System Setting relationship
+            builder.Entity<SystemSetting>()
+                .HasOne(ss => ss.UpdatedByAdmin)
+                .WithMany(a => a.SystemSettingsUpdated)
+                .HasForeignKey(ss => ss.UpdatedByAdminId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Audit Log relationships
+            builder.Entity<AuditLog>()
+                .HasOne(al => al.User)
+                .WithMany()
+                .HasForeignKey(al => al.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<AuditLog>()
+                .HasOne(al => al.Admin)
+                .WithMany(a => a.AdminAuditLogs)
+                .HasForeignKey(al => al.AdminId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Search History relationships
+            builder.Entity<SearchHistory>()
+                .HasOne(sh => sh.User)
+                .WithMany()
+                .HasForeignKey(sh => sh.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Login Log relationships
+            builder.Entity<LoginLog>()
+                .HasOne(ll => ll.User)
+                .WithMany(u => u.LoginLogs)
+                .HasForeignKey(ll => ll.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Email Verification relationships
+            builder.Entity<EmailVerification>()
+                .HasOne(ev => ev.User)
+                .WithMany(u => u.EmailVerifications)
+                .HasForeignKey(ev => ev.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         private void ConfigureIndexes(ModelBuilder builder)
@@ -318,6 +519,12 @@ namespace TidyUpCapstone.Data
                 .IsUnique()
                 .HasDatabaseName("idx_user_sso_links_provider");
 
+            // SsoProvider ProviderName must be unique since it's used as principal key
+            builder.Entity<SsoProvider>()
+                .HasIndex(sp => sp.ProviderName)
+                .IsUnique()
+                .HasDatabaseName("idx_sso_provider_name");
+
             // Notification indexes
             builder.Entity<Notification>()
                 .HasIndex(n => new { n.UserId, n.IsRead })
@@ -330,26 +537,30 @@ namespace TidyUpCapstone.Data
             builder.Entity<AppUser>()
                 .HasCheckConstraint("chk_positive_token_balance", "token_balance >= 0");
 
-            // Item price constraints
+            // Item price constraints - Fix column names to match actual properties
             builder.Entity<Item>()
                 .HasCheckConstraint("chk_positive_prices",
-                    "adjusted_token_price >= 0 AND final_token_price >= 0 AND (ai_suggested_price IS NULL OR ai_suggested_price >= 0)");
+                    "[AdjustedTokenPrice] >= 0 AND [FinalTokenPrice] >= 0 AND ([AiSuggestedPrice] IS NULL OR [AiSuggestedPrice] >= 0)");
 
             // Coordinate constraints
             builder.Entity<Item>()
                 .HasCheckConstraint("chk_valid_coordinates",
-                    "(latitude IS NULL AND longitude IS NULL) OR (latitude BETWEEN -90 AND 90 AND longitude BETWEEN -180 AND 180)");
+                    "([Latitude] IS NULL AND [Longitude] IS NULL) OR ([Latitude] BETWEEN -90 AND 90 AND [Longitude] BETWEEN -180 AND 180)");
 
             // Transaction constraints
             builder.Entity<Transaction>()
-                .HasCheckConstraint("chk_buyer_not_seller", "buyer_id != seller_id");
+                .HasCheckConstraint("chk_buyer_not_seller", "[BuyerId] != [SellerId]");
 
             builder.Entity<Transaction>()
-                .HasCheckConstraint("chk_positive_token_amount", "token_amount > 0");
+                .HasCheckConstraint("chk_positive_token_amount", "[TokenAmount] > 0");
 
-            // Location preference constraints
+            // Location preference constraints - Fix column name to match actual property
             builder.Entity<UserLocationPreference>()
-                .HasCheckConstraint("chk_valid_radius", "radius_km > 0 AND radius_km <= 1000");
+                .HasCheckConstraint("chk_valid_radius", "[RadiusKm] > 0 AND [RadiusKm] <= 1000");
+
+            // User Report constraint to prevent self-reporting
+            builder.Entity<UserReport>()
+                .HasCheckConstraint("chk_no_self_report", "[ReporterId] != [ReportedUserId]");
         }
 
         private void ConfigureCompositeKeys(ModelBuilder builder)

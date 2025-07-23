@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using TidyUpCapstone.Models.Entities.Customization;
+
 
 namespace TidyUpCapstone.Models.Entities.Gamification
 {

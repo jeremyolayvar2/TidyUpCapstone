@@ -17,7 +17,7 @@ namespace TidyUpCapstone.Models.Entities.Core
         [Required]
         public AdminRole AdminRole { get; set; } = AdminRole.Moderator;
 
-        [Column(TypeName = "json")]
+        // Removed [Column(TypeName = "json")] - will be configured in DbContext
         public string? AdminPermissions { get; set; }
 
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;

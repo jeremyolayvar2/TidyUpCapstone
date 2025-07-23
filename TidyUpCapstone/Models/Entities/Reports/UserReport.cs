@@ -26,7 +26,7 @@ namespace TidyUpCapstone.Models.Entities.Reporting
 
         public string? Description { get; set; }
 
-        [Column(TypeName = "json")]
+  
         public string? EvidenceUrls { get; set; }
 
         public DateTime DateSubmitted { get; set; } = DateTime.UtcNow;

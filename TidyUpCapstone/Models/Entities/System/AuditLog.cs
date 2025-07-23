@@ -25,10 +25,10 @@ namespace TidyUpCapstone.Models.Entities.System
         [Required]
         public int EntityId { get; set; }
 
-        [Column(TypeName = "json")]
+
         public string? OldValues { get; set; }
 
-        [Column(TypeName = "json")]
+
         public string? NewValues { get; set; }
 
         [StringLength(45)]

@@ -13,8 +13,11 @@ namespace TidyUpCapstone.Models.Entities.SSO
         public int? UserId { get; set; }
 
         [Required]
+        public int ProviderId { get; set; } // Changed from ProviderName to ProviderId
+
+        [Required]
         [StringLength(50)]
-        public string ProviderName { get; set; } = string.Empty;
+        public string ProviderName { get; set; } = string.Empty; // Keep this for data purposes
 
         [Required]
         [StringLength(100)]
@@ -40,7 +43,7 @@ namespace TidyUpCapstone.Models.Entities.SSO
         [StringLength(255)]
         public string? RequestId { get; set; }
 
-        [Column(TypeName = "json")]
+        // Removed [Column(TypeName = "json")] - will be configured in DbContext
         public string? AdditionalData { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -49,7 +52,7 @@ namespace TidyUpCapstone.Models.Entities.SSO
         [ForeignKey("UserId")]
         public virtual AppUser? User { get; set; }
 
-        [ForeignKey("ProviderName")]
+        [ForeignKey("ProviderId")] // Changed to ProviderId
         public virtual SsoProvider Provider { get; set; } = null!;
     }
 }
