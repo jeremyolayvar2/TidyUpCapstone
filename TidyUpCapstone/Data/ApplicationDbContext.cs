@@ -13,6 +13,7 @@ using TidyUpCapstone.Models.Entities.Transactions;
 using TidyUpCapstone.Models.Entities.User;
 using TidyUpCapstone.Models.Entities.Core;
 
+
 namespace TidyUpCapstone.Data
 {
     public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole<int>, int>
