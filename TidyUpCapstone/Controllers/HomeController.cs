@@ -2,8 +2,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using TidyUpCapstone.Models;
 //using TidyUpCapstone.Models.DTOs;
-using TidyUpCapstone.Models.Entities;
+using TidyUpCapstone.Models.Entities.User;
 using TidyUpCapstone.Models.ViewModels;
 //using TidyUpCapstone.Services.Interfaces;
 
@@ -14,13 +15,13 @@ namespace TidyUp.Controllers
         private readonly ILogger<HomeController> _logger;
         //private readonly IItemPostService _itemPostService;
         //private readonly IUserService _userService;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<AppUser> _userManager;
 
         public HomeController(
             ILogger<HomeController> logger,
             //IItemPostService itemPostService,
             //IUserService userService,
-            UserManager<ApplicationUser> userManager)
+            UserManager<AppUser> userManager)
         {
             _logger = logger;
             //_itemPostService = itemPostService;
