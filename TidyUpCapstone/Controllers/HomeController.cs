@@ -35,7 +35,10 @@ namespace TidyUp.Controllers
         }
 
         public IActionResult MessagePage()
+
         {
+            ViewData["Title"] = "Message";
+            ViewData["PageType"] = "message";
             return View();
         }
 

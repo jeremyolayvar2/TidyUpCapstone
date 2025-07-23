@@ -1,0 +1,12 @@
+:root {
+    --background: #F5F5F5;
+    --primary-color: #6B9080;
+    --secondary-color: #A4C3B2;
+    --accent-color: #EAF4F4;
+    --text-color: #000000;
+    --hover-effect: rgba(217, 217, 217, 0.6);
+}
+
+* {
+    box-sizing: border-box;
+}
