@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using TidyUpCapstone.Models.Entities.Items;
-using TidyUpCapstone.Models.Entities.Search;
+using TidyUpCapstone.Models.Entities.System;
 
 namespace TidyUpCapstone.Models.Entities.Items
 {

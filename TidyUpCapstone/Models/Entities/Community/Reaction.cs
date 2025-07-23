@@ -1,32 +1,24 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using TidyUpCapstone.Models.Entities.Authentication;
 using TidyUpCapstone.Models.Entities.Community;
-
+using TidyUpCapstone.Models.Entities.User;
 
 namespace TidyUpCapstone.Models.Entities.Community
 {
-    [Table("reactions")]
     public class Reaction
     {
         [Key]
-        [Column("reaction_id")]
         public int ReactionId { get; set; }
 
         [Required]
-        [Column("post_id")]
         public int PostId { get; set; }
 
         [Required]
-        [Column("user_id")]
         public int UserId { get; set; }
 
         [Required]
-        [StringLength(50)]
-        [Column("reaction_type")]
-        public string ReactionType { get; set; } = "like"; // like, love, helpful, inspiring
+        public ReactionType ReactionType { get; set; } = ReactionType.Like;
 
-        [Column("date_reacted")]
         public DateTime DateReacted { get; set; } = DateTime.UtcNow;
 
         // Navigation properties
@@ -35,5 +27,13 @@ namespace TidyUpCapstone.Models.Entities.Community
 
         [ForeignKey("UserId")]
         public virtual AppUser User { get; set; } = null!;
+    }
+
+    public enum ReactionType
+    {
+        Like,
+        Love,
+        Helpful,
+        Inspiring
     }
 }
