@@ -1,3 +1,5 @@
+/* MessagePage.css - Cleaned version without dock conflicts */
+
 :root {
     --background: #F5F5F5;
     --primary-color: #6B9080;
@@ -9,4 +11,405 @@
 
 * {
     box-sizing: border-box;
+}
+
+/* Mobile-specific fixes for message page layout ONLY */
+@media (max-width: 768px) {
+    /* Ensure the message page body overrides take precedence */
+    body.message-page {
+        overflow: hidden !important;
+        height: 100vh !important;
+    }
+
+        /* Override main layout positioning for message page */
+        body.message-page .layout-wrapper {
+            height: 100vh !important;
+            overflow: hidden !important;
+        }
+
+        body.message-page .main-content {
+            margin-left: 0 !important;
+            padding-bottom: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            overflow: hidden !important;
+            position: relative !important;
+        }
+
+            body.message-page .main-content main {
+                height: 100vh !important;
+                overflow: hidden !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                position: relative !important;
+            }
+
+        /* Hide the sidebar completely on mobile message page */
+        body.message-page #sidebar {
+            display: none !important;
+        }
+
+        /* Message page container adjustments */
+        body.message-page .message-page .flex.h-\[calc\(100vh-4rem\)\] {
+            height: calc(100vh - 85px) !important; /* Account for dock height */
+            width: 100vw !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        /* Chat section takes remaining space */
+        body.message-page .chat-section {
+            background-color: var(--background) !important;
+            color: var(--text-color) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            height: 100% !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+
+            /* Hide the original message input from the chat section */
+            body.message-page .chat-section .message-input-container {
+                display: none !important;
+            }
+
+        /* Chat messages container - leave space for fixed message input */
+        body.message-page .chat-messages {
+            padding: 1rem 0.75rem 170px 0.75rem !important; /* Space for input + dock */
+            gap: 0.75rem !important;
+            background-color: var(--background) !important;
+            flex: 1 !important;
+            overflow-y: auto !important;
+            margin-bottom: 0 !important;
+            min-height: 0 !important;
+        }
+
+        /* Fixed message input container - positioned above dock */
+        body.message-page .message-input-container-fixed {
+            position: fixed !important;
+            bottom: 85px !important; /* Position above the dock */
+            left: 0 !important;
+            right: 0 !important;
+            z-index: 200 !important; /* Higher than dock */
+            width: 100vw !important;
+            padding: 0.75rem !important;
+            background-color: var(--background) !important;
+            border-top: 1px solid rgba(0,0,0,0.1) !important;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1) !important;
+            box-sizing: border-box !important;
+            display: flex !important;
+            gap: 0.75rem !important;
+            align-items: center !important;
+        }
+
+            /* Message input styling */
+            body.message-page .message-input-container-fixed .message-input {
+                flex: 1 !important;
+                padding: 0.7rem 1rem !important;
+                font-size: 0.9rem !important;
+                border-radius: 1.5rem !important;
+                color: var(--text-color) !important;
+                border: 1px solid rgba(0,0,0,0.2) !important;
+                outline: none !important;
+                background-color: white !important;
+            }
+
+            /* Send button styling */
+            body.message-page .message-input-container-fixed .send-button {
+                width: 2.5rem !important;
+                height: 2.5rem !important;
+                background-color: var(--primary-color) !important;
+                color: white !important;
+                border-radius: 50% !important;
+                border: none !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                cursor: pointer !important;
+                transition: all 0.3s ease !important;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
+                flex-shrink: 0 !important;
+            }
+
+                body.message-page .message-input-container-fixed .send-button:hover {
+                    background-color: var(--secondary-color) !important;
+                    transform: scale(1.05) !important;
+                }
+}
+
+/* Small mobile adjustments */
+@media (max-width: 480px) {
+    body.message-page .message-input-container-fixed {
+        bottom: 80px !important; /* Adjust for smaller dock on small screens */
+        padding: 0.6rem !important;
+    }
+
+        body.message-page .message-input-container-fixed .message-input {
+            padding: 0.6rem 0.9rem !important;
+            font-size: 0.85rem !important;
+        }
+
+        body.message-page .message-input-container-fixed .send-button {
+            width: 2.25rem !important;
+            height: 2.25rem !important;
+        }
+
+    body.message-page .chat-messages {
+        padding: 0.75rem 0.5rem 160px 0.5rem !important;
+    }
+
+    body.message-page .message-page .flex.h-\[calc\(100vh-4rem\)\] {
+        height: calc(100vh - 80px) !important;
+    }
+}
+
+/* Desktop layout overrides */
+body.message-page .main-content {
+    height: 100vh !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+}
+
+    body.message-page .main-content main {
+        height: 100vh !important;
+        min-height: 100vh !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+/* Main message container */
+.message-page .flex.h-\[calc\(100vh-4rem\)\] {
+    height: 100vh !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Sidebar styling */
+.sidebar {
+    background-color: var(--background) !important;
+}
+
+/* Toggle Button Styles */
+.toggle-delivery-button {
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    transition: all 0.3s ease;
+}
+
+    .toggle-delivery-button:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .toggle-delivery-button.active {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+
+/* Delivery Options */
+.delivery-options {
+    display: none;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+}
+
+    .delivery-options.show {
+        display: flex;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .delivery-options button {
+        transition: all 0.3s ease;
+    }
+
+        .delivery-options button:hover {
+            background-color: #EAF4F4;
+        }
+
+        .delivery-options button.active {
+            background-color: #A4C3B2;
+            color: white;
+        }
+
+/* Base styles for chat messages */
+.chat-messages {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    padding: 1rem !important;
+}
+
+    .chat-messages > div {
+        display: flex !important;
+        width: 100% !important;
+        clear: both !important;
+    }
+
+        /* Received messages (left aligned) */
+        .chat-messages > div:not(.flex) {
+            justify-content: flex-start !important;
+        }
+
+        /* Sent messages (right aligned) */
+        .chat-messages > div.flex.justify-end {
+            justify-content: flex-end !important;
+        }
+
+        /* Message bubbles styling */
+        .chat-messages > div > div {
+            max-width: 70% !important;
+            word-wrap: break-word !important;
+            overflow-wrap: break-word !important;
+            hyphens: auto !important;
+            line-height: 1.4 !important;
+            padding: 0.75rem 1rem !important;
+            border-radius: 1.5rem !important;
+        }
+
+.send-button {
+    transition: all 0.3s ease;
+}
+
+    .send-button:hover {
+        background-color: #EAF4F4;
+        transform: scale(1.05);
+    }
+
+/* Desktop Styles (above 768px) */
+@media (min-width: 769px) {
+    body.message-page .main-content {
+        height: 100vh !important;
+        overflow: hidden !important;
+    }
+
+        body.message-page .main-content main {
+            height: 100vh !important;
+            min-height: 100vh !important;
+        }
+
+    .message-page .flex.h-\[calc\(100vh-4rem\)\] {
+        height: 100vh !important;
+    }
+
+    .sidebar {
+        width: 300px !important;
+        max-width: 300px !important;
+    }
+
+    .chat-messages {
+        padding: 1.5rem 1rem !important;
+        gap: 1rem !important;
+    }
+
+        .chat-messages > div > div {
+            max-width: 70% !important;
+            padding: 0.75rem 1rem !important;
+            font-size: 1rem !important;
+            line-height: 1.4 !important;
+            border-radius: 1.5rem !important;
+        }
+
+    .chat-header {
+        padding: 1.5rem 1rem !important;
+    }
+
+    .message-input-container {
+        padding: 1rem !important;
+        position: relative !important;
+        bottom: auto !important;
+    }
+
+    .delivery-options {
+        margin-bottom: 0.5rem !important;
+        padding: 0 1rem 0.75rem !important;
+    }
+
+    /* Hide fixed message input on desktop */
+    .message-input-container-fixed {
+        display: none !important;
+    }
+}
+
+/* Mobile message bubbles styling */
+@media (max-width: 768px) {
+    .chat-messages > div {
+        width: 100% !important;
+        padding: 0 !important;
+    }
+
+        /* Mobile message bubbles with updated colors */
+        .chat-messages > div > div {
+            max-width: 80% !important;
+            padding: 0.65rem 0.9rem !important;
+            font-size: 0.9rem !important;
+            border-radius: 1.25rem !important;
+            line-height: 1.35 !important;
+        }
+
+        /* Received messages - left aligned with accent color */
+        .chat-messages > div:not(.flex) > div {
+            background-color: var(--accent-color) !important;
+            color: var(--text-color) !important;
+        }
+
+        /* Sent messages - right aligned, keep white background */
+        .chat-messages > div.flex.justify-end > div {
+            background-color: white !important;
+            color: var(--text-color) !important;
+        }
+
+    .chat-header {
+        padding: 1rem !important;
+        position: relative;
+        background-color: var(--primary-color) !important;
+        color: white !important;
+        flex-shrink: 0 !important;
+    }
+
+    .delivery-options {
+        padding: 0 1rem 0.75rem !important;
+        background-color: var(--primary-color) !important;
+        flex-shrink: 0 !important;
+    }
+
+        .delivery-options button {
+            padding: 0.6rem 1rem !important;
+            font-size: 0.85rem !important;
+        }
+}
+
+/* Smooth scrolling and scrollbar styles */
+.chat-messages {
+    scroll-behavior: smooth;
+}
+
+    .chat-messages::-webkit-scrollbar,
+    .conversations-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .chat-messages::-webkit-scrollbar-track,
+    .conversations-list::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+    }
+
+.conversations-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.conversations-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
 }

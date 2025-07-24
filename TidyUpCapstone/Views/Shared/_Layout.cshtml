@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>@ViewData["Title"] Tidy Up</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/main.css" asp-append-version="true" />
@@ -20,7 +20,7 @@
     @if (ViewBag.HideNavigation == null || ViewBag.HideNavigation == false)
     {
         <!-- Pages WITH navigation get the layout-wrapper -->
-        <div class="layout-wrapper d-flex">
+        <div class="layout-wrapper flex">
             <!-- Sidebar Navigation - Default -->
             <nav id="sidebar" class="close">
                 <ul>
@@ -113,85 +113,85 @@
             </nav>
 
             <div class="dock-outer">
-                <div class="dock-panel" id="dockPanel">
-                    <div class="dock-item" data-label="Home">
+                <nav class="dock-panel" id="dockPanel" role="navigation" aria-label="Mobile Navigation">
+                    <a href="@Url.Action("Main", "Home")" class="dock-item" data-label="Home" tabindex="0" aria-label="Home">
                         <div class="dock-icon">
-                            <img src="~/assets/VectorHome.svg" />
+                            <img src="~/assets/VectorHome.svg" alt="" role="presentation" />
                         </div>
                         <div class="dock-label">Home</div>
-                    </div>
-                    <div class="dock-item" data-label="Browse">
+                    </a>
+                    <a href="#" class="dock-item" data-label="Browse" tabindex="-1" aria-label="Browse Items">
                         <div class="dock-icon">
-                            <img src="~/assets/VectorBrowse.svg" />
+                            <img src="~/assets/VectorBrowse.svg" alt="" role="presentation" />
                         </div>
                         <div class="dock-label">Browse Item</div>
-                    </div>
-                    <div class="dock-item" data-label="Claimed">
+                    </a>
+                    <a href="#" class="dock-item" data-label="Claimed" tabindex="-1" aria-label="Claimed Items">
                         <div class="dock-icon">
-                            <img src="~/assets/VectorClaimed.svg" />
+                            <img src="~/assets/VectorClaimed.svg" alt="" role="presentation" />
                         </div>
                         <div class="dock-label">Claimed</div>
-                    </div>
-                    <div class="dock-item" data-label="Community">
+                    </a>
+                    <a href="#" class="dock-item" data-label="Community" tabindex="-1" aria-label="Community">
                         <div class="dock-icon">
-                            <img src="~/assets/VectorComm.svg" />
+                            <img src="~/assets/VectorComm.svg" alt="" role="presentation" />
                         </div>
                         <div class="dock-label">Community</div>
-                    </div>
-                    <div class="dock-item" data-label="Create">
+                    </a>
+                    <button class="dock-item" data-label="Create" tabindex="-1" aria-label="Create New Item" id="dockCreateBtn">
                         <div class="dock-icon">
-                            <img src="~/assets/VectorCreate.svg" />
+                            <img src="~/assets/VectorCreate.svg" alt="" role="presentation" />
                         </div>
                         <div class="dock-label">Create</div>
-                    </div>
-                    <div class="dock-item open-token" data-label="Token">
+                    </button>
+                    <button class="dock-item open-token" data-label="Token" tabindex="-1" aria-label="Token Balance">
                         <div class="dock-icon">
-                            <img src="~/assets/VectorToken.svg" />
+                            <img src="~/assets/VectorToken.svg" alt="" role="presentation" />
                         </div>
                         <div class="dock-label">Token</div>
-                    </div>
-                    <div class="dock-item" data-label="Shop">
+                    </button>
+                    <a href="#" class="dock-item" data-label="Shop" tabindex="-1" aria-label="Shop">
                         <div class="dock-icon">
-                            <img src="~/assets/VectorShop.svg" />
+                            <img src="~/assets/VectorShop.svg" alt="" role="presentation" />
                         </div>
                         <div class="dock-label">Shop</div>
-                    </div>
-                    <div class="dock-item" data-label="Message">
+                    </a>
+                    <a href="@Url.Action("MessagePage", "Home")" class="dock-item" data-label="Message" tabindex="-1" aria-label="Messages">
                         <div class="dock-icon">
-                            <img src="~/assets/VectorMsg.svg" />
+                            <img src="~/assets/VectorMsg.svg" alt="" role="presentation" />
                         </div>
                         <div class="dock-label">Message</div>
-                    </div>
-                    <div class="dock-item" data-label="Notification">
+                    </a>
+                    <a href="#" class="dock-item" data-label="Notification" tabindex="-1" aria-label="Notifications">
                         <div class="dock-icon">
-                            <img src="~/assets/VectorNotif.svg" />
+                            <img src="~/assets/VectorNotif.svg" alt="" role="presentation" />
                         </div>
                         <div class="dock-label">Notification</div>
-                    </div>
-                    <div class="dock-item" data-label="Leaderboards">
+                    </a>
+                    <a href="#" class="dock-item" data-label="Leaderboards" tabindex="-1" aria-label="Leaderboards">
                         <div class="dock-icon">
-                            <img src="~/assets/VectorLB.svg" />
+                            <img src="~/assets/VectorLB.svg" alt="" role="presentation" />
                         </div>
                         <div class="dock-label">Leaderboards</div>
-                    </div>
-                    <div class="dock-item" data-label="Quests/Milestone">
+                    </a>
+                    <a href="@Url.Action("QuestPage", "Home")" class="dock-item" data-label="Quests/Milestone" tabindex="-1" aria-label="Quests and Milestones">
                         <div class="dock-icon">
-                            <img src="~/assets/VectorQuests.svg" />
+                            <img src="~/assets/VectorQuests.svg" alt="" role="presentation" />
                         </div>
                         <div class="dock-label">Quests & Milestone</div>
-                    </div>
-                    <div class="dock-item" data-label="Settings">
+                    </a>
+                    <a href="#" class="dock-item" data-label="Settings" tabindex="-1" aria-label="Settings">
                         <div class="dock-icon">
-                            <img src="~/assets/VectorSettings.svg" />
+                            <img src="~/assets/VectorSettings.svg" alt="" role="presentation" />
                         </div>
                         <div class="dock-label">Settings</div>
-                    </div>
-                </div>
+                    </a>
+                </nav>
             </div>
-
+            <script src="~/js/dock-scroll.js" asp-append-version="true"></script>
             <!-- Main Content for pages WITH navigation -->
             <div class="main-content">
-                <main role="main" class="pb-3">
+                <main role="main" class="min-h-screen">
                     @RenderBody()
                     <script src="~/js/openModal.js"></script>
                 </main>

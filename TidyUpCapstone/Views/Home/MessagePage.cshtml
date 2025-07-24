@@ -18,10 +18,9 @@
     });
 </script>
 
-
-<div class="flex h-[calc(100vh-4rem)] font-['Montserrat']">
+<div class="flex h-[calc(100vh-4rem)] font-['Montserrat'] min-h-screen">
     <!-- Sidebar -->
-    <div class="w-1/3 max-w-sm bg-[#F5F5F5] border-r border-gray-300 flex flex-col">
+    <div class="w-1/3 max-w-sm bg-[#F5F5F5] border-r border-gray-300 flex flex-col sidebar">
         <div class="flex justify-center m-2 pb-2">
             <img class="w-[50px] h-[50px]" src="~/assets/logo-tidyup.png" alt="Alternate Text" />
         </div>
@@ -31,8 +30,8 @@
         </div>
 
         <!-- Conversations List -->
-        <div class="overflow-y-auto">
-            @for (int i = 0; i < 5; i++)
+        <div class="overflow-y-auto conversations-list">
+            @for (int i = 0; i < 7; i++)
             {
                 <div class="flex items-center px-4 py-3 hover:bg-gray-200 cursor-pointer transition">
                     <div class="w-14 h-14 bg-gray-300 rounded-full mr-4"></div>
@@ -43,40 +42,67 @@
     </div>
 
     <!-- Chat Section -->
-    <div class="flex-1 bg-[#6B9080] text-white flex flex-col relative">
+    <div class="flex-1 bg-[#6B9080] text-white flex flex-col relative chat-section">
         <!-- Header -->
-        <div class="flex items-center gap-4 p-6">
-            <div class="w-16 h-16 rounded-full bg-gray-300"></div>
-            <div class="text-lg font-semibold">Item Owner</div>
-            <div class="ml-auto flex gap-2">
-                <button class="bg-white text-[#6B9080] px-4 py-2 rounded-tl-md rounded-bl-md">via Meet-up</button>
-                <button class="bg-white text-[#6B9080] px-4 py-2 rounded-tr-md rounded-br-md">via Delivery</button>
+        <div class="flex items-center justify-between p-6 chat-header">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 rounded-full bg-gray-300"></div>
+                <div class="text-lg font-semibold">Item Owner</div>
             </div>
-            <button class="ml-4 text-white">
-                <i class='bx bx-info-circle text-xl'></i>
-            </button>
+            <div class="flex gap-2">
+                <button class="text-white">
+                    <i class='bx bx-info-circle text-xl'></i>
+                </button>
+                <button class="text-white toggle-delivery-button" id="toggleDeliveryBtn">
+                    <i class='bx bx-transfer-alt text-xl'></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Delivery Options (Initially Hidden) -->
+        <div class="flex gap-2 items-center px-6 pb-4 delivery-options" id="deliveryOptions">
+            <button class="bg-white text-[#6B9080] px-4 py-2 rounded-tl-md rounded-bl-md flex-1">via Meet-up</button>
+            <button class="bg-white text-[#6B9080] px-4 py-2 rounded-tr-md rounded-br-md flex-1">via Delivery</button>
         </div>
 
         <!-- Chat Messages -->
-        <div class="flex-1 px-6 py-4 space-y-4 overflow-y-auto">
-            <div class="bg-white text-black rounded-full px-6 py-3 max-w-lg">Hi! 👋 I saw you’re interested in the Bookshelf I posted. It’s still available!</div>
-
-            <div class="flex justify-end">
-                <div class="bg-white text-black rounded-full px-6 py-3 max-w-lg">Hello! Yes, I’d love to claim it.</div>
+        <div class="flex-1 px-6 py-4 overflow-y-auto w-full chat-messages" id="chatMessages">
+            <!-- Received Message -->
+            <div class="flex justify-start mb-3">
+                <div class="bg-[#F5F5F5] text-black rounded-2xl px-4 py-2 max-w-xs shadow-sm">Hi! I saw you're interested in the Bookshelf I posted. It's still available!</div>
             </div>
 
-            <div class="flex justify-end">
-                <div class="bg-white text-black rounded-full px-6 py-3 max-w-lg">Okay, I have enough tokens. Can we meet this Saturday afternoon around 3PM at SM Sta. Mesa?</div>
+            <!-- Sent Messages -->
+            <div class="flex justify-end mb-3">
+                <div class="bg-[#344e41] text-[#F5F5F5] rounded-2xl px-4 py-2 max-w-xs shadow-sm">Hello! Yes, I'd love to claim it.</div>
             </div>
 
-            <div class="bg-white text-black rounded-full px-6 py-3 max-w-lg">Sure! Saturday at 3PM works for me. Let’s meet at the main entrance near Starbucks.</div>
+            <div class="flex justify-end mb-3">
+                <div class="bg-[#344e41] text-[#F5F5F5] rounded-2xl px-4 py-2 max-w-xs shadow-sm">Okay, I have enough tokens. Can we meet this Saturday afternoon around 3PM at SM Sta. Mesa?</div>
+            </div>
+
+            <!-- Received Message -->
+            <div class="flex justify-start mb-3">
+                <div class="bg-[#F5F5F5] text-black rounded-2xl px-4 py-2 max-w-xs shadow-sm">Sure! Saturday at 3PM works for me. Let's meet at the main entrance near Starbucks.</div>
+            </div>
         </div>
 
-        <!-- Message Input -->
-        <div class="p-4">
-            <input type="text" placeholder="Message..." class="w-full px-6 py-3 rounded-md text-black focus:outline-none" />
+        <!-- Desktop Message Input (hidden on mobile) -->
+        <div class="p-4 flex gap-3 items-center message-input-container">
+            <input type="text" placeholder="Message..." class="flex-1 px-6 py-3 rounded-md text-black focus:outline-none message-input" />
+            <button class="bg-white text-[#6B9080] rounded-full w-12 h-12 flex items-center justify-center send-button">
+                <i class='bx bx-send'></i>
+            </button>
         </div>
     </div>
+</div>
+
+<!-- Fixed Message Input for Mobile (positioned above dock) -->
+<div class="message-input-container-fixed">
+    <input type="text" placeholder="Message..." class="message-input" id="mobileMessageInput" />
+    <button class="send-button" id="mobileSendButton">
+        <i class='bx bx-send'></i>
+    </button>
 </div>
 
 <script src="~/js/MessagePage.js"></script>

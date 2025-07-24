@@ -344,3 +344,168 @@ window.TidyUpSite = {
     applyPageTheme,
     closeActiveModals
 };
+
+    // Dock Scroll Functionality
+// Add this to your existing JavaScript or create a new file: dock-scroll.js
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeDockScroll();
+});
+
+function initializeDockScroll() {
+    const dockPanel = document.getElementById('dockPanel');
+    if (!dockPanel) return;
+
+    // Update scroll indicators
+    function updateScrollIndicators() {
+        const canScrollLeft = dockPanel.scrollLeft > 0;
+        const canScrollRight = dockPanel.scrollLeft < (dockPanel.scrollWidth - dockPanel.clientWidth);
+        
+        dockPanel.classList.toggle('can-scroll-left', canScrollLeft);
+        dockPanel.classList.toggle('can-scroll-right', canScrollRight);
+    }
+
+    // Initial check
+    updateScrollIndicators();
+
+    // Update on scroll
+    dockPanel.addEventListener('scroll', updateScrollIndicators);
+
+    // Update on resize
+    window.addEventListener('resize', function() {
+        setTimeout(updateScrollIndicators, 100);
+    });
+
+    // Optional: Add touch/swipe support for better mobile experience
+    let isScrolling = false;
+    let startX = 0;
+    let scrollLeft = 0;
+
+    // Mouse events for desktop
+    dockPanel.addEventListener('mousedown', function(e) {
+        if (window.innerWidth <= 768) return; // Only on desktop
+        isScrolling = true;
+        startX = e.pageX - dockPanel.offsetLeft;
+        scrollLeft = dockPanel.scrollLeft;
+        dockPanel.style.cursor = 'grabbing';
+    });
+
+    dockPanel.addEventListener('mouseleave', function() {
+        isScrolling = false;
+        dockPanel.style.cursor = 'grab';
+    });
+
+    dockPanel.addEventListener('mouseup', function() {
+        isScrolling = false;
+        dockPanel.style.cursor = 'grab';
+    });
+
+    dockPanel.addEventListener('mousemove', function(e) {
+        if (!isScrolling || window.innerWidth <= 768) return;
+        e.preventDefault();
+        const x = e.pageX - dockPanel.offsetLeft;
+        const walk = (x - startX) * 2;
+        dockPanel.scrollLeft = scrollLeft - walk;
+    });
+
+    // Touch events for mobile
+    let touchStartX = 0;
+    let touchScrollLeft = 0;
+
+    dockPanel.addEventListener('touchstart', function(e) {
+        touchStartX = e.touches[0].clientX;
+        touchScrollLeft = dockPanel.scrollLeft;
+    }, { passive: true });
+
+    dockPanel.addEventListener('touchmove', function(e) {
+        if (!touchStartX) return;
+        const touchX = e.touches[0].clientX;
+        const diff = touchStartX - touchX;
+        dockPanel.scrollLeft = touchScrollLeft + diff;
+    }, { passive: true });
+
+    dockPanel.addEventListener('touchend', function() {
+        touchStartX = 0;
+    });
+
+    // Optional: Auto-scroll to active item
+    function scrollToActiveItem() {
+        const activeItem = dockPanel.querySelector('.dock-item.active');
+        if (activeItem) {
+            const itemRect = activeItem.getBoundingClientRect();
+            const panelRect = dockPanel.getBoundingClientRect();
+            
+            if (itemRect.left < panelRect.left || itemRect.right > panelRect.right) {
+                activeItem.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest',
+                    inline: 'center'
+                });
+            }
+        }
+    }
+
+    // Call this when an item becomes active
+    window.scrollToActiveDockItem = scrollToActiveItem;
+
+    // Optional: Keyboard navigation
+    dockPanel.addEventListener('keydown', function(e) {
+        if (!dockPanel.contains(document.activeElement)) return;
+        
+        const items = Array.from(dockPanel.querySelectorAll('.dock-item'));
+        const currentIndex = items.indexOf(document.activeElement.closest('.dock-item'));
+        
+        switch(e.key) {
+            case 'ArrowLeft':
+                e.preventDefault();
+                if (currentIndex > 0) {
+                    items[currentIndex - 1].focus();
+                    items[currentIndex - 1].scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest',
+                        inline: 'center'
+                    });
+                }
+                break;
+            case 'ArrowRight':
+                e.preventDefault();
+                if (currentIndex < items.length - 1) {
+                    items[currentIndex + 1].focus();
+                    items[currentIndex + 1].scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest',
+                        inline: 'center'
+                    });
+                }
+                break;
+        }
+    });
+
+    // Make dock items focusable for keyboard navigation
+    const dockItems = dockPanel.querySelectorAll('.dock-item');
+    dockItems.forEach((item, index) => {
+        if (!item.hasAttribute('tabindex')) {
+            item.setAttribute('tabindex', index === 0 ? '0' : '-1');
+        }
+        
+        // Update tabindex on focus
+        item.addEventListener('focus', function() {
+            dockItems.forEach(otherItem => otherItem.setAttribute('tabindex', '-1'));
+            this.setAttribute('tabindex', '0');
+        });
+    });
+}
+
+// Utility function to scroll dock to specific item
+function scrollDockToItem(itemIndex) {
+    const dockPanel = document.getElementById('dockPanel');
+    const items = dockPanel.querySelectorAll('.dock-item');
+    
+    if (items[itemIndex]) {
+        items[itemIndex].scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'center'
+        });
+    }
+}

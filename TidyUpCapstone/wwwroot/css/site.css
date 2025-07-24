@@ -73,10 +73,11 @@ body:has(.layout-wrapper).quest-page {
     background-color: var(--primary-color);
 }
 
-.layout-wrapper body.shop-page,
-body:has(.layout-wrapper).shop-page {
-    background-color: var(--secondary-color);
+.layout-wrapper body.message-page,
+body:has(.layout-wrapper).message-page {
+    background-color: var(--background);
 }
+
 
 /*SideBar - Default -----------------------------*/
 #sidebar {
@@ -311,31 +312,54 @@ body:has(.layout-wrapper).main-page #sidebar a {
     }
 }
 
-/*Phone nav bar ------------------------------------------------*/
+/* REPLACE THE DOCK SECTION IN YOUR site.css WITH THIS SCROLLABLE VERSION */
+
+/*Phone nav bar - SCROLLABLE VERSION ------------------------------------------------*/
 
 .dock-outer {
     position: fixed;
     bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
+    right: 0;
     display: none;
     justify-content: center;
+    align-items: flex-end;
     width: 100%;
+    padding: 0.5rem;
     pointer-events: none;
     z-index: 1000;
+    box-sizing: border-box;
 }
 
 .dock-panel {
     pointer-events: auto;
     display: flex;
-    gap: 2rem;
+    align-items: center;
+    gap: 0.25rem;
     /* Default dock background */
     background-color: var(--primary-color);
-    border-radius: 8px;
-    padding: 0.5rem 1rem;
-    align-items: flex-end;
+    border-radius: 12px;
+    padding: 0.5rem 0.75rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     transition: background-color 0.3s ease;
+    /* Add subtle shadow for depth */
+    box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(10px);
+    /* Make it scrollable */
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    /* Hide scrollbar but keep functionality */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
 }
+
+    /* Hide scrollbar for webkit browsers */
+    .dock-panel::-webkit-scrollbar {
+        display: none;
+    }
 
 /* Dock styles for different page types - ONLY for pages with navigation */
 body:has(.layout-wrapper).quest-page .dock-panel {
@@ -346,37 +370,62 @@ body:has(.layout-wrapper).main-page .dock-panel {
     background-color: var(--primary-color);
 }
 
+body:has(.layout-wrapper).message-page .dock-panel {
+    background-color: var(--primary-color);
+}
+
 .dock-item {
     position: relative;
-    display: inline-flex;
+    display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
+    border-radius: 8px;
     /* Default dock item background */
-    background-color: var(--primary-color);
+    background-color: transparent;
     cursor: pointer;
     transition: all 0.15s ease;
+    padding: 0.25rem 0.1rem;
+    /* Fixed width to prevent shrinking */
+    flex: 0 0 auto;
+    min-width: 48px;
+    width: 48px;
+    height: 50px;
 }
 
     .dock-item:hover {
-        background-color: var(--hover-effect);
+        background-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
     }
 
 /* Dock item styles for different page types - ONLY for pages with navigation */
 body:has(.layout-wrapper).quest-page .dock-item {
-    background-color: var(--background);
+    background-color: transparent;
 }
 
 body:has(.layout-wrapper).main-page .dock-item {
-    background-color: var(--primary-color);
+    background-color: transparent;
 }
 
-.dock-icon img {
-    padding: 10px;
-    width: 40px;
-    height: 40px;
-    transition: all 0.2s ease;
+body:has(.layout-wrapper).message-page .dock-item {
+    background-color: transparent;
 }
+
+.dock-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin-bottom: 2px;
+}
+
+    .dock-icon img {
+        width: 22px;
+        height: 22px;
+        object-fit: contain;
+        transition: all 0.2s ease;
+    }
 
 /* Dock icon styles for different page types - ONLY for pages with navigation */
 body:has(.layout-wrapper).quest-page .dock-icon img {
@@ -384,46 +433,177 @@ body:has(.layout-wrapper).quest-page .dock-icon img {
 }
 
 body:has(.layout-wrapper).main-page .dock-icon img {
-    filter: brightness(1); /* Normal brightness for dark background */
+    filter: brightness(0) invert(1); /* White icons for dark background */
+}
+
+body:has(.layout-wrapper).message-page .dock-icon img {
+    filter: brightness(0) invert(1); /* White icons for dark background */
 }
 
 .dock-label {
     position: absolute;
-    top: -1.8rem;
+    top: -2.5rem;
     left: 50%;
     transform: translateX(-50%);
     background: var(--background);
-    border-radius: 5px;
-    padding: 2px 8px;
+    border-radius: 6px;
+    padding: 4px 8px;
     color: var(--text-color);
     font-size: 8px;
+    font-weight: 500;
     white-space: nowrap;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s ease, transform 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 1001;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dock-item:hover .dock-label {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-2px);
+}
+
+/* Scroll indicators (optional visual cues) */
+.dock-panel::before,
+.dock-panel::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 15px;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.dock-panel::before {
+    left: 0;
+    background: linear-gradient(to right, rgba(107, 144, 128, 0.8), transparent);
+    border-radius: 12px 0 0 12px;
+}
+
+.dock-panel::after {
+    right: 0;
+    background: linear-gradient(to left, rgba(107, 144, 128, 0.8), transparent);
+    border-radius: 0 12px 12px 0;
+}
+
+/* Show scroll indicators when content overflows */
+.dock-panel.can-scroll-left::before {
+    opacity: 1;
+}
+
+.dock-panel.can-scroll-right::after {
+    opacity: 1;
 }
 
 /* Mobile dock display */
 @media (max-width: 768px) {
     .dock-outer {
-        display: block;
-        width: 100%;
-        z-index: 1000;
-        overflow-x: auto;
-        white-space: nowrap;
+        display: flex;
+        height: 85px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
     }
 
     .dock-panel {
-        display: flex;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        justify-content: space-around;
-        padding: 0.5em;
-        margin: 0 0.5rem 0.5rem 0.5rem;
+        width: calc(100% - 1rem);
+        margin: 0;
+        /* Enable smooth scrolling on mobile */
+        -webkit-overflow-scrolling: touch;
     }
 
     .dock-item {
-        flex: 0 0 auto;
+        min-width: 44px;
+        width: 44px;
+        padding: 0.25rem 0.1rem;
+    }
+
+    .dock-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+        .dock-icon img {
+            width: 20px;
+            height: 20px;
+        }
+
+    .dock-label {
+        font-size: 7px;
+        max-width: 60px;
+    }
+}
+
+/* Small mobile adjustments */
+@media (max-width: 480px) {
+    .dock-outer {
+        height: 80px;
+        padding: 0.4rem;
+    }
+
+    .dock-panel {
+        padding: 0.4rem 0.5rem;
+        gap: 0.15rem;
+    }
+
+    .dock-item {
+        height: 45px;
+        padding: 0.2rem 0.05rem;
+        min-width: 40px;
+        width: 40px;
+    }
+
+    .dock-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+        .dock-icon img {
+            width: 18px;
+            height: 18px;
+        }
+
+    .dock-label {
+        font-size: 6px;
+        max-width: 50px;
+    }
+}
+
+/* Very small screens - even more compact */
+@media (max-width: 380px) {
+    .dock-panel {
+        gap: 0.1rem;
+        padding: 0.3rem 0.4rem;
+    }
+
+    .dock-item {
+        min-width: 36px;
+        width: 36px;
+        height: 42px;
+        padding: 0.15rem 0.02rem;
+    }
+
+    .dock-icon {
+        width: 18px;
+        height: 18px;
+    }
+
+        .dock-icon img {
+            width: 16px;
+            height: 16px;
+        }
+
+    .dock-label {
+        font-size: 5px;
+        max-width: 40px;
     }
 }
 
