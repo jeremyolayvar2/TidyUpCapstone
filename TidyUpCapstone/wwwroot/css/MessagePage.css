@@ -356,10 +356,7 @@ body.message-page .main-content {
         }
 
         /* Sent messages - right aligned, keep white background */
-        .chat-messages > div.flex.justify-end > div {
-            background-color: white !important;
-            color: var(--text-color) !important;
-        }
+ 
 
     .chat-header {
         padding: 1rem !important;
