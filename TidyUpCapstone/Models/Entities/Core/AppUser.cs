@@ -33,6 +33,14 @@ namespace TidyUpCapstone.Models.Entities.User
         [Column("last_login")]
         public DateTime? LastLogin { get; set; }
 
+        [StringLength(50)]
+        [Column("first_name")]
+        public string? FirstName { get; set; }
+
+        [StringLength(50)]
+        [Column("last_name")]
+        public string? LastName { get; set; }
+
         // Navigation Properties
         [ForeignKey("ManagedByAdminId")]
         public virtual AppUser? ManagedByAdmin { get; set; }

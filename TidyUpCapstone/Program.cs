@@ -2,50 +2,110 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TidyUpCapstone.Data;
 using TidyUpCapstone.Models.Entities.User;
+using SendGrid;
+using Microsoft.Extensions.Options;
+using TidyUpCapstone.Models.DTOs.Configuration;
+using SendGrid.Helpers.Mail;
+using TidyUpCapstone.Services.Interfaces;
+using TidyUpCapstone.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Database Configuration
+// -----------------------------------------------------
+// 1. Database Configuration
+// -----------------------------------------------------
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection") ??
-        "Server=OLAYVAR\\SQLEXPRESS;Database=TidyUpdb;Trusted_Connection=true;MultipleActiveResultSets=true;TrustServerCertificate=true"
+        "Server=(LocalDB)\\MSSQLLocalDB;Database=TidyUpdbCapstone;Trusted_Connection=true;MultipleActiveResultSets=true;TrustServerCertificate=true"
     ));
 
-// Identity Configuration
+// -----------------------------------------------------
+// 2. Identity Configuration (SSO Only)
+// -----------------------------------------------------
 builder.Services.AddIdentity<AppUser, IdentityRole<int>>(options =>
 {
-    // Password settings
-    options.Password.RequireDigit = true;
-    options.Password.RequireLowercase = true;
-    options.Password.RequireNonAlphanumeric = true;
-    options.Password.RequireUppercase = true;
-    options.Password.RequiredLength = 6;
-    options.Password.RequiredUniqueChars = 1;
-
-    // Lockout settings
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-    options.Lockout.MaxFailedAccessAttempts = 5;
-    options.Lockout.AllowedForNewUsers = true;
-
-    // User settings
-    options.User.AllowedUserNameCharacters =
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
     options.User.RequireUniqueEmail = true;
-
-    // Sign-in settings
-    options.SignIn.RequireConfirmedEmail = false; // Set to false for development
-    options.SignIn.RequireConfirmedPhoneNumber = false;
+    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+ "; // Added space at the end
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequiredLength = 0;
+    options.SignIn.RequireConfirmedEmail = false;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
-// Add services to the container
+// -----------------------------------------------------
+// 3. Application Cookie Config
+// -----------------------------------------------------
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+    options.LogoutPath = "/Account/Logout";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
+    options.SlidingExpiration = true;
+});
+
+// -----------------------------------------------------
+// 4. External Authentication (Google + Placeholder Facebook)
+// -----------------------------------------------------
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultChallengeScheme = IdentityConstants.ExternalScheme;
+})
+.AddGoogle(googleOptions =>
+{
+    googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
+    googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
+    googleOptions.SaveTokens = false;
+    googleOptions.Scope.Add("email");
+    googleOptions.Scope.Add("profile");
+});
+
+/* Uncomment later for Facebook
+.AddFacebook(facebookOptions =>
+{
+    facebookOptions.AppId = builder.Configuration["Authentication:Facebook:AppId"]!;
+    facebookOptions.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"]!;
+    facebookOptions.Scope.Add("email");
+    facebookOptions.Fields.Add("email");
+    facebookOptions.Fields.Add("name");
+});
+*/
+
+
+// -----------------------------------------------------
+// 5. Email Service Configuration (SendGrid)
+// -----------------------------------------------------
+// Configure SendGrid and Email settings
+builder.Services.Configure<SendGridSettingsDto>(builder.Configuration.GetSection("SendGrid"));
+builder.Services.Configure<EmailSettingsDto>(builder.Configuration.GetSection("EmailSettings"));
+
+// Register SendGrid client
+builder.Services.AddSingleton<ISendGridClient>(provider =>
+{
+    var settings = provider.GetRequiredService<IOptions<SendGridSettingsDto>>().Value;
+    return new SendGridClient(settings.ApiKey);
+});
+
+// Register email service
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+
+// -----------------------------------------------------
+// 6. Add MVC
+// -----------------------------------------------------
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// -----------------------------------------------------
+// 6. Middleware
+// -----------------------------------------------------
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -56,7 +116,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseCookiePolicy();
 app.UseAuthentication();
 app.UseAuthorization();
 

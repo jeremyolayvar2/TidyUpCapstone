@@ -1,0 +1,67 @@
+﻿@{
+    ViewData["Title"] = "Check Your Email";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.HideNavigation = true;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/account.css" />
+}
+
+<div class="email-verification-container d-flex align-items-center justify-content-center min-vh-100">
+    <div class="verification-card card shadow-lg border-0">
+        <div class="card-body text-center p-5">
+
+            <!-- Icon -->
+            <div class="icon-wrapper mb-4">
+                <i class="fas fa-envelope-open-text text-primary"></i>
+            </div>
+
+            <!-- Header -->
+            <h2 class="h3 mb-3 fw-bold">Check Your Email!</h2>
+
+            <!-- Message -->
+            <p class="text-muted mb-2">
+                We've sent a verification link to:
+            </p>
+            <p class="h5 text-primary fw-bold mb-4">@ViewBag.Email</p>
+
+            <p class="text-muted small mb-4">
+                Click the verification link in your email to activate your account and start using TidyUp.
+            </p>
+
+            <!-- Info Box -->
+            <div class="info-box alert mb-4">
+                <h6 class="fw-bold mb-2">
+                    <i class="fas fa-info-circle text-info me-2"></i>
+                    What's Next?
+                </h6>
+                <ul class="list-unstyled text-muted small mb-0">
+                    <li>✅ Check your inbox (and spam folder)</li>
+                    <li>✅ Click the verification link</li>
+                    <li>✅ Return here to log in</li>
+                </ul>
+            </div>
+
+            <!-- Buttons -->
+            <div class="d-grid gap-3 mb-3">
+                <a href="@Url.Action("ResendVerification", "Account", new { email = ViewBag.Email })"
+                   class="btn btn-primary btn-lg">
+                    <i class="fas fa-paper-plane me-2"></i>
+                    Resend Verification Email
+                </a>
+
+                <a href="@Url.Action("Login", "Account")"
+                   class="btn btn-link text-decoration-none">
+                    Back to Login
+                </a>
+            </div>
+
+            <!-- Footer -->
+            <p class="small text-muted mt-4 pt-3 border-top">
+                <i class="fas fa-clock me-1"></i>
+                Verification link expires in 24 hours
+            </p>
+        </div>
+    </div>
+</div>

@@ -7,8 +7,7 @@ using TidyUpCapstone.Models;
 using TidyUpCapstone.Models.Entities.User;
 using TidyUpCapstone.Models.ViewModels;
 //using TidyUpCapstone.Services.Interfaces;
-
-namespace TidyUp.Controllers
+namespace TidyUpCapstone.Controllers
 {
     public class HomeController : Controller
     {
@@ -16,7 +15,6 @@ namespace TidyUp.Controllers
         //private readonly IItemPostService _itemPostService;
         //private readonly IUserService _userService;
         private readonly UserManager<AppUser> _userManager;
-
         public HomeController(
             ILogger<HomeController> logger,
             //IItemPostService itemPostService,
@@ -28,44 +26,22 @@ namespace TidyUp.Controllers
             //_userService = userService;
             _userManager = userManager;
         }
-
         public IActionResult Index()
         {
             return View();
         }
 
-        //[Authorize]
-        //public async Task<IActionResult> Main()
-        //{
-        //    try
-        //    {
-        //        var currentUser = await _userManager.GetUserAsync(User);
-        //        if (currentUser == null)
-        //        {
-        //            _logger.LogWarning("Current user is null, redirecting to login");
-        //            return RedirectToAction("Login", "Account");
-        //        }
+        [Authorize]
+        public async Task<IActionResult> Main()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
 
-        //        _logger.LogInformation("Loading main page for user: {UserId}", currentUser.Id);
-
-        //        var items = await _itemPostService.GetAllItemPostsAsync();
-        //        var tokenBalance = await _userService.GetUserTokenBalanceAsync(currentUser.Id);
-
-        //        var viewModel = new MainPageViewModel
-        //        {
-        //            ItemPosts = items ?? new List<ItemPost>(),
-        //            NewItemPost = new ItemPostDto(),
-        //            CurrentUserTokenBalance = tokenBalance
-        //        };
-
-        //        return View(viewModel);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "Error loading main page");
-        //        return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        //    }
-        //}
+            return View();
+        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

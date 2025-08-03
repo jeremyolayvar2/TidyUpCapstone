@@ -103,12 +103,12 @@ namespace TidyUpCapstone.Data
                 entity.Property(e => e.LastLogin).HasColumnName("last_login");
             });
 
-            builder.Entity<IdentityRole<int>>().ToTable("AspNetRoles");
-            builder.Entity<IdentityUserRole<int>>().ToTable("AspNetUserRoles");
-            builder.Entity<IdentityUserClaim<int>>().ToTable("AspNetUserClaims");
-            builder.Entity<IdentityUserLogin<int>>().ToTable("AspNetUserLogins");
-            builder.Entity<IdentityUserToken<int>>().ToTable("AspNetUserTokens");
-            builder.Entity<IdentityRoleClaim<int>>().ToTable("AspNetRoleClaims");
+            builder.Entity<IdentityRole<int>>().ToTable("app_roles");
+            builder.Entity<IdentityUserRole<int>>().ToTable("app_user_roles");
+            builder.Entity<IdentityUserClaim<int>>().ToTable("app_user_claims");
+            builder.Entity<IdentityUserLogin<int>>().ToTable("app_user_logins");
+            builder.Entity<IdentityUserToken<int>>().ToTable("app_user_tokens");
+            builder.Entity<IdentityRoleClaim<int>>().ToTable("app_role_claims");
 
             // Configure table names to match SQL schema
             ConfigureTableNames(builder);

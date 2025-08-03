@@ -507,3 +507,22 @@ footer {
     font-family: Montserrat;
 }
 
+.external-login {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    position: relative !important;
+    display: block !important;
+    margin-bottom: 15px;
+}
+
+form {
+    position: relative !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+button.external-login {
+    border: 2px solid red;
+    background-color: yellow;
+    color: black;
+}

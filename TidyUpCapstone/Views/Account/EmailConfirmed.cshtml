@@ -1,47 +1,70 @@
-﻿@* @{
-    ViewBag.HideNavigation = false;
+﻿@{
+    ViewData["Title"] = "Email Verified Successfully";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.HideNavigation = true;
 }
 
-
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Email Confirmed</title>
-    <meta http-equiv="refresh" content="3;url=/Account/Login" />
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 100px;
-        }
-    </style>
-</head>
-<body>
-    <h2>Email Confirmed</h2>
-    <p>Your email has been successfully confirmed. Redirecting to the login page...</p>
-</body>
-</html> *@
-
-
-@{
-    Layout = null; // disables the shared layout to prevent unwanted redirects or scripts
+@section Styles {
+    <link rel="stylesheet" href="~/css/account.css" />
 }
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Email Confirmed</title>
-    <meta http-equiv="refresh" content="3;url=/Account/Login" />
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 100px;
-        }
-    </style>
-</head>
-<body>
-    <h2>Email Confirmed</h2>
-    <p>Your email has been successfully confirmed. Redirecting to the login page...</p>
-</body>
-</html>
+<div class="verification-container d-flex align-items-center justify-content-center min-vh-100">
+    <div class="verification-card card shadow-lg border-0">
+        <div class="card-body text-center p-5">
+
+            <!-- Success Checkmark -->
+            <div class="success-checkmark mb-4">
+                <div class="check-icon">
+                    <span class="icon-line line-tip"></span>
+                    <span class="icon-line line-long"></span>
+                    <div class="icon-circle"></div>
+                    <div class="icon-fix"></div>
+                </div>
+            </div>
+
+            <!-- Title -->
+            <h2 class="h3 fw-bold text-success mb-3">Email Verified Successfully!</h2>
+
+            <!-- Message -->
+            <p class="text-muted mb-2">Your email address has been verified:</p>
+            <p class="h5 text-primary fw-bold mb-3">@ViewBag.Email</p>
+            <p class="text-muted mb-4">Your TidyUp account is now active and ready to use!</p>
+
+            <!-- Welcome Note -->
+            <div class="alert alert-success border-0 mb-4">
+                <h6 class="mb-2"><i class="fas fa-rocket me-2"></i>Welcome to TidyUp!</h6>
+                <p class="small mb-0">You can now log in and start organizing your life with ease.</p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-grid gap-3 mb-3">
+                <a href="@Url.Action("Login", "Account")" class="btn btn-success btn-lg">
+                    <i class="fas fa-sign-in-alt me-2"></i> Log In to Your Account
+                </a>
+                <a href="@Url.Action("Index", "Home")" class="btn btn-outline-primary">
+                    <i class="fas fa-home me-2"></i> Go to Homepage
+                </a>
+            </div>
+
+            <!-- Next Steps -->
+            <div class="mt-4 pt-3 border-top">
+                <h6 class="text-muted mb-3">What's Next?</h6>
+                <div class="row text-center">
+                    <div class="col-4">
+                        <i class="fas fa-user-cog text-primary mb-2" style="font-size: 1.5rem;"></i>
+                        <p class="small text-muted mb-0">Complete Profile</p>
+                    </div>
+                    <div class="col-4">
+                        <i class="fas fa-plus-circle text-success mb-2" style="font-size: 1.5rem;"></i>
+                        <p class="small text-muted mb-0">Add Items</p>
+                    </div>
+                    <div class="col-4">
+                        <i class="fas fa-users text-info mb-2" style="font-size: 1.5rem;"></i>
+                        <p class="small text-muted mb-0">Join Community</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

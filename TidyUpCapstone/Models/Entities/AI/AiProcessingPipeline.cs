@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using TidyUpCapstone.Models.Entities.AI;
 using TidyUpCapstone.Models.Entities.Items;
-using TidyUpCapstone.Models.Entities.Items;
+
 
 namespace TidyUpCapstone.Models.Entities.AI
 {
