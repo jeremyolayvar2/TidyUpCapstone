@@ -1,6 +1,7 @@
 ﻿@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
+
 :root {
     --background: #F5F5F5;
     --primary-color: #6B9080;
@@ -17,7 +18,6 @@
     font-family: "Montserrat", sans-serif;
 }
 
-
 body {
     background-color: var(--background);
     width: 100vw;
@@ -25,28 +25,30 @@ body {
 }
 
 .main-container {
-    margin: 7rem auto;
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
+    align-content: center;
     justify-content: space-around;
     width: 100vw;
 }
 
-
-/* Left Side Container--------------------------------------------------------------------------------------*/
+/* LEFT SIDE - BRAND SECTION ========================================================================== */
 .container1 {
     position: relative;
+    align-content: center;
 }
 
+/* Brand Title */
 .title {
-    font-size: 12.5rem;
+    font-size: 8.5rem;
+    max-width: 800px;
     font-family: "Righteous", sans-serif;
-    line-height: 1;
-    color: #000;
+    line-height: 0.78;
+    color: var(--primary-color);
 }
 
-.block {
+/* Decorative Blocks Base Style */
+/*.block {
     position: absolute;
     background: var(--background);
     border: 1.6px solid var(--text-color);
@@ -56,7 +58,7 @@ body {
     font-size: 1.2rem;
 }
 
-
+ 
     .block.reuse {
         top: -100px;
         left: 145px;
@@ -67,17 +69,6 @@ body {
         top: 10px;
         left: 115px;
         transform: rotate(26deg);
-    }
-
-    .block.empty1 {
-        top: 200px;
-        left: 168px;
-        width: 119px;
-        height: 30px;
-        border: 1.6px solid var(--text-color);
-        border-radius: 8px;
-        background: var(--background);
-        transform: rotate(-46.67deg);
     }
 
     .block.unload {
@@ -104,14 +95,20 @@ body {
         transform: rotate(0deg);
     }
 
+  
+    .block.empty1 {
+        top: 200px;
+        left: 168px;
+        width: 119px;
+        height: 30px;
+        transform: rotate(-46.67deg);
+    }
+
     .block.empty2 {
         top: 412px;
         left: 168px;
         width: 119px;
         height: 31px;
-        border: 1.6px solid var(--text-color);
-        border-radius: 8px;
-        background: var(--background);
         transform: rotate(0deg);
     }
 
@@ -120,147 +117,30 @@ body {
         left: 10px;
         width: 200px;
         height: 30px;
-        border: 1.6px solid var(--text-color);
-        border-radius: 8px;
-        background: var(--background);
         transform: rotate(0deg);
     }
-
-
 
     .block.empty5 {
         top: 473px;
         left: -20px;
         width: 490px;
         height: 30px;
-        border: 1.6px solid var(--text-color);
-        border-radius: 8px;
-        background: var(--background);
         transform: rotate(0deg);
     }
+*/
+/* RIGHT SIDE - WELCOME/FORM CONTAINER ========================================================================== */
 
-
-/* Right Side Container--------------------------------------------------------------------------------------*/
-
-/*Login Container*/
 .container2 {
-    width: 380px;
-    padding: 70px 60px;
+    max-width: 500px;
+    max-height: 600px;
+    padding: 50px;
     background-color: var(--background);
     border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--primary-color);
     position: relative;
     overflow: hidden;
     transition: height 0.5s ease;
 }
-.input-box {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 20px;
-    position: relative;
-}
-
-    .input-box input {
-        padding: 10px 20px;
-        border: 1px solid var(--text-color);
-        border-radius: 8px;
-        font-size: 14px;
-        outline: none;
-        background-color: var(--background);
-    }
-
-    .input-box label {
-        position: absolute;
-        top: -8px;
-        left: 12px;
-        background: var(--background);
-        padding: 0 2px;
-        font-size: 13px;
-        color: var(--text-color);
-    }
-
-button.login {
-    width: 100%;
-    padding: 10px 0;
-    background-color: var(--primary-color);
-    color: var(--background);
-    font-weight: 600;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
-
-    button.login:hover {
-        background-color: var(--secondary-color);
-    }
-
-button.signup {
-    background-color: var(--background);
-    border: none;
-    padding: 10px 0;
-    color: var(--text-color);
-    font-size: 16px;
-    font-weight: bold;
-    text-align: center;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-    button.signup:hover {
-        background-color: #ebebeb;
-    }
-
-.signup-col {
-    display: flex;
-    justify-content: center;
-    margin-top: 10px;
-}
-
-.forgotP-col {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 15px;
-    font-size: 13px;
-}
-
-    .forgotP-col a {
-        text-decoration: none;
-        color: var(--secondary-color);
-    }
-
-        .forgotP-col a:hover {
-            text-decoration: underline;
-        }
-
-
-.signup-form {
-    background-color: var(--background);
-    display: flex;
-    flex-direction: column;
-}
-.signup-header h2 {
-    font-size: 1.6rem;
-    font-family: "Righteous", sans-serif;
-    color: var(--text-color);
-    margin-bottom: 20px;
-}
-
-button.create {
-    width: 100%;
-    padding: 10px 0;
-    background-color: var(--primary-color);
-    color: var(--background);
-    font-weight: 600;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
-
-    button.create:hover {
-        background-color: var(--secondary-color);
-    }
 
 .form-wrapper {
     position: relative;
@@ -269,90 +149,129 @@ button.create {
     height: auto;
 }
 
-form {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
+
+.welcome-section {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.4s ease;
 }
 
-    form.active {
-        position: relative;
+    .welcome-section.active {
         opacity: 1;
         pointer-events: auto;
     }
 
-
-.login-form.active ~ .signup-form {
-    opacity: 0;
-    pointer-events: none;
-}
-
-.signup-form.active {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.login-form.active {
-   background-color: var(--background);
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.back-login {
-    background-color: var(--background);
-    border: none;
-    padding: 10px 0;
+.welcome-header h2 {
+    font-size: 5rem;
+    font-family: "Righteous", sans-serif;
     color: var(--text-color);
-    font-size: 16px;
-    font-weight: bold;
-    text-align: center;
-    border-radius: 8px;
-    cursor: pointer;
+    margin-bottom: 20px;
 }
 
-    .back-login:hover {
-        background-color: #ebebeb;
+
+
+.cta-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.input-box {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+/* Primary Button (Get Started) */
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 0;
+    background-color: var(--primary-color);
+    color: var(--background);
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.3s ease;
+    font-size: 16px;
+}
+
+    .btn-primary:hover {
+        background-color: var(--secondary-color);
     }
 
-.container2.show-signup .form-wrapper {
-    transform: translateX(-50%);
-}
-
-.container2.show-signup .signup-form {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.container2.show-signup .login-form {
-    opacity: 0;
-    pointer-events: none;
-}
-
-
-footer {
-    display: none;
-}
-
-.input-box input:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 5px var(--secondary-color);
+/* Secondary Button (Sign In) */
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 0;
     background-color: var(--background);
+    color: var(--text-color);
+    font-weight: 600;
+    text-decoration: none;
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-size: 16px;
 }
 
+    .btn-secondary:hover {
+        background-color: var(--primary-color);
+        color: var(--background);
+    }
+
+/* SOCIAL LOGIN SECTION (Currently Commented Out) ==========================================================================*/
+   
 
 
+.login-preview {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.login-preview-text {
+    font-size: 14px;
+    color: var(--text-color);
+    margin-bottom: 15px;
+}
+
+.social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.social-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: 1px solid var(--secondary-color);
+    border-radius: 8px;
+    background-color: var(--background);
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+    .social-icon:hover:not(.disabled) {
+        background-color: var(--accent-color);
+    }
+
+    .social-icon.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
 
 
-
-
-/*Media Queries----------------------------------------------------------------------------------------------------*/
-
-
-/* Tablets and below */
 @media (max-width: 992px) {
     .main-container {
         flex-direction: column;
@@ -369,8 +288,9 @@ footer {
         text-align: center;
     }
 
+    /* Hide decorative blocks on smaller screens */
     .block {
-        display: none; /* Hide decorative blocks on smaller screens */
+        display: none;
     }
 
     .container2 {
@@ -379,7 +299,7 @@ footer {
     }
 }
 
-/* Phones and small screens */
+/* Mobile phones and small screens (576px and down) */
 @media (max-width: 576px) {
     .title {
         font-size: 4rem;
@@ -390,139 +310,48 @@ footer {
         padding: 30px 20px;
     }
 
-    .input-box input {
-        font-size: 13px;
-        padding: 8px 16px;
-    }
-
-    button.login, button.create {
-        padding: 8px 0;
-        font-size: 14px;
-    }
-
-    button.signup, button.back-login {
-        font-size: 14px;
-    }
-
-    .signup-header h2 {
+    .welcome-header h2 {
         font-size: 1.3rem;
     }
 
-    .forgotP-col {
-        font-size: 12px;
+    .welcome-subtitle {
+        font-size: 1rem;
     }
 
-    .input-box label {
-        font-size: 12px;
-        top: -10px;
+    .welcome-description {
+        font-size: 0.9rem;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        padding: 10px 0;
+        font-size: 14px;
+    }
+
+    .cta-buttons {
+        gap: 12px;
     }
 }
 
+/*============================================================================= */
 
-/*About us section---------------------------------------------------------------------------------------------------*/
-
-.image-1 {
-    position: absolute;
-    top: 720px;
-    left: 483px;
-    background: linear-gradient(180deg, #fff, rgba(255, 255, 255, 0));
-    width: 398.4px;
-    height: 658px;
+.hidden {
+    display: none !important;
 }
 
-.pic1-login-page-1 {
-    position: absolute;
-    top: -20px;
-    left: -138px;
-    width: 860px;
-    height: 483px;
-    object-fit: cover;
+.text-center {
+    text-align: center;
 }
 
-.frame1 {
-    align-self: stretch;
-    width: 722px;
-    position: relative;
-    border-radius: 0px 20px 20px 0px;
-    background-color: #6b9080;
-    overflow: hidden;
-    flex-shrink: 0;
+/*============================================================================= */ 
+
+.btn-primary:focus,
+.btn-secondary:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
 }
 
-.frame2 {
-    width: 115px;
-    position: relative;
-    border-radius: 20px;
-    background-color: #cce3de;
-    height: 444px;
-    overflow: hidden;
-    flex-shrink: 0;
-    transform: rotate(180deg);
-}
-
-.frame {
-    width: 860px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: flex-start;
-    gap: 10px;
-}
-
-.lorem-ipsum-dolor {
-    position: absolute;
-    top: 61px;
-    left: 144px;
-    display: inline-block;
-    width: 701px;
-}
-
-.frame3 {
-    width: 1107px;
-    position: relative;
-    border-radius: 0px 20px 20px 0px;
-    border: 5px solid #000;
-    box-sizing: border-box;
-    height: 222px;
-    overflow: hidden;
-    flex-shrink: 0;
-}
-
-.about-us-bento {
-    width: 100%;
-    position: relative;
-    background-color: #f5f5f5;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-    padding: 32px;
-    box-sizing: border-box;
-    gap: 10px;
-    text-align: justify;
-    font-size: 16px;
-    color: #000;
-    font-family: Montserrat;
-}
-
-.external-login {
-    opacity: 1 !important;
-    pointer-events: auto !important;
-    position: relative !important;
-    display: block !important;
-    margin-bottom: 15px;
-}
-
-form {
-    position: relative !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
-}
-
-button.external-login {
-    border: 2px solid red;
-    background-color: yellow;
-    color: black;
+.social-icon:focus {
+    outline: 2px solid var(--secondary-color);
+    outline-offset: 2px;
 }
