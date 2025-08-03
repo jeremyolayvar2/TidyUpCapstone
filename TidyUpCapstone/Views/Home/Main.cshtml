@@ -1,9 +1,11 @@
-﻿
+﻿<!-- Enhanced Main.cshtml with Community Hub -->
+@model TidyUpCapstone.Models.ViewModels.Items.ItemListViewModel
 @using TidyUpCapstone.Helpers
+
+<link href="https://cdn.jsdelivr.net/npm/iconsax@1.0.0-alpha2/dist/css/iconsax.css" rel="stylesheet">
 
 @{
     ViewBag.HideNavigation = false;
-
     string currentUserId = "";
     string currentUserName = "";
 
@@ -18,7 +20,6 @@
     window.currentUserId = '@currentUserId';
     window.currentUserName = '@currentUserName';
 
-    // Update the getCurrentUserId and getCurrentUserName functions
     function getCurrentUserId() {
         return window.currentUserId || document.body.dataset.userid || null;
     }
@@ -32,120 +33,294 @@
     @Html.AntiForgeryToken()
 </form>
 
-<!-- POST CONTAINER ================================================================================================================================ -->
-<div class="main-container-main">
+<!-- Filter Tabs -->
+<div class="filter-tabs-container">
+    <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">
+            <i class='bx bx-apps-alt'></i>
+            All Posts
+        </button>
+        <button class="filter-tab" data-filter="items">
+            <i class='bx bx-shopping-bag'></i>
+            Items
+        </button>
+        <button class="filter-tab" data-filter="community">
+            <i class='bx bx-community'></i>
+            Community
+        </button>
+    </div>
+</div>
 
-    @if (Model?.ItemPosts != null && Model.ItemPosts.Any())
-    {
-        @foreach (var item in Model.ItemPosts)
-        {
-            <div id="mid-container">
-                <div id="item-@item.Id" class="mid-container-child">
-                    <div class="listing-container1">
-                        <div class="listing-container1-child1">
-                            <img src="~/assets/person-image.svg" alt="person" />
-                            <span>@(item.User?.UserName ?? "Unknown User")</span>
-                            <img src="~/assets/verified-icon.svg" alt="verified" />
-                            <span class="date-span">@item.CreatedAt.ToLocalTime().ToTimeAgo()</span>
-
-                        </div>
-
-                        <!-- Only show dropdown if current user owns the item -->
-                        @if (User.Identity.IsAuthenticated && User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == item.UserId)
-                        {
-                            <div class="dropdown-menu">
-                                <button class="dropdown-btn" onclick="toggleDropdown(this)">
-                                    <img src="~/assets/dot-horiz.svg" alt="dot-horiz" />
-                                </button>
-                                <div class="dropdown-content">
-                                    <button class="dropdown-item" onclick="openEditModal(@item.Id)">Edit</button>
-                                    <button class="dropdown-item delete" onclick="deleteItem(@item.Id)">Delete</button>
-                                </div>
-                            </div>
-                        }
-                    </div>
-
-                    <div class="listing-container2">
-                        @if (!string.IsNullOrEmpty(item.ImageFileName))
-                        {
-                            <img src="~/ItemPosts/@item.ImageFileName" alt="@item.ItemTitle" />
-                        }
-                        else
-                        {
-                            <div class="no-image-placeholder">No Image Available</div>
-                        }
-                    </div>
-
-                    <div class="listing-container3">
-                        <div class="listing-container3-child1">
-                            <span class="material-symbols-outlined">category</span>
-                            <span>@(item.Category?.Name ?? "No Category")</span>
-                        </div>
-
-                        <div class="listing-container3-child2">
-                            <span class="material-symbols-outlined">action_key</span>
-                            <span>@(item.Condition?.Name ?? "No Condition")</span>
-                        </div>
-
-                        <div class="listing-container3-child3">
-                            <span class="material-symbols-outlined">location_on</span>
-                            <span>@(item.Location?.Name ?? "No Location")</span>
-                        </div>
-                    </div>
-
-                    <div class="listing-container4">
-                        <h3>@item.ItemTitle</h3>
-                        <p>@item.Description</p>
-                    </div>
-
-                    <div class="listing-container5">
-                        <div class="listing-container5-child1">
-                            <span>
-                                @{
-                                    string currentUserIdForPrice = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-                                    if (string.IsNullOrEmpty(currentUserIdForPrice) || !User.Identity.IsAuthenticated)
-                                    {
-                                        @item.AdjustedTokenPrice.ToString("0.##")
-                                    }
-                                    else if (currentUserIdForPrice == item.UserId)
-                                    {
-                                        @item.FinalTokenPrice.ToString("0.##")
-                                    }
-                                    else
-                                    {
-                                        @item.AdjustedTokenPrice.ToString("0.##")
-                                    }
-                                }
-                            </span>
-                            <img src="~/assets/game-icons_token.svg" alt="token" />
-                        </div>
-
-                        <button class="interested-btn" onclick="createChatBubble('@item.UserId', '@item.User?.UserName', @item.Id, '@item.ItemTitle')">
-                            <span>Interested</span>
+<!-- Community Post Creation Section -->
+<div class="community-post-section" id="communityPostSection">
+    <div class="post-creator">
+        <div class="post-creator-header">
+            <div class="user-avatar">
+                <img src="@(ViewBag.CurrentUserAvatar ?? "~/assets/default-avatar.svg")" alt="Your avatar" />
+            </div>
+            <div class="post-input-container">
+                <textarea class="post-input"
+                          placeholder="Share your clutter story..."
+                          id="communityPostInput"
+                          maxlength="1000"
+                          rows="1"></textarea>
+                <div class="post-actions">
+                    <div class="post-options">
+                        <button type="button" class="post-option-btn" id="addImageBtn">
+                            <i class='bx bx-image text-xl'></i>
+                            Photo
                         </button>
-
+                        <input type="file" id="communityImageInput" accept="image/*" style="display: none;">
                     </div>
+                    <button type="button" class="post-btn-community" id="postCommunityBtn" disabled>
+                        Post
+                    </button>
                 </div>
             </div>
-        }
-    }
-    else
-    {
-        <div class="container" id="mid-container">
-            <div class="listing-container0">
-                <p>No items available at the moment.</p>
-                @if (Model?.ItemPosts == null)
-                {
-                    <p>Debug: ItemPosts is null</p>
-                }
-                else
-                {
-                    <p>Debug: ItemPosts count is @Model.ItemPosts.Count</p>
-                }
+        </div>
+
+        <!-- Image Preview -->
+        <div class="community-image-preview" id="communityImagePreview" style="display: none;">
+            <img id="communityPreviewImg" src="" alt="Preview" />
+            <button type="button" class="remove-community-image" id="removeCommunityImage">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- POST CONTAINER -->
+<div class="main-container-main">
+    <div class="posts-container" id="postsContainer">
+
+        <!-- Sample Community Posts -->
+        <div class="community-post" data-type="community">
+            <div class="post-header">
+                <div class="post-user-info">
+                    <img src="~/assets/default-avatar.svg" alt="User" class="post-avatar" />
+                    <div class="post-user-details">
+                        <span class="post-username">Katherina Valerious</span>
+                        <span class="post-time">1 hour</span>
+                    </div>
+                </div>
+                <div class="post-options-dropdown">
+                    <button class="post-options-btn">
+                        <span class="material-symbols-outlined">more_horiz</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="post-content">
+                <p>Anyone know good places to donate electronics in Metro Manila? I have some old gadgets that still work but I don't use anymore 📱💻</p>
+            </div>
+
+            <div class="post-interactions">
+
+                <div class="interaction-buttons">
+                    <button class="interaction-btn like-btn" data-post-id="sample-2">
+                        <i class='bx bx-heart'></i>
+                        <span class="likes-count">8</span>
+                    </button>
+                    <button class="interaction-btn comment-btn" data-post-id="sample-2">
+                        <i class='bx bx-message-circle'></i>
+  
+                        <span class="comment-count">12</span>
+                    </button>
+                </div>
             </div>
         </div>
-    }
+
+        <div class="community-post" data-type="community">
+            <div class="post-header">
+                <div class="post-user-info">
+                    <img src="~/assets/default-avatar.svg" alt="User" class="post-avatar" />
+                    <div class="post-user-details">
+                        <span class="post-username">Bossing</span>
+                        <span class="post-time">2 mins</span>
+                    </div>
+                </div>
+                <div class="post-options-dropdown">
+                    <button class="post-options-btn">
+                        <span class="material-symbols-outlined">more_horiz</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="post-content">
+                <p>Just finished decluttering my closet! Found so many clothes I forgot I had. Time to donate and make space for what I actually wear! 👗✨</p>
+            </div>
+
+            <div class="post-interactions">
+
+                <div class="interaction-buttons">
+                    <button class="interaction-btn like-btn" data-post-id="sample-2">
+                        <i class='bx bx-hear'></i>
+                        <span class="likes-count">8</span>
+                    </button>
+                    <button class="interaction-btn comment-btn" data-post-id="sample-2">
+                        <i class='bx bx-message-circle'></i>
+
+                        <span class="comment-count">12</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Regular Item Posts -->
+        @if (Model?.Items != null && Model.Items.Any())
+        {
+            @foreach (var item in Model.Items)
+            {
+                <div class="item-post" data-type="item" id="item-@item.ItemId">
+                    <div class="mid-container-child">
+                        <div class="listing-container1">
+                            <div class="listing-container1-child1">
+                                <img src="@item.UserAvatarUrl" alt="person" />
+                                <span>@item.Username</span>
+                                <img src="~/assets/verified-icon.svg" alt="verified" />
+                                <span class="date-span">@item.DatePosted.ToTimeAgo()</span>
+                            </div>
+
+                            @if (User.Identity.IsAuthenticated && User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == item.UserId.ToString())
+                            {
+                                <div class="dropdown-menu">
+                                    <button class="dropdown-btn" onclick="toggleDropdown(this)">
+                                        <img src="~/assets/dot-horiz.svg" alt="dot-horiz" />
+                                    </button>
+                                    <div class="dropdown-content">
+                                        <button class="dropdown-item" onclick="openEditModal(@item.ItemId)">Edit</button>
+                                        <button class="dropdown-item delete" onclick="deleteItem(@item.ItemId)">Delete</button>
+                                        <button class="dropdown-item report" onclick="">Report</button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="listing-container2">
+                            @if (!string.IsNullOrEmpty(item.ImageFileName))
+                            {
+                                <img src="@item.ImageUrl" alt="@item.ItemTitle" />
+                            }
+                            else
+                            {
+                                <div class="no-image-placeholder">No Image Available</div>
+                            }
+                        </div>
+
+                        <div class="listing-container3">
+                            <div class="listing-container3-child1">
+                                <span class="material-symbols-outlined">category</span>
+                                <span>@item.CategoryName</span>
+                            </div>
+
+                            <div class="listing-container3-child2">
+                                <span class="material-symbols-outlined">action_key</span>
+                                <span>@item.ConditionName</span>
+                            </div>
+
+                            <div class="listing-container3-child3">
+                                <span class="material-symbols-outlined">location_on</span>
+                                <span>@item.LocationName</span>
+                            </div>
+                        </div>
+
+                        <div class="listing-container4">
+                            <h3>@item.ItemTitle</h3>
+                            <p>@item.Description</p>
+                        </div>
+
+                        <div class="listing-container5">
+                            <div class="listing-container5-child1">
+                                <span>
+                                    @{
+                                        string currentUserIdForPrice = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+                                        if (string.IsNullOrEmpty(currentUserIdForPrice) || !User.Identity.IsAuthenticated)
+                                        {
+                                            @item.AdjustedTokenPrice.ToString("0.##")
+                                        }
+                                        else if (currentUserIdForPrice == item.UserId.ToString())
+                                        {
+                                            @item.FinalTokenPrice.ToString("0.##")
+                                        }
+                                        else
+                                        {
+                                            @item.AdjustedTokenPrice.ToString("0.##")
+                                        }
+                                    }
+                                </span>
+                                <img src="~/assets/game-icons_token.svg" alt="token" />
+                            </div>
+
+                            @if (item.Status != TidyUpCapstone.Models.Entities.Items.ItemStatus.Available)
+                            {
+                                <div class="status-badge @item.StatusDisplayName.ToLower()">
+                                    @item.StatusDisplayName
+                                </div>
+                            }
+                            else if (item.IsExpired)
+                            {
+                                <div class="status-badge expired">
+                                    Expired
+                                </div>
+                            }
+                            else
+                            {
+                                <button class="interested-btn" onclick="createChatBubble('@item.UserId', '@item.Username', @item.ItemId, '@item.ItemTitle')">
+                                    <span>Interested</span>
+                                </button>
+                            }
+
+                            @if (item.IsAiProcessed && item.AiConfidenceLevel.HasValue)
+                            {
+                                <div class="ai-confidence" title="AI Confidence Level">
+                                    <span class="material-symbols-outlined">psychology</span>
+                                    <span>@((item.AiConfidenceLevel.Value * 100).ToString("0"))%</span>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Add interaction buttons for item posts -->
+                        <div class="post-interactions" style="border-top: 1px solid rgba(107, 144, 128, 0.1); padding-top: 15px; margin-top: 15px;">
+                            <div class="interaction-stats">
+                                <span class="likes-count">0 likes</span>
+                                <span class="comments-count">0 comments</span>
+                            </div>
+
+                            <div class="interaction-buttons">
+                                <button class="interaction-btn like-btn" data-post-id="@item.ItemId">
+                                    <i class='bx bx-heart'></i>
+                                    Like
+                                </button>
+                                <button class="interaction-btn comment-btn" data-post-id="@item.ItemId">
+                                    <i class='bx bx-message-circle'></i>
+                                    Comments
+                                    <span class="comment-count">0</span>
+                                </button>
+                                <button class="interaction-btn share-btn" data-post-id="@item.ItemId">
+                                    <i class='bx bx-share'></i>
+                                    Share
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state-container" id="emptyState" style="display: none;">
+        <div class="empty-state">
+            <img src="~/assets/empty-items.svg" alt="No items" class="empty-state-icon" />
+            <h3>No posts found</h3>
+            <p>Be the first to post in this community!</p>
+            @if (User.Identity.IsAuthenticated)
+            {
+                <button class="btn btn-primary" id="openCreateModal">Post Your First Item</button>
+            }
+        </div>
+    </div>
 </div>
 
 <!-- CHAT  ==================================================================================================================================== -->
@@ -187,26 +362,7 @@
             </button>
         </div>
         <div class="message-log">
-            @{
-                string? lastTimestamp = null;
-            }
-
-            @foreach (var msg in Model.Messages)
-            {
-                var currentTimestamp = msg.Timestamp.ToString("t");
-
-                if (currentTimestamp != lastTimestamp)
-                {
-                    <div class="message timestamp">
-                        <p>@currentTimestamp</p>
-                    </div>
-                    lastTimestamp = currentTimestamp;
-                }
-
-                <div class="message received">
-                    <p>@msg.Text</p>
-                </div>
-            }
+            @* Messages will be loaded dynamically *@
         </div>
 
         <div class="message-input">
@@ -225,7 +381,7 @@
 
 <div class="card-spotlight" id="tokenModal">
     <div class="card-spotlight-child1">
-        <h2>@Model.CurrentUserTokenBalance</h2>
+        <h2>@(ViewBag.CurrentUserTokenBalance ?? 0)</h2>
         <img src="~/assets/token-symbol.svg" alt="Token" />
     </div>
     <div class="card-spotlight-child2">
@@ -237,143 +393,408 @@
 <div id="createPostModal" class="modal" enctype="multipart/form-data">
 
     <div class="modal-content">
-        <h2>Post an Item</h2>
+        <div class="modal-header">
+            <h2>Post an Item</h2>
+            <button type="button" class="close-modal" onclick="closeCreateModal()">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
 
         <div class="modal-content-child1">
             <div class="upload-section">
-                <label for="imageInput">
+                <label for="imageInput" class="upload-label">
                     <img src="~/assets/upload-image-input.svg" alt="Upload" class="upload-image-btn" name="ImageFile">
+                    <span class="upload-text">Click to upload image</span>
                 </label>
-                <input type="file" id="imageInput" name="ImageFile">
+                <input type="file" id="imageInput" name="ImageFile" accept="image/*" required>
+                <div class="image-preview" id="imagePreview" style="display: none;">
+                    <img id="previewImg" src="" alt="Preview" />
+                    <button type="button" class="remove-image" onclick="removeImage()">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
             </div>
 
             <div class="cat-con-price">
-                <select id="categoryInput" name="CategoryId">
+
+                <select id="categoryInput" name="CategoryId" required>
                     <option value="" disabled selected hidden>Select a category</option>
-                    <option value="1">Books & Stationery</option>
-                    <option value="2">Electronics & Gadgets</option>
-                    <option value="3">Toys & Games</option>
-                    <option value="4">Home & Kitchen</option>
-                    <option value="5">Furniture</option>
-                    <option value="6">Appliances</option>
-                    <option value="7">Health & Beauty</option>
-                    <option value="8">Crafts & DIY Supplies</option>
-                    <option value="9">School & Office Supplies</option>
+                    @foreach (var category in Model?.Categories ?? new List<TidyUpCapstone.Models.DTOs.Items.ItemCategoryDto>())
+                    {
+                        <option value="@category.CategoryId">@category.Name</option>
+                    }
                 </select>
-                <select id="conditionInput" name="ConditionId">
+                <select id="conditionInput" name="ConditionId" required>
                     <option value="" disabled selected hidden>Select condition</option>
-                    <option value="1">Brand New</option>
-                    <option value="2">Like New</option>
-                    <option value="3">Gently Used</option>
-                    <option value="4">Visible Wear</option>
-                    <option value="5">For Repair/Parts</option>
+                    @foreach (var condition in Model?.Conditions ?? new List<TidyUpCapstone.Models.DTOs.Items.ItemConditionDto>())
+                    {
+                        <option value="@condition.ConditionId">@condition.Name</option>
+                    }
                 </select>
+
+                <div class="input-wrapper">
+                    <input class="input-form" type="text" id="locationInput" name="LocationName" placeholder=" " required />
+                    <label class="input-label" for="locationInput">Location</label>
+
+                </div>
             </div>
         </div>
 
         <div class="modal-content-child2">
             <div class="item-info">
-                <input class="input-form" type="text" id="titleInput" placeholder="Item Title" name="ItemTitle" />
-                <textarea class="input-form" id="descriptionInput" placeholder="Description" name="Description"></textarea>
+                <!-- Title -->
+                <div class="input-wrapper">
+                    <input class="input-form" type="text" id="titleInput" name="ItemTitle" placeholder=" " required maxlength="100" />
+                    <label class="input-label" for="titleInput">Item</label>
 
-                <input class="input-form" type="text" id="locationInput" placeholder="Location" name="LocationName" />
+                </div>
+
+                <!-- Description -->
+                <div class="input-wrapper">
+                    <textarea class="input-form" id="descriptionInput" name="Description" placeholder=" " required maxlength="1000"></textarea>
+                    <label class="input-label" for="descriptionInput">Description</label>
+                </div>
+
+                <!-- Hidden Lat/Lng -->
                 <input type="hidden" name="Latitude" id="Latitude" />
                 <input type="hidden" name="Longitude" id="Longitude" />
             </div>
 
+
             <div class="token-post">
-                <div>
+                <div class="price-display">
                     <span class="token-count" id="finalPrice">0.00</span>
                     <img src="~/assets/game-icons_token.svg" alt="token" />
+                    <div class="price-breakdown" id="priceBreakdown" style="display: none;">
+                        <small id="priceDetails"></small>
+                    </div>
                 </div>
-                <button type="submit" class="post-btn" id="submitPost" disabled>Post</button>
+                <button type="submit" class="post-btn" id="submitPost" disabled>
+                    <span class="loading-spinner" style="display: none;"></span>
+                    <span class="btn-text">Post</span>
+                </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Original Edit Modal for Posting an Item ===================================================================================================== -->
+<!-- Edit Modal for Posting an Item ===================================================================================================== -->
 <div id="editPostModal" class="modal">
     <div class="modal-content">
-        <h2>Post an Item</h2>
+        <div class="modal-header">
+            <h2>Edit Item</h2>
+            <button type="button" class="close-modal" onclick="closeEditModal()">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
 
         <div class="modal-content-child1">
             <div class="upload-section">
                 <label for="editImageInput">
                     <img src="~/assets/upload-image-input.svg" alt="Upload" class="upload-image-btn">
+                    <span class="upload-text">Change image</span>
                 </label>
-                <input type="file" id="editImageInput" />
+                <input type="file" id="editImageInput" accept="image/*" />
+                <div class="current-image" id="currentImage">
+                    <img id="currentImageDisplay" src="" alt="Current image" style="display: none;" />
+                </div>
             </div>
 
             <div class="cat-con-price">
                 <select id="editCategoryInput">
                     <option value="" disabled selected hidden>Select a category</option>
-                    <option value="1">Books & Stationery</option>
-                    <option value="2">Electronics & Gadgets</option>
-                    <option value="3">Toys & Games</option>
-                    <option value="4">Home & Kitchen</option>
-                    <option value="5">Furniture</option>
-                    <option value="6">Appliances</option>
-                    <option value="7">Health & Beauty</option>
-                    <option value="8">Crafts & DIY Supplies</option>
-                    <option value="9">School & Office Supplies</option>
+                    @foreach (var category in Model?.Categories ?? new List<TidyUpCapstone.Models.DTOs.Items.ItemCategoryDto>())
+                    {
+                        <option value="@category.CategoryId">@category.Name</option>
+                    }
                 </select>
                 <select id="editConditionInput">
                     <option value="" disabled selected hidden>Select condition</option>
-                    <option value="1">Brand New</option>
-                    <option value="2">Like New</option>
-                    <option value="3">Gently Used</option>
-                    <option value="4">Visible Wear</option>
-                    <option value="5">For Repair/Parts</option>
+                    @foreach (var condition in Model?.Conditions ?? new List<TidyUpCapstone.Models.DTOs.Items.ItemConditionDto>())
+                    {
+                        <option value="@condition.ConditionId">@condition.Name</option>
+                    }
                 </select>
+                <div class="input-wrapper">
+                    <input class="input-form" type="text" id="editLocationInput" name="LocationName" placeholder=" " required />
+                    <label class="input-label" for="editLocationInput">Location</label>
+
+                </div>
             </div>
         </div>
 
         <div class="modal-content-child2">
             <div class="item-info">
-                <input type="hidden" id="editItemId" />
-                <input class="input-form" type="text" id="editTitleInput" placeholder="Item Title" />
-                <textarea class="input-form" id="editDescriptionInput" placeholder="Description"></textarea>
 
-                <input class="input-form" type="text" id="editLocationInput" placeholder="Location" />
+                <!-- Title -->
+                <div class="input-wrapper">
+                    <input class="input-form" type="text" id="editTitleInput" name="ItemTitle" placeholder=" " required maxlength="100" />
+                    <label class="input-label" for="editTitleInput">Item</label>
+
+                </div>
+
+                <!-- Description -->
+                <div class="input-wrapper">
+                    <textarea class="input-form" id="editDescriptionInput" name="Description" placeholder=" " required maxlength="1000"></textarea>
+                    <label class="input-label" for="editDescriptionInput">Description</label>
+                </div>
+
+                <!-- Hidden Lat/Lng -->
                 <input type="hidden" id="editLatitude" name="Latitude" />
                 <input type="hidden" id="editLongitude" name="Longitude" />
+
             </div>
 
             <div class="token-post">
-                <div>
+                <div class="price-display">
                     <span class="token-count" id="editFinalPrice"></span>
                     <img src="~/assets/game-icons_token.svg" alt="token" />
                 </div>
-                <button class="post-btn" id="submitEdit">Save Changes</button>
+                <button class="post-btn" id="submitEdit">
+                    <span class="loading-spinner" style="display: none;"></span>
+                    <span class="btn-text">Save Changes</span>
+                </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- dropdown for edit and delete a post -->
+<!-- Comments Modal - Add this at the end -->
+<!-- Comments Modal - Updated HTML Structure -->
+<!-- Place this at the end of your Main.cshtml, just before the closing body tag -->
+
+<div class="comments-modal" id="commentsModal">
+    <div class="comments-modal-content">
+        <!-- Modal Header -->
+        <div class="comments-modal-header">
+            <div class="comments-header-content">
+                <div class="comments-modal-title">
+                    <i class='bx bx-message-circle'></i>
+                    Comments
+                    <span class="comments-count-badge" id="modalCommentsCount">0</span>
+                </div>
+                <button class="close-comments-modal" onclick="closeCommentsModal()">
+                    <i class='bx bx-x'></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Comments List -->
+        <div class="comments-list-container" id="commentsListContainer">
+            <div class="loading-comments" id="commentsLoading" style="display: none;">
+                <div class="loading-spinner-comments"></div>
+            </div>
+
+            <!-- Demo Comments (these will be replaced with real comments in production) -->
+            <div class="comments-demo-content">
+                <div class="comment-item">
+                    <div class="comment-avatar-wrapper">
+                        <img src=""
+                             alt="User" class="comment-avatar">
+                    </div>
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <span class="comment-username">Nardong Putik</span>
+                            <span class="comment-time">6 hours ago</span>
+                        </div>
+                        <p class="comment-text">Amazing work! Keep it up! ✨</p>
+                        <div class="comment-actions">
+                            <button class="comment-action-btn" data-action="like" data-comment-id="3">
+                                <i class='bx bx-heart'></i>
+
+                            </button>
+                            <button class="comment-action-btn" data-action="reply" data-comment-id="3">
+                                <i class='bx  bx-message-bubble-reply'></i>
+                                Reply
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comment-item">
+                    <div class="comment-avatar-wrapper">
+                        <img src=""
+                             alt="User" class="comment-avatar">
+                    </div>
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <span class="comment-username">Joaquin Bordado</span>
+                            <span class="comment-time">6 hours ago</span>
+                        </div>
+                        <p class="comment-text">Amazing work! Keep it up! ✨</p>
+                        <div class="comment-actions">
+                            <button class="comment-action-btn" data-action="like" data-comment-id="3">
+                                <i class='bx bx-heart'></i>
+
+                            </button>
+                            <button class="comment-action-btn" data-action="reply" data-comment-id="3">
+                                <i class='bx  bx-message-bubble-reply'></i>
+                                Reply
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comment-item">
+                    <div class="comment-avatar-wrapper">
+                        <img src=""
+                             alt="User" class="comment-avatar">
+                    </div>
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <span class="comment-username">Tonyong Bayawak</span>
+                            <span class="comment-time">6 hours ago</span>
+                        </div>
+                        <p class="comment-text">Amazing work! Keep it up! ✨</p>
+                        <div class="comment-actions">
+                            <button class="comment-action-btn" data-action="like" data-comment-id="3">
+                                <i class='bx bx-heart'></i>
+                                
+                            </button>
+                            <button class="comment-action-btn" data-action="reply" data-comment-id="3">
+                                <i class='bx  bx-message-bubble-reply'></i>
+                                Reply
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State (hidden by default, show when no comments) -->
+            <div class="comments-empty-state" style="display: none;">
+                <i class='bx bx-message-circle'></i>
+                <h3>No comments yet</h3>
+                <p>Be the first to comment on this post!</p>
+            </div>
+        </div>
+
+        <!-- New Comment Input -->
+        <div class="new-comment-section">
+            <div class="new-comment-container">
+                <img src="@(ViewBag.CurrentUserAvatar ?? "~/assets/default-avatar.svg")"
+                     alt="Your avatar" class="new-comment-avatar">
+                <div class="new-comment-input-wrapper">
+                    <textarea class="new-comment-input"
+                              placeholder="Write a comment..."
+                              rows="1"
+                              id="newCommentInput"
+                              maxlength="500"></textarea>
+                    <button class="send-comment-btn" id="sendCommentBtn" disabled>
+                        <i class='bx bx-send'></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
 <script src="~/js/toggleEditDelete.js"></script>
-
-<!-- for showing the after taxed token price before posting -->
 <script src="~/js/afterTax.js"></script>
-
-<!--Open a modal for posting-->
-<script src="~/js/openModal.js"> </script>
-
-<!-- for editing post-->
+<script src="~/js/openModal.js"></script>
 <script src="~/js/editingPost.js"></script>
-
-<!--for delete post-->
 <script src="~/js/deletePost.js"></script>
-
-<!--for modal token-->
 <script src="~/js/tokenModal.js"></script>
-
-<!--for alert-->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<!--Message Script-->
 <script src="~/js/messageScript.js"></script>
-
-<!--Chat Bubble Script-->
 <script src="~/js/createChatBubble.js"></script>
+
+<!-- Enhanced JavaScript for image preview and form validation -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Image preview functionality
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+        const uploadSection = document.querySelector('.upload-section .upload-label');
+
+        if (imageInput) {
+            imageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImg.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                        uploadSection.style.display = 'none';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Character count for text inputs
+        const titleInput = document.getElementById('titleInput');
+        const descriptionInput = document.getElementById('descriptionInput');
+
+        if (titleInput) {
+            titleInput.addEventListener('input', function() {
+                const remaining = 100 - this.value.length;
+                // You can add character count display here
+            });
+        }
+
+        if (descriptionInput) {
+            descriptionInput.addEventListener('input', function() {
+                const remaining = 1000 - this.value.length;
+                // You can add character count display here
+            });
+        }
+
+        // Form validation
+        function validateForm() {
+            const title = titleInput?.value.trim();
+            const description = descriptionInput?.value.trim();
+            const category = document.getElementById('categoryInput')?.value;
+            const condition = document.getElementById('conditionInput')?.value;
+            const location = document.getElementById('locationInput')?.value.trim();
+            const image = imageInput?.files?.length > 0;
+            const latitude = document.getElementById('Latitude')?.value;
+            const longitude = document.getElementById('Longitude')?.value;
+
+            const isValid = title && description && category && condition && location && image && latitude && longitude;
+
+            const submitBtn = document.getElementById('submitPost');
+            if (submitBtn) {
+                submitBtn.disabled = !isValid;
+            }
+
+            return isValid;
+        }
+
+        // Add validation listeners to all form inputs
+        [titleInput, descriptionInput, document.getElementById('categoryInput'),
+         document.getElementById('conditionInput'), document.getElementById('locationInput'), imageInput]
+        .forEach(input => {
+            if (input) {
+                input.addEventListener('change', validateForm);
+                input.addEventListener('input', validateForm);
+            }
+        });
+    });
+
+    function removeImage() {
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const uploadSection = document.querySelector('.upload-section .upload-label');
+
+        imageInput.value = '';
+        imagePreview.style.display = 'none';
+        uploadSection.style.display = 'block';
+
+        // Trigger validation
+        const event = new Event('change');
+        imageInput.dispatchEvent(event);
+    }
+
+    function closeCreateModal() {
+        document.getElementById('createPostModal').style.display = 'none';
+    }
+
+    function closeEditModal() {
+        document.getElementById('editPostModal').style.display = 'none';
+    }
+</script>
+
+<script src="~/js/CommunityPage.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
