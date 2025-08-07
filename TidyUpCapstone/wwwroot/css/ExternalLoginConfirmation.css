@@ -1,0 +1,764 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root {
+    --background: #F5F5F5;
+    --primary-color: #6B9080;
+    --secondary-color: #A4C3B2;
+    --accent-color: #EAF4F4;
+    --text-color: #212529;
+    --success-color: #28a745;
+    --google-color: #4285f4;
+    --hover-effect: rgba(217, 217, 217, 0.6);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Montserrat", sans-serif;
+}
+
+body {
+    background: var(--background);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Montserrat", sans-serif;
+}
+
+.registration-container {
+    width: 100%;
+    max-width: 550px;
+    margin: 0 auto;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.registration-card {
+    background: var(--background);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 550px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+    border: 2px solid var(--primary-color);
+    font-family: "Montserrat", sans-serif;
+    background-clip: padding-box;
+    position: relative;
+    overflow: hidden;
+    animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.card-body {
+    padding: 2.5rem !important;
+}
+
+/* Header Styles */
+.provider-icon {
+    opacity: 0;
+    transform: translateY(20px) scale(0.8);
+    animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.2s forwards;
+}
+
+    .provider-icon i {
+        font-size: 3rem;
+        color: var(--google-color);
+        filter: drop-shadow(0 4px 8px rgba(66, 133, 244, 0.2));
+    }
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.3);
+    }
+
+    50% {
+        transform: translateY(-10px) scale(1.1);
+    }
+
+    70% {
+        transform: translateY(5px) scale(0.95);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.registration-header {
+    font-family: "Righteous", sans-serif;
+    font-size: 2rem;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.4s forwards;
+}
+
+.text-muted {
+    color: #666 !important;
+    font-size: 0.8rem;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.5s forwards;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Alert Styles */
+.alert-danger-custom {
+    background: linear-gradient(135deg, #f8d7da 0%, #fce4e6 100%);
+    border: 1px solid #dc3545;
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.6s forwards;
+}
+
+.alert-icon i {
+    font-size: 1.5rem;
+    color: #dc3545;
+    margin-top: 0.25rem;
+}
+
+.alert-content {
+    flex: 1;
+    text-align: left;
+}
+
+.alert-title {
+    font-weight: 600;
+    color: #dc3545;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.error-list {
+    color: #721c24;
+    font-size: 0.9rem;
+}
+
+/* Form Styles */
+#registrationForm {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.7s forwards;
+}
+
+.flex {
+    display: flex;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+/* Fixed floating label styles */
+.login-form-label {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    font-size: 1rem;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+    background: var(--background);
+    padding: 0 0.5rem;
+    font-weight: 400;
+    white-space: nowrap;
+}
+
+/* Active/focused label state */
+.login-form-control:not(:placeholder-shown) + .login-form-label,
+.login-form-control:focus + .login-form-label {
+    top: 0;
+    left: 1rem;
+    font-size: 0.85rem;
+    color: var(--primary-color);
+    font-weight: 500;
+    transform: translateY(-50%);
+}
+
+.login-form-control {
+    width: 100%;
+    padding: 1.25rem 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: var(--background);
+    font-family: "Montserrat", sans-serif;
+    position: relative;
+    z-index: 1;
+}
+
+    .login-form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(107, 144, 128, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .login-form-control:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-1px);
+    }
+
+    .login-form-control.bg-light {
+        background-color: #f8f9fa !important;
+        color: #666;
+    }
+
+    .login-form-control.is-invalid {
+        border-color: #dc3545;
+    }
+
+    .login-form-control.is-valid {
+        border-color: var(--success-color);
+    }
+
+.provider-badge {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--google-color);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+}
+
+.provider-text {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
+
+/* Custom Checkbox Styles */
+.checkbox-group {
+    margin: 1.5rem 0;
+}
+
+.custom-checkbox-wrapper {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.custom-checkbox {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.custom-checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    padding-left: 2rem;
+    position: relative;
+}
+
+.checkbox-checkmark {
+    position: absolute;
+    left: 0;
+    top: 2px;
+    height: 20px;
+    width: 20px;
+    background-color: #fff;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.custom-checkbox:hover ~ .custom-checkbox-label .checkbox-checkmark {
+    border-color: var(--primary-color);
+}
+
+.custom-checkbox:checked ~ .custom-checkbox-label .checkbox-checkmark {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.checkbox-checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.custom-checkbox:checked ~ .custom-checkbox-label .checkbox-checkmark:after {
+    display: block;
+}
+
+.custom-checkbox-label .checkbox-checkmark:after {
+    left: 6px;
+    top: 2px;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+}
+
+.checkbox-checkmark.checked {
+    animation: checkboxCheck 0.3s ease;
+}
+
+@keyframes checkboxCheck {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Button Styles */
+.btn-complete-registration {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: "Montserrat", sans-serif;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    text-decoration: none;
+    margin-top: 1rem;
+}
+
+    .btn-complete-registration:hover:not(:disabled) {
+        background: linear-gradient(135deg, #5a7d6b 0%, #8fb19e 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(107, 144, 128, 0.3);
+    }
+
+    .btn-complete-registration:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
+    /* Ripple Effect */
+    .btn-complete-registration::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-complete-registration:active::before {
+        width: 300px;
+        height: 300px;
+    }
+
+/* Spinner */
+.spinner-border {
+    width: 1rem;
+    height: 1rem;
+    border: 0.125em solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spinner-border-animation 0.75s linear infinite;
+}
+
+.spinner-border-sm {
+    width: 0.875rem;
+    height: 0.875rem;
+    border-width: 0.125em;
+}
+
+@keyframes spinner-border-animation {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Text Styles */
+.text-danger {
+    color: #dc3545 !important;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    display: block;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    min-height: 1.2rem;
+}
+
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.fw-semibold {
+    font-weight: 600 !important;
+}
+
+.small {
+    font-size: 0.9rem;
+}
+
+/* Email link hover effect */
+a[href^="mailto:"] {
+    color: var(--primary-color) !important;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+    a[href^="mailto:"]:hover {
+        text-decoration: underline;
+        transform: translateY(-1px);
+    }
+
+/* Links */
+a.text-primary {
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+    a.text-primary:hover {
+        text-decoration: underline;
+        color: #5a7d6b !important;
+    }
+
+/* Border and spacing utilities */
+.border-top {
+    border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.mt-3 {
+    margin-top: 1rem !important;
+}
+
+.mt-4 {
+    margin-top: 1.5rem !important;
+}
+
+.pt-3 {
+    padding-top: 1rem !important;
+}
+
+.mb-0 {
+    margin-bottom: 0 !important;
+}
+
+.mb-3 {
+    margin-bottom: 1rem !important;
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem !important;
+}
+
+.me-2 {
+    margin-right: 0.5rem !important;
+}
+
+/* Text alignment */
+.text-center {
+    text-align: center !important;
+}
+
+/* Display utilities */
+.d-flex {
+    display: flex !important;
+}
+
+.d-grid {
+    display: grid !important;
+}
+
+.d-none {
+    display: none !important;
+}
+
+.align-items-center {
+    align-items: center !important;
+}
+
+.justify-content-center {
+    justify-content: center !important;
+}
+
+.min-vh-100 {
+    min-height: 100vh !important;
+}
+
+/* Bottom section animation */
+.text-center.mt-3 {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.8s forwards;
+}
+
+.mt-4.pt-3.border-top {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.9s forwards;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 2rem !important;
+    }
+
+    .registration-header {
+        font-size: 1.75rem;
+    }
+
+    .registration-container {
+        padding: 0.5rem;
+    }
+
+    .login-form-control {
+        padding: 1.125rem 0.875rem;
+    }
+
+    .login-form-label {
+        left: 0.875rem;
+        font-size: 0.95rem;
+    }
+
+    .login-form-control:not(:placeholder-shown) + .login-form-label,
+    .login-form-control:focus + .login-form-label {
+        left: 0.875rem;
+        font-size: 0.8rem;
+    }
+
+    .alert-danger-custom {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .alert-content {
+        text-align: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1.5rem !important;
+    }
+
+    .registration-header {
+        font-size: 1.5rem;
+    }
+
+    .registration-container {
+        padding: 0.25rem;
+    }
+
+    .registration-card {
+        margin: 0.5rem;
+        border-radius: 16px;
+    }
+
+    .btn-complete-registration {
+        padding: 0.875rem 1.25rem;
+    }
+
+    .login-form-control {
+        padding: 1rem 0.75rem;
+        font-size: 0.95rem;
+    }
+
+    .login-form-label {
+        left: 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .login-form-control:not(:placeholder-shown) + .login-form-label,
+    .login-form-control:focus + .login-form-label {
+        left: 0.75rem;
+        font-size: 0.75rem;
+    }
+
+    .provider-icon i {
+        font-size: 2.5rem;
+    }
+
+    .custom-checkbox-label {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .registration-card {
+        width: calc(100vw - 1rem);
+        margin: 0.5rem;
+    }
+
+    .card-body {
+        padding: 1.25rem !important;
+    }
+
+    .login-form-control {
+        padding: 0.875rem 0.625rem;
+        font-size: 0.9rem;
+    }
+
+    .login-form-label {
+        left: 0.625rem;
+        font-size: 0.85rem;
+    }
+
+    .login-form-control:not(:placeholder-shown) + .login-form-label,
+    .login-form-control:focus + .login-form-label {
+        left: 0.625rem;
+        font-size: 0.7rem;
+    }
+
+    .custom-checkbox-label {
+        padding-left: 1.8rem;
+        font-size: 0.85rem;
+    }
+
+    .checkbox-checkmark {
+        height: 18px;
+        width: 18px;
+    }
+}
+
+/* Extra small screens - 320px and below */
+@media (max-width: 320px) {
+    .card-body {
+        padding: 1rem !important;
+    }
+
+    .login-form-control {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .login-form-label {
+        left: 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .login-form-control:not(:placeholder-shown) + .login-form-label,
+    .login-form-control:focus + .login-form-label {
+        left: 0.5rem;
+        font-size: 0.65rem;
+    }
+
+    .registration-header {
+        font-size: 1.25rem;
+    }
+
+    .custom-checkbox-label {
+        font-size: 0.8rem;
+        padding-left: 1.6rem;
+    }
+
+    .checkbox-checkmark {
+        height: 16px;
+        width: 16px;
+    }
+}
+
+/* Focus visible for accessibility */
+.btn-complete-registration:focus-visible,
+.login-form-control:focus-visible,
+.custom-checkbox:focus-visible ~ .custom-checkbox-label .checkbox-checkmark {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .registration-card {
+        border-width: 3px;
+    }
+
+    .login-form-control {
+        border-width: 2px;
+    }
+
+    .checkbox-checkmark {
+        border-width: 3px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .registration-card,
+    .provider-icon,
+    .registration-header,
+    .text-muted,
+    .alert-danger-custom,
+    #registrationForm,
+    .text-center.mt-3,
+    .mt-4.pt-3.border-top {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+}

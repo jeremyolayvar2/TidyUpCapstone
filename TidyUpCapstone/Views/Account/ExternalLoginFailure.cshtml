@@ -1,13 +1,81 @@
 ﻿@{
     ViewBag.HideNavigation = true;
+    ViewData["Title"] = "Login Failed";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/account.css" />
+    <link rel="stylesheet" href="~/css/ExternalLoginFailure.css" />
 }
 
-<div class="container mt-5">
-    <h2>Login Failed</h2>
-    <p>There was an error signing you in. Please try again.</p>
-    <a href="/Account/Login" class="btn btn-secondary">Back to Login</a>
+<div class="external-login-failure-container d-flex align-items-center justify-content-center min-vh-100">
+    <div class="external-login-failure-card">
+        <div class="card-body p-5">
+
+            <!-- Header Section -->
+            <div class="text-center mb-4">
+                <h1 class="external-login-failure-header">Login Failed</h1>
+                <p class="text-muted small mb-0">
+                    We encountered an error while signing you in. Please try again or use a different login method.
+                </p>
+            </div>
+
+            <!-- Error Details -->
+            <div class="alert alert-danger-custom text-center mb-4">
+                <div class="alert-content">
+                    <h6 class="alert-title">Authentication Error</h6>
+                    <p class="alert-message mb-0">
+                        The external login provider returned an error. This might be due to:
+                    </p>
+                    <ul class="error-reasons">
+                        <li>Account permissions or access restrictions</li>
+                        <li>Temporary service unavailability</li>
+                        <li>Network connectivity issues</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-grid mb-3">
+                <a href="@Url.Action("Index", "Home")" class="btn-back-to-login">
+    
+                    Back to Login
+                </a>
+            </div>
+
+
+            <!-- Additional Help -->
+            <div class="mt-4 pt-3 border-top text-center small text-muted">
+                Still having trouble? Contact us at
+                <a href="mailto:support@tidyup.com" class="text-primary fw-semibold">support@tidyup.com</a>
+            </div>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Auto-refresh after 30 seconds if user doesn't take action
+        let refreshTimer = setTimeout(() => {
+            if (confirm('Would you like to return to the login page?')) {
+                window.location.href = '@Url.Action("Index", "Home")';
+            }
+        }, 30000);
+
+        // Clear timer if user interacts with the page
+        document.addEventListener('click', () => {
+            clearTimeout(refreshTimer);
+        });
+
+        // Add smooth animations to buttons
+        document.querySelectorAll('.btn-back-to-login, .btn-try-again, .btn-alternative').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px) scale(1.02)';
+            });
+
+            btn.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    </script>
+}

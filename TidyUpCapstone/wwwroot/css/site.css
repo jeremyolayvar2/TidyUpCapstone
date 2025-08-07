@@ -24,16 +24,20 @@ body {
     line-height: normal;
     min-height: 100vh;
     min-height: 100dvh;
-    display: grid;
-    grid-template-columns: auto 1fr 1fr;
-    justify-content: center;
+    display: flex;
+    width: 100vw;
+    overflow-x: hidden;
 }
 
-
+.main {
+    width: 100vw;
+}
 
 .layout-wrapper {
     width: 100vw;
-    justify-content: space-around;
+    display: flex;
+    position: relative;
+
 }
 
 

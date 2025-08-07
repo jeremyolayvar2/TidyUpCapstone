@@ -5,45 +5,37 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/account.css" />
+    <link rel="stylesheet" href="~/css/EmailAlreadyConfirmed.css" />
 }
 
-<div class="verification-status-container d-flex align-items-center justify-content-center min-vh-100">
-    <div class="status-card card shadow-lg border-0">
-        <div class="card-body text-center p-5">
+<div class="email-already-confirmed-container d-flex align-items-center justify-content-center min-vh-100">
+    <div class="email-already-confirmed-card">
+        <div class="card-body p-5">
 
-            <!-- Success Icon -->
-            <div class="mb-4">
-                <i class="fas fa-check-circle text-success" style="font-size: 4rem; animation: pulse 1.5s infinite;"></i>
+            <!-- Header Section -->
+            <div class="text-center mb-4">
+                <h1 class="email-already-confirmed-header">Email Already Verified</h1>
+                <p class="text-muted small mb-0">
+                    Great news! Your email address is already verified and your account is active.
+                </p>
             </div>
 
-            <!-- Header -->
-            <h2 class="h3 fw-bold text-success mb-3">Email Already Verified</h2>
-
-            <!-- Message -->
-            <p class="text-muted mb-3">
-                Great news! Your email address is already verified and your account is active.
-            </p>
-
             <!-- Info Alert -->
-            <div class="alert alert-info border-0 mb-4">
-                <i class="fas fa-info-circle me-2"></i>
+            <div class="info-alert mb-4">
+                <i class="info-alert-icon"></i>
                 You can log in to your account anytime.
             </div>
 
-            <!-- Action Buttons -->
+            <!-- Action Buttons - FIXED -->
             <div class="d-grid gap-3 mb-3">
-                <a href="@Url.Action("Login", "Account")" class="btn btn-success btn-lg">
-                    <i class="fas fa-sign-in-alt me-2"></i> Log In to Your Account
-                </a>
-                <a href="@Url.Action("Index", "Home")" class="btn btn-outline-primary">
-                    <i class="fas fa-home me-2"></i> Go to Homepage
+                <a href="@Url.Action("Index", "Home")" class="btn-go-to-login">
+                    Go to Login
                 </a>
             </div>
 
             <!-- Help -->
-            <div class="mt-4 pt-3 border-top">
-                <p class="small text-muted mb-0">
+            <div class="help-section mt-4 pt-3 border-top text-center small text-muted">
+                <p class="mb-0">
                     Forgot your password?
                     <a href="@Url.Action("ForgotPassword", "Account")" class="text-primary fw-semibold">Reset it here</a>
                 </p>
@@ -51,4 +43,3 @@
         </div>
     </div>
 </div>
-

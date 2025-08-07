@@ -5,41 +5,40 @@
 }
 
 @section Styles {
-        <link rel="stylesheet" href="~/css/account.css" />
+    <link rel="stylesheet" href="~/css/EmailConfirmationError.css" />
 }
 
+<div class="email-confirmation-error-container d-flex align-items-center justify-content-center min-vh-100">
+    <div class="email-confirmation-error-card">
+        <div class="card-body p-5">
 
-<div class="verification-error-container d-flex align-items-center justify-content-center min-vh-100">
-    <div class="error-card card shadow-lg border-0">
-        <div class="card-body text-center p-5">
-
-            <!-- Error Icon -->
-            <div class="mb-4">
-                <i class="fas fa-exclamation-triangle text-warning" style="font-size: 4rem; animation: pulse 1.5s infinite;"></i>
+            <!-- Header Section -->
+            <div class="text-center mb-4">
+                <h1 class="email-confirmation-error-header">Verification Link Issue</h1>
+                <p class="text-muted small mb-0">
+                    We encountered a problem with your verification link.
+                </p>
             </div>
 
-            <!-- Header -->
-            <h2 class="h3 fw-bold text-warning mb-3">Verification Link Issue</h2>
-
             <!-- Error Message -->
-            <div class="alert alert-warning border-0 mb-4">
+            <div class="error-alert mb-4">
                 <p class="mb-0 fw-semibold">@ViewBag.ErrorMessage</p>
             </div>
 
             <!-- Common Reasons -->
-            <div class="mb-4 text-start">
-                <h6 class="text-muted mb-3">Possible reasons:</h6>
-                <ul class="list-unstyled small text-muted">
-                    <li class="mb-2">
-                        <i class="fas fa-clock text-warning me-2"></i>
+            <div class="reasons-section mb-4">
+                <h6 class="reasons-title mb-3">Possible reasons:</h6>
+                <ul class="reasons-list">
+                    <li>
+                        <i class="clock-icon"></i>
                         Verification link has expired (valid for 24 hours)
                     </li>
-                    <li class="mb-2">
-                        <i class="fas fa-link text-warning me-2"></i>
+                    <li>
+                        <i class="link-icon"></i>
                         Link was already used or is invalid
                     </li>
-                    <li class="mb-2">
-                        <i class="fas fa-copy text-warning me-2"></i>
+                    <li>
+                        <i class="copy-icon"></i>
                         The link was copied incorrectly from your email
                     </li>
                 </ul>
@@ -47,19 +46,16 @@
 
             <!-- Action Buttons -->
             <div class="d-grid gap-3 mb-3">
-                <a href="@Url.Action("ResendVerification", "Account")" class="btn btn-warning btn-lg">
-                    <i class="fas fa-paper-plane me-2"></i> Request New Verification Email
+                <a href="@Url.Action("ResendVerification", "Account")" class="btn-resend-verification">
+                    Request New Verification Email
                 </a>
-                <a href="@Url.Action("Register", "Account")" class="btn btn-outline-primary">
-                    <i class="fas fa-user-plus me-2"></i> Create New Account
-                </a>
-                <a href="@Url.Action("Login", "Account")" class="btn btn-link">Back to Login</a>
+                <a href="@Url.Action("Index", "Home")" class="btn btn-link">Back to Login</a>
             </div>
 
             <!-- Help Section -->
-            <div class="mt-4 pt-3 border-top">
+            <div class="help-section mt-4 pt-3 border-top text-center">
                 <p class="small text-muted mb-1">
-                    <i class="fas fa-question-circle me-1"></i> Still having trouble?
+                     Still having trouble?
                 </p>
                 <p class="small text-muted">
                     Contact our support team at

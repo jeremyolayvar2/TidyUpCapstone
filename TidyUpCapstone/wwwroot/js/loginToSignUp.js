@@ -1,4 +1,4 @@
-﻿const container = document.querySelector('.container2');
+﻿ const container = document.querySelector('.container2');
 const loginForm = document.querySelector('.login-form');
 const signupForm = document.querySelector('.signup-form');
 const signupBtn = document.getElementById('signup-btn');

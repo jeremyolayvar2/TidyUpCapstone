@@ -12,8 +12,8 @@ using TidyUpCapstone.Data;
 namespace TidyUpCapstone.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250728180039_AddFirstNameLastNameToAppUser")]
-    partial class AddFirstNameLastNameToAppUser
+    [Migration("20250807120520_TidyUpSchema")]
+    partial class TidyUpSchema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

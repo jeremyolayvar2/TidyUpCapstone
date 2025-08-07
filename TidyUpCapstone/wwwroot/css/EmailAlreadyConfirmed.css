@@ -1,0 +1,382 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root {
+    --background: #F5F5F5;
+    --primary-color: #6B9080;
+    --secondary-color: #A4C3B2;
+    --accent-color: #EAF4F4;
+    --text-color: #212529;
+   
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Montserrat", sans-serif;
+}
+
+body {
+    background: var(--background);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Montserrat", sans-serif;
+}
+
+.email-already-confirmed-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.email-already-confirmed-card {
+    background: var(--background);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+    border: 2px solid var(--primary-color);
+    font-family: "Montserrat", sans-serif;
+    background-clip: padding-box;
+    position: relative;
+    overflow: hidden;
+    animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.card-body {
+    padding: 2.5rem !important;
+}
+
+/* Header Styles */
+.email-already-confirmed-header {
+    font-family: "Righteous", sans-serif;
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
+}
+
+.text-muted {
+    color: #666 !important;
+    font-size: 1rem;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Info Alert */
+.info-alert {
+    background: var(--background);
+    border: 1px solid var(--secondary-color);
+    border-radius: 12px;
+    padding: 1rem;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.4s forwards;
+}
+
+.info-alert-icon::before {
+    content: "ℹ";
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+/* Button Styles */
+.btn-log-in {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: "Montserrat", sans-serif;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--success-color) 0%, #34ce57 100%);
+    color: white;
+    text-decoration: none;
+}
+
+    .btn-log-in:hover {
+        background: linear-gradient(135deg, #218838 0%, #28a745 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(40, 167, 69, 0.3);
+    }
+
+.btn-go-to-login {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: "Montserrat", sans-serif;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #6B9080 0%, #A4C3B2 100%);
+    color: var(--background);
+    text-decoration: none;
+}
+
+
+        .btn-go-to-login:hover:not(:disabled) {
+            background: linear-gradient(135deg, #5a7d6b 0%, #8fb19e 100%);
+        }
+
+    /* Ripple Effect */
+    .btn-log-in::before,
+    .btn-go-to-login::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-log-in:active::before,
+    .btn-go-to-login:active::before {
+        width: 300px;
+        height: 300px;
+    }
+
+/* Action buttons container animation */
+.d-grid {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.5s forwards;
+}
+
+/* Help Section */
+.help-section {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.6s forwards;
+}
+
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.fw-semibold {
+    font-weight: 600 !important;
+}
+
+/* Text Styles */
+.small {
+    font-size: 0.9rem;
+}
+
+/* Border and spacing utilities */
+.border-top {
+    border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.mt-4 {
+    margin-top: 1.5rem !important;
+}
+
+.pt-3 {
+    padding-top: 1rem !important;
+}
+
+.mb-0 {
+    margin-bottom: 0 !important;
+}
+
+.mb-3 {
+    margin-bottom: 1rem !important;
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem !important;
+}
+
+/* Text alignment */
+.text-center {
+    text-align: center !important;
+}
+
+/* Display utilities */
+.d-flex {
+    display: flex !important;
+}
+
+.d-grid {
+    display: grid !important;
+}
+
+.align-items-center {
+    align-items: center !important;
+}
+
+.justify-content-center {
+    justify-content: center !important;
+}
+
+.min-vh-100 {
+    min-height: 100vh !important;
+}
+
+.gap-3 {
+    gap: 1rem !important;
+}
+
+/* Link hover effect */
+a[href*="ForgotPassword"] {
+    color: var(--primary-color) !important;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+    a[href*="ForgotPassword"]:hover {
+        text-decoration: underline;
+        transform: translateY(-1px);
+    }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 2rem !important;
+    }
+
+    .email-already-confirmed-header {
+        font-size: 1.75rem;
+    }
+
+    .email-already-confirmed-container {
+        padding: 0.5rem;
+    }
+
+    .email-already-confirmed-card {
+        margin: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1.5rem !important;
+    }
+
+    .email-already-confirmed-header {
+        font-size: 1.5rem;
+    }
+
+    .email-already-confirmed-container {
+        padding: 0.25rem;
+    }
+
+    .email-already-confirmed-card {
+        margin: 0.5rem;
+        border-radius: 16px;
+    }
+
+    .btn-log-in,
+    .btn-go-to-login {
+        padding: 0.875rem 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .email-already-confirmed-card {
+        width: calc(100vw - 1rem);
+        margin: 0.5rem;
+    }
+
+    .card-body {
+        padding: 1.25rem !important;
+    }
+}
+
+/* Focus visible for accessibility */
+.btn-log-in:focus-visible,
+.btn-go-to-login:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .email-already-confirmed-card {
+        border-width: 3px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .email-already-confirmed-card {
+        animation: none;
+    }
+
+    .email-already-confirmed-header,
+    .text-muted,
+    .info-alert,
+    .d-grid,
+    .help-section {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+}

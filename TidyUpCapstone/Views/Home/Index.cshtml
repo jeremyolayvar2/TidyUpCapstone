@@ -1,77 +1,689 @@
-﻿@model ErrorViewModel
+﻿@model TidyUpCapstone.Models.ViewModels.Account.LoginViewModel
 
 @{
     ViewBag.HideNavigation = true;
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/home-index.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/style1.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/modal.css" asp-append-version="true" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 }
 
-<div class="main-container">
-    <div class="container1">
-        <div class="title">Build Better Habits-Together.</div>
+<!-- Scroll Container -->
+<div class="scroll-container">
 
-        @* <div class="block reuse">Reuse</div>
-        <div class="block mindful">Mindful</div>
-        <div class="block empty1"></div>
-        <div class="block unload">Unload</div>
-        <div class="block letgo">Let go</div>
-        <div class="block clearout">Clear out</div>
-        <div class="block organize">Organize</div>
-        <div class="block empty2"></div>
-        <div class="block empty3"></div>
-        <div class="block empty5"></div> *@
+    <!-- SECTION 1: Main Landing Section -->
+    <div class="section">
+        <div class="main-container">
+            <!-- Logo Section -->
+            <div class="logo-section">
+                <img src="~/assets/logo-tidyup.png" alt="TidyUp Logo" class="logo" />
+            </div>
 
-    </div>
-
-    <div class="container2">
-        <div class="form-wrapper">
-            <!-- Updated Welcome Section -->
-            <div class="welcome-section active">
-                <div class="welcome-header">
-                    <h2>Welcome to TidyUp</h2>
+            <!-- Main Content Container -->
+            <div class="content-wrapper">
+                <!-- Left Side - Brand Section -->
+                <div class="brand-section">
+                    <div class="title">Build Better Habits-Together.</div>
                 </div>
 
-                <!-- Call to Action Buttons -->
-                <div class="cta-buttons">
-                    <div class="input-box">
-                        <a href="/Account/Register" class="btn-primary get-started">
-                            <i class="fas fa-rocket"></i>
-                            Get Started
-                        </a>
-                    </div>
-                    <div class="input-box">
-                        <a href="/Account/Login" class="btn-secondary sign-in">
-                            <i class="fas fa-sign-in-alt"></i>
-                            Sign In
-                        </a>
-                    </div>
-                </div>
+                <!-- Right Side - Form Container -->
+                <div class="form-container">
+                    <div class="form-wrapper">
+                        <!-- Welcome Section -->
+                        <div class="welcome-section active">
+                            <div class="welcome-header">
+                                <h2 class="welcome-title">Welcome to <br /> TidyUp</h2>
+                            </div>
 
-                <!-- Social Login Preview -->
-                @* <div class="login-preview">
-                    <p class="login-preview-text">Quick sign in with:</p>
-                    <div class="social-icons">
-                        <!-- Google OAuth Form -->
-                        <form asp-action="ExternalLogin" asp-controller="Account" method="post" style="display: inline;">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="provider" value="Google" />
-                            <input type="hidden" name="returnUrl" value="@Url.Action("Main", "Home")" />
-                            <button type="submit" class="social-icon google">
-                                <i class="fab fa-google"></i>
-                                <span>Google</span>
-                            </button>
-                        </form>
-
-                        <!-- Facebook (placeholder for future) -->
-                        <div class="social-icon facebook disabled">
-                            <i class="fab fa-facebook-f"></i>
-                            <span>Facebook</span>
+                            <!-- Call to Action Buttons -->
+                            <div class="cta-buttons">
+                                <div class="input-box">
+                                    <a href="#" class="btn-get-started" id="openRegisterModal">
+                                        <span>Get Started</span>
+                                    </a>
+                                </div>
+                                <div class="input-box">
+                                    <a href="#" class="btn-sign-in" id="openLoginModal">
+                                        <span>Sign In</span>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div> *@
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 2: Community Section -->
+    <div class="section community-section">
+        <div class="community-container">
+            <div class="community-header">
+                <h2 class="community-title">Join Our Community</h2>
+                <p class="community-subtitle">
+                    Welcome to a new kind of space - where less is more and simplicity reigns.
+                </p>
+                <p class="community-description">
+                    Our platform is built for those who are ready to give unused items a second life, earn rewards, and make habits for what truly matters.
+                </p>
+            </div>
+
+            <div class="community-cta">
+                <a href="/Community/Join" class="btn-join-community">
+                    <i class="fas fa-users"></i>
+                    <span>Join Community</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Floating Avatars -->
+        <div class="floating-avatars">
+            <div class="avatar large" style="background-image: url('https://images.unsplash.com/photo-1494790108755-2616c6c1ac09?w=120&h=120&fit=crop&crop=face'); background-size: cover; background-position: center;"></div>
+            <div class="avatar medium" style="background-image: url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face'); background-size: cover; background-position: center;"></div>
+            <div class="avatar small" style="background-image: url('https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&h=60&fit=crop&crop=face'); background-size: cover; background-position: center;"></div>
+            <div class="avatar medium" style="background-image: url('https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face'); background-size: cover; background-position: center;"></div>
+            <div class="avatar small" style="background-image: url('https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?w=60&h=60&fit=crop&crop=face'); background-size: cover; background-position: center;"></div>
+            <div class="avatar large" style="background-image: url('https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?w=120&h=120&fit=crop&crop=face'); background-size: cover; background-position: center;"></div>
+            <div class="avatar medium" style="background-image: url('https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&crop=face'); background-size: cover; background-position: center;"></div>
+            <div class="avatar small" style="background-image: url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&h=60&fit=crop&crop=face'); background-size: cover; background-position: center;"></div>
+            <div class="avatar large" style="background-image: url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&h=120&fit=crop&crop=face'); background-size: cover; background-position: center;"></div>
+            <div class="avatar medium" style="background-image: url('https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=80&h=80&fit=crop&crop=face'); background-size: cover; background-position: center;"></div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Scroll Indicator -->
+<div class="scroll-indicator">
+    <div class="scroll-dot active" data-section="0"></div>
+    <div class="scroll-dot" data-section="1"></div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="login-modal-overlay" id="loginModal">
+    <div class="login-modal-container">
+        <div class="login-modal-header">
+            <button class="login-modal-close" id="closeLoginModal">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="login-auth-header">
+                <h2>Sign in to Tidy Up</h2>
+            </div>
+        </div>
+
+        <div class="login-modal-body">
+            <!-- Error Messages -->
+            <div class="login-alert login-alert-danger" id="loginErrorAlert" style="display: none;">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="loginErrorMessage"></span>
+            </div>
+
+            <!-- OAuth Section -->
+            <form method="post" action="/Account/ExternalLogin" class="login-oauth-section">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="provider" value="Google" />
+                <input type="hidden" name="returnUrl" value="" />
+                <button type="submit" class="login-btn login-btn-google">
+                    <i class="fab fa-google"></i>
+                    Sign in with Google
+                </button>
+            </form>
+
+            <button class="login-btn login-btn-facebook" disabled>
+                <i class="fab fa-facebook-f"></i>
+                Sign in with Facebook
+            </button>
+
+            <!-- Divider -->
+            <div class="login-divider">
+                <span>OR</span>
+            </div>
+
+            <!-- Manual Login Form -->
+            <form method="post" action="/Account/ModalLogin" id="loginForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="" />
+
+                <!-- Email -->
+                <div class="login-form-group">
+                    <input name="Email" type="email" class="login-form-control" placeholder=" " required />
+                    <label class="login-form-label">Email</label>
+                </div>
+
+                <!-- Password -->
+                <div class="login-form-group">
+                    <input name="Password" type="password" class="login-form-control" placeholder=" " required />
+                    <label class="login-form-label">Password</label>
+                </div>
+
+                <!-- Remember Me & Forgot Password -->
+                <div class="login-form-group login-form-row">
+                    <div class="login-form-check">
+                        <input name="RememberMe" class="login-form-check-input" type="checkbox" id="loginRememberMe" />
+                        <label class="login-form-check-label" for="loginRememberMe">Remember me</label>
+                    </div>
+                    <a href="/Account/ForgotPassword" class="login-forgot-password-link">Forgot Password?</a>
+                </div>
+
+                <!-- Sign In Button -->
+                <button type="submit" class="login-btn login-btn-primary" id="loginSubmitBtn">
+                    Sign In
+                </button>
+            </form>
+
+            <!-- Footer -->
+            <div class="login-footer-links">
+                <p>
+                    Don't have an account?
+                    <a href="#" onclick="switchToRegister()">Create Account</a>
+                </p>
+                <p class="login-terms-text">
+                    By continuing, you agree to our
+                    <a href="#">Terms</a> &
+                    <a href="#">Privacy Policy</a>
+                </p>
             </div>
         </div>
     </div>
 </div>
+
+<!-- REGISTER MODAL -->
+<!-- Replace the register form section in your Index.cshtml with this corrected version -->
+<!-- REGISTER MODAL -->
+<div class="register-modal-overlay" id="registerModal">
+    <div class="register-modal-container">
+        <div class="register-modal-header">
+            <button class="register-modal-close" id="closeRegisterModal">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="register-auth-header">
+                <h2>Create Your Account</h2>
+                <p>Start decluttering with ease</p>
+            </div>
+        </div>
+
+        <div class="register-modal-body">
+            <!-- Error Messages -->
+            <div class="register-alert register-alert-danger" id="registerErrorAlert" style="display: none;">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="registerErrorMessage"></span>
+            </div>
+
+            <!-- OAuth Section -->
+            <form method="post" action="/Account/ExternalLogin" class="register-oauth-section">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="provider" value="Google" />
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+                <button type="submit" class="register-btn register-btn-google">
+                    <i class="fab fa-google"></i>
+                    Create an account with Google
+                </button>
+            </form>
+
+            <button class="register-btn register-btn-facebook" disabled>
+                <i class="fab fa-facebook-f"></i>
+                Create an account with Facebook
+            </button>
+
+            <!-- Divider -->
+            <div class="register-divider">
+                <span>OR</span>
+            </div>
+
+            <!-- Manual Registration Form - FIXED -->
+            <form method="post" action="/Account/ModalRegister" id="registerForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
+                <!-- Email -->
+                <div class="register-form-group">
+                    <div class="register-input-group">
+                        <input name="Email" type="email" class="register-form-control" placeholder=" " required />
+                        <label class="register-form-label">Email Address</label>
+                    </div>
+                </div>
+
+                <!-- Username -->
+                <div class="register-form-group">
+                    <div class="register-input-group">
+                        <input name="Username" type="text" class="register-form-control" placeholder=" " required />
+                        <label class="register-form-label">Username</label>
+                    </div>
+                </div>
+
+                <!-- Name Fields -->
+                <div class="register-form-row">
+                    <div class="register-form-group">
+                        <div class="register-input-group">
+                            <input name="FirstName" type="text" class="register-form-control" placeholder=" " required />
+                            <label class="register-form-label">First Name</label>
+                        </div>
+                    </div>
+                    <div class="register-form-group">
+                        <div class="register-input-group">
+                            <input name="LastName" type="text" class="register-form-control" placeholder=" " required />
+                            <label class="register-form-label">Last Name</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="register-form-group">
+                    <div class="register-input-group">
+                        <input name="Password" type="password" class="register-form-control" placeholder=" " required />
+                        <label class="register-form-label">Password</label>
+                        <i class="fas fa-eye register-show-password" onclick="toggleRegisterPassword(this)"></i>
+                    </div>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="register-form-group">
+                    <div class="register-input-group">
+                        <input name="ConfirmPassword" type="password" class="register-form-control" placeholder=" " required />
+                        <label class="register-form-label">Confirm Password</label>
+                        <i class="fas fa-eye register-show-password" onclick="toggleRegisterPassword(this)"></i>
+                    </div>
+                </div>
+
+                <div class="register-terms-section">
+                    <div class="register-form-check">
+                        <input name="AcceptTerms" class="register-form-check-input" type="checkbox" id="acceptTerms" required />
+                        <label class="register-form-check-label" for="acceptTerms">
+                            I accept the <a href="@Url.Action("Terms", "Legal")" target="_blank">Terms of Service</a>
+                        </label>
+                    </div>
+                    <div class="register-form-check">
+                        <input name="AcceptPrivacy" class="register-form-check-input" type="checkbox" id="acceptPrivacy" required />
+                        <label class="register-form-check-label" for="acceptPrivacy">
+                            I accept the <a href="@Url.Action("Privacy", "Legal")" target="_blank">Privacy Policy</a>
+                        </label>
+                    </div>
+                    <div class="register-form-check">
+                        <input name="MarketingEmails" class="register-form-check-input" type="checkbox" id="marketingEmails" />
+                        <label class="register-form-check-label" for="marketingEmails">
+                            Subscribe to marketing emails (optional)
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="register-btn register-btn-primary" id="registerSubmitBtn">
+                    Start Your Journey
+                </button>
+            </form>
+
+            <!-- Footer -->
+            <div class="register-footer-links">
+                <p>
+                    Already have an account?
+                    <a href="#" onclick="switchToLogin()">Sign In</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/IndexPageScroll.js"></script>
+    <script>
+        (function() {
+            'use strict';
+
+            // Get modal elements
+            const loginModal = document.getElementById('loginModal');
+            const registerModal = document.getElementById('registerModal');
+            const closeLoginModal = document.getElementById('closeLoginModal');
+            const closeRegisterModal = document.getElementById('closeRegisterModal');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+            const registerSubmitBtn = document.getElementById('registerSubmitBtn');
+            const loginErrorAlert = document.getElementById('loginErrorAlert');
+            const loginErrorMessage = document.getElementById('loginErrorMessage');
+            const registerErrorAlert = document.getElementById('registerErrorAlert');
+            const registerErrorMessage = document.getElementById('registerErrorMessage');
+
+            // Modal management functions
+            function openLoginModal() {
+                console.log('Opening login modal...');
+                if (loginModal) {
+                    loginModal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    console.error('Login modal not found!');
+                }
+            }
+
+            function openRegisterModal() {
+                console.log('Opening register modal...');
+                if (registerModal) {
+                    registerModal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    console.error('Register modal not found!');
+                }
+            }
+
+            function closeAllModals() {
+                console.log('Closing all modals...');
+                if (loginModal) loginModal.classList.remove('active');
+                if (registerModal) registerModal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            // Show error message functions
+            function showLoginError(message) {
+                console.log('Login error:', message);
+                if (loginErrorMessage && loginErrorAlert) {
+                    loginErrorMessage.textContent = message;
+                    loginErrorAlert.style.display = 'flex';
+                }
+                if (loginSubmitBtn) {
+                    loginSubmitBtn.disabled = false;
+                    loginSubmitBtn.innerHTML = 'Sign In';
+                }
+            }
+
+            function showRegisterError(message) {
+                console.log('Register error:', message);
+                if (registerErrorMessage && registerErrorAlert) {
+                    registerErrorMessage.textContent = message;
+                    registerErrorAlert.style.display = 'flex';
+                }
+                if (registerSubmitBtn) {
+                    registerSubmitBtn.disabled = false;
+                    registerSubmitBtn.innerHTML = 'Start Your Journey';
+                }
+            }
+
+            function showSuccess(message) {
+                console.log('Success:', message);
+                alert(message); // You can replace this with a nicer notification system
+            }
+
+            // Event listeners for opening modals
+            document.addEventListener('click', function(e) {
+                console.log('Click detected on:', e.target);
+
+                // Open login modal
+                if (e.target.closest('.btn-sign-in') || e.target.id === 'openLoginModal') {
+                    console.log('Login button clicked');
+                    e.preventDefault();
+                    openLoginModal();
+                }
+
+                // Open register modal
+                if (e.target.closest('.btn-get-started') || e.target.id === 'openRegisterModal') {
+                    console.log('Register button clicked');
+                    e.preventDefault();
+                    openRegisterModal();
+                }
+            });
+
+            // Close modal events
+            if (closeLoginModal) {
+                closeLoginModal.addEventListener('click', function(e) {
+                    console.log('Close login modal clicked');
+                    closeAllModals();
+                });
+            }
+            if (closeRegisterModal) {
+                closeRegisterModal.addEventListener('click', function(e) {
+                    console.log('Close register modal clicked');
+                    closeAllModals();
+                });
+            }
+
+            // Close on overlay click
+            if (loginModal) {
+                loginModal.addEventListener('click', function(e) {
+                    if (e.target === loginModal) {
+                        console.log('Login overlay clicked');
+                        closeAllModals();
+                    }
+                });
+            }
+            if (registerModal) {
+                registerModal.addEventListener('click', function(e) {
+                    if (e.target === registerModal) {
+                        console.log('Register overlay clicked');
+                        closeAllModals();
+                    }
+                });
+            }
+
+            // Close on Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    console.log('Escape key pressed');
+                    closeAllModals();
+                }
+            });
+
+            // Handle login form submission
+            if (loginForm) {
+                loginForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    console.log('Login form submitted');
+
+                    // Show loading state
+                    if (loginSubmitBtn) {
+                        loginSubmitBtn.disabled = true;
+                        loginSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
+                    }
+
+                    // Hide previous errors
+                    if (loginErrorAlert) {
+                        loginErrorAlert.style.display = 'none';
+                    }
+
+                    try {
+                        // Get form data
+                        const formData = new FormData(loginForm);
+
+                        // Submit form via AJAX
+                        const response = await fetch('/Account/ModalLogin', {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+
+                        const result = await response.json();
+                        console.log('Login response:', result);
+
+                        if (result.success) {
+                            // Success - redirect to main page
+                            window.location.href = result.redirectUrl || '/Home/Main';
+                        } else {
+                            // Show error
+                            showLoginError(result.message || 'An error occurred during login.');
+                        }
+                    } catch (error) {
+                        console.error('Login error:', error);
+                        showLoginError('An unexpected error occurred. Please try again.');
+                    }
+                });
+            }
+
+            // Handle register form submission
+             // Replace the register form submission part in your JavaScript with this updated version
+
+        // Handle register form submission
+        if (registerForm) {
+            registerForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                console.log('Register form submitted');
+
+                // Show loading state
+                if (registerSubmitBtn) {
+                    registerSubmitBtn.disabled = true;
+                    registerSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+                }
+
+                // Hide previous errors
+                if (registerErrorAlert) {
+                    registerErrorAlert.style.display = 'none';
+                }
+
+                try {
+                    // Get form data
+                    const formData = new FormData(registerForm);
+
+                    // Fix checkbox values - convert to proper boolean strings
+                    const acceptTermsCheckbox = document.getElementById('acceptTerms');
+                    const acceptPrivacyCheckbox = document.getElementById('acceptPrivacy');
+                    const marketingEmailsCheckbox = document.getElementById('marketingEmails');
+
+                    // Remove existing checkbox values and set proper ones
+                    formData.delete('AcceptTerms');
+                    formData.delete('AcceptPrivacy');
+                    formData.delete('MarketingEmails');
+
+                    // Set boolean values as strings
+                    formData.append('AcceptTerms', acceptTermsCheckbox.checked ? 'true' : 'false');
+                    formData.append('AcceptPrivacy', acceptPrivacyCheckbox.checked ? 'true' : 'false');
+                    formData.append('MarketingEmails', marketingEmailsCheckbox.checked ? 'true' : 'false');
+
+                    console.log('Form data being sent:');
+                    for (let [key, value] of formData.entries()) {
+                        console.log(key + ': ' + value);
+                    }
+
+                    // Submit form via AJAX
+                    const response = await fetch('/Account/ModalRegister', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    const result = await response.json();
+                    console.log('Register response:', result);
+
+                    if (result.success) {
+                        // Success - show message and redirect
+                        closeAllModals();
+                        showSuccess(result.message);
+                        if (result.redirectUrl) {
+                            setTimeout(() => {
+                                window.location.href = result.redirectUrl;
+                            }, 2000);
+                        }
+                    } else {
+                        // Show error
+                        showRegisterError(result.message || 'An error occurred during registration.');
+                    }
+                } catch (error) {
+                    console.error('Registration error:', error);
+                    showRegisterError('An unexpected error occurred. Please try again.');
+                }
+            });
+        }
+            // Input focus animations
+            const formControls = document.querySelectorAll('.login-form-control, .register-form-control');
+            formControls.forEach(input => {
+                input.addEventListener('focus', function() {
+                    const inputGroup = this.closest('.login-input-group, .register-input-group');
+                    if (inputGroup) {
+                        inputGroup.style.transform = 'translateY(-2px)';
+                    }
+                });
+
+                input.addEventListener('blur', function() {
+                    const inputGroup = this.closest('.login-input-group, .register-input-group');
+                    if (inputGroup) {
+                        inputGroup.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+
+            // Ripple effect for buttons
+            function createRipple(event) {
+                const button = event.currentTarget;
+                const circle = document.createElement('span');
+                const diameter = Math.max(button.clientWidth, button.clientHeight);
+                const radius = diameter / 2;
+
+                circle.style.width = circle.style.height = `${diameter}px`;
+                circle.style.left = `${event.clientX - button.offsetLeft - radius}px`;
+                circle.style.top = `${event.clientY - button.offsetTop - radius}px`;
+                circle.classList.add('login-ripple');
+
+                const ripple = button.getElementsByClassName('login-ripple')[0];
+                if (ripple) {
+                    ripple.remove();
+                }
+
+                button.appendChild(circle);
+            }
+
+            // Apply ripple effect to buttons
+            const buttons = document.querySelectorAll('.login-btn, .register-btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', createRipple);
+            });
+
+            // Password toggle function
+            window.toggleRegisterPassword = function(element) {
+                const input = element.previousElementSibling.previousElementSibling;
+                if (input && input.tagName === 'INPUT') {
+                    if (input.type === "password") {
+                        input.type = "text";
+                        element.classList.replace("fa-eye", "fa-eye-slash");
+                    } else {
+                        input.type = "password";
+                        element.classList.replace("fa-eye-slash", "fa-eye");
+                    }
+                }
+            };
+
+            // Switch between modals
+            window.switchToLogin = function() {
+                console.log('Switching to login modal');
+                closeAllModals();
+                setTimeout(() => openLoginModal(), 100);
+            };
+
+            window.switchToRegister = function() {
+                console.log('Switching to register modal');
+                closeAllModals();
+                setTimeout(() => openRegisterModal(), 100);
+            };
+
+            // Make functions available globally
+            window.LoginModal = {
+                open: openLoginModal,
+                close: closeAllModals,
+                showError: showLoginError
+            };
+
+            window.RegisterModal = {
+                open: openRegisterModal,
+                close: closeAllModals,
+                showError: showRegisterError
+            };
+
+            // Prevent form submission on disabled buttons
+            document.addEventListener('click', function(e) {
+                if (e.target.matches('.login-btn[disabled], .register-btn[disabled]')) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // Debug: Log when DOM is ready
+            console.log('Modal script loaded. Elements found:');
+            console.log('Login modal:', !!loginModal);
+            console.log('Register modal:', !!registerModal);
+            console.log('Login form:', !!loginForm);
+            console.log('Register form:', !!registerForm);
+
+        })();
+    </script>
+}

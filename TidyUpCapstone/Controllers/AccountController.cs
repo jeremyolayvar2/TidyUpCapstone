@@ -32,9 +32,188 @@ namespace TidyUpCapstone.Controllers
             _emailService = emailService;
         }
 
-        // ===== EXISTING OAUTH SYSTEM (PRESERVED) =====
+        // ===== MODAL LOGIN/REGISTER ENDPOINTS =====
 
-        // ✅ LOGIN VIEW (Enhanced to support both OAuth + Manual)
+        /// <summary>
+        /// Handle modal login requests - returns JSON for AJAX
+        /// </summary>
+        /// <summary>
+        /// Handle modal login requests - returns JSON for AJAX - FIXED REDIRECT
+        /// </summary>
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ModalLogin([FromForm] string Email, [FromForm] string Password, [FromForm] bool RememberMe = false, [FromForm] string? returnUrl = null)
+        {
+            _logger.LogInformation("=== MODAL LOGIN DEBUG ===");
+            _logger.LogInformation("Email: {Email}", Email);
+            _logger.LogInformation("Password length: {Length}", Password?.Length ?? 0);
+
+            if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
+            {
+                return Json(new { success = false, message = "Email and password are required." });
+            }
+
+            // Check if user exists and email is verified
+            var user = await _userManager.FindByEmailAsync(Email);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "Invalid email or password." });
+            }
+
+            if (!user.EmailConfirmed)
+            {
+                return Json(new { success = false, message = "Please verify your email before logging in. Check your inbox for verification link." });
+            }
+
+            // Try login with email first
+            var result = await _signInManager.PasswordSignInAsync(Email, Password, RememberMe, lockoutOnFailure: false);
+
+            if (!result.Succeeded)
+            {
+                // Try with username if email didn't work
+                var usernameResult = await _signInManager.PasswordSignInAsync(user.UserName, Password, RememberMe, lockoutOnFailure: false);
+                result = usernameResult;
+            }
+
+            if (result.Succeeded)
+            {
+                // Update LastLogin timestamp (Philippines time)
+                user.LastLogin = GetPhilippinesTime();
+                await _userManager.UpdateAsync(user);
+
+                _logger.LogInformation("User {Email} logged in successfully", Email);
+
+                // FIXED: Use proper action redirect instead of tilde path
+                return Json(new { success = true, redirectUrl = returnUrl ?? "/Home/Main" });
+            }
+
+            return Json(new { success = false, message = "Invalid email or password." });
+        }
+
+        /// <summary>
+        /// Handle modal registration requests - returns JSON for AJAX
+        /// </summary>
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ModalRegister(RegisterDto model, string? returnUrl = null)
+        {
+            // QUICK FIX: Handle "on" values from HTML checkboxes
+            var request = HttpContext.Request;
+            if (request.Form.ContainsKey("AcceptTerms"))
+            {
+                var acceptTermsValue = request.Form["AcceptTerms"].ToString();
+                model.AcceptTerms = acceptTermsValue == "on" || acceptTermsValue == "true" || acceptTermsValue.Contains("true");
+            }
+
+            if (request.Form.ContainsKey("AcceptPrivacy"))
+            {
+                var acceptPrivacyValue = request.Form["AcceptPrivacy"].ToString();
+                model.AcceptPrivacy = acceptPrivacyValue == "on" || acceptPrivacyValue == "true" || acceptPrivacyValue.Contains("true");
+            }
+
+            if (request.Form.ContainsKey("MarketingEmails"))
+            {
+                var marketingEmailsValue = request.Form["MarketingEmails"].ToString();
+                model.MarketingEmails = marketingEmailsValue == "on" || marketingEmailsValue == "true" || marketingEmailsValue.Contains("true");
+            }
+
+            // Clear model state for these fields so validation runs on the corrected values
+            ModelState.Remove("AcceptTerms");
+            ModelState.Remove("AcceptPrivacy");
+            ModelState.Remove("MarketingEmails");
+
+            // Re-validate manually
+            if (!model.AcceptTerms)
+            {
+                ModelState.AddModelError("AcceptTerms", "You must accept the Terms of Service");
+            }
+
+            if (!model.AcceptPrivacy)
+            {
+                ModelState.AddModelError("AcceptPrivacy", "You must accept the Privacy Policy");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                return Json(new { success = false, message = string.Join("; ", errors) });
+            }
+
+            try
+            {
+                // 1. Check email uniqueness across ALL users (OAuth + Manual)
+                var existingEmailUser = await _userManager.FindByEmailAsync(model.Email);
+                if (existingEmailUser != null)
+                {
+                    if (existingEmailUser.EmailConfirmed)
+                    {
+                        return Json(new { success = false, message = "This email address is already registered and verified." });
+                    }
+                    else
+                    {
+                        return Json(new { success = false, message = "This email is already registered but not verified. Check your email for verification link." });
+                    }
+                }
+
+                // 2. Check username uniqueness
+                var existingUsernameUser = await _userManager.FindByNameAsync(model.Username);
+                if (existingUsernameUser != null)
+                {
+                    return Json(new { success = false, message = "This username is already taken. Please choose another one." });
+                }
+
+                // 3. Create new user account (inactive until email verified)
+                var user = new AppUser
+                {
+                    UserName = model.Username,
+                    Email = model.Email,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    EmailConfirmed = false,  // CRITICAL: User cannot login until verified
+                    DateCreated = GetPhilippinesTime(), // Use Philippines time like other methods
+                    Status = "pending_verification",
+                    TokenBalance = 0.00m
+                };
+
+                // 4. Create user with password
+                var result = await _userManager.CreateAsync(user, model.Password);
+                if (!result.Succeeded)
+                {
+                    var errors = result.Errors.Select(e => e.Description);
+                    return Json(new { success = false, message = string.Join("; ", errors) });
+                }
+
+                // 5. Generate email verification token and send email
+                var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                await SendVerificationEmail(user.Email, user.FirstName, emailToken);
+
+                // 6. Log registration attempt
+                await LogRegistrationAttempt(user.Id, "Manual", "Success",
+                    Request.HttpContext.Connection.RemoteIpAddress?.ToString());
+
+                _logger.LogInformation("Manual user {UserId} registered with email {Email}. Verification email sent.",
+                    user.Id, user.Email);
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Account created successfully! Please check your email to verify your account before signing in.",
+                    redirectUrl = "/" // Redirect to home page with success message
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during modal registration for email {Email}", model.Email);
+                return Json(new { success = false, message = "An error occurred during registration. Please try again." });
+            }
+        }
+
+        // ===== KEEP EXISTING METHODS FOR BACKWARD COMPATIBILITY =====
+
+        // ✅ LOGIN VIEW (Enhanced to support both OAuth + Manual) - Keep for direct access
         [HttpGet]
         [AllowAnonymous]
         public IActionResult Login(string? returnUrl = null)
@@ -44,7 +223,7 @@ namespace TidyUpCapstone.Controllers
             {
                 ReturnUrl = returnUrl,
                 GoogleEnabled = true,
-                FacebookEnabled = false // Kept as you had it
+                FacebookEnabled = false
             });
         }
 
@@ -115,15 +294,12 @@ namespace TidyUpCapstone.Controllers
 
             if (result.Succeeded)
             {
-
-                
                 // Update LastLogin timestamp (Philippines time)
                 user.LastLogin = GetPhilippinesTime();
                 await _userManager.UpdateAsync(user);
 
-
                 _logger.LogInformation("User {Email} logged in successfully", Email);
-                return LocalRedirect(returnUrl ?? "~/Home/Main");
+                return LocalRedirect(returnUrl ?? "/Home/Main"); // FIXED: Changed from "~/Home/Main"
             }
 
             _logger.LogWarning("Login failed for user: {Email}", Email);
@@ -157,13 +333,13 @@ namespace TidyUpCapstone.Controllers
             if (remoteError != null)
             {
                 _logger.LogError("External provider error: {Error}", remoteError);
-                return RedirectToAction(nameof(Login), new { ErrorMessage = $"Error: {remoteError}" });
+                return RedirectToAction("Index", "Home", new { error = $"External provider error: {remoteError}" });
             }
 
             var info = await _signInManager.GetExternalLoginInfoAsync();
             if (info == null)
             {
-                return RedirectToAction(nameof(Login), new { ErrorMessage = "Error loading external login info." });
+                return RedirectToAction("Index", "Home", new { error = "Error loading external login info." });
             }
 
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, false, true);
@@ -176,7 +352,7 @@ namespace TidyUpCapstone.Controllers
                     existingUser.LastLogin = GetPhilippinesTime();
                     await _userManager.UpdateAsync(existingUser);
                 }
-                return LocalRedirect("~/Home/Main");
+                return LocalRedirect("/Home/Main"); // FIXED: Changed from "~/Home/Main"
             }
 
             // If no account exists, show confirmation page
@@ -262,7 +438,7 @@ namespace TidyUpCapstone.Controllers
 
                 _logger.LogInformation("OAuth user {UserId} created account using {Provider}", user.Id, info.LoginProvider);
 
-                return LocalRedirect(model.ReturnUrl ?? "~/Home/Main");
+                return LocalRedirect(model.ReturnUrl ?? "/Home/Main"); 
             }
 
             foreach (var error in result.Errors)
@@ -271,14 +447,14 @@ namespace TidyUpCapstone.Controllers
             return View(model);
         }
 
-        // ===== NEW MANUAL REGISTRATION SYSTEM =====
+        // ===== KEEP EXISTING REGISTER METHODS FOR BACKWARD COMPATIBILITY =====
 
         // ✅ MANUAL REGISTRATION FORM
         [HttpGet]
         [AllowAnonymous]
         public IActionResult Register(string? returnUrl = null)
         {
-            ViewBag.HideNavigation = true; // Keep your existing UI preference
+            ViewBag.HideNavigation = true;
             ViewData["ReturnUrl"] = returnUrl;
 
             var model = new RegisterDto();
@@ -378,6 +554,8 @@ namespace TidyUpCapstone.Controllers
                 return View(model);
             }
         }
+
+        // ===== REST OF THE EXISTING METHODS REMAIN THE SAME =====
 
         // ✅ EMAIL VERIFICATION HANDLER
         [HttpGet]
@@ -881,7 +1059,5 @@ namespace TidyUpCapstone.Controllers
             return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
                 TimeZoneInfo.FindSystemTimeZoneById("Singapore Standard Time"));
         }
-
-    } 
+    }
 }
-

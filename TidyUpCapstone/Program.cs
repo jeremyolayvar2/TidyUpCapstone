@@ -17,7 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection") ??
-        "Server=(LocalDB)\\MSSQLLocalDB;Database=TidyUpdbCapstone;Trusted_Connection=true;MultipleActiveResultSets=true;TrustServerCertificate=true"
+        "Server=OLAYVAR\\SQLEXPRESS;Database=TidyUpdb;Trusted_Connection=true;TrustServerCertificate=true;Encrypt=false;MultipleActiveResultSets=true"
     ));
 
 // -----------------------------------------------------

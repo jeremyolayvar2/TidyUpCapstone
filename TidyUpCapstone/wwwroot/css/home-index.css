@@ -1,5 +1,5 @@
 ﻿/* Welcome Section Styles */
-.welcome-section {
+/*.welcome-section {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -35,16 +35,16 @@
     line-height: 1.6;
     max-width: 400px;
     margin: 0 auto;
-}
+}*/
 
 /* CTA Buttons */
-.cta-buttons {
+/*.cta-buttons {
     margin: 2rem 0;
     width: 100%;
     max-width: 300px;
-}
+}*/
 
-.btn-primary, .btn-secondary {
+/*.btn-primary, .btn-secondary {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -85,10 +85,10 @@
         color: white;
         transform: translateY(-2px);
         text-decoration: none;
-    }
+    }*/
 
 /* Social Login Preview */
-.login-preview {
+/*.login-preview {
     margin-top: 1rem;
     padding-top: 1.5rem;
     border-top: 1px solid #eee;
@@ -146,15 +146,15 @@
 
     .social-icon.google:hover {
         background: rgba(219, 68, 55, 0.2);
-    }
+    }*/
 
 /* Hide old forms */
-.login-form, .signup-form {
+/*.login-form, .signup-form {
     display: none;
-}
+}*/
 
 /* Responsive Design */
-@media (max-width: 768px) {
+/*@media (max-width: 768px) {
     .welcome-header h2 {
         font-size: 1.8rem;
     }
@@ -187,4 +187,4 @@
         padding: 12px 20px;
         font-size: 1rem;
     }
-}
+}*/

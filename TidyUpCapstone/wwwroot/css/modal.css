@@ -1,0 +1,966 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root {
+    --background: #F5F5F5;
+    --primary-color: #6B9080;
+    --secondary-color: #A4C3B2;
+    --accent-color: #EAF4F4;
+    --text-color: #212529;
+    --hover-effect: rgba(217, 217, 217, 0.6);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Montserrat", sans-serif;
+}
+
+.login-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    .login-modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+.login-modal-container {
+    background: var(--background);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 0;
+    max-width: 600px;
+    width: 90%;
+    max-height: 95vh;
+    overflow: hidden;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+    border: 2px solid var(--primary-color);
+    transform: translateY(50px) scale(0.9);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: "Montserrat", sans-serif;
+    background-clip: padding-box;
+}
+
+.login-modal-overlay.active .login-modal-container {
+    transform: translateY(0) scale(1);
+}
+
+.login-modal-header {
+    padding: 1rem;
+    text-align: center;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+/*    border-top-right-radius: 30px;
+    border-top-left-radius: 30px;*/
+}
+
+.login-modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #999;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+    .login-modal-close:hover {
+        background: rgba(0, 0, 0, 0.05);
+        color: #333;
+        transform: rotate(90deg);
+    }
+
+.login-modal-body {
+    padding: 1rem 2rem 2rem;
+}
+
+.login-auth-header h2 {
+    font-family: "Righteous", sans-serif;
+    font-size: 2rem;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.login-auth-header p {
+    color: #666;
+    font-size: 1rem;
+}
+
+/* Form Styles */
+.login-form-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.login-form-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.login-form-label {
+    position: absolute;
+    left: 33px;
+    bottom: 24px;
+    color: #e0e0e0;
+    font-size: 1rem;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    opacity: 1;
+}
+
+.login-form-control:not(:placeholder-shown) + .login-form-label,
+.login-form-control:focus + .login-form-label {
+    left: 25px;
+    bottom: 44px;
+    font-size: 0.85rem;
+    color: #6B9080;
+}
+
+
+.login-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.login-input-group-text {
+    position: absolute;
+    left: 1rem;
+    color: #999;
+    z-index: 2;
+    font-size: 0.9rem;
+}
+
+.login-form-control {
+    width: 100%;
+    padding: 1.4rem 2rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: var(--background);
+    font-family: "Montserrat", sans-serif;
+    placeholder-shown: true;
+}
+
+    .login-form-control:focus {
+        outline: var(--primary-color);
+        border-color: #6B9080;
+        box-shadow: 0 0 0 3px rgba(107, 144, 128, 0.1);
+    }
+
+/* Button Styles */
+.login-btn {
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    font-family: "Montserrat", sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-btn-google {
+    color: var(--text-color);
+    border: 1px solid var(--hover-effect);
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+    .login-btn-google:hover {
+        border-color: var(--primary-color);
+/*        background-color: var(--hover-effect);*/
+        transform: translateY(-1px);
+/*        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);*/
+    }
+
+.login-btn-facebook {
+    border: 1px solid var(--hover-effect);
+    color: var(--text-color);
+    width: 100%;
+    margin-bottom: 1.5rem;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.login-btn-primary {
+    background: linear-gradient(135deg, #6B9080 0%, #A4C3B2 100%);
+    color: white;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+    .login-btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        background: linear-gradient(135deg, #5a7d6b 0%, #8fb19e 100%);
+    }
+
+.login-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Ripple Effect */
+.login-ripple {
+    position: absolute;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: scale(0);
+    animation: login-ripple-animation 0.6s linear;
+    pointer-events: none;
+}
+
+@keyframes login-ripple-animation {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* Divider */
+.login-divider {
+    display: flex;
+    align-items: center;
+    margin: 1.5rem 0;
+    text-align: center;
+}
+
+    .login-divider::before,
+    .login-divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #e0e0e0;
+    }
+
+    .login-divider span {
+        background-color: var(--background);
+        padding: 0 1rem;
+        color: var(--text-color);
+        font-size: 0.9rem;
+        
+    }
+
+/* Checkbox and Links */
+.login-form-check {
+    background-color: var(--background);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.login-form-check-input {
+    width: 15px;
+    height: 15px;
+    background-color: var(--background);
+    accent-color: var(--primary-color);
+}
+
+.login-form-check-label {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+.login-forgot-password-link {
+    color: var(--text-color) !important;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+    .login-forgot-password-link:hover {
+        text-decoration: underline;
+    }
+
+.login-footer-links {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+    .login-footer-links p {
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+.login-terms-text {
+    font-size: 0.8rem !important;
+    margin-top: 1rem !important;
+}
+
+.login-footer-links a {
+    color: #6B9080;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+    .login-footer-links a:hover {
+        text-decoration: underline;
+    }
+
+/* Alert Styles */
+.login-alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.login-alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Custom Scrollbar */
+.login-modal-container::-webkit-scrollbar {
+    width: 6px;
+
+}
+
+.login-modal-container::-webkit-scrollbar-track {
+    background: var(--background);
+    margin-block: 12px;
+    border-radius: 12px;
+}
+
+.login-modal-container::-webkit-scrollbar-thumb {
+    background-color: var(--hover-effect);
+    border-radius: 12px;
+    
+    background-clip: content-box;
+    transition: background-color 0.3s;
+}
+
+    .login-modal-container::-webkit-scrollbar-thumb:hover {
+        background-color: #888;
+    }
+
+
+/* Animation for form elements */
+.login-form-group,
+.login-btn,
+.login-oauth-section,
+.login-divider,
+.login-footer-links {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.login-modal-overlay.active .login-form-group,
+.login-modal-overlay.active .login-btn,
+.login-modal-overlay.active .login-oauth-section,
+.login-modal-overlay.active .login-divider,
+.login-modal-overlay.active .login-footer-links {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Stagger animation delays */
+.login-modal-overlay.active .login-oauth-section {
+    transition-delay: 0.1s;
+}
+
+.login-modal-overlay.active .login-btn-facebook {
+    transition-delay: 0.15s;
+}
+
+.login-modal-overlay.active .login-divider {
+    transition-delay: 0.2s;
+}
+
+.login-modal-overlay.active .login-form-group:nth-of-type(1) {
+    transition-delay: 0.25s;
+}
+
+.login-modal-overlay.active .login-form-group:nth-of-type(2) {
+    transition-delay: 0.3s;
+}
+
+.login-modal-overlay.active .login-form-group:nth-of-type(3) {
+    transition-delay: 0.35s;
+}
+
+.login-modal-overlay.active .login-btn-primary {
+    transition-delay: 0.4s;
+}
+
+.login-modal-overlay.active .login-footer-links {
+    transition-delay: 0.45s;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .login-modal-container {
+        width: 95%;
+        margin: 1rem;
+    }
+
+    .login-modal-header,
+    .login-modal-body {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+
+    .login-auth-header h2 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-modal-container {
+        width: 98%;
+        margin: 0.5rem;
+        border-radius: 16px;
+    }
+
+    .login-btn {
+        padding: 0.875rem 1.25rem;
+    }
+
+    .login-form-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+
+/* Input focus animations */
+.login-input-group {
+    transition: transform 0.2s ease;
+}
+
+    .login-form-control:focus + .login-input-group,
+    .login-input-group:focus-within {
+        transform: translateY(-2px);
+    }
+
+
+
+
+/*Creating an account modal*/
+
+
+/* Add these styles to your existing modal.css file */
+
+/* Register Modal Styles - Matching Login Modal */
+.register-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    .register-modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+.register-modal-container {
+    background: var(--background);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 0;
+    max-width: 650px;
+    width: 90%;
+    max-height: 95vh;
+    overflow: hidden;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+    border: 2px solid var(--primary-color);
+    transform: translateY(50px) scale(0.9);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: "Montserrat", sans-serif;
+    background-clip: padding-box;
+}
+
+.register-modal-overlay.active .register-modal-container {
+    transform: translateY(0) scale(1);
+}
+
+.register-modal-header {
+    padding: 1rem;
+    text-align: center;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.register-modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #999;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+    .register-modal-close:hover {
+        background: rgba(0, 0, 0, 0.05);
+        color: #333;
+        transform: rotate(90deg);
+    }
+
+.register-modal-body {
+    padding: 1rem 2rem 2rem;
+}
+
+.register-auth-header h2 {
+    font-family: "Righteous", sans-serif;
+    font-size: 2rem;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.register-auth-header p {
+    color: #666;
+    font-size: 1rem;
+}
+
+/* Register Form Styles */
+.register-form-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.register-form-row {
+    display: flex;
+    gap: 1rem;
+}
+
+    .register-form-row .register-form-group {
+        flex: 1;
+    }
+
+.register-form-label {
+    position: absolute;
+    left: 35px;
+    bottom: 24px;
+    color: #e0e0e0;
+    font-size: 1rem;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    opacity: 1;
+}
+
+.register-form-control:not(:placeholder-shown) + .register-form-label,
+.register-form-control:focus + .register-form-label {
+    left: 25px;
+    bottom: 44px;
+    font-size: 0.85rem;
+    color: #6B9080;
+}
+
+.register-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.register-input-icon {
+    position: absolute;
+    left: 1rem;
+    color: #999;
+    z-index: 2;
+    font-size: 0.9rem;
+}
+
+.register-form-control {
+    width: 100%;
+    padding: 1.4rem 2rem 1.4rem 2.5rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: var(--background);
+    font-family: "Montserrat", sans-serif;
+}
+
+    .register-form-control:focus {
+        outline: none;
+        border-color: #6B9080;
+        box-shadow: 0 0 0 3px rgba(107, 144, 128, 0.1);
+    }
+
+/* Password toggle icon */
+.register-show-password {
+    position: absolute;
+    right: 1rem;
+    color: #999;
+    cursor: pointer;
+    z-index: 2;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+}
+
+    .register-show-password:hover {
+        color: #6B9080;
+    }
+
+/* Register Button Styles */
+.register-btn {
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    font-family: "Montserrat", sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+.register-btn-google {
+    color: var(--text-color);
+    border: 1px solid var(--hover-effect);
+    width: 100%;
+    margin-bottom: 1rem;
+    background: var(--background);
+}
+
+    .register-btn-google:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-1px);
+    }
+
+.register-btn-facebook {
+    border: 1px solid var(--hover-effect);
+    color: var(--text-color);
+    width: 100%;
+    margin-bottom: 1.5rem;
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: var(--background);
+}
+
+.register-btn-primary {
+    background: linear-gradient(135deg, #6B9080 0%, #A4C3B2 100%);
+    color: white;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+    .register-btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        background: linear-gradient(135deg, #5a7d6b 0%, #8fb19e 100%);
+    }
+
+.register-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Terms section */
+.register-terms-section {
+    margin-bottom: 1.5rem;
+}
+
+.register-form-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.register-form-check-input {
+    width: 15px;
+    height: 15px;
+    margin-top: 2px;
+    accent-color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.register-form-check-label {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    cursor: pointer;
+    line-height: 1.4;
+}
+
+    .register-form-check-label a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+        .register-form-check-label a:hover {
+            text-decoration: underline;
+        }
+
+/* Divider */
+.register-divider {
+    display: flex;
+    align-items: center;
+    margin: 1.5rem 0;
+    text-align: center;
+}
+
+    .register-divider::before,
+    .register-divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #e0e0e0;
+    }
+
+    .register-divider span {
+        background-color: var(--background);
+        padding: 0 1rem;
+        color: var(--text-color);
+        font-size: 0.9rem;
+    }
+
+/* Footer Links */
+.register-footer-links {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+    .register-footer-links p {
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .register-footer-links a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+        .register-footer-links a:hover {
+            text-decoration: underline;
+        }
+
+/* Alert Styles */
+.register-alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.register-alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Custom Scrollbar */
+.register-modal-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.register-modal-container::-webkit-scrollbar-track {
+    background: var(--background);
+    margin-block: 12px;
+    border-radius: 12px;
+}
+
+.register-modal-container::-webkit-scrollbar-thumb {
+    background-color: var(--hover-effect);
+    border-radius: 12px;
+    background-clip: content-box;
+    transition: background-color 0.3s;
+}
+
+    .register-modal-container::-webkit-scrollbar-thumb:hover {
+        background-color: #888;
+    }
+
+/* Animation for form elements */
+.register-form-group,
+.register-btn,
+.register-oauth-section,
+.register-divider,
+.register-footer-links,
+.register-terms-section {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.register-modal-overlay.active .register-form-group,
+.register-modal-overlay.active .register-btn,
+.register-modal-overlay.active .register-oauth-section,
+.register-modal-overlay.active .register-divider,
+.register-modal-overlay.active .register-footer-links,
+.register-modal-overlay.active .register-terms-section {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Stagger animation delays */
+.register-modal-overlay.active .register-oauth-section {
+    transition-delay: 0.1s;
+}
+
+.register-modal-overlay.active .register-btn-facebook {
+    transition-delay: 0.15s;
+}
+
+.register-modal-overlay.active .register-divider {
+    transition-delay: 0.2s;
+}
+
+.register-modal-overlay.active .register-form-group:nth-of-type(1) {
+    transition-delay: 0.25s;
+}
+
+.register-modal-overlay.active .register-form-group:nth-of-type(2) {
+    transition-delay: 0.3s;
+}
+
+.register-modal-overlay.active .register-form-row {
+    transition-delay: 0.35s;
+}
+
+.register-modal-overlay.active .register-terms-section {
+    transition-delay: 0.4s;
+}
+
+.register-modal-overlay.active .register-btn-primary {
+    transition-delay: 0.45s;
+}
+
+.register-modal-overlay.active .register-footer-links {
+    transition-delay: 0.5s;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .register-modal-container {
+        width: 95%;
+        margin: 1rem;
+    }
+
+    .register-modal-header,
+    .register-modal-body {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+
+    .register-auth-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .register-form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .register-modal-container {
+        width: 98%;
+        margin: 0.5rem;
+        border-radius: 16px;
+    }
+
+    .register-btn {
+        padding: 0.875rem 1.25rem;
+    }
+}
+
+/* Ripple Effect */
+.register-ripple {
+    position: absolute;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: scale(0);
+    animation: register-ripple-animation 0.6s linear;
+    pointer-events: none;
+}
+
+@keyframes register-ripple-animation {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* Input focus animations */
+.register-input-group {
+    transition: transform 0.2s ease;
+}
+
+    .register-form-control:focus + .register-input-group,
+    .register-input-group:focus-within {
+        transform: translateY(-2px);
+    }

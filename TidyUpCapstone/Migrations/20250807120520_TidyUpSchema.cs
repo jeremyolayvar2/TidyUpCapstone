@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TidyUpCapstone.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialSchema : Migration
+    public partial class TidyUpSchema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -36,6 +36,21 @@ namespace TidyUpCapstone.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "app_roles",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_app_roles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "app_user",
                 columns: table => new
                 {
@@ -47,6 +62,8 @@ namespace TidyUpCapstone.Migrations
                     admin_notes = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     last_login = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    first_name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    last_name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     username = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -71,21 +88,6 @@ namespace TidyUpCapstone.Migrations
                         column: x => x.managed_by_admin_id,
                         principalTable: "app_user",
                         principalColumn: "user_id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AspNetRoles",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetRoles", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -281,6 +283,27 @@ namespace TidyUpCapstone.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "app_role_claims",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RoleId = table.Column<int>(type: "int", nullable: false),
+                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_app_role_claims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_app_role_claims_app_roles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "app_roles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "admin",
                 columns: table => new
                 {
@@ -307,7 +330,7 @@ namespace TidyUpCapstone.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AspNetUserClaims",
+                name: "app_user_claims",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -318,9 +341,9 @@ namespace TidyUpCapstone.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AspNetUserClaims", x => x.Id);
+                    table.PrimaryKey("PK_app_user_claims", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AspNetUserClaims_app_user_UserId",
+                        name: "FK_app_user_claims_app_user_UserId",
                         column: x => x.UserId,
                         principalTable: "app_user",
                         principalColumn: "user_id",
@@ -328,7 +351,7 @@ namespace TidyUpCapstone.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AspNetUserLogins",
+                name: "app_user_logins",
                 columns: table => new
                 {
                     LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -338,9 +361,9 @@ namespace TidyUpCapstone.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AspNetUserLogins", x => new { x.LoginProvider, x.ProviderKey });
+                    table.PrimaryKey("PK_app_user_logins", x => new { x.LoginProvider, x.ProviderKey });
                     table.ForeignKey(
-                        name: "FK_AspNetUserLogins_app_user_UserId",
+                        name: "FK_app_user_logins_app_user_UserId",
                         column: x => x.UserId,
                         principalTable: "app_user",
                         principalColumn: "user_id",
@@ -348,7 +371,31 @@ namespace TidyUpCapstone.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AspNetUserTokens",
+                name: "app_user_roles",
+                columns: table => new
+                {
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    RoleId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_app_user_roles", x => new { x.UserId, x.RoleId });
+                    table.ForeignKey(
+                        name: "FK_app_user_roles_app_roles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "app_roles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_app_user_roles_app_user_UserId",
+                        column: x => x.UserId,
+                        principalTable: "app_user",
+                        principalColumn: "user_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "app_user_tokens",
                 columns: table => new
                 {
                     UserId = table.Column<int>(type: "int", nullable: false),
@@ -358,9 +405,9 @@ namespace TidyUpCapstone.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AspNetUserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
+                    table.PrimaryKey("PK_app_user_tokens", x => new { x.UserId, x.LoginProvider, x.Name });
                     table.ForeignKey(
-                        name: "FK_AspNetUserTokens_app_user_UserId",
+                        name: "FK_app_user_tokens_app_user_UserId",
                         column: x => x.UserId,
                         principalTable: "app_user",
                         principalColumn: "user_id",
@@ -491,51 +538,6 @@ namespace TidyUpCapstone.Migrations
                     table.CheckConstraint("chk_valid_radius", "[RadiusKm] > 0 AND [RadiusKm] <= 1000");
                     table.ForeignKey(
                         name: "FK_user_location_preferences_app_user_UserId",
-                        column: x => x.UserId,
-                        principalTable: "app_user",
-                        principalColumn: "user_id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AspNetRoleClaims",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    RoleId = table.Column<int>(type: "int", nullable: false),
-                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetRoleClaims", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "AspNetRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AspNetUserRoles",
-                columns: table => new
-                {
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    RoleId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetUserRoles", x => new { x.UserId, x.RoleId });
-                    table.ForeignKey(
-                        name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "AspNetRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AspNetUserRoles_app_user_UserId",
                         column: x => x.UserId,
                         principalTable: "app_user",
                         principalColumn: "user_id",
@@ -1426,6 +1428,18 @@ namespace TidyUpCapstone.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_app_role_claims_RoleId",
+                table: "app_role_claims",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "RoleNameIndex",
+                table: "app_roles",
+                column: "NormalizedName",
+                unique: true,
+                filter: "[NormalizedName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
                 name: "EmailIndex",
                 table: "app_user",
                 column: "NormalizedEmail");
@@ -1453,30 +1467,18 @@ namespace TidyUpCapstone.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetRoleClaims_RoleId",
-                table: "AspNetRoleClaims",
-                column: "RoleId");
-
-            migrationBuilder.CreateIndex(
-                name: "RoleNameIndex",
-                table: "AspNetRoles",
-                column: "NormalizedName",
-                unique: true,
-                filter: "[NormalizedName] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AspNetUserClaims_UserId",
-                table: "AspNetUserClaims",
+                name: "IX_app_user_claims_UserId",
+                table: "app_user_claims",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUserLogins_UserId",
-                table: "AspNetUserLogins",
+                name: "IX_app_user_logins_UserId",
+                table: "app_user_logins",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUserRoles_RoleId",
-                table: "AspNetUserRoles",
+                name: "IX_app_user_roles_RoleId",
+                table: "app_user_roles",
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
@@ -1747,19 +1749,19 @@ namespace TidyUpCapstone.Migrations
                 name: "ai_training_feedback");
 
             migrationBuilder.DropTable(
-                name: "AspNetRoleClaims");
+                name: "app_role_claims");
 
             migrationBuilder.DropTable(
-                name: "AspNetUserClaims");
+                name: "app_user_claims");
 
             migrationBuilder.DropTable(
-                name: "AspNetUserLogins");
+                name: "app_user_logins");
 
             migrationBuilder.DropTable(
-                name: "AspNetUserRoles");
+                name: "app_user_roles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUserTokens");
+                name: "app_user_tokens");
 
             migrationBuilder.DropTable(
                 name: "audit_logs");
@@ -1828,7 +1830,7 @@ namespace TidyUpCapstone.Migrations
                 name: "tensorflow_prediction");
 
             migrationBuilder.DropTable(
-                name: "AspNetRoles");
+                name: "app_roles");
 
             migrationBuilder.DropTable(
                 name: "chats");

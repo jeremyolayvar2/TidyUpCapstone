@@ -5,38 +5,39 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/account.css" />
+    <link rel="stylesheet" href="~/css/ExternalLoginConfirmation.css" />
 }
 
 @model TidyUpCapstone.Models.ViewModels.Account.ExternalLoginConfirmationViewModel
 
 <div class="registration-container d-flex align-items-center justify-content-center min-vh-100">
-    <div class="registration-card card shadow-lg border-0 rounded-4 animate__animated animate__fadeInUp">
+    <div class="registration-card">
         <div class="card-body p-5">
 
             <!-- Header -->
             <div class="text-center mb-4">
-                <div class="provider-icon mb-3">
-                    <i class="fab fa-google text-danger" style="font-size: 3rem;"></i>
-                </div>
-                <h2 class="h2 fw-bold mb-2">Complete Your Registration</h2>
-                <p class="text-muted">Just a few more details to finish setting up your TidyUp account.</p>
+                <h1 class="registration-header">Complete Your Registration</h1>
+                <p class="text-muted small mb-0">
+                    Just a few more details to finish setting up your TidyUp account.
+                </p>
             </div>
 
             <!-- Error Summary -->
             @if (!ViewData.ModelState.IsValid)
             {
-                <div class="alert alert-danger mb-4">
-                    <h6 class="alert-heading">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Please fix the following errors:
-                    </h6>
-                    <div asp-validation-summary="All" class="mb-0"></div>
+                <div class="alert alert-danger-custom mb-4">
+                    <div class="alert-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="alert-content">
+                        <h6 class="alert-title">Please fix the following errors:</h6>
+                        <div asp-validation-summary="All" class="mb-0 error-list"></div>
+                    </div>
                 </div>
             }
 
             <!-- Form -->
-            <form asp-action="ExternalLoginConfirmation" method="post" novalidate>
+            <form asp-action="ExternalLoginConfirmation" method="post" novalidate id="registrationForm">
                 @Html.AntiForgeryToken()
 
                 <!-- Hidden Fields -->
@@ -47,86 +48,154 @@
                 <input type="hidden" asp-for="ProviderAvatarUrl" />
 
                 <!-- Email (Read-only) -->
-                <div class="mb-3">
-                    <label asp-for="Email" class="form-label fw-semibold">Email Address</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-envelope text-muted"></i></span>
-                        <input asp-for="Email" class="form-control bg-light" readonly />
+                <div class="mb-4">
+                    <div class="flex flex-col">
+                        <div class="input-wrapper">
+                            <input asp-for="Email"
+                                   class="login-form-control bg-light"
+                                   readonly
+                                   placeholder=" " />
+                        </div>
+                        
                     </div>
-                    <small class="text-muted">Connected via @Model.Provider</small>
+                    <small class="provider-text">Connected via @Model.Provider</small>
                     <span asp-validation-for="Email" class="text-danger small"></span>
                 </div>
 
                 <!-- Username -->
-                <div class="mb-3">
-                    <label asp-for="Username" class="form-label fw-semibold">Username</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-user text-muted"></i></span>
-                        <input asp-for="Username" class="form-control @(Html.ViewData.ModelState["Username"]?.Errors.Count > 0 ? "is-invalid" : "")" placeholder="Choose a username" />
+                <div class="mb-4">
+                    <div class="flex flex-col">
+                        <input asp-for="Username"
+                               class="login-form-control @(Html.ViewData.ModelState["Username"]?.Errors.Count > 0 ? "is-invalid" : "")"
+                               placeholder=" "
+                               required />
+                        <label asp-for="Username" class="login-form-label">Username</label>
                     </div>
                     <span asp-validation-for="Username" class="text-danger small"></span>
                     <small class="text-muted">This will be your unique identifier on TidyUp.</small>
                 </div>
 
                 <!-- First Name -->
-                <div class="mb-3">
-                    <label asp-for="FirstName" class="form-label fw-semibold">First Name</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-user-tag text-muted"></i></span>
-                        <input asp-for="FirstName" class="form-control @(Html.ViewData.ModelState["FirstName"]?.Errors.Count > 0 ? "is-invalid" : "")" placeholder="Enter your first name" />
+                <div class="mb-4">
+                    <div class="flex flex-col">
+                        <input asp-for="FirstName"
+                               class="login-form-control @(Html.ViewData.ModelState["FirstName"]?.Errors.Count > 0 ? "is-invalid" : "")"
+                               placeholder=" "
+                               required />
+                        <label asp-for="FirstName" class="login-form-label">First Name</label>
                     </div>
                     <span asp-validation-for="FirstName" class="text-danger small"></span>
                 </div>
 
                 <!-- Last Name -->
-                <div class="mb-3">
-                    <label asp-for="LastName" class="form-label fw-semibold">Last Name</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-user-tag text-muted"></i></span>
-                        <input asp-for="LastName" class="form-control @(Html.ViewData.ModelState["LastName"]?.Errors.Count > 0 ? "is-invalid" : "")" placeholder="Enter your last name" />
+                <div class="mb-4">
+                    <div class="flex flex-col">
+                        <input asp-for="LastName"
+                               class="login-form-control @(Html.ViewData.ModelState["LastName"]?.Errors.Count > 0 ? "is-invalid" : "")"
+                               placeholder=" "
+                               required />
+                        <label asp-for="LastName" class="login-form-label">Last Name</label>
                     </div>
                     <span asp-validation-for="LastName" class="text-danger small"></span>
                 </div>
 
                 <!-- Terms & Privacy -->
-                <div class="form-check mb-2">
-                    <input asp-for="AcceptTerms" class="form-check-input @(Html.ViewData.ModelState["AcceptTerms"]?.Errors.Count > 0 ? "is-invalid" : "")" type="checkbox" />
-                    <label asp-for="AcceptTerms" class="form-check-label">I accept the <a href="@Url.Action("Terms", "Legal")" target="_blank" class="text-primary">Terms and Conditions</a></label>
-                    <span asp-validation-for="AcceptTerms" class="text-danger small"></span>
-                </div>
+                <div class="checkbox-group mb-4">
+                    <div class="custom-checkbox-wrapper">
+                        <input asp-for="AcceptTerms"
+                               class="custom-checkbox @(Html.ViewData.ModelState["AcceptTerms"]?.Errors.Count > 0 ? "is-invalid" : "")"
+                               type="checkbox"
+                               required />
+                        <label asp-for="AcceptTerms" class="custom-checkbox-label">
+                            <span class="checkbox-checkmark"></span>
+                            I accept the <a href="@Url.Action("Terms", "Legal")" target="_blank" class="text-primary">Terms and Conditions</a>
+                        </label>
+                        <span asp-validation-for="AcceptTerms" class="text-danger small"></span>
+                    </div>
 
-                <div class="form-check mb-4">
-                    <input asp-for="AcceptPrivacy" class="form-check-input @(Html.ViewData.ModelState["AcceptPrivacy"]?.Errors.Count > 0 ? "is-invalid" : "")" type="checkbox" />
-                    <label asp-for="AcceptPrivacy" class="form-check-label">I accept the <a href="@Url.Action("Privacy", "Legal")" target="_blank" class="text-primary">Privacy Policy</a></label>
-                    <span asp-validation-for="AcceptPrivacy" class="text-danger small"></span>
-                </div>
+                    <div class="custom-checkbox-wrapper">
+                        <input asp-for="AcceptPrivacy"
+                               class="custom-checkbox @(Html.ViewData.ModelState["AcceptPrivacy"]?.Errors.Count > 0 ? "is-invalid" : "")"
+                               type="checkbox"
+                               required />
+                        <label asp-for="AcceptPrivacy" class="custom-checkbox-label">
+                            <span class="checkbox-checkmark"></span>
+                            I accept the <a href="@Url.Action("Privacy", "Legal")" target="_blank" class="text-primary">Privacy Policy</a>
+                        </label>
+                        <span asp-validation-for="AcceptPrivacy" class="text-danger small"></span>
+                    </div>
 
-                <!-- Optional Marketing -->
-                <div class="form-check mb-4">
-                    <input asp-for="MarketingEmails" class="form-check-input" type="checkbox" />
-                    <label asp-for="MarketingEmails" class="form-check-label">Send me marketing emails (optional)</label>
+                    <div class="custom-checkbox-wrapper">
+                        <input asp-for="MarketingEmails"
+                               class="custom-checkbox"
+                               type="checkbox" />
+                        <label asp-for="MarketingEmails" class="custom-checkbox-label">
+                            <span class="checkbox-checkmark"></span>
+                            Send me marketing emails (optional)
+                        </label>
+                    </div>
                 </div>
 
                 <!-- Submit -->
                 <div class="d-grid mb-3">
-                    <button type="submit" class="btn btn-primary btn-lg fw-bold">
-                        <i class="fas fa-check me-2"></i> Complete Registration
+                    <button type="submit" class="btn-complete-registration" id="completeRegistrationBtn">
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                       
+                        Complete Registration
                     </button>
                 </div>
             </form>
 
             <!-- Already have account -->
             <div class="text-center mt-3">
-                <p class="text-muted mb-0">Already have an account? <a href="@Url.Action("Login", "Account")" class="text-primary fw-semibold">Sign in here</a></p>
+                <p class="text-muted mb-0">
+                    Already have an account?
+                    <a href="@Url.Action("Index", "Home")" class="text-primary fw-semibold">Sign in here</a>
+                </p>
+            </div>
+
+            <!-- Additional Help -->
+            <div class="mt-4 pt-3 border-top text-center small text-muted">
+                Need help? Contact us at
+                <a href="mailto:support@tidyup.com" class="text-primary fw-semibold">support@tidyup.com</a>
             </div>
         </div>
     </div>
 </div>
 
-
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-}
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 
+    <script>
+        document.getElementById('registrationForm').addEventListener('submit', function () {
+            const btn = document.getElementById('completeRegistrationBtn');
+            btn.disabled = true;
+            btn.querySelector('.spinner-border').classList.remove('d-none');
+        });
+
+        // Enhanced form validation feedback
+        document.querySelectorAll('.login-form-control').forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.checkValidity()) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                } else {
+                    this.classList.add('is-invalid');
+                    this.classList.remove('is-valid');
+                }
+            });
+        });
+
+        // Custom checkbox animations
+        document.querySelectorAll('.custom-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const checkmark = this.nextElementSibling.querySelector('.checkbox-checkmark');
+                if (this.checked) {
+                    checkmark.classList.add('checked');
+                } else {
+                    checkmark.classList.remove('checked');
+                }
+            });
+        });
+    </script>
+}

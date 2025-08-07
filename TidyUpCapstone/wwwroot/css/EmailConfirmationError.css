@@ -1,0 +1,427 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root {
+    --background: #F5F5F5;
+    --primary-color: #6B9080;
+    --secondary-color: #A4C3B2;
+    --accent-color: #EAF4F4;
+    --text-color: #212529;
+    --warning-color: #ffc107;
+    --warning-darker: #e0a800;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Montserrat", sans-serif;
+}
+
+body {
+    background: var(--background);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Montserrat", sans-serif;
+}
+
+.email-confirmation-error-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.email-confirmation-error-card {
+    background: var(--background);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+    border: 2px solid var(--warning-color);
+    font-family: "Montserrat", sans-serif;
+    background-clip: padding-box;
+    position: relative;
+    overflow: hidden;
+    animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.card-body {
+    padding: 2.5rem !important;
+}
+
+/* Header Styles */
+.email-confirmation-error-header {
+    font-family: "Righteous", sans-serif;
+    font-size: 2rem;
+    color: var(--warning-darker);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
+}
+
+.text-muted {
+    color: #666 !important;
+    font-size: 1rem;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Error Alert */
+.error-alert {
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    border-radius: 12px;
+    padding: 1rem;
+    color: var(--warning-darker);
+    font-weight: 600;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.4s forwards;
+}
+
+/* Reasons Section */
+.reasons-section {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.5s forwards;
+}
+
+.reasons-title {
+    color: #666;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.reasons-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+    .reasons-list li {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 0.75rem;
+        padding: 0.5rem;
+        background: rgba(255, 193, 7, 0.05);
+        border-radius: 8px;
+        border-left: 3px solid var(--warning-color);
+    }
+
+        .reasons-list li:last-child {
+            margin-bottom: 0;
+        }
+
+.clock-icon::before {
+    content: "🕐";
+    font-size: 1.1rem;
+}
+
+.link-icon::before {
+    content: "🔗";
+    font-size: 1.1rem;
+}
+
+.copy-icon::before {
+    content: "📋";
+    font-size: 1.1rem;
+}
+
+/* Button Styles */
+.btn-resend-verification {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: "Montserrat", sans-serif;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--warning-darker) 0%, var(--background) 100%);
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+    .btn-resend-verification:hover {
+        background: linear-gradient(145deg, var(--background) 0%, var(--warning-color) 100%);
+        transform: translateY(-2px);
+        
+    }
+
+/* Link Styles */
+.btn-link {
+    color: var(--text-color) !important;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+    .btn-link:hover {
+        text-decoration: underline;
+    }
+
+/* Ripple Effect */
+.btn-resend-verification::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-resend-verification:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Action buttons container animation */
+.d-grid {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.6s forwards;
+}
+
+/* Help Section */
+.help-section {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.7s forwards;
+}
+
+.question-icon::before {
+    content: "❓";
+    margin-right: 0.25rem;
+}
+
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.fw-semibold {
+    font-weight: 600 !important;
+}
+
+/* Text Styles */
+.small {
+    font-size: 0.9rem;
+}
+
+/* Border and spacing utilities */
+.border-top {
+    border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.mt-4 {
+    margin-top: 1.5rem !important;
+}
+
+.pt-3 {
+    padding-top: 1rem !important;
+}
+
+.mb-0 {
+    margin-bottom: 0 !important;
+}
+
+.mb-1 {
+    margin-bottom: 0.25rem !important;
+}
+
+.mb-3 {
+    margin-bottom: 1rem !important;
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem !important;
+}
+
+/* Text alignment */
+.text-center {
+    text-align: center !important;
+}
+
+/* Display utilities */
+.d-flex {
+    display: flex !important;
+}
+
+.d-grid {
+    display: grid !important;
+}
+
+.align-items-center {
+    align-items: center !important;
+}
+
+.justify-content-center {
+    justify-content: center !important;
+}
+
+.min-vh-100 {
+    min-height: 100vh !important;
+}
+
+.gap-3 {
+    gap: 1rem !important;
+}
+
+/* Email link hover effect */
+a[href^="mailto:"] {
+    color: var(--primary-color) !important;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+    a[href^="mailto:"]:hover {
+        text-decoration: underline;
+        transform: translateY(-1px);
+    }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 2rem !important;
+    }
+
+    .email-confirmation-error-header {
+        font-size: 1.75rem;
+    }
+
+    .email-confirmation-error-container {
+        padding: 0.5rem;
+    }
+
+    .email-confirmation-error-card {
+        margin: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1.5rem !important;
+    }
+
+    .email-confirmation-error-header {
+        font-size: 1.5rem;
+    }
+
+    .email-confirmation-error-container {
+        padding: 0.25rem;
+    }
+
+    .email-confirmation-error-card {
+        margin: 0.5rem;
+        border-radius: 16px;
+    }
+
+    .btn-resend-verification {
+        padding: 0.875rem 1.25rem;
+    }
+
+    .reasons-list li {
+        font-size: 0.85rem;
+        padding: 0.4rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .email-confirmation-error-card {
+        width: calc(100vw - 1rem);
+        margin: 0.5rem;
+    }
+
+    .card-body {
+        padding: 1.25rem !important;
+    }
+}
+
+/* Focus visible for accessibility */
+.btn-resend-verification:focus-visible,
+.btn-link:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .email-confirmation-error-card {
+        border-width: 3px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .email-confirmation-error-card {
+        animation: none;
+    }
+
+    .email-confirmation-error-header,
+    .text-muted,
+    .error-alert,
+    .reasons-section,
+    .d-grid,
+    .help-section {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+}

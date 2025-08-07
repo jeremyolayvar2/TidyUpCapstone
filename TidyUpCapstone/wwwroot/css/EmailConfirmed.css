@@ -1,0 +1,482 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root {
+    --background: #F5F5F5;
+    --primary-color: #6B9080;
+    --secondary-color: #A4C3B2;
+    --accent-color: #EAF4F4;
+    --text-color: #212529;
+    --success-color: #28a745;
+    --info-color: #17a2b8;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Montserrat", sans-serif;
+}
+
+body {
+    background: var(--background);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Montserrat", sans-serif;
+}
+
+.email-confirmed-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.email-confirmed-card {
+    background: var(--background);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+    border: 2px solid var(--primary-color);
+    font-family: "Montserrat", sans-serif;
+    background-clip: padding-box;
+    position: relative;
+    overflow: hidden;
+    animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.card-body {
+    padding: 2.5rem !important;
+}
+
+/* Header Styles */
+.email-confirmed-header {
+    font-family: "Righteous", sans-serif;
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
+}
+
+.text-muted {
+    color: #666 !important;
+    font-size: 1rem;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.4s forwards;
+}
+
+.verified-email {
+    font-size: 1.25rem;
+    color: var(--primary-color);
+    font-weight: 700;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.5s forwards;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Welcome Alert */
+.welcome-alert {
+    background: rgba(40, 167, 69, 0.1);
+    border: 1px solid rgba(40, 167, 69, 0.2);
+    border-radius: 12px;
+    padding: 1.5rem;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.6s forwards;
+}
+
+.welcome-title {
+    color: var(--primary-color);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.rocket-icon::before {
+    content: "🚀";
+    font-size: 1.2rem;
+}
+
+.welcome-text {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Button Styles */
+.btn-login-account {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: "Montserrat", sans-serif;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    text-decoration: none;
+}
+
+    .btn-login-account:hover {
+        background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+        transform: translateY(-2px);
+   
+    }
+
+.btn-go-homepage {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 1rem;
+    border: 2px solid var(--primary-color);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: "Montserrat", sans-serif;
+    position: relative;
+    overflow: hidden;
+    background: transparent;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+    .btn-go-homepage:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(107, 144, 128, 0.3);
+    }
+
+.sign-in-icon::before {
+    content: "🔑";
+    font-size: 1.1rem;
+}
+
+.home-icon::before {
+    content: "🏠";
+    font-size: 1.1rem;
+}
+
+/* Ripple Effect */
+.btn-login-account::before,
+.btn-go-homepage::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-login-account:active::before,
+.btn-go-homepage:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Action buttons container animation */
+.d-grid {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.7s forwards;
+}
+
+/* Next Steps */
+.next-steps {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.8s forwards;
+    text-align: center;
+}
+
+.next-steps-title {
+    color: #666;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    text-align: center;
+}
+
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.step-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.user-icon::before {
+   
+    color: var(--primary-color);
+}
+
+.plus-icon::before {
+
+    color: var(--success-color);
+}
+
+.users-icon::before {
+   
+    color: var(--info-color);
+}
+
+.step-text {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Text Styles */
+.small {
+    font-size: 0.9rem;
+}
+
+/* Border and spacing utilities */
+.border-top {
+    border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.mt-4 {
+    margin-top: 1.5rem !important;
+}
+
+.pt-3 {
+    padding-top: 1rem !important;
+}
+
+.mb-0 {
+    margin-bottom: 0 !important;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem !important;
+}
+
+.mb-3 {
+    margin-bottom: 1rem !important;
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem !important;
+}
+
+/* Text alignment */
+.text-center {
+    text-align: center !important;
+}
+
+/* Display utilities */
+.d-flex {
+    display: flex !important;
+}
+
+.d-grid {
+    display: grid !important;
+}
+
+.align-items-center {
+    align-items: center !important;
+}
+
+.justify-content-center {
+    justify-content: center !important;
+}
+
+.min-vh-100 {
+    min-height: 100vh !important;
+}
+
+.gap-3 {
+    gap: 1rem !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 2rem !important;
+    }
+
+    .email-confirmed-header {
+        font-size: 1.75rem;
+    }
+
+    .email-confirmed-container {
+        padding: 0.5rem;
+    }
+
+    .email-confirmed-card {
+        margin: 1rem;
+    }
+
+
+}
+
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1.5rem !important;
+    }
+
+    .email-confirmed-header {
+        font-size: 1.5rem;
+    }
+
+    .email-confirmed-container {
+        padding: 0.25rem;
+    }
+
+    .email-confirmed-card {
+        margin: 0.5rem;
+        border-radius: 16px;
+    }
+
+    .btn-login-account,
+    .btn-go-homepage {
+        padding: 0.875rem 1.25rem;
+    }
+
+ 
+
+    .steps-grid {
+        gap: 0.5rem;
+    }
+
+    .step-icon {
+        font-size: 1.25rem;
+    }
+
+    .step-text {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .email-confirmed-card {
+        width: calc(100vw - 1rem);
+        margin: 0.5rem;
+    }
+
+    .card-body {
+        padding: 1.25rem !important;
+    }
+
+    .verified-email {
+        font-size: 1.1rem;
+    }
+
+    .steps-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .step-item {
+        flex-direction: row;
+        justify-content: flex-start;
+        text-align: left;
+    }
+}
+
+/* Focus visible for accessibility */
+.btn-login-account:focus-visible,
+.btn-go-homepage:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .email-confirmed-card {
+        border-width: 3px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .email-confirmed-card {
+        animation: none;
+    }
+
+    .success-checkmark,
+    .email-confirmed-header,
+    .text-muted,
+    .verified-email,
+    .welcome-alert,
+    .d-grid,
+    .next-steps {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+
+        .success-checkmark .check-icon::before {
+            transform: scale(1);
+            animation: none;
+        }
+
+        .success-checkmark .icon-line.line-tip,
+        .success-checkmark .icon-line.line-long {
+            animation: none;
+        }
+}
