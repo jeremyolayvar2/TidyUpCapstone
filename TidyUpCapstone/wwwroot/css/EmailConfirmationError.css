@@ -197,12 +197,20 @@ body {
     transition: all 0.3s ease;
     padding: 0.5rem 1rem;
     border-radius: 8px;
-    display: inline-block;
+    display: flex;
+    align-items: center;
+    justify-content: center !important; /* Center the text */
+    text-align: center !important; /* Center align text */
+    width: 100%; /* Make it full width like the button above */
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
     .btn-link:hover {
         text-decoration: underline;
     }
+
 
 /* Ripple Effect */
 .btn-resend-verification::before {
@@ -386,13 +394,13 @@ a[href^="mailto:"] {
     }
 }
 
-/* Focus visible for accessibility */
-.btn-resend-verification:focus-visible,
-.btn-link:focus-visible {
-    outline: 2px solid var(--primary-color);
-    outline-offset: 2px;
+/* Remove blue border from Bootstrap btn btn-link */
+.btn.btn-link:focus {
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
 }
-
+bt
 /* High contrast mode support */
 @media (prefers-contrast: high) {
     .email-confirmation-error-card {
@@ -425,3 +433,4 @@ a[href^="mailto:"] {
         transform: none;
     }
 }
+

@@ -5,7 +5,7 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/EmailConfirmationError.css" />
+    <link rel="stylesheet" href="~/css/EmailConfirmationError.css?v=@DateTime.Now.Ticks" />
 }
 
 <div class="email-confirmation-error-container d-flex align-items-center justify-content-center min-vh-100">
@@ -49,7 +49,7 @@
                 <a href="@Url.Action("ResendVerification", "Account")" class="btn-resend-verification">
                     Request New Verification Email
                 </a>
-                <a href="@Url.Action("Index", "Home")" class="btn btn-link">Back to Login</a>
+                <a href="@Url.Action("Index", "Home")" class="btn-link">Back to Login</a>
             </div>
 
             <!-- Help Section -->

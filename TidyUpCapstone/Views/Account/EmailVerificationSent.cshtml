@@ -5,7 +5,7 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/EmailVerificationSent.css" />
+    <link rel="stylesheet" href="~/css/EmailVerificationSent.css?v=@DateTime.Now.Ticks" />
 }
 
 <div class="email-verification-sent-container d-flex align-items-center justify-content-center min-vh-100">
@@ -46,7 +46,7 @@
                 </a>
 
                 <a href="@Url.Action("Index", "Home")"
-                   class="btn btn-link">
+                   class="btn-link">
                     Back to Login
                 </a>
             </div>
