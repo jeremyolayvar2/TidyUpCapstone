@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <Folder Include="Views\Home\" />
+    <Folder Include="Views\Home\" />
+    <Folder Include="Views\Home\" />
   </ItemGroup>
 
   <ItemGroup>
