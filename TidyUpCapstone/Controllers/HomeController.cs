@@ -36,6 +36,12 @@ namespace TidyUp.Controllers
             return View();
         }
 
+
+        public IActionResult SettingsPage()
+        {
+            return View();
+        }
+
         //[Authorize]
         //public async Task<IActionResult> Main()
         //{

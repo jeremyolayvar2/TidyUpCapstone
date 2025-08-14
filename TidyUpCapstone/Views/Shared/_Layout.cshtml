@@ -13,6 +13,9 @@
     <link href="~/assets/logo-tidyup.png" rel="shortcut icon" type="image/svg" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
+    
+    <!-- ADD THIS LINE: Render page-specific styles -->
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body data-userid="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value"
       data-username="@User.Identity?.Name">
