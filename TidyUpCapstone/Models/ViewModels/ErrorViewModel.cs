@@ -1,4 +1,4 @@
-namespace TidyUpCapstone.Models
+﻿namespace TidyUpCapstone.Models.ViewModels
 {
     public class ErrorViewModel
     {
