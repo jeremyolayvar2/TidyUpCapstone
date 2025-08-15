@@ -3,6 +3,7 @@
 @using TidyUpCapstone.Helpers
 
 <link href="https://cdn.jsdelivr.net/npm/iconsax@1.0.0-alpha2/dist/css/iconsax.css" rel="stylesheet">
+<link rel="stylesheet" href="~/css/instagram-animations.css" />
 
 @{
     ViewBag.HideNavigation = false;
@@ -11,8 +12,29 @@
 
     if (User.Identity.IsAuthenticated)
     {
+        // Real authenticated user
         currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "";
         currentUserName = User.Identity.Name ?? "";
+    }
+    else
+    {
+        // Test mode: Get current test user from session
+        var currentTestUser = Context.Session.GetString("CurrentTestUser") ?? "Alice";
+        currentUserName = currentTestUser;
+
+        // Map test usernames to their IDs (these should match your database)
+        if (currentTestUser == "Alice")
+        {
+            currentUserId = "1";  // Make sure this matches Alice's actual ID in your database
+        }
+        else if (currentTestUser == "Bob")
+        {
+            currentUserId = "2";  // Make sure this matches Bob's actual ID in your database
+        }
+        else if (currentTestUser == "Charlie")
+        {
+            currentUserId = "3";  // Make sure this matches Charlie's actual ID in your database
+        }
     }
 }
 
@@ -115,21 +137,27 @@
             </div>
 
             <div class="post-interactions">
-
                 <div class="interaction-buttons">
-                    <button class="interaction-btn like-btn" data-post-id="sample-2">
+                    <!-- ENHANCED LIKE BUTTON with proper data attributes -->
+                    <button class="interaction-btn like-btn" data-post-id="sample-1">
                         <i class='bx bx-heart'></i>
                         <span class="likes-count">8</span>
                     </button>
-                    <button class="interaction-btn comment-btn" data-post-id="sample-2">
+                    <!-- ENHANCED COMMENT BUTTON -->
+                    <button class="interaction-btn comment-btn" data-post-id="sample-1">
                         <i class='bx bx-message-circle'></i>
-  
                         <span class="comment-count">12</span>
                     </button>
                 </div>
             </div>
+
+            <!-- HEART OVERLAY for double-click animation -->
+            <div class="heart-overlay">
+                <i class="bx bxs-heart heart-animation"></i>
+            </div>
         </div>
 
+        <!-- 3. UPDATE THE SECOND SAMPLE POST TOO -->
         <div class="community-post" data-type="community">
             <div class="post-header">
                 <div class="post-user-info">
@@ -151,18 +179,23 @@
             </div>
 
             <div class="post-interactions">
-
                 <div class="interaction-buttons">
+                    <!-- ENHANCED LIKE BUTTON -->
                     <button class="interaction-btn like-btn" data-post-id="sample-2">
-                        <i class='bx bx-hear'></i>
-                        <span class="likes-count">8</span>
+                        <i class='bx bx-heart'></i>
+                        <span class="likes-count">15</span>
                     </button>
+                    <!-- ENHANCED COMMENT BUTTON -->
                     <button class="interaction-btn comment-btn" data-post-id="sample-2">
                         <i class='bx bx-message-circle'></i>
-
-                        <span class="comment-count">12</span>
+                        <span class="comment-count">8</span>
                     </button>
                 </div>
+            </div>
+
+            <!-- HEART OVERLAY for double-click animation -->
+            <div class="heart-overlay">
+                <i class="bx bxs-heart heart-animation"></i>
             </div>
         </div>
 
@@ -796,5 +829,118 @@
     }
 </script>
 
-<script src="~/js/CommunityPage.js"></script>
+<script src="~/js/CommunityPage.js?v=20241114g"></script>
+
+
+
+<!-- TEST MODE: Enhanced User Switcher -->
+<!-- TEST MODE: Enhanced User Switcher with Debug Info -->
+<!-- TEST MODE: Enhanced User Switcher with Debug Info -->
+@if (!User.Identity.IsAuthenticated)
+{
+    var currentTestUser = Context.Session.GetString("CurrentTestUser") ?? "Alice";
+    var sessionId = Context.Session.Id;
+
+    <div id="testUserSwitcher" style="
+            position: fixed; top: 10px; left: 10px; z-index: 9999;
+            background: #fff; border: 2px solid #007bff; border-radius: 8px;
+            padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-family: Arial, sans-serif;">
+        <strong>🧪 TEST MODE</strong><br>
+        <label>Current User:</label>
+        <select id="testUserSelect" onchange="switchTestUser()" style="margin: 5px 0; padding: 4px;">
+            <option value="1">Alice</option>
+            <option value="2">Bob</option>
+            <option value="3">Charlie</option>
+        </select>
+        <br>
+        <small>Backend user: @currentTestUser</small><br>
+        <small>Session ID: @sessionId</small><br>
+        <small id="frontendUserDisplay">Frontend: Alice</small>
+    </div>
+
+    <script>
+        // Enhanced Test User Switcher with better debugging
+        async function switchTestUser() {
+            const select = document.getElementById('testUserSelect');
+            const value = select.value;
+
+            let username;
+            if (value === "1") {
+                username = "Alice";
+            } else if (value === "2") {
+                username = "Bob";
+            } else if (value === "3") {
+                username = "Charlie";
+            } else {
+                return;
+            }
+
+            try {
+                console.log(`🔄 Attempting to switch to ${username}...`);
+
+                // Test current state before switch
+                const beforeResponse = await fetch('/Community/DebugCurrentUser');
+                const beforeData = await beforeResponse.json();
+                console.log('BEFORE switch:', beforeData);
+
+                // Send the user switch to the backend
+                const formData = new FormData();
+                formData.append('username', username);
+
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                if (token) {
+                    formData.append('__RequestVerificationToken', token);
+                }
+
+                const response = await fetch('/Community/SwitchTestUser', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                console.log('Switch API result:', result);
+
+                if (result.success) {
+                    // Test state after switch
+                    const afterResponse = await fetch('/Community/DebugCurrentUser');
+                    const afterData = await afterResponse.json();
+                    console.log('AFTER switch:', afterData);
+
+                    // Update frontend display immediately
+                    document.getElementById('frontendUserDisplay').textContent = `Frontend: ${username}`;
+
+                    console.log(`✅ Backend switched to: ${username}`);
+                    console.log('🔄 Reloading page to sync HTML...');
+
+                    // Force page reload
+                    window.location.reload();
+
+                } else {
+                    console.error('❌ Switch failed:', result.message);
+                    alert('Error switching user: ' + result.message);
+                }
+            } catch (error) {
+                console.error('❌ Error during switch:', error);
+                alert('Error switching user');
+            }
+        }
+
+        // Set initial dropdown value
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentUser = '@currentTestUser';
+            const select = document.getElementById('testUserSelect');
+
+            console.log('🔍 Page loaded with backend user:', currentUser);
+
+            if (currentUser === 'Alice') select.value = '1';
+            else if (currentUser === 'Bob') select.value = '2';
+            else if (currentUser === 'Charlie') select.value = '3';
+
+            document.getElementById('frontendUserDisplay').textContent = `Frontend: ${currentUser}`;
+        });
+    </script>
+}
+}
+
 <script src="https://cdn.tailwindcss.com"></script>

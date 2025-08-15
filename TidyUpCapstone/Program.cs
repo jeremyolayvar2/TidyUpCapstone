@@ -1,4 +1,7 @@
 using TidyUpCapstone.Extensions;
+using TidyUpCapstone.Helpers;
+using TidyUpCapstone.Services;
+using TidyUpCapstone.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +15,22 @@ builder.Services
     .AddLoggingConfiguration(builder.Environment)
     .AddCachingServices()
     .AddAIServices(builder.Configuration) // For future AI integration
-    .AddBackgroundServices(); // For future background tasks
+    .AddBackgroundServices() // For future background tasks
+    .AddScoped<IImageUploadService, ImageUploadService>();
+builder.Services.AddScoped<ICommunityService, CommunityService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<IReactionService, ReactionService>();
+builder.Services.AddScoped<ITestUserHelper, TestUserHelper>();
+builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IViewModelService, ViewModelService>();
+
+// ?? ADD SESSION SUPPORT
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 // Add MVC and API controllers
 builder.Services.AddControllersWithViews();
@@ -33,8 +51,10 @@ else
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
+
+// ?? ADD SESSION MIDDLEWARE (must be after UseRouting and before UseAuthentication)
+app.UseSession();
 
 app.UseAuthentication();
 app.UseAuthorization();

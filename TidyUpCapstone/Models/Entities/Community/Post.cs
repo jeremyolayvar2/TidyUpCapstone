@@ -28,6 +28,10 @@ namespace TidyUpCapstone.Models.Entities.Community
 
         public DateTime? LastEdited { get; set; }
 
+
+        // SOFT DELETE PROPERTY
+        public bool IsDeleted { get; set; } = false;
+
         // Navigation properties
         [ForeignKey("AuthorId")]
         public virtual AppUser Author { get; set; } = null!;
