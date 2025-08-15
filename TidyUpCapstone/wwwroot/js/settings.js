@@ -13,6 +13,9 @@ function initializeSettings() {
     initExportData();
     initDeactivateAccount();
     initAccessibilityFeatures();
+    initProfileFeatures();
+    initSidebarIntegration();
+    initResponsiveLayout();
 
     console.log('Settings page initialized successfully');
 }
@@ -20,7 +23,7 @@ function initializeSettings() {
 /**
  * Initialize sidebar integration for responsive behavior
  */
-function initializeSidebarIntegration() {
+function initSidebarIntegration() {
     const sidebar = document.getElementById('sidebar');
     const settingsContainer = document.getElementById('settings-container');
 
@@ -112,7 +115,7 @@ function updateSettingsLayoutForSidebar() {
 /**
  * Initialize responsive layout handling
  */
-function initializeResponsiveLayout() {
+function initResponsiveLayout() {
     let resizeTimeout;
 
     function handleResize() {
@@ -212,7 +215,7 @@ function handleResponsiveChanges() {
 }
 
 /**
- * Initialize tab switching functionality
+ * FIXED: Initialize tab switching functionality
  */
 function initTabSwitching() {
     const tabLinks = document.querySelectorAll('.tab-link');
@@ -241,27 +244,42 @@ function initTabSwitching() {
     function showTab(targetTab) {
         console.log('Showing tab:', targetTab);
 
-        // Remove active class from all links and contents
-        tabLinks.forEach(l => l.classList.remove('active'));
-        tabContents.forEach(c => {
-            c.classList.remove('active');
-            c.style.display = 'none';
+        // Hide all tab contents first
+        tabContents.forEach(content => {
+            content.classList.remove('active');
+            content.style.display = 'none';
+            content.style.visibility = 'hidden';
+            content.style.opacity = '0';
         });
+
+        // Remove active class from all links
+        tabLinks.forEach(link => {
+            link.classList.remove('active');
+        });
+
+        // Show the target tab content
+        const targetContent = document.getElementById(targetTab);
+        if (targetContent) {
+            // Force display the target content
+            targetContent.style.display = 'block';
+            targetContent.style.visibility = 'visible';
+            targetContent.style.opacity = '1';
+            targetContent.classList.add('active');
+
+            console.log('Tab content displayed:', targetTab);
+            console.log('Target content styles:', {
+                display: targetContent.style.display,
+                visibility: targetContent.style.visibility,
+                opacity: targetContent.style.opacity
+            });
+        } else {
+            console.error('Target content not found:', targetTab);
+        }
 
         // Add active class to clicked link
         const activeLink = document.querySelector(`[data-tab="${targetTab}"]`);
         if (activeLink) {
             activeLink.classList.add('active');
-        }
-
-        // Show corresponding content
-        const targetContent = document.getElementById(targetTab);
-        if (targetContent) {
-            targetContent.classList.add('active');
-            targetContent.style.display = 'block';
-            console.log('Tab content displayed:', targetTab);
-        } else {
-            console.error('Target content not found:', targetTab);
         }
 
         // Update header
@@ -277,7 +295,7 @@ function initTabSwitching() {
         }
     }
 
-    // Add click handlers
+    // Add click handlers to tab links
     tabLinks.forEach(link => {
         link.addEventListener('click', function (e) {
             e.preventDefault();
@@ -288,8 +306,8 @@ function initTabSwitching() {
         });
     });
 
-    // Initialize first tab or restore saved tab
-    let initialTab = 'profile'; // Default to profile tab
+    // Initialize with profile tab
+    let initialTab = 'profile';
 
     try {
         const savedTab = sessionStorage.getItem('activeSettingsTab');
@@ -300,34 +318,53 @@ function initTabSwitching() {
         console.warn('SessionStorage not available:', e);
     }
 
-    // Show initial tab
+    // Force show the initial tab immediately
     setTimeout(() => {
         showTab(initialTab);
+
+        // Double-check that profile tab is visible
+        const profileTab = document.getElementById('profile');
+        if (profileTab && initialTab === 'profile') {
+            profileTab.style.display = 'block !important';
+            profileTab.style.visibility = 'visible !important';
+            profileTab.style.opacity = '1 !important';
+        }
     }, 100);
 }
 
+// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('DOM loaded, initializing tabs...');
+    console.log('DOM loaded, initializing settings...');
 
-    // Wait a bit more to ensure all elements are rendered
+    // Initialize settings with a slight delay to ensure all elements are rendered
     setTimeout(() => {
-        initTabSwitching();
+        initializeSettings();
 
-        // Force show profile tab if nothing is visible
+        // Force profile tab to be visible as a fallback
         const profileTab = document.getElementById('profile');
-        const activeTab = document.querySelector('.tab-content.active');
+        const profileLink = document.querySelector('[data-tab="profile"]');
 
-        if (!activeTab && profileTab) {
-            console.log('No active tab found, forcing profile tab to show');
+        if (profileTab) {
             profileTab.classList.add('active');
             profileTab.style.display = 'block';
-
-            const profileLink = document.querySelector('[data-tab="profile"]');
-            if (profileLink) {
-                profileLink.classList.add('active');
-            }
+            profileTab.style.visibility = 'visible';
+            profileTab.style.opacity = '1';
+            console.log('Profile tab forced to show');
         }
-    }, 500);
+
+        if (profileLink) {
+            profileLink.classList.add('active');
+        }
+
+        // Debug information
+        console.log('Profile tab element:', profileTab);
+        console.log('Profile tab classes:', profileTab ? profileTab.className : 'not found');
+        console.log('Profile tab computed styles:', profileTab ? {
+            display: getComputedStyle(profileTab).display,
+            visibility: getComputedStyle(profileTab).visibility,
+            opacity: getComputedStyle(profileTab).opacity
+        } : 'not found');
+    }, 200);
 });
 
 // Additional debugging function - call this from browser console if needed
@@ -743,63 +780,6 @@ function clearFieldError(field) {
 }
 
 /**
- * Initialize profile picture upload
- */
-function initProfilePictureUpload() {
-    const profileAvatar = document.getElementById('profile-avatar-upload');
-
-    if (!profileAvatar) {
-        console.warn('Profile avatar element not found');
-        return;
-    }
-
-    profileAvatar.addEventListener('click', handleProfilePictureUpload);
-    profileAvatar.style.cursor = 'pointer';
-    profileAvatar.title = 'Click to upload profile picture';
-}
-
-/**
- * Handle profile picture upload
- */
-function handleProfilePictureUpload() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-
-    input.addEventListener('change', function (e) {
-        const file = e.target.files[0];
-        if (file) {
-            // Validate file size (max 5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                showNotification('File size must be less than 5MB', 'error');
-                return;
-            }
-
-            // Validate file type
-            if (!file.type.startsWith('image/')) {
-                showNotification('Please select a valid image file', 'error');
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const avatar = document.getElementById('profile-avatar-upload');
-                if (avatar) {
-                    avatar.style.backgroundImage = `url(${e.target.result})`;
-                    avatar.style.backgroundSize = 'cover';
-                    avatar.style.backgroundPosition = 'center';
-                    avatar.innerHTML = '';
-                    showNotification('Profile picture updated successfully!', 'success');
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-
-    input.click();
-}
-
-/**
  * Initialize account deletion
  */
 function initAccountDeletion() {
@@ -851,25 +831,19 @@ function initAccountDeletion() {
  * Initialize connected accounts
  */
 function initConnectedAccounts() {
-    const addButtons = document.querySelectorAll('.btn-add');
+    const connectButtons = document.querySelectorAll('.btn-connect');
 
-    if (!addButtons.length) {
-        console.warn('Connected account buttons not found');
-        return;
-    }
-
-    addButtons.forEach(button => {
+    connectButtons.forEach(button => {
         button.addEventListener('click', function () {
             const accountType = this.getAttribute('data-account');
-            const accountInfo = this.closest('.account-item').querySelector('.account-info span');
-            const accountName = accountInfo ? accountInfo.textContent : 'account';
+            const accountItem = this.closest('.account-item');
+            const accountName = accountItem.querySelector('.account-info span').textContent;
 
-            // Check if already connected
             if (this.classList.contains('connected')) {
                 // Disconnect account
                 const confirmDisconnect = confirm(`Are you sure you want to disconnect ${accountName}?`);
                 if (confirmDisconnect) {
-                    this.textContent = '+';
+                    this.innerHTML = '<i class="bx bx-plus"></i>';
                     this.classList.remove('connected');
                     showNotification(`${accountName} disconnected`, 'info');
                 }
@@ -877,13 +851,12 @@ function initConnectedAccounts() {
             }
 
             // Show loading state
-            const originalText = this.textContent;
-            this.textContent = '...';
+            this.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i>';
             this.disabled = true;
 
             // Simulate connection process
             setTimeout(() => {
-                this.textContent = '?';
+                this.innerHTML = '<i class="bx bx-check"></i>';
                 this.classList.add('connected');
                 this.disabled = false;
                 showNotification(`${accountName} connected successfully!`, 'success');
@@ -1267,10 +1240,6 @@ const addPasswordStrengthStyles = () => {
 
 // Add password strength styles when DOM is ready
 document.addEventListener('DOMContentLoaded', addPasswordStrengthStyles);
-
-
-
-
 
 //Profile Tab
 
@@ -1678,54 +1647,6 @@ function initProfilePictureUpload() {
     profileAvatar.style.cursor = 'pointer';
     profileAvatar.title = 'Click to upload profile picture';
 }
-
-/**
- * Initialize connected accounts functionality
- */
-function initConnectedAccounts() {
-    const connectButtons = document.querySelectorAll('.btn-connect');
-
-    connectButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            const accountType = this.getAttribute('data-account');
-            const accountItem = this.closest('.account-item');
-            const accountName = accountItem.querySelector('.account-info span').textContent;
-
-            if (this.classList.contains('connected')) {
-                // Disconnect account
-                const confirmDisconnect = confirm(`Are you sure you want to disconnect ${accountName}?`);
-                if (confirmDisconnect) {
-                    this.innerHTML = '<i class="bx bx-plus"></i>';
-                    this.classList.remove('connected');
-                    showNotification(`${accountName} disconnected`, 'info');
-                }
-                return;
-            }
-
-            // Show loading state
-            this.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i>';
-            this.disabled = true;
-
-            // Simulate connection process
-            setTimeout(() => {
-                this.innerHTML = '<i class="bx bx-check"></i>';
-                this.classList.add('connected');
-                this.disabled = false;
-                showNotification(`${accountName} connected successfully!`, 'success');
-            }, 1500);
-        });
-    });
-}
-
-/**
- * Add profile features to the main settings initialization
- */
-document.addEventListener('DOMContentLoaded', function () {
-    // Add a delay to ensure DOM is fully loaded
-    setTimeout(() => {
-        initProfileFeatures();
-    }, 500);
-});
 
 /**
  * Handle escape key to close modal

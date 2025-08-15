@@ -6,6 +6,7 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/settings.css" />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 }
 
 <!-- Settings container that adapts to sidebar state -->
@@ -68,227 +69,237 @@
 
         <!-- Main Content -->
         <div class="settings-content">
-            <!-- Profile Tab -->
-            <div id="profile" class="tab-content active" style="display: block;">
+            <!-- Profile Tab - MODERN DESIGN -->
+            <!-- FIXED Profile Tab - Replace the entire #profile div in your SettingsPage.cshtml -->
+
+            <div id="profile" class="tab-content active" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
                 <div class="content-header">
                     <h3>Profile & Account Settings</h3>
                     <p>Manage your personal information and account details</p>
                 </div>
 
-                <form method="post" asp-action="UpdateProfile" asp-controller="Settings">
-                    <!-- Profile Picture Section -->
-                    <div class="profile-picture-section">
-                        <div class="profile-avatar-container">
+                <div class="profile-container">
+                    <!-- Profile Picture and Edit Section -->
+                    <div class="profile-header-section">
+                        <div class="profile-picture-container">
                             <div class="profile-avatar-large" id="profile-avatar-upload">
                                 📷
                             </div>
-                            <div class="verification-badge" id="verification-badge" style="display: none;">
+                            <div class="verification-badge" id="verification-badge" style="display: flex;">
                                 <i class="bx bx-check-shield"></i>
                             </div>
                         </div>
-                        <div class="profile-actions">
-                            <button type="button" class="btn-edit-profile" id="edit-profile-btn">
-                                <i class="bx bx-edit"></i>
-                                Edit
-                            </button>
-                        </div>
-                    </div>
 
-                    <!-- Personal Information Grid -->
-                    <div class="profile-info-grid">
-                        <!-- Left Column -->
-                        <div class="profile-info-left">
-                            <div class="form-group">
-                                <label for="firstName">First Name</label>
-                                <input type="text" id="firstName" name="FirstName" placeholder="First Name" value="John" />
-                            </div>
-
-                            <div class="form-group">
-                                <label for="lastName">Last Name</label>
-                                <input type="text" id="lastName" name="LastName" placeholder="Last Name" value="Doe" />
-                            </div>
-
-                            <div class="form-group">
-                                <label for="email">Email</label>
-                                <input type="email" id="email" name="Email" placeholder="jovanjeremy@gmail.com" value="jovanjeremy@gmail.com" />
-                            </div>
-                        </div>
-
-                        <!-- Right Column -->
-                        <div class="profile-info-right">
-                            <div class="form-group">
-                                <label for="phone">Phone</label>
-                                <div class="phone-input-container">
-                                    <input type="tel" id="phone" name="Phone" placeholder="000-00000-000" value="+63 912 345 6789" />
-                                    <button type="button" class="btn-verify-phone" id="verify-phone-btn">
-                                        Verify Now
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="location">Location</label>
-                                <input type="text" id="location" name="Location" placeholder="Set Location" value="Manila, Philippines" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Account Details Section -->
-                    <div class="account-details-section">
-                        <div class="account-details-grid">
-                            <div class="form-group">
-                                <label for="username">User Name</label>
-                                <input type="text" id="username" name="Username" placeholder="jovanjeremy" value="jovanjeremy" />
-                            </div>
-
-                            <div class="form-group">
-                                <label for="password">Password</label>
-                                <div class="password-input-container">
-                                    <input type="password" id="password" name="Password" placeholder="••••••••" value="password123" />
-                                    <button type="button" class="btn-toggle-password" id="toggle-password">
-                                        <i class="bx bx-hide"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="gender">Gender</label>
-                                <select id="gender" name="Gender">
-                                    <option value="">Select</option>
-                                    <option value="male" selected>Male</option>
-                                    <option value="female">Female</option>
-                                    <option value="other">Other</option>
-                                    <option value="prefer-not-to-say">Prefer not to say</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="birthday">Birthday</label>
-                                <input type="date" id="birthday" name="Birthday" value="1990-01-01" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Connected Accounts Section -->
-                    <div class="connected-accounts-section">
-                        <h4>Connected Accounts</h4>
-                        <div class="connected-accounts-grid">
-                            <div class="account-item">
-                                <div class="account-info">
-                                    <div class="account-icon facebook-icon">
-                                        <i class="bx bxl-facebook"></i>
-                                    </div>
-                                    <span>Facebook</span>
-                                </div>
-                                <button type="button" class="btn-connect" data-account="facebook">
-                                    <i class="bx bx-plus"></i>
-                                </button>
-                            </div>
-
-                            <div class="account-item">
-                                <div class="account-info">
-                                    <div class="account-icon google-icon">
-                                        <i class="bx bxl-google"></i>
-                                    </div>
-                                    <span>Google Chrome</span>
-                                </div>
-                                <button type="button" class="btn-connect" data-account="google">
-                                    <i class="bx bx-plus"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn-save-profile">Save Changes</button>
-                </form>
-            </div>
-
-            <!-- Phone Verification Modal -->
-            <div class="verification-modal" id="phone-verification-modal">
-                <div class="verification-modal-content">
-                    <div class="verification-modal-header">
-                        <h3>Verify Your Phone Number</h3>
-                        <button type="button" class="btn-close-modal" id="close-verification-modal">
-                            <i class="bx bx-x"></i>
+                        <button type="button" class="btn-edit-modern" id="edit-profile-btn">
+                            <i class="bx bx-edit"></i>
+                            Edit
                         </button>
                     </div>
 
-                    <div class="verification-steps">
-                        <!-- Step 1: Enter Phone Number -->
-                        <div class="verification-step active" id="step-phone">
-                            <div class="step-content">
-                                <div class="step-icon">
-                                    <i class="bx bx-phone"></i>
-                                </div>
-                                <h4>Enter Your Phone Number</h4>
-                                <p>We'll send you a verification code via SMS</p>
-
-                                <div class="phone-number-input">
-                                    <select id="country-code" class="country-code-select">
-                                        <option value="+1">🇺🇸 +1</option>
-                                        <option value="+63" selected>🇵🇭 +63</option>
-                                        <option value="+44">🇬🇧 +44</option>
-                                        <option value="+81">🇯🇵 +81</option>
-                                        <option value="+86">🇨🇳 +86</option>
-                                    </select>
-                                    <input type="tel" id="verification-phone" placeholder="Enter phone number" />
+                    <!-- Profile Information Form -->
+                    <form method="post" asp-action="UpdateProfile" asp-controller="Settings">
+                        <!-- Personal Information Grid -->
+                        <div class="profile-form-grid">
+                            <!-- Left Column -->
+                            <div class="form-column">
+                                <div class="form-group-modern">
+                                    <label for="firstName">First Name</label>
+                                    <input type="text" id="firstName" name="FirstName" placeholder="First Name" value="John" />
                                 </div>
 
-                                <button type="button" class="btn-send-code" id="send-verification-code">
-                                    Send Verification Code
-                                </button>
+                                <div class="form-group-modern">
+                                    <label for="email">Email</label>
+                                    <input type="email" id="email" name="Email" placeholder="jovanjeremy@gmail.com" value="jovanjeremy@gmail.com" />
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- Step 2: Enter Verification Code -->
-                        <div class="verification-step" id="step-code">
-                            <div class="step-content">
-                                <div class="step-icon">
-                                    <i class="bx bx-message-dots"></i>
-                                </div>
-                                <h4>Enter Verification Code</h4>
-                                <p>We sent a 6-digit code to <span id="phone-display"></span></p>
-
-                                <div class="code-input-container">
-                                    <input type="text" class="code-input" maxlength="1" data-index="0">
-                                    <input type="text" class="code-input" maxlength="1" data-index="1">
-                                    <input type="text" class="code-input" maxlength="1" data-index="2">
-                                    <input type="text" class="code-input" maxlength="1" data-index="3">
-                                    <input type="text" class="code-input" maxlength="1" data-index="4">
-                                    <input type="text" class="code-input" maxlength="1" data-index="5">
+                            <!-- Right Column -->
+                            <div class="form-column">
+                                <div class="form-group-modern">
+                                    <label for="lastName">Last Name</label>
+                                    <input type="text" id="lastName" name="LastName" placeholder="Last Name" value="Doe" />
                                 </div>
 
-                                <div class="verification-actions">
-                                    <button type="button" class="btn-verify-code" id="verify-code-btn">
-                                        Verify Code
-                                    </button>
-                                    <button type="button" class="btn-resend-code" id="resend-code-btn">
-                                        Resend Code <span id="resend-timer"></span>
+                                <div class="form-group-modern">
+                                    <label for="location">Location</label>
+                                    <input type="text" id="location" name="Location" placeholder="Set Location" value="Manila, Philippines" />
+                                </div>
+                            </div>
+
+                            <!-- Phone Field - Full Width -->
+                            <div class="form-group-modern phone-group">
+                                <label for="phone">Phone</label>
+                                <div class="phone-input-wrapper">
+                                    <input type="tel" id="phone" name="Phone" placeholder="000-00000-000" value="+63 912 345 6789" />
+                                    <button type="button" class="btn-get-verified" id="verify-phone-btn">
+                                        Get Verified
                                     </button>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Step 3: Success -->
-                        <div class="verification-step" id="step-success">
-                            <div class="step-content">
-                                <div class="step-icon success">
-                                    <i class="bx bx-check-circle"></i>
-                                </div>
-                                <h4>Phone Verified Successfully!</h4>
-                                <p>Your phone number has been verified and your account is now secure.</p>
+                        <!-- Account Details Section -->
+                        <div class="account-details-modern">
+                            <div class="account-details-grid">
+                                <!-- Left Side - Form Fields -->
+                                <div class="account-form-section">
+                                    <div class="form-group-account">
+                                        <label for="username">User Name</label>
+                                        <input type="text" id="username" name="Username" placeholder="jovalayvar" value="jovalayvar" />
+                                    </div>
 
-                                <button type="button" class="btn-complete-verification" id="complete-verification">
-                                    Complete
-                                </button>
+                                    <div class="form-group-account">
+                                        <label for="password">Password</label>
+                                        <div class="password-input-wrapper">
+                                            <input type="password" id="password" name="Password" placeholder="........" value="password123" />
+                                            <button type="button" class="btn-toggle-password-modern" id="toggle-password">
+                                                <i class="bx bx-hide"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group-account">
+                                        <label for="gender">Gender</label>
+                                        <select id="gender" name="Gender" class="select-modern">
+                                            <option value="">Select</option>
+                                            <option value="male" selected>Male</option>
+                                            <option value="female">Female</option>
+                                            <option value="other">Other</option>
+                                            <option value="prefer-not-to-say">Prefer not to say</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group-account">
+                                        <label for="birthday">Birthday</label>
+                                        <input type="date" id="birthday" name="Birthday" value="1990-01-01" placeholder="00/00/00" />
+                                    </div>
+                                </div>
+
+                                <!-- Right Side - Connected Accounts -->
+                                <div class="connected-accounts-modern">
+                                    <h3>Connected Accounts</h3>
+
+                                    <div class="account-item-modern">
+                                        <div class="account-info-modern">
+                                            <div class="account-icon-modern facebook-icon">
+                                                <i class="bx bxl-facebook"></i>
+                                            </div>
+                                            <span>Facebook</span>
+                                        </div>
+                                        <button type="button" class="btn-connect-modern" data-account="facebook">
+                                            <i class="bx bx-plus"></i>
+                                        </button>
+                                    </div>
+
+                                    <div class="account-item-modern">
+                                        <div class="account-info-modern">
+                                            <div class="account-icon-modern google-icon">
+                                                <i class="bx bxl-google"></i>
+                                            </div>
+                                            <span>Google Chrome</span>
+                                        </div>
+                                        <button type="button" class="btn-connect-modern" data-account="google">
+                                            <i class="bx bx-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Save Button -->
+                        <div class="save-button-container">
+                            <button type="submit" class="btn-save-modern">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Phone Verification Modal -->
+                <div class="verification-modal" id="phone-verification-modal">
+                    <div class="verification-modal-content">
+                        <div class="verification-modal-header">
+                            <h3>Verify Your Phone Number</h3>
+                            <button type="button" class="btn-close-modal" id="close-verification-modal">
+                                <i class="bx bx-x"></i>
+                            </button>
+                        </div>
+
+                        <div class="verification-steps">
+                            <!-- Step 1: Enter Phone Number -->
+                            <div class="verification-step active" id="step-phone">
+                                <div class="step-content">
+                                    <div class="step-icon">
+                                        <i class="bx bx-phone"></i>
+                                    </div>
+                                    <h4>Enter Your Phone Number</h4>
+                                    <p>We'll send you a verification code via SMS</p>
+
+                                    <div class="phone-number-input">
+                                        <select id="country-code" class="country-code-select">
+                                            <option value="+1">🇺🇸 +1</option>
+                                            <option value="+63" selected>🇵🇭 +63</option>
+                                            <option value="+44">🇬🇧 +44</option>
+                                            <option value="+81">🇯🇵 +81</option>
+                                            <option value="+86">🇨🇳 +86</option>
+                                        </select>
+                                        <input type="tel" id="verification-phone" placeholder="Enter phone number" />
+                                    </div>
+
+                                    <button type="button" class="btn-send-code" id="send-verification-code">
+                                        Send Verification Code
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Enter Verification Code -->
+                            <div class="verification-step" id="step-code">
+                                <div class="step-content">
+                                    <div class="step-icon">
+                                        <i class="bx bx-message-dots"></i>
+                                    </div>
+                                    <h4>Enter Verification Code</h4>
+                                    <p>We sent a 6-digit code to <span id="phone-display"></span></p>
+
+                                    <div class="code-input-container">
+                                        <input type="text" class="code-input" maxlength="1" data-index="0">
+                                        <input type="text" class="code-input" maxlength="1" data-index="1">
+                                        <input type="text" class="code-input" maxlength="1" data-index="2">
+                                        <input type="text" class="code-input" maxlength="1" data-index="3">
+                                        <input type="text" class="code-input" maxlength="1" data-index="4">
+                                        <input type="text" class="code-input" maxlength="1" data-index="5">
+                                    </div>
+
+                                    <div class="verification-actions">
+                                        <button type="button" class="btn-verify-code" id="verify-code-btn">
+                                            Verify Code
+                                        </button>
+                                        <button type="button" class="btn-resend-code" id="resend-code-btn">
+                                            Resend Code <span id="resend-timer"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step 3: Success -->
+                            <div class="verification-step" id="step-success">
+                                <div class="step-content">
+                                    <div class="step-icon success">
+                                        <i class="bx bx-check-circle"></i>
+                                    </div>
+                                    <h4>Phone Verified Successfully!</h4>
+                                    <p>Your phone number has been verified and your account is now secure.</p>
+
+                                    <button type="button" class="btn-complete-verification" id="complete-verification">
+                                        Complete
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Modal Overlay -->
-            <div class="modal-overlay" id="modal-overlay"></div>
+                <!-- Modal Overlay -->
+                <div class="modal-overlay" id="modal-overlay"></div>
+            </div>
 
             <!-- Privacy Tab -->
             <div id="privacy" class="tab-content">
@@ -696,32 +707,328 @@
 @section Scripts {
     <script src="~/js/settings.js"></script>
 
+  
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Settings page loaded');
+            console.log('🔧 Debugging Profile Content Visibility...');
 
-            // Force profile tab to be visible
-            setTimeout(function() {
+            // Function to force show all profile content
+            function forceShowProfileContent() {
+                console.log('🚀 Forcing profile content to show...');
+
                 const profileTab = document.getElementById('profile');
-                const profileLink = document.querySelector('[data-tab="profile"]');
 
-                if (profileTab) {
-                    profileTab.classList.add('active');
-                    profileTab.style.display = 'block';
-                    profileTab.style.visibility = 'visible';
-                    profileTab.style.opacity = '1';
-                    console.log('Profile tab forced to show');
+                if (!profileTab) {
+                    console.error('❌ Profile tab not found!');
+                    return;
                 }
 
+                // Force the main profile tab to be visible
+                profileTab.style.display = 'block';
+                profileTab.style.visibility = 'visible';
+                profileTab.style.opacity = '1';
+                profileTab.style.position = 'relative';
+                profileTab.style.zIndex = '1';
+                profileTab.classList.add('active');
+
+                console.log('✅ Profile tab visibility set');
+
+                // Force all child elements to be visible
+                const allElements = profileTab.querySelectorAll('*');
+                allElements.forEach((element, index) => {
+                    // Don't mess with the modal elements
+                    if (!element.closest('.verification-modal') && !element.closest('.modal-overlay')) {
+                        element.style.display = '';
+                        element.style.visibility = 'visible';
+                        element.style.opacity = '1';
+
+                        // Special handling for flex and grid containers
+                        if (element.classList.contains('profile-form-grid') ||
+                            element.classList.contains('account-details-grid') ||
+                            element.classList.contains('account-form-section')) {
+                            element.style.display = 'grid';
+                        }
+
+                        if (element.classList.contains('profile-header-section') ||
+                            element.classList.contains('phone-input-wrapper') ||
+                            element.classList.contains('password-input-wrapper') ||
+                            element.classList.contains('account-info-modern') ||
+                            element.classList.contains('btn-edit-modern') ||
+                            element.classList.contains('profile-avatar-large') ||
+                            element.classList.contains('verification-badge') ||
+                            element.classList.contains('account-item-modern') ||
+                            element.classList.contains('btn-connect-modern') ||
+                            element.classList.contains('save-button-container') ||
+                            element.classList.contains('form-column') ||
+                            element.classList.contains('form-group-modern') ||
+                            element.classList.contains('form-group-account')) {
+                            element.style.display = 'flex';
+                        }
+                    }
+                });
+
+                console.log(`✅ Processed ${allElements.length} elements`);
+
+                // Hide other tabs
+                const allTabs = document.querySelectorAll('.tab-content');
+                allTabs.forEach(tab => {
+                    if (tab.id !== 'profile') {
+                        tab.style.display = 'none';
+                        tab.classList.remove('active');
+                    }
+                });
+
+                // Update active tab link
+                const profileLink = document.querySelector('[data-tab="profile"]');
                 if (profileLink) {
                     profileLink.classList.add('active');
                 }
 
-                // Debug info
-                console.log('Profile tab element:', profileTab);
-                console.log('Profile tab classes:', profileTab ? profileTab.className : 'not found');
-                console.log('Profile tab display:', profileTab ? getComputedStyle(profileTab).display : 'not found');
-            }, 100);
+                console.log('✅ Profile content forced to show!');
+
+                // Debug what's visible
+                setTimeout(() => {
+                    debugProfileContent();
+                }, 500);
+            }
+
+            // Debug function to check what's visible
+            function debugProfileContent() {
+                console.log('🔍 Debugging profile content...');
+
+                const elements = [
+                    'profile',
+                    'profile-container',
+                    'profile-header-section',
+                    'profile-form-grid',
+                    'account-details-modern',
+                    'connected-accounts-modern'
+                ];
+
+                elements.forEach(className => {
+                    const element = document.getElementById(className) || document.querySelector('.' + className);
+                    if (element) {
+                        const styles = getComputedStyle(element);
+                        console.log(`📋 ${className}:`, {
+                            display: styles.display,
+                            visibility: styles.visibility,
+                            opacity: styles.opacity,
+                            height: styles.height,
+                            width: styles.width
+                        });
+                    } else {
+                        console.warn(`⚠️ Element not found: ${className}`);
+                    }
+                });
+            }
+
+            // Add CSS fixes directly via JavaScript
+            function addCriticalCSS() {
+                const style = document.createElement('style');
+                style.id = 'profile-visibility-fix';
+                style.textContent = `
+                    #profile {
+                        display: block !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        position: relative !important;
+                        z-index: 1 !important;
+                    }
+
+                    #profile * {
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                    }
+
+                    #profile .profile-container,
+                    #profile .profile-header-section,
+                    #profile .profile-form-grid,
+                    #profile .form-column,
+                    #profile .form-group-modern,
+                    #profile .account-details-modern,
+                    #profile .account-details-grid,
+                    #profile .account-form-section,
+                    #profile .form-group-account,
+                    #profile .connected-accounts-modern,
+                    #profile .account-item-modern,
+                    #profile .save-button-container {
+                        display: block !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                    }
+
+                    #profile .profile-header-section,
+                    #profile .phone-input-wrapper,
+                    #profile .password-input-wrapper,
+                    #profile .account-info-modern,
+                    #profile .btn-edit-modern,
+                    #profile .profile-avatar-large,
+                    #profile .verification-badge,
+                    #profile .account-item-modern,
+                    #profile .btn-connect-modern,
+                    #profile .save-button-container,
+                    #profile .form-column,
+                    #profile .form-group-modern,
+                    #profile .form-group-account {
+                        display: flex !important;
+                    }
+
+                    #profile .profile-form-grid,
+                    #profile .account-details-grid,
+                    #profile .account-form-section {
+                        display: grid !important;
+                    }
+
+                    #profile input,
+                    #profile select,
+                    #profile label,
+                    #profile button,
+                    #profile h3,
+                    #profile span {
+                        display: block !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                    }
+
+                    #profile .profile-form-grid {
+                        grid-template-columns: 1fr 1fr !important;
+                        gap: 24px !important;
+                    }
+
+                    #profile .account-details-grid {
+                        grid-template-columns: 1fr 320px !important;
+                        gap: 40px !important;
+                    }
+
+                    #profile .account-form-section {
+                        grid-template-columns: 1fr 1fr !important;
+                        gap: 20px !important;
+                    }
+
+                    @@media (max-width: 768px) {
+                        #profile .profile-form-grid {
+                            grid-template-columns: 1fr !important;
+                        }
+
+                        #profile .account-details-grid {
+                            grid-template-columns: 1fr !important;
+                        }
+
+                        #profile .account-form-section {
+                            grid-template-columns: 1fr !important;
+                        }
+
+                        #profile .phone-input-wrapper {
+                            flex-direction: column !important;
+                        }
+                    }
+                `;
+
+                // Remove existing style if it exists
+                const existingStyle = document.getElementById('profile-visibility-fix');
+                if (existingStyle) {
+                    existingStyle.remove();
+                }
+
+                document.head.appendChild(style);
+                console.log('✅ Critical CSS added via JavaScript');
+            }
+
+            // Run the fixes
+            addCriticalCSS();
+
+            // Run immediately
+            forceShowProfileContent();
+
+            // Run multiple times to ensure it works
+            setTimeout(forceShowProfileContent, 100);
+            setTimeout(forceShowProfileContent, 500);
+            setTimeout(forceShowProfileContent, 1000);
+
+            // Add a manual trigger function for testing
+            window.fixProfileContent = forceShowProfileContent;
+            window.debugProfile = debugProfileContent;
+
+            console.log('🎯 Profile visibility fix loaded. Use fixProfileContent() or debugProfile() in console if needed.');
         });
+
+        // Also run when the tab is clicked
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('[data-tab="profile"]')) {
+                setTimeout(() => {
+                    console.log('🔄 Profile tab clicked, re-running visibility fix...');
+
+                    const profileTab = document.getElementById('profile');
+                    if (profileTab) {
+                        profileTab.style.display = 'block';
+                        profileTab.style.visibility = 'visible';
+                        profileTab.style.opacity = '1';
+                        profileTab.classList.add('active');
+
+                        // Force all content to be visible
+                        const allElements = profileTab.querySelectorAll('*');
+                        allElements.forEach(element => {
+                            if (!element.closest('.verification-modal') && !element.closest('.modal-overlay')) {
+                                element.style.visibility = 'visible';
+                                element.style.opacity = '1';
+                            }
+                        });
+                    }
+                }, 50);
+            }
+        });
+
+        // Additional fix for tab switching
+        document.addEventListener('DOMContentLoaded', function() {
+            // Force profile tab to be active on load
+            const profileLink = document.querySelector('[data-tab="profile"]');
+            const profileTab = document.getElementById('profile');
+
+            if (profileLink && profileTab) {
+                profileLink.classList.add('active');
+                profileTab.classList.add('active');
+                profileTab.style.display = 'block';
+                profileTab.style.visibility = 'visible';
+                profileTab.style.opacity = '1';
+
+                // Hide other tabs
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    if (tab.id !== 'profile') {
+                        tab.style.display = 'none';
+                        tab.classList.remove('active');
+                    }
+                });
+
+                // Update header
+                const currentTabName = document.getElementById('current-tab-name');
+                if (currentTabName) {
+                    currentTabName.textContent = 'Profile & Account';
+                }
+            }
+        });
+
+        // Force profile content visibility every 2 seconds for the first 10 seconds
+        let retryCount = 0;
+        const maxRetries = 5;
+        const retryInterval = setInterval(() => {
+            const profileTab = document.getElementById('profile');
+            if (profileTab && retryCount < maxRetries) {
+                const isVisible = getComputedStyle(profileTab).display !== 'none' &&
+                                 getComputedStyle(profileTab).visibility !== 'hidden';
+
+                if (!isVisible) {
+                    console.log(`🔄 Retry ${retryCount + 1}: Forcing profile visibility...`);
+                    if (window.fixProfileContent) {
+                        window.fixProfileContent();
+                    }
+                }
+
+                retryCount++;
+            } else {
+                clearInterval(retryInterval);
+                console.log('✅ Profile visibility monitoring stopped');
+            }
+        }, 2000);
     </script>
 }
