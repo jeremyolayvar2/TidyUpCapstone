@@ -12,8 +12,8 @@ using TidyUpCapstone.Data;
 namespace TidyUpCapstone.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250723054455_InitialSchema")]
-    partial class InitialSchema
+    [Migration("20250814020147_AddChatFeature")]
+    partial class AddChatFeature
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

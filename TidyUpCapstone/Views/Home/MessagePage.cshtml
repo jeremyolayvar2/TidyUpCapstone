@@ -1,7 +1,4 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-
+﻿@model TidyUpCapstone.Models.ViewModels.MessagePageViewModel
 @{
     ViewData["Title"] = "Message";
     ViewData["PageType"] = "message";
@@ -12,30 +9,111 @@
 <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="~/css/MessagePage.css" asp-append-version="true" />
 
+<!-- SignalR JavaScript Library -->
+<script src="https://unpkg.com/@@microsoft/signalr@latest/dist/browser/signalr.min.js"></script>
+
+<!-- User Data for JavaScript -->
+<script type="application/json" id="userData">
+    {
+        "currentUser": @if (Model.CurrentUser != null)
+    {
+        @Html.Raw(Json.Serialize(new { id = Model.CurrentUser.Id, name = Model.CurrentUser.UserName }))
+    }
+    else
+    {
+        @Html.Raw("null")
+    },
+        "otherUser": @if (Model.OtherUser != null)
+    {
+        @Html.Raw(Json.Serialize(new { id = Model.OtherUser.Id, name = Model.OtherUser.UserName }))
+    }
+    else
+    {
+        @Html.Raw("null")
+    },
+        "testUsers": @Html.Raw(Json.Serialize(Model.TestUsers.Select(u => new { id = u.Id, name = u.UserName }).ToList()))
+    }
+</script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         document.body.classList.add('message-page');
     });
 </script>
 
+<!-- Test Mode Controls (Development Only) -->
+@if (Model.IsTestMode && Model.TestUsers.Any())
+{
+    <div class="fixed top-4 left-4 z-50 bg-yellow-100 border border-yellow-400 rounded-lg p-4 shadow-lg test-mode-controls">
+        <h4 class="font-bold text-sm mb-2">🧪 Test Mode - Real-time Chat</h4>
+        <div class="text-xs mb-2">
+            Current User: <strong>@(Model.CurrentUser?.UserName ?? "None")</strong><br>
+            Chat Partner: <strong>@(Model.OtherUser?.UserName ?? "None")</strong><br>
+            <span id="connectionStatus" class="text-gray-500">Connecting...</span>
+        </div>
+        <div class="space-y-1">
+            <p class="text-xs font-semibold">Switch User:</p>
+            @foreach (var user in Model.TestUsers)
+            {
+                <button onclick="switchTestUser(@user.Id)"
+                        class="block w-full text-left text-xs px-2 py-1 bg-blue-100 hover:bg-blue-200 rounded @(Model.CurrentUser?.Id == user.Id ? "bg-blue-300" : "")"
+                        data-user-id="@user.Id">
+                    <span class="flex items-center">
+                        <div class="status-indicator w-2 h-2 rounded-full bg-gray-400 mr-2"></div>
+                        @user.UserName
+                    </span>
+                </button>
+            }
+        </div>
+        <div class="mt-2 text-xs">
+            <button onclick="testSignalRConnection()" class="bg-green-100 hover:bg-green-200 px-2 py-1 rounded text-xs">
+                Test Connection
+            </button>
+        </div>
+    </div>
+}
+
 <div class="flex h-[calc(100vh-4rem)] font-['Montserrat'] min-h-screen">
     <!-- Sidebar -->
     <div class="w-1/3 max-w-sm bg-[#F5F5F5] border-r border-gray-300 flex flex-col sidebar">
         <div class="flex justify-center m-2 pb-2">
-            <img class="w-[50px] h-[50px]" src="~/assets/logo-tidyup.png" alt="Alternate Text" />
+            <img class="w-[50px] h-[50px]" src="~/assets/logo-tidyup.png" alt="TidyUp Logo" />
         </div>
 
         <div class="px-4 pb-2">
-            <input type="text" placeholder="Search..." class="w-full px-4 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6B9080]" />
+            <input type="text" placeholder="Search conversations..." class="w-full px-4 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6B9080]" />
         </div>
 
         <!-- Conversations List -->
         <div class="overflow-y-auto conversations-list">
-            @for (int i = 0; i < 7; i++)
+            @if (Model.TestUsers.Any())
             {
-                <div class="flex items-center px-4 py-3 hover:bg-gray-200 cursor-pointer transition">
-                    <div class="w-14 h-14 bg-gray-300 rounded-full mr-4"></div>
-                    <div class="text-lg font-medium">Item Owner</div>
+                @foreach (var user in Model.TestUsers.Where(u => u.Id != Model.CurrentUser?.Id))
+                {
+                    <div class="flex items-center px-4 py-3 hover:bg-gray-200 cursor-pointer transition @(Model.OtherUser?.Id == user.Id ? "bg-gray-200 conversation-active" : "")"
+                         onclick="window.location.href='/Home/MessagePage?otherUserId=@user.Id'"
+                         data-user-id="@user.Id">
+                        <div class="relative">
+                            <div class="w-14 h-14 bg-gray-300 rounded-full mr-4 flex items-center justify-center text-lg font-bold text-gray-600">
+                                @user.UserName.First()
+                            </div>
+                            <div class="status-indicator absolute bottom-0 right-4 w-4 h-4 bg-gray-400 rounded-full border-2 border-white"></div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-lg font-medium">@user.UserName</div>
+                            <div class="text-sm text-gray-500 truncate">Click to start chatting...</div>
+                        </div>
+                        <div class="text-xs text-gray-400">
+                            <div id="unread-@user.Id" class="hidden bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">0</div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="p-4 text-center text-gray-500">
+                    <p>No conversations yet</p>
+                    <p class="text-xs mt-2">Start by creating test users</p>
                 </div>
             }
         </div>
@@ -46,14 +124,35 @@
         <!-- Header -->
         <div class="flex items-center justify-between p-6 chat-header">
             <div class="flex items-center gap-4">
-                <div class="w-16 h-16 rounded-full bg-gray-300"></div>
-                <div class="text-lg font-semibold">Item Owner</div>
+                <div class="relative">
+                    <div class="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-2xl font-bold text-gray-600">
+                        @if (Model.OtherUser != null)
+                        {
+                            @Model.OtherUser.UserName.First()
+                        }
+                        else
+                        {
+                            <span>?</span>
+                        }
+                    </div>
+                    @if (Model.OtherUser != null)
+                    {
+                        <div class="status-indicator absolute bottom-0 right-0 w-5 h-5 bg-gray-400 rounded-full border-2 border-white" data-user-id="@Model.OtherUser.Id"></div>
+                    }
+                </div>
+                <div>
+                    <div class="text-lg font-semibold">@(Model.OtherUser?.UserName ?? "Select a conversation")</div>
+                    @if (Model.OtherUser != null)
+                    {
+                        <div class="text-sm opacity-75" id="userStatus">Online</div>
+                    }
+                </div>
             </div>
             <div class="flex gap-2">
-                <button class="text-white">
+                <button class="text-white p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all">
                     <i class='bx bx-info-circle text-xl'></i>
                 </button>
-                <button class="text-white toggle-delivery-button" id="toggleDeliveryBtn">
+                <button class="text-white toggle-delivery-button p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all" id="toggleDeliveryBtn">
                     <i class='bx bx-transfer-alt text-xl'></i>
                 </button>
             </div>
@@ -61,48 +160,141 @@
 
         <!-- Delivery Options (Initially Hidden) -->
         <div class="flex gap-2 items-center px-6 pb-4 delivery-options" id="deliveryOptions">
-            <button class="bg-white text-[#6B9080] px-4 py-2 rounded-tl-md rounded-bl-md flex-1">via Meet-up</button>
-            <button class="bg-white text-[#6B9080] px-4 py-2 rounded-tr-md rounded-br-md flex-1">via Delivery</button>
+            <button class="bg-white text-[#6B9080] px-4 py-2 rounded-tl-md rounded-bl-md flex-1 hover:bg-gray-100 transition-all">via Meet-up</button>
+            <button class="bg-white text-[#6B9080] px-4 py-2 rounded-tr-md rounded-br-md flex-1 hover:bg-gray-100 transition-all">via Delivery</button>
         </div>
 
         <!-- Chat Messages -->
         <div class="flex-1 px-6 py-4 overflow-y-auto w-full chat-messages" id="chatMessages">
-            <!-- Received Message -->
-            <div class="flex justify-start mb-3">
-                <div class="bg-[#F5F5F5] text-black rounded-2xl px-4 py-2 max-w-xs shadow-sm">Hi! I saw you're interested in the Bookshelf I posted. It's still available!</div>
-            </div>
-
-            <!-- Sent Messages -->
-            <div class="flex justify-end mb-3">
-                <div class="bg-[#344e41] text-[#F5F5F5] rounded-2xl px-4 py-2 max-w-xs shadow-sm">Hello! Yes, I'd love to claim it.</div>
-            </div>
-
-            <div class="flex justify-end mb-3">
-                <div class="bg-[#344e41] text-[#F5F5F5] rounded-2xl px-4 py-2 max-w-xs shadow-sm">Okay, I have enough tokens. Can we meet this Saturday afternoon around 3PM at SM Sta. Mesa?</div>
-            </div>
-
-            <!-- Received Message -->
-            <div class="flex justify-start mb-3">
-                <div class="bg-[#F5F5F5] text-black rounded-2xl px-4 py-2 max-w-xs shadow-sm">Sure! Saturday at 3PM works for me. Let's meet at the main entrance near Starbucks.</div>
-            </div>
+            @if (Model.CurrentUser == null || Model.OtherUser == null)
+            {
+                <div class="flex justify-center items-center h-full">
+                    <div class="text-center text-white opacity-75">
+                        <i class='bx bx-message-square-dots text-6xl mb-4'></i>
+                        <p class="text-lg">Select a conversation to start messaging</p>
+                        <p class="text-sm mt-2">Real-time chat powered by SignalR</p>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Messages will be loaded dynamically via JavaScript and SignalR -->
+                <div class="flex justify-center items-center h-full" id="loadingIndicator">
+                    <div class="text-center text-white opacity-75">
+                        <i class='bx bx-loader-alt bx-spin text-4xl mb-2'></i>
+                        <p>Connecting to real-time chat...</p>
+                    </div>
+                </div>
+            }
         </div>
 
         <!-- Desktop Message Input (hidden on mobile) -->
-        <div class="p-4 flex gap-3 items-center message-input-container">
-            <input type="text" placeholder="Message..." class="flex-1 px-6 py-3 rounded-md text-black focus:outline-none message-input" />
-            <button class="bg-white text-[#6B9080] rounded-full w-12 h-12 flex items-center justify-center send-button">
-                <i class='bx bx-send'></i>
-            </button>
-        </div>
+        @if (Model.CurrentUser != null && Model.OtherUser != null)
+        {
+            <div class="p-4 flex gap-3 items-center message-input-container">
+                <input type="text" placeholder="Type a message..." class="flex-1 px-6 py-3 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-white message-input" maxlength="500" />
+                <button class="bg-white text-[#6B9080] rounded-full w-12 h-12 flex items-center justify-center send-button hover:bg-gray-100 transition-all" title="Send message">
+                    <i class='bx bx-send'></i>
+                </button>
+            </div>
+        }
     </div>
 </div>
 
 <!-- Fixed Message Input for Mobile (positioned above dock) -->
-<div class="message-input-container-fixed">
-    <input type="text" placeholder="Message..." class="message-input" id="mobileMessageInput" />
-    <button class="send-button" id="mobileSendButton">
-        <i class='bx bx-send'></i>
-    </button>
+@if (Model.CurrentUser != null && Model.OtherUser != null)
+{
+    <div class="message-input-container-fixed">
+        <input type="text" placeholder="Type a message..." class="message-input" id="mobileMessageInput" maxlength="500" />
+        <button class="send-button" id="mobileSendButton" title="Send message">
+            <i class='bx bx-send'></i>
+        </button>
+    </div>
+}
+
+<!-- Connection Status Indicator -->
+<div id="connectionStatusIndicator" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white px-4 py-2 rounded-lg text-sm hidden">
+    <i class='bx bx-wifi text-lg mr-2'></i>
+    <span id="connectionStatusText">Connecting...</span>
 </div>
+
+<!-- Anti-forgery token for AJAX requests -->
+@Html.AntiForgeryToken()
+
+<!-- Additional JavaScript for SignalR testing -->
+<script>
+    // Test SignalR connection function
+    async function testSignalRConnection() {
+        if (window.MessagePage && window.MessagePage.connection) {
+            try {
+                await window.MessagePage.connection.invoke("TestConnection");
+                showNotification("SignalR connection test successful!", "success");
+            } catch (err) {
+                showNotification("SignalR connection test failed: " + err.message, "error");
+            }
+        } else {
+            showNotification("SignalR not initialized yet", "warning");
+        }
+    }
+
+    // Update connection status in UI
+    function updateConnectionStatus(status, isConnected) {
+        const statusElement = document.getElementById('connectionStatus');
+        const indicator = document.getElementById('connectionStatusIndicator');
+
+        if (statusElement) {
+            statusElement.textContent = status;
+            statusElement.className = isConnected ? 'text-green-600 font-semibold' : 'text-red-600';
+        }
+
+        if (indicator) {
+            const statusText = document.getElementById('connectionStatusText');
+            statusText.textContent = status;
+
+            if (isConnected) {
+                indicator.classList.add('hidden');
+            } else {
+                indicator.classList.remove('hidden');
+            }
+        }
+    }
+
+    // Monitor SignalR connection status
+    document.addEventListener('DOMContentLoaded', function() {
+        // Wait for SignalR to initialize
+        setTimeout(() => {
+            if (window.connection) {
+                // Update status based on connection state
+                const updateStatus = () => {
+                    const state = window.connection.state;
+                    switch (state) {
+                        case signalR.HubConnectionState.Connected:
+                            updateConnectionStatus('Connected ✓', true);
+                            break;
+                        case signalR.HubConnectionState.Connecting:
+                            updateConnectionStatus('Connecting...', false);
+                            break;
+                        case signalR.HubConnectionState.Reconnecting:
+                            updateConnectionStatus('Reconnecting...', false);
+                            break;
+                        case signalR.HubConnectionState.Disconnected:
+                            updateConnectionStatus('Disconnected ✗', false);
+                            break;
+                        default:
+                            updateConnectionStatus('Unknown', false);
+                    }
+                };
+
+                // Initial status update
+                updateStatus();
+
+                // Monitor connection state changes
+                window.connection.onreconnecting(() => updateStatus());
+                window.connection.onreconnected(() => updateStatus());
+                window.connection.onclose(() => updateStatus());
+            }
+        }, 1000);
+    });
+</script>
 
 <script src="~/js/MessagePage.js"></script>

@@ -1,32 +1,32 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-//using TidyUpCapstone.Models.DTOs;
 using TidyUpCapstone.Models.Entities.User;
 using TidyUpCapstone.Models.ViewModels;
-//using TidyUpCapstone.Services.Interfaces;
 using TidyUpCapstone.Models;
+using TidyUpCapstone.Services;
+using TidyUpCapstone.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace TidyUp.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        //private readonly IItemPostService _itemPostService;
-        //private readonly IUserService _userService;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly ApplicationDbContext _context;
 
         public HomeController(
             ILogger<HomeController> logger,
-            //IItemPostService itemPostService,
-            //IUserService userService,
-            UserManager<AppUser> userManager)
+            UserManager<AppUser> userManager,
+            IServiceProvider serviceProvider,
+            ApplicationDbContext context)
         {
             _logger = logger;
-            //_itemPostService = itemPostService;
-            //_userService = userService;
             _userManager = userManager;
+            _serviceProvider = serviceProvider;
+            _context = context;
         }
 
         public IActionResult Index()
@@ -34,46 +34,58 @@ namespace TidyUp.Controllers
             return View();
         }
 
-        public IActionResult MessagePage()
-
+        public async Task<IActionResult> MessagePage(int? otherUserId = null)
         {
             ViewData["Title"] = "Message";
             ViewData["PageType"] = "message";
-            return View();
+
+            try
+            {
+                // Seed test users if they don't exist
+                await DatabaseSeeder.SeedTestUsersAsync(_serviceProvider);
+
+                // Get test users from database
+                var testUsers = await _context.Users
+                    .Where(u => u.Email == "testuser1@example.com" || u.Email == "testuser2@example.com")
+                    .ToListAsync();
+
+                // Set default current user (TestUser1) in session if not set
+                var currentUserId = HttpContext.Session.GetInt32("CurrentTestUserId");
+                if (currentUserId == null && testUsers.Any())
+                {
+                    currentUserId = testUsers.First().Id;
+                    HttpContext.Session.SetInt32("CurrentTestUserId", currentUserId.Value);
+                }
+
+                var currentUser = testUsers.FirstOrDefault(u => u.Id == currentUserId);
+
+                AppUser? otherUser = null;
+                if (otherUserId.HasValue)
+                {
+                    otherUser = testUsers.FirstOrDefault(u => u.Id == otherUserId.Value);
+                }
+                else if (testUsers.Count > 1 && currentUser != null)
+                {
+                    // Default to the other test user
+                    otherUser = testUsers.FirstOrDefault(u => u.Id != currentUser.Id);
+                }
+
+                var viewModel = new MessagePageViewModel
+                {
+                    CurrentUser = currentUser,
+                    OtherUser = otherUser,
+                    TestUsers = testUsers,
+                    IsTestMode = true
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading message page");
+                return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            }
         }
-
-        //[Authorize]
-        //public async Task<IActionResult> Main()
-        //{
-        //    try
-        //    {
-        //        var currentUser = await _userManager.GetUserAsync(User);
-        //        if (currentUser == null)
-        //        {
-        //            _logger.LogWarning("Current user is null, redirecting to login");
-        //            return RedirectToAction("Login", "Account");
-        //        }
-
-        //        _logger.LogInformation("Loading main page for user: {UserId}", currentUser.Id);
-
-        //        var items = await _itemPostService.GetAllItemPostsAsync();
-        //        var tokenBalance = await _userService.GetUserTokenBalanceAsync(currentUser.Id);
-
-        //        var viewModel = new MainPageViewModel
-        //        {
-        //            ItemPosts = items ?? new List<ItemPost>(),
-        //            NewItemPost = new ItemPostDto(),
-        //            CurrentUserTokenBalance = tokenBalance
-        //        };
-
-        //        return View(viewModel);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "Error loading main page");
-        //        return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        //    }
-        //}
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

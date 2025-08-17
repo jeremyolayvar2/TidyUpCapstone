@@ -355,8 +355,8 @@ body.message-page .main-content {
             color: var(--text-color) !important;
         }
 
-        /* Sent messages - right aligned, keep white background */
- 
+    /* Sent messages - right aligned, keep white background */
+
 
     .chat-header {
         padding: 1rem !important;
@@ -410,3 +410,312 @@ body.message-page .main-content {
 .conversations-list::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 0, 0, 0.3);
 }
+
+
+/* Enhanced report button styling */
+.report-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .report-btn:hover {
+        background-color: rgba(239, 68, 68, 0.1);
+        transform: scale(1.1);
+    }
+
+    .report-btn:active {
+        transform: scale(0.95);
+    }
+
+/* Message bubble hover effects */
+.message-bubble.group:hover .report-btn {
+    opacity: 1 !important;
+}
+
+.message-bubble {
+    transition: all 0.2s ease;
+}
+
+    .message-bubble:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1.1);
+    }
+
+    50% {
+        transform: scale(1.3);
+    }
+
+    100% {
+        transform: scale(1.1);
+    }
+}
+
+/* Notification animations */
+.notification {
+    transform: translateX(100%);
+    opacity: 0;
+}
+
+/* Enhanced message styling */
+.message-content {
+    word-break: break-word;
+    line-height: 1.4;
+}
+
+/* Better spacing for time and report button */
+.message-bubble .text-xs {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 4px;
+}
+
+/* Reported message indicator */
+.message-reported {
+    border-left: 3px solid #10b981;
+    background-color: rgba(16, 185, 129, 0.05);
+}
+
+/* Mobile adjustments for report button */
+@media (max-width: 768px) {
+    .report-btn {
+        font-size: 14px;
+        padding: 4px 6px;
+        opacity: 0.7; /* More visible on mobile */
+    }
+
+    .message-bubble.group .report-btn {
+        opacity: 0.7 !important; /* Always somewhat visible on mobile */
+    }
+
+    .message-bubble.group:hover .report-btn {
+        opacity: 1 !important;
+    }
+}
+
+/* Responsive modal for very small screens */
+@media (max-width: 480px) {
+    .report-btn {
+        font-size: 16px;
+        padding: 6px 8px;
+    }
+}
+
+/* ========================================
+   MODAL FIX - UPDATED FOR INLINE STYLES APPROACH
+   ======================================== */
+
+/* CRITICAL: Since we're using inline styles in JS, we only need these as backup */
+#reportModal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 2147483647 !important; /* Maximum z-index value */
+    pointer-events: auto !important;
+    box-sizing: border-box !important;
+}
+    /* When modal is shown via JavaScript */
+    #reportModal[style*="display: flex"] {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    /* Ensure modal content is always visible */
+    #reportModal > div {
+        position: relative !important;
+        z-index: 2147483647 !important;
+        max-width: 90vw !important;
+        max-height: 90vh !important;
+        overflow-y: auto !important;
+        margin: auto !important;
+        pointer-events: auto !important;
+        box-sizing: border-box !important;
+    }
+
+body.report-modal-open,
+body.report-modal-open * {
+    overflow: visible !important;
+}
+
+
+    /* Ensure all modal interactive elements work */
+    #reportModal input,
+    #reportModal textarea,
+    #reportModal button,
+    #reportModal label,
+    #reportModal form {
+        pointer-events: auto !important;
+        position: relative !important;
+        z-index: 2147483647 !important;
+        box-sizing: border-box !important;
+    }
+
+/* Override ALL overflow restrictions when modal needs to be visible */
+body.message-page:has(#reportModal[style*="display: flex"]),
+body.message-page:has(#reportModal[style*="display: flex"]) *,
+body.message-page:has(#reportModal[style*="display: flex"]) .main-content,
+body.message-page:has(#reportModal[style*="display: flex"]) .main-content main,
+body.message-page:has(#reportModal[style*="display: flex"]) .layout-wrapper,
+body.message-page:has(#reportModal[style*="display: flex"]) .chat-section {
+    overflow: visible !important;
+}
+
+/* Fallback for browsers that don't support :has() */
+body.modal-open,
+body.modal-open *,
+body.message-page.modal-open,
+body.message-page.modal-open *,
+body.message-page.modal-open .main-content,
+body.message-page.modal-open .main-content main,
+body.message-page.modal-open .layout-wrapper,
+body.message-page.modal-open .chat-section {
+    overflow: visible !important;
+}
+
+body.message-page.report-modal-open {
+    overflow: auto !important;
+    height: auto !important;
+}
+
+    body.message-page.report-modal-open .layout-wrapper {
+        overflow: visible !important;
+        height: auto !important;
+    }
+
+    body.message-page.report-modal-open .main-content {
+        overflow: visible !important;
+        height: auto !important;
+    }
+
+        body.message-page.report-modal-open .main-content main {
+            overflow: visible !important;
+            height: auto !important;
+        }
+
+    body.message-page.report-modal-open .chat-section {
+        overflow: visible !important;
+    }
+
+/* Mobile-specific modal fixes */
+@media (max-width: 768px) {
+    #reportModal > div {
+        margin: 1rem !important;
+        max-width: calc(100vw - 2rem) !important;
+        max-height: calc(100vh - 2rem) !important;
+    }
+
+    /* Force override mobile overflow rules when modal is open */
+    body.message-page:has(#reportModal[style*="display: flex"]) {
+        overflow: visible !important;
+        height: auto !important;
+    }
+
+        body.message-page:has(#reportModal[style*="display: flex"]) .layout-wrapper {
+            overflow: visible !important;
+            height: auto !important;
+        }
+
+        body.message-page:has(#reportModal[style*="display: flex"]) .main-content {
+            overflow: visible !important;
+            height: auto !important;
+        }
+
+            body.message-page:has(#reportModal[style*="display: flex"]) .main-content main {
+                overflow: visible !important;
+                height: auto !important;
+            }
+
+        body.message-page:has(#reportModal[style*="display: flex"]) .chat-section {
+            overflow: visible !important;
+        }
+
+    /* Fallback for browsers without :has() support */
+    body.message-page.modal-open {
+        overflow: visible !important;
+        height: auto !important;
+    }
+
+        body.message-page.modal-open .layout-wrapper {
+            overflow: visible !important;
+            height: auto !important;
+        }
+
+        body.message-page.modal-open .main-content {
+            overflow: visible !important;
+            height: auto !important;
+        }
+
+            body.message-page.modal-open .main-content main {
+                overflow: visible !important;
+                height: auto !important;
+            }
+
+        body.message-page.modal-open .chat-section {
+            overflow: visible !important;
+        }
+}
+
+/* Force modal to appear above everything */
+#reportModal {
+    z-index: 2147483647 !important; /* Maximum z-index value */
+}
+
+    /* Ensure backdrop is clickable */
+    #reportModal::backdrop {
+        background-color: rgba(0, 0, 0, 0.5) !important;
+    }
+
+    /* Additional safety measures */
+    #reportModal * {
+        box-sizing: border-box !important;
+    }
+
+    /* Hide modal by default */
+    #reportModal[style*="display: none"] {
+        display: none !important;
+    }
+
+    /* Show modal when explicitly set to flex */
+    #reportModal[style*="display: flex"] {
+        display: flex !important;
+    }
