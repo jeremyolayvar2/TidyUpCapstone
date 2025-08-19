@@ -1,12 +1,10 @@
-﻿// ==========================================
-// COMPLETE RESPONSIVE SETTINGS.JS
-// ==========================================
-
-class ResponsiveSettingsManager {
+﻿class ResponsiveSettingsManager {
     constructor() {
         this.currentTab = 'profile';
         this.initialized = false;
-        this.isMobile = window.innerWidth <= 1024;
+        this.isMobile = window.innerWidth <= 768;
+        this.isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+        this.isDesktop = window.innerWidth > 768;
         this.sidebarOpen = false;
         this.tabNames = {
             'profile': 'Profile & Account',
@@ -63,7 +61,10 @@ class ResponsiveSettingsManager {
 
     updateLayoutState() {
         const wasMobile = this.isMobile;
-        this.isMobile = window.innerWidth <= 1024;
+        // Changed breakpoint to 768px
+        this.isMobile = window.innerWidth <= 768;
+        this.isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+        this.isDesktop = window.innerWidth > 768;
 
         if (wasMobile !== this.isMobile) {
             console.log(`📱 Layout changed: ${this.isMobile ? 'Mobile' : 'Desktop'}`);
@@ -80,38 +81,28 @@ class ResponsiveSettingsManager {
     }
 
     setupMobileLayout() {
-        console.log('📱 Setting up mobile layout...');
-
         const sidebar = document.getElementById('settings-sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
+        const toggleBtn = document.getElementById('mobile-menu-toggle');
 
         if (sidebar) {
-            sidebar.classList.remove('mobile-open');
+            sidebar.classList.add('mobile-responsive');
         }
-
-        if (overlay) {
-            overlay.classList.remove('active');
+        if (toggleBtn) {
+            toggleBtn.style.display = 'flex';
         }
-
-        document.body.classList.remove('sidebar-mobile-open');
-        this.sidebarOpen = false;
+        this.closeMobileSidebar();
     }
 
     setupDesktopLayout() {
-        console.log('🖥️ Setting up desktop layout...');
-
         const sidebar = document.getElementById('settings-sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
+        const toggleBtn = document.getElementById('mobile-menu-toggle');
 
         if (sidebar) {
-            sidebar.classList.remove('mobile-open');
+            sidebar.classList.remove('mobile-responsive', 'mobile-open');
         }
-
-        if (overlay) {
-            overlay.classList.remove('active');
+        if (toggleBtn) {
+            toggleBtn.style.display = 'none';
         }
-
-        document.body.classList.remove('sidebar-mobile-open');
         this.sidebarOpen = false;
     }
 
@@ -133,6 +124,51 @@ class ResponsiveSettingsManager {
             } else {
                 container.style.marginLeft = '250px';
                 container.style.width = 'calc(100% - 250px)';
+            }
+        }
+    }
+
+    // Add this method to handle form layout
+    adjustFormLayout() {
+        const formRows = document.querySelectorAll('.form-row-top, .form-row-bottom');
+
+        formRows.forEach(row => {
+            if (window.innerWidth <= 480) {
+                // Stack all fields on very small screens
+                row.style.display = 'block';
+            } else if (window.innerWidth <= 768) {
+                // 1 column on mobile
+                row.style.display = 'grid';
+                row.style.gridTemplateColumns = '1fr';
+            } else {
+                // Original grid layout for desktop (769px+)
+                row.style.display = 'grid';
+                row.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
+            }
+        });
+    }
+
+    // Add this method:
+    adjustProfileLayout() {
+        const profileSection = document.querySelector('.profile-avatar-section');
+        const accountDetails = document.querySelector('.account-details-section');
+
+        if (window.innerWidth <= 768) {
+            if (profileSection) {
+                profileSection.style.flexDirection = 'column';
+                profileSection.style.textAlign = 'center';
+            }
+            if (accountDetails) {
+                accountDetails.style.display = 'block';
+            }
+        } else {
+            // Reset to original layout for desktop
+            if (profileSection) {
+                profileSection.style.flexDirection = 'row';
+                profileSection.style.textAlign = 'left';
+            }
+            if (accountDetails) {
+                accountDetails.style.display = 'grid';
             }
         }
     }
@@ -281,6 +317,8 @@ class ResponsiveSettingsManager {
 
         this.updateLayoutState();
         this.adjustContainerLayout();
+        this.adjustFormLayout();
+        this.adjustProfileLayout();
 
         // Close mobile sidebar if switching to desktop
         if (!this.isMobile && this.sidebarOpen) {
@@ -1095,7 +1133,8 @@ class ResponsiveSettingsManager {
     }
 
     initTouchGestures() {
-        if (!this.isMobile) return;
+        // Only enable touch gestures on mobile
+        if (window.innerWidth > 768) return;
 
         let startX = 0;
         let startY = 0;
@@ -1137,7 +1176,7 @@ class ResponsiveSettingsManager {
             if (!startX || !startY || isScrolling) return;
 
             const diffX = startX - currentX;
-            const threshold = 50; // Minimum swipe distance
+            const threshold = Math.min(50, window.innerWidth * 0.15);
 
             // Swipe right to open sidebar (from left edge)
             if (diffX < -threshold && startX < 50 && !this.sidebarOpen) {
@@ -1358,8 +1397,9 @@ window.addEventListener('orientationchange', () => {
     setTimeout(() => {
         if (settingsManager) {
             settingsManager.handleResize();
+            settingsManager.adjustFormLayout();
         }
-    }, 100);
+    }, 200);
 });
 
 // Handle visibility change (when app comes back into focus)

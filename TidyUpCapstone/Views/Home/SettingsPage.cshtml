@@ -11,12 +11,12 @@
 }
 
 
-        <!-- Mobile Menu Toggle Button -->
+<!-- Mobile Menu Toggle Button -->
 <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Open settings menu">
     <i class="bx bx-menu"></i>
 </button>
 
-        <!-- Sidebar Overlay for Mobile -->
+<!-- Sidebar Overlay for Mobile -->
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
 <!-- Settings container with improved structure -->
@@ -95,8 +95,8 @@
                     <!-- Profile Header with Avatar and Edit Button -->
                     <div class="profile-header-card">
                         <div class="profile-avatar-section">
-                            <div class="profile-avatar" id="profile-avatar-upload" 
-                                 role="button" 
+                            <div class="profile-avatar" id="profile-avatar-upload"
+                                 role="button"
                                  tabindex="0"
                                  aria-label="Upload profile picture"
                                  title="Click to upload profile picture">
@@ -118,44 +118,44 @@
                         <div class="form-row-top">
                             <div class="form-field">
                                 <label for="firstName">First Name *</label>
-                                <input type="text" 
-                                       id="firstName" 
-                                       name="FirstName" 
-                                       placeholder="Enter your first name" 
-                                       value="Jiro" 
-                                       required 
+                                <input type="text"
+                                       id="firstName"
+                                       name="FirstName"
+                                       placeholder="Enter your first name"
+                                       value="Jiro"
+                                       required
                                        aria-describedby="firstName-error" />
                                 <div id="firstName-error" class="error-message" role="alert" aria-live="polite"></div>
                             </div>
                             <div class="form-field">
                                 <label for="lastName">Last Name *</label>
-                                <input type="text" 
-                                       id="lastName" 
-                                       name="LastName" 
-                                       placeholder="Enter your last name" 
-                                       value="Llaguno" 
-                                       required 
+                                <input type="text"
+                                       id="lastName"
+                                       name="LastName"
+                                       placeholder="Enter your last name"
+                                       value="Llaguno"
+                                       required
                                        aria-describedby="lastName-error" />
                                 <div id="lastName-error" class="error-message" role="alert" aria-live="polite"></div>
                             </div>
                             <div class="form-field phone-field">
                                 <label for="phone">Phone Number</label>
                                 <div class="phone-input-container">
-                                    <input type="tel" 
-                                           id="phone" 
-                                           name="Phone" 
-                                           placeholder="+63 912 345 6789" 
-                                           value="+63 912 345 6789" 
+                                    <input type="tel"
+                                           id="phone"
+                                           name="Phone"
+                                           placeholder="+63 912 345 6789"
+                                           value="+63 912 345 6789"
                                            aria-describedby="phone-error phone-help" />
-                                    <button type="button" 
-                                            class="btn-get-verified" 
+                                    <button type="button"
+                                            class="btn-get-verified"
                                             id="verify-phone-btn"
                                             aria-label="Verify phone number">
                                         Get Verified
                                     </button>
                                 </div>
                                 <div id="phone-error" class="error-message" role="alert" aria-live="polite"></div>
-                               
+
                             </div>
                         </div>
 
@@ -163,22 +163,22 @@
                         <div class="form-row-bottom">
                             <div class="form-field">
                                 <label for="email">Email Address *</label>
-                                <input type="email" 
-                                       id="email" 
-                                       name="Email" 
-                                       placeholder="your.email@example.com" 
-                                       value="jiro@gmail.com" 
-                                       required 
+                                <input type="email"
+                                       id="email"
+                                       name="Email"
+                                       placeholder="your.email@example.com"
+                                       value="jiro@gmail.com"
+                                       required
                                        aria-describedby="email-error" />
                                 <div id="email-error" class="error-message" role="alert" aria-live="polite"></div>
                             </div>
                             <div class="form-field">
                                 <label for="location">Location</label>
-                                <input type="text" 
-                                       id="location" 
-                                       name="Location" 
-                                       placeholder="City, Country" 
-                                       value="Manila, Philippines" 
+                                <input type="text"
+                                       id="location"
+                                       name="Location"
+                                       placeholder="City, Country"
+                                       value="Manila, Philippines"
                                        aria-describedby="location-error" />
                                 <div id="location-error" class="error-message" role="alert" aria-live="polite"></div>
                             </div>
@@ -189,12 +189,12 @@
                             <div class="account-form-left">
                                 <div class="form-field-account">
                                     <label for="username">Username *</label>
-                                    <input type="text" 
-                                           id="username" 
-                                           name="Username" 
-                                           placeholder="Choose a username" 
-                                           value="joyolayvar" 
-                                           required 
+                                    <input type="text"
+                                           id="username"
+                                           name="Username"
+                                           placeholder="Choose a username"
+                                           value="joyolayvar"
+                                           required
                                            aria-describedby="username-error" />
                                     <div id="username-error" class="error-message" role="alert" aria-live="polite"></div>
                                 </div>
@@ -202,21 +202,21 @@
                                 <div class="form-field-account">
                                     <label for="password">Password</label>
                                     <div class="password-input-wrapper">
-                                        <input type="password" 
-                                               id="password" 
-                                               name="Password" 
-                                               placeholder="Enter your password" 
-                                               value="password123" 
+                                        <input type="password"
+                                               id="password"
+                                               name="Password"
+                                               placeholder="Enter your password"
+                                               value="password123"
                                                aria-describedby="password-error password-help" />
-                                        <button type="button" 
-                                                class="btn-toggle-password" 
+                                        <button type="button"
+                                                class="btn-toggle-password"
                                                 id="toggle-password"
                                                 aria-label="Toggle password visibility">
                                             <i class="bx bx-hide" aria-hidden="true"></i>
                                         </button>
                                     </div>
                                     <div id="password-error" class="error-message" role="alert" aria-live="polite"></div>
-                                    <small id="password-help" class="form-help">Password must be at least 8 characters</small>
+                                    
                                 </div>
 
                                 <div class="form-field-account">
@@ -233,10 +233,10 @@
 
                                 <div class="form-field-account">
                                     <label for="birthday">Date of Birth</label>
-                                    <input type="date" 
-                                           id="birthday" 
-                                           name="Birthday" 
-                                           value="1990-01-01" 
+                                    <input type="date"
+                                           id="birthday"
+                                           name="Birthday"
+                                           value="1990-01-01"
                                            aria-describedby="birthday-error" />
                                     <div id="birthday-error" class="error-message" role="alert" aria-live="polite"></div>
                                 </div>
@@ -253,8 +253,8 @@
                                         </div>
                                         <span>Facebook</span>
                                     </div>
-                                    <button type="button" 
-                                            class="btn-connect" 
+                                    <button type="button"
+                                            class="btn-connect"
                                             data-account="facebook"
                                             aria-label="Connect Facebook account">
                                         <i class="bx bx-plus" aria-hidden="true"></i>
@@ -268,8 +268,8 @@
                                         </div>
                                         <span>Google</span>
                                     </div>
-                                    <button type="button" 
-                                            class="btn-connect" 
+                                    <button type="button"
+                                            class="btn-connect"
                                             data-account="google"
                                             aria-label="Connect Google account">
                                         <i class="bx bx-plus" aria-hidden="true"></i>
@@ -300,8 +300,8 @@
                     @Html.AntiForgeryToken()
 
                     <div class="privacy-section">
-                        <h4>Privacy Settings</h4>
                         
+
                         <div class="toggle-group">
                             <div>
                                 <h4>Profile Visibility</h4>
@@ -310,7 +310,7 @@
                             <div class="toggle-buttons" data-setting="profile-visibility" role="radiogroup" aria-labelledby="profile-visibility-label">
                                 <input type="hidden" name="ProfileVisibility" value="public" />
                                 <button type="button" class="toggle-btn active" data-value="public" role="radio" aria-checked="true">Public</button>
-                                
+
                                 <button type="button" class="toggle-btn" data-value="private" role="radio" aria-checked="false">Private</button>
                             </div>
                         </div>
@@ -371,7 +371,7 @@
                             <div class="toggle-buttons" data-setting="contact-visibility" role="radiogroup">
                                 <input type="hidden" name="ContactVisibility" value="public" />
                                 <button type="button" class="toggle-btn active" data-value="public" role="radio" aria-checked="true">Public</button>
-                               
+
                                 <button type="button" class="toggle-btn" data-value="private" role="radio" aria-checked="false">Private</button>
                             </div>
                         </div>
@@ -570,31 +570,31 @@
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="currentPassword">Current Password *</label>
-                                <input type="password" 
-                                       id="currentPassword" 
-                                       name="CurrentPassword" 
-                                       placeholder="Enter current password" 
-                                       required 
+                                <input type="password"
+                                       id="currentPassword"
+                                       name="CurrentPassword"
+                                       placeholder="Enter current password"
+                                       required
                                        aria-describedby="currentPassword-error" />
                                 <div id="currentPassword-error" class="error-message" role="alert" aria-live="polite"></div>
                             </div>
                             <div class="form-group">
                                 <label for="newPassword">New Password *</label>
-                                <input type="password" 
-                                       id="newPassword" 
-                                       name="NewPassword" 
-                                       placeholder="Enter new password" 
-                                       required 
+                                <input type="password"
+                                       id="newPassword"
+                                       name="NewPassword"
+                                       placeholder="Enter new password"
+                                       required
                                        aria-describedby="newPassword-error newPassword-help" />
                                 <div id="newPassword-error" class="error-message" role="alert" aria-live="polite"></div>
                             </div>
                             <div class="form-group full-width">
                                 <label for="confirmNewPassword">Confirm New Password *</label>
-                                <input type="password" 
-                                       id="confirmNewPassword" 
-                                       name="ConfirmNewPassword" 
-                                       placeholder="Confirm new password" 
-                                       required 
+                                <input type="password"
+                                       id="confirmNewPassword"
+                                       name="ConfirmNewPassword"
+                                       placeholder="Confirm new password"
+                                       required
                                        aria-describedby="confirmNewPassword-error" />
                                 <div id="confirmNewPassword-error" class="error-message" role="alert" aria-live="polite"></div>
                             </div>

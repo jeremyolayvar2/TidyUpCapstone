@@ -51,7 +51,7 @@ body {
     display: none;
     position: fixed;
     top: 20px;
-    left: 20px;
+    right: 20px;
     z-index: 1100;
     background: var(--primary-color);
     color: var(--white);
@@ -74,7 +74,29 @@ body {
     }
 
 /* Show mobile toggle at tablet and below */
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
+    .settings-main-container {
+        flex-direction: column;
+        width: 100vw;
+        min-width: 0;
+        max-width: 100vw;
+    }
+
+    .settings-sidebar {
+        width: 100vw;
+        min-width: 0;
+        max-width: 100vw;
+        border-radius: 0;
+        margin-bottom: 1rem;
+    }
+
+    .settings-content {
+        width: 100vw;
+        min-width: 0;
+        max-width: 100vw;
+        margin-left: 0;
+        border-radius: 0;
+    }
 }
 
 /* ==========================================
@@ -92,7 +114,7 @@ body {
 }
 
 /* Desktop sidebar states */
-@media (min-width: 1025px) {
+@media (min-width: 769px) {
     body:not(.sidebar-closed) .settings-container {
         margin-left: var(--sidebar-width);
         width: calc(100% - var(--sidebar-width));
@@ -106,13 +128,416 @@ body {
 }
 
 /* Tablet and mobile - no sidebar margin */
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
+    /* Settings container - full width */
     .settings-container {
+       
+        margin-left: 0 !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        padding: 80px 12px 15px 12px !important;
+        min-height: 100vh !important;
+        box-sizing: border-box !important;
+        background-color: var(--background) !important; /* Ensure proper background */
+    }
+
+    /* Settings header - full width */
+    .settings-header {
+        padding: 10px 15px 20px 15px !important;
+        margin-bottom: 15px !important;
         margin-left: 0 !important;
         width: 100% !important;
-        padding-top: 90px !important;
-        padding-left: 15px;
-        padding-right: 15px;
+        box-sizing: border-box !important;
+    }
+
+        .settings-header h1 {
+            font-size: 1.75rem !important;
+            margin-left: 0 !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 8px !important;
+        }
+
+    #current-tab-name {
+        font-size: 1.25rem !important;
+    }
+
+    /* Settings layout - full width */
+    .settings-layout {
+        display: block !important;
+        grid-template-columns: none !important;
+        gap: 0 !important;
+        max-width: calc(100vw - 32px) !important; 
+        width: calc(100vw - 24px) !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Settings content - full width */
+    .settings-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        border-radius: 20px !important;
+        border: none !important;
+        box-sizing: border-box !important;
+        background: var(--white) !important;
+        box-shadow: none !important;
+    }
+
+    /* Content header - full width */
+    .content-header {
+        padding: 20px 15px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+        .content-header h3 {
+            font-size: 1.5rem !important;
+        }
+
+
+
+    /* Profile main container - full width */
+    .profile-main-container {
+        padding: 20px 15px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        background: var(--white) !important;
+    }
+
+    /* Profile header card - full width */
+    .profile-header-card {
+        flex-direction: column !important;
+        text-align: center !important;
+        gap: 16px !important;
+        padding: 20px 15px !important;
+        margin-bottom: 20px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Profile avatar section - full width */
+    .profile-avatar-section {
+        width: 100% !important;
+        justify-content: center !important;
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+
+    .profile-avatar {
+        width: 100px !important;
+        height: 100px !important;
+        font-size: 2.5rem !important;
+        margin-bottom: 16px !important;
+    }
+
+    /* Form rows - full width */
+    .form-row-top,
+    .form-row-bottom {
+        display: block !important;
+        grid-template-columns: none !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Form fields - full width */
+    .form-field {
+        margin-bottom: 16px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+        .form-field input,
+        .form-field select {
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 12px 14px !important;
+            font-size: 14px !important;
+            box-sizing: border-box !important;
+        }
+
+    /* Phone input container - full width */
+    .phone-input-container {
+        flex-direction: column !important;
+        gap: 8px !important;
+        align-items: stretch !important;
+        width: 100% !important;
+    }
+
+        .phone-input-container input {
+            padding-right: 16px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+    .btn-get-verified {
+        position: static !important;
+        transform: none !important;
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 10px !important;
+        margin-top: 5px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Account details section - full width */
+    .account-details-section {
+        display: block !important;
+        grid-template-columns: none !important;
+        padding: 20px 15px !important;
+        gap: 0 !important;
+        margin: 20px 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Account form left - full width */
+    .account-form-left {
+        display: block !important;
+        grid-template-columns: none !important;
+        margin-bottom: 20px !important;
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+
+    /* Account form fields - full width */
+    .form-field-account {
+        margin-bottom: 16px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+        .form-field-account input,
+        .form-field-account select {
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 12px 14px !important;
+            font-size: 14px !important;
+            box-sizing: border-box !important;
+        }
+
+    /* Connected accounts section - full width */
+    .connected-accounts-section {
+        max-width: none !important;
+        min-width: auto !important;
+        margin: 0 !important;
+        padding: 16px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Password input wrapper - full width */
+    .password-input-wrapper {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+        .password-input-wrapper input {
+            width: 100% !important;
+            max-width: 100% !important;
+            padding-right: 45px !important;
+            box-sizing: border-box !important;
+        }
+
+    .btn-toggle-password {
+        right: 10px;
+        font-size: 16px;
+    }
+
+    /* Save button section - full width */
+    .save-button-section {
+        display: flex;
+        justify-content: center;
+        margin-top: 10px;
+        width: 100% !important;
+        padding: 0 15px !important;
+        box-sizing: border-box !important;
+    }
+
+    .btn-save-profile {
+        padding: 12px 24px !important;
+        font-size: 14px !important;
+        width: 100% !important;
+        max-width: 300px !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+    }
+
+    /* All sections - full width */
+    .notification-section,
+    .privacy-section,
+    .security-section,
+    .language-section,
+    .accessibility-section,
+    .support-section,
+    .legal-section,
+    .account-actions-section {
+        padding: 16px 15px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Toggle groups - full width */
+    .toggle-group {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 12px !important;
+        padding: 16px 0 !important;
+        width: 100% !important;
+    }
+
+    .toggle-buttons {
+        width: 100% !important;
+        min-width: auto !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+    }
+
+    .toggle-btn {
+        padding: 10px 16px !important;
+        font-size: 13px !important;
+        flex: 1 !important;
+    }
+
+    /* Form grid - full width */
+    .form-grid {
+        display: block !important;
+        grid-template-columns: none !important;
+        padding: 0 15px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .form-group {
+        margin-bottom: 16px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+        .form-group input,
+        .form-group select {
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+    /* Notification items - full width */
+    .notification-item,
+    .security-item,
+    .session-item {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 10px !important;
+        padding: 16px 0 !important;
+        width: 100% !important;
+    }
+
+    .notification-info,
+    .security-info,
+    .session-info {
+        width: 100% !important;
+        min-width: auto !important;
+    }
+
+    .notification-info-child {
+        width: 100% !important;
+        margin-bottom: 8px !important;
+    }
+
+    /* Buttons - full width */
+    .btn-save,
+    .btn-danger {
+        margin-left: 15px !important;
+        margin-right: 15px !important;
+        padding: 12px 20px !important;
+        font-size: 14px !important;
+        width: calc(100% - 30px) !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+    }
+
+    .action-buttons {
+        flex-direction: column !important;
+        gap: 10px !important;
+        width: 100% !important;
+        padding: 0 15px !important;
+        box-sizing: border-box !important;
+    }
+
+        .action-buttons .btn-logout,
+        .action-buttons .btn-danger {
+            width: 100% !important;
+            margin: 0 !important;
+        }
+
+    /* Support grid - full width */
+    .support-grid {
+        display: block !important;
+        grid-template-columns: none !important;
+        width: 100% !important;
+    }
+
+    .support-item {
+        margin-bottom: 16px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Legal links - full width */
+    .legal-links {
+        width: 100% !important;
+    }
+
+    .legal-link {
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Mobile menu toggle */
+    .mobile-menu-toggle {
+        display: flex !important;
+        position: fixed !important;
+        top: 15px !important;
+        right: 15px !important;
+        z-index: 1100 !important;
+        width: 45px !important;
+        height: 45px !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: var(--primary-color) !important;
+        color: var(--white) !important;
+        border: none !important;
+        border-radius: 12px !important;
+        box-shadow: var(--shadow) !important;
+    }
+
+        .mobile-menu-toggle i {
+            font-size: 20px !important;
+        }
+
+    /* Ensure no horizontal scroll */
+    body {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+    }
+
+    html {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+    }
+
+    /* Remove any margin/padding that might cause issues */
+    * {
+        max-width: 100vw !important;
+    }
+
+    .settings-container * {
+        box-sizing: border-box !important;
     }
 }
 
@@ -191,11 +616,11 @@ body {
 }
 
 /* Fix layout on mobile */
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
     .settings-layout {
         grid-template-columns: 1fr !important;
         gap: 0 !important;
-        max-width: 100% !important;
+        max-width: 100% ;
     }
 }
 
@@ -215,7 +640,7 @@ body {
 }
 
 /* Desktop sticky sidebar */
-@media (min-width: 1025px) {
+@media (min-width: 769px) {
     .settings-sidebar {
         position: sticky;
         top: 20px;
@@ -223,7 +648,7 @@ body {
 }
 
 /* Mobile/Tablet sidebar - full screen overlay */
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
     .settings-sidebar {
         position: fixed !important;
         top: 0 !important;
@@ -282,7 +707,7 @@ body {
         color: var(--primary-color);
     }
 
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
     .sidebar-close-btn {
         display: flex !important;
         align-items: center;
@@ -362,8 +787,8 @@ body {
 
 .settings-content {
     background: var(--white);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
+    border-radius: 30px;
+    border: 2px solid var(--primary-color) !important;
     overflow: hidden;
     border: 1px solid var(--gray-200);
     min-height: 600px;
@@ -371,7 +796,7 @@ body {
 }
 
 /* Fix content area on mobile */
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
     .settings-content {
         width: 100% !important;
         margin: 0 !important;
@@ -585,18 +1010,22 @@ body {
     align-items: start;
     margin-top: 24px;
     box-shadow: 0 8px 24px rgba(107, 144, 128, 0.2);
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .account-form-left {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
+    max-width: 100%;
 }
 
 .form-field-account {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    min-width: 0; 
 }
 
     .form-field-account label {
@@ -618,6 +1047,9 @@ body {
         transition: all 0.3s ease;
         font-weight: 500;
         backdrop-filter: blur(10px);
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
 .password-input-wrapper {
@@ -725,7 +1157,7 @@ body {
 .save-button-section {
     display: flex;
     justify-content: center;
-    margin-top: 32px;
+    margin-bottom: 20px;
 }
 
 .btn-save-profile {
@@ -920,7 +1352,7 @@ input:checked + .slider {
 .support-section,
 .legal-section,
 .account-actions-section {
-    margin-bottom: 32px;
+    margin-bottom: 40px;
     padding: 40px;
 }
 
@@ -1016,7 +1448,8 @@ input:checked + .slider {
 .btn-save {
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     color: var(--white);
-    margin: 32px 40px;
+    margin: 0 16px;
+    margin-bottom: 40px;
     box-shadow: 0 4px 16px rgba(107, 144, 128, 0.3);
 }
 
@@ -1026,6 +1459,7 @@ input:checked + .slider {
 }
 
 .btn-logout {
+    justify-content: center;
     background: var(--primary-color);
     color: var(--white);
     box-shadow: 0 2px 8px rgba(107, 144, 128, 0.3);
@@ -1204,6 +1638,11 @@ input:checked + .slider {
    NOTIFICATIONS SYSTEM
    ========================================== */
 
+/* ==========================================
+   RESPONSIVE NOTIFICATIONS/ALERTS POSITIONING
+   ========================================== */
+
+/* Base notification styles - Desktop (1025px+) */
 .notification {
     position: fixed;
     top: 32px;
@@ -1214,13 +1653,123 @@ input:checked + .slider {
     font-weight: 600;
     z-index: 1000;
     max-width: 400px;
+    min-width: 320px;
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
     font-size: 16px;
     cursor: pointer;
     transition: all 0.3s ease;
     animation: slideInRight 0.3s ease;
+    word-wrap: break-word;
+    line-height: 1.4;
 }
 
+/* Large Desktop (1400px+) */
+@media (min-width: 1400px) {
+    .notification {
+        top: 40px;
+        right: 40px;
+        max-width: 450px;
+        min-width: 350px;
+        padding: 24px 36px;
+        font-size: 17px;
+        border-radius: 18px;
+    }
+}
+
+/* Desktop (1200px - 1399px) */
+@media (min-width: 1200px) and (max-width: 1399px) {
+    .notification {
+        top: 36px;
+        right: 36px;
+        max-width: 420px;
+        min-width: 340px;
+        padding: 22px 34px;
+        font-size: 16px;
+    }
+}
+
+/* Medium Desktop (1025px - 1199px) */
+@media (min-width: 1025px) and (max-width: 1199px) {
+    .notification {
+        top: 32px;
+        right: 32px;
+        max-width: 380px;
+        min-width: 300px;
+        padding: 20px 30px;
+        font-size: 15px;
+    }
+}
+
+/* Tablet Landscape (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .notification {
+        top: 24px;
+        right: 24px;
+        max-width: 350px;
+        min-width: 280px;
+        padding: 18px 24px;
+        font-size: 15px;
+        border-radius: 14px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* Tablet Portrait & Mobile Landscape (481px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+    .notification {
+        position: fixed;
+        top: 80px; /* Account for mobile header */
+        left: 16px;
+        right: 16px;
+        max-width: none;
+        min-width: auto;
+        width: calc(100vw - 32px);
+        padding: 16px 20px;
+        font-size: 14px;
+        border-radius: 12px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        animation: slideInTop 0.3s ease; /* Change animation for mobile */
+    }
+}
+
+/* Mobile Portrait (320px - 480px) */
+@media (max-width: 480px) {
+    .notification {
+        position: fixed;
+        top: 75px; /* Account for smaller mobile header */
+        left: 12px;
+        right: 12px;
+        max-width: none;
+        min-width: auto;
+        width: calc(100vw - 24px);
+        padding: 14px 16px;
+        font-size: 13px;
+        border-radius: 10px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        line-height: 1.3;
+        animation: slideInTop 0.3s ease;
+    }
+}
+
+/* Very Small Screens (less than 360px) */
+@media (max-width: 359px) {
+    .notification {
+        top: 70px;
+        left: 8px;
+        right: 8px;
+        width: calc(100vw - 16px);
+        padding: 12px 14px;
+        font-size: 12px;
+        border-radius: 8px;
+        line-height: 1.2;
+    }
+}
+
+/* ==========================================
+   NOTIFICATION ANIMATIONS
+   ========================================== */
+
+/* Desktop slide in from right */
 @keyframes slideInRight {
     from {
         opacity: 0;
@@ -1232,6 +1781,48 @@ input:checked + .slider {
         transform: translateX(0);
     }
 }
+
+/* Mobile slide in from top */
+@keyframes slideInTop {
+    from {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Slide out animations */
+@keyframes slideOutRight {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+@keyframes slideOutTop {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+}
+
+/* ==========================================
+   NOTIFICATION VARIANTS
+   ========================================== */
 
 .notification-success {
     background: linear-gradient(135deg, var(--success), #059669);
@@ -1249,6 +1840,293 @@ input:checked + .slider {
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
 }
 
+/* ==========================================
+   NOTIFICATION STACKING (Multiple notifications)
+   ========================================== */
+
+/* Desktop stacking */
+@media (min-width: 769px) {
+    .notification:nth-child(1) {
+        top: 32px;
+    }
+
+    .notification:nth-child(2) {
+        top: 100px;
+    }
+
+    .notification:nth-child(3) {
+        top: 168px;
+    }
+
+    .notification:nth-child(4) {
+        top: 236px;
+    }
+}
+
+/* Tablet stacking */
+@media (min-width: 481px) and (max-width: 768px) {
+    .notification:nth-child(1) {
+        top: 80px;
+    }
+
+    .notification:nth-child(2) {
+        top: 140px;
+    }
+
+    .notification:nth-child(3) {
+        top: 200px;
+    }
+
+    .notification:nth-child(4) {
+        top: 260px;
+    }
+}
+
+/* Mobile stacking */
+@media (max-width: 480px) {
+    .notification:nth-child(1) {
+        top: 75px;
+    }
+
+    .notification:nth-child(2) {
+        top: 130px;
+    }
+
+    .notification:nth-child(3) {
+        top: 185px;
+    }
+
+    .notification:nth-child(4) {
+        top: 240px;
+    }
+}
+
+/* ==========================================
+   NOTIFICATION CONTENT ADJUSTMENTS
+   ========================================== */
+
+/* Icon spacing adjustments for different screen sizes */
+.notification i {
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+@media (max-width: 768px) {
+    .notification i {
+        margin-right: 6px;
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .notification i {
+        margin-right: 4px;
+        font-size: 14px;
+    }
+}
+
+/* Text content adjustments */
+.notification p {
+    margin: 0;
+    word-break: break-word;
+}
+
+.notification strong {
+    font-weight: 700;
+}
+
+/* ==========================================
+   HOVER AND INTERACTION STATES
+   ========================================== */
+
+.notification:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Mobile hover adjustments */
+@media (max-width: 768px) {
+    .notification:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .notification:hover {
+        transform: none;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+}
+
+/* ==========================================
+   NOTIFICATION DISMISS BUTTON
+   ========================================== */
+
+.notification-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+    .notification-close:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: rgba(255, 255, 255, 1);
+    }
+
+@media (max-width: 768px) {
+    .notification-close {
+        width: 20px;
+        height: 20px;
+        font-size: 14px;
+        top: 6px;
+        right: 6px;
+    }
+}
+
+/* ==========================================
+   NOTIFICATION PROGRESS BAR (Auto-dismiss timer)
+   ========================================== */
+
+.notification-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 0 0 16px 16px;
+    animation: progressBar 4s linear forwards;
+}
+
+@keyframes progressBar {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
+}
+
+@media (max-width: 768px) {
+    .notification-progress {
+        height: 2px;
+        border-radius: 0 0 12px 12px;
+    }
+}
+
+/* ==========================================
+   DARK MODE SUPPORT
+   ========================================== */
+
+@media (prefers-color-scheme: dark) {
+    .notification {
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .notification-close {
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+        .notification-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+}
+
+/* ==========================================
+   HIGH CONTRAST MODE
+   ========================================== */
+
+@media (prefers-contrast: high) {
+    .notification {
+        border: 2px solid var(--white);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .notification-success {
+        background: #008000;
+    }
+
+    .notification-error {
+        background: #cc0000;
+    }
+
+    .notification-warning {
+        background: #ff6600;
+    }
+
+    .notification-info {
+        background: #0066cc;
+    }
+}
+
+/* ==========================================
+   REDUCED MOTION SUPPORT
+   ========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .notification {
+        animation: none !important;
+        transition: opacity 0.1s ease !important;
+    }
+
+        .notification:hover {
+            transform: none !important;
+        }
+
+    .notification-progress {
+        animation: none !important;
+    }
+}
+
+/* ==========================================
+   LANDSCAPE ORIENTATION ADJUSTMENTS
+   ========================================== */
+
+@media screen and (orientation: landscape) and (max-height: 500px) {
+    .notification {
+        top: 16px !important;
+        padding: 12px 16px !important;
+        font-size: 13px !important;
+        max-height: 80px !important;
+        overflow: hidden !important;
+    }
+
+        .notification:nth-child(1) {
+            top: 16px !important;
+        }
+
+        .notification:nth-child(2) {
+            top: 60px !important;
+        }
+
+        .notification:nth-child(3) {
+            top: 104px !important;
+        }
+}
+
+/* Ensure notifications appear above everything */
+.notification {
+    z-index: 10000;
+}
+
+/* When mobile sidebar is open */
+body.sidebar-mobile-open .notification {
+    z-index: 10001;
+}
 /* ==========================================
    ERROR HANDLING
    ========================================== */
@@ -1312,7 +2190,7 @@ input:checked + .slider {
 }
 
 /* Medium-Large Screens (1025px - 1199px) */
-@media (max-width: 1199px) and (min-width: 1025px) {
+@media (max-width: 1199px) and (min-width: 769px) {
     .settings-layout {
         grid-template-columns: 280px 1fr;
         gap: 20px;
@@ -1329,27 +2207,394 @@ input:checked + .slider {
 }
 
 /* Tablet Landscape (769px - 1024px) */
-@media (max-width: 1024px) and (min-width: 769px) {
+
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    /* Container adjustments */
     .settings-container {
         padding: 16px;
-        padding-top: 80px;
     }
 
+    /* Main layout - reduce sidebar width for better content space */
+    .settings-layout {
+        grid-template-columns: 260px 1fr;
+        gap: 20px;
+        max-width: 100%;
+    }
+
+    /* Sidebar adjustments */
+    .settings-sidebar {
+        width: 260px;
+    }
+
+    .sidebar-menu li a {
+        padding: 16px 20px;
+        font-size: 14px;
+    }
+
+        .sidebar-menu li a i {
+            font-size: 1.1rem;
+            width: 20px;
+        }
+
+    /* Header adjustments */
     .settings-header {
         padding: 16px 0 24px 0;
+        margin-bottom: 16px;
     }
 
         .settings-header h1 {
             font-size: 2rem;
-            margin-left: 60px;
         }
 
+    #current-tab-name {
+        font-size: 1.3rem;
+    }
+
+    /* Content area */
+    .settings-content {
+        border-radius: 20px;
+    }
+
+    .content-header {
+        padding: 24px 32px 20px 32px;
+    }
+
+        .content-header h3 {
+            font-size: 1.75rem;
+        }
+
+    /* Profile section improvements */
+    .profile-main-container {
+        padding: 24px;
+        max-width: 100%;
+    }
+
+    .profile-header-card {
+        margin-bottom: 24px;
+        gap: 16px;
+    }
+
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        font-size: 2.5rem;
+    }
+    
+ 
+
+    /* Form layout - better proportions */
+    .form-row-top,
+    .form-row-bottom {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        max-width: 100%;
+    }
+
+        /* Phone field gets full width on tablet */
+        .form-row-top .phone-field {
+            grid-column: 1 / -1;
+            max-width: 400px;
+        }
+
+    /* Form fields */
+    .form-field {
+        width: 100%;
+    }
+
+        .form-field input,
+        .form-field select {
+            padding: 12px 16px;
+            font-size: 14px;
+            max-width: 100%;
+        }
+
+    /* Account details section - stack on tablet */
+    .account-details-section {
+        display: block !important;
+        grid-template-columns: none !important;
+        padding: 24px;
+        gap: 0;
+    }
+
+    .account-form-left {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .form-field-account {
+        width: 100%;
+    }
+
+        .form-field-account input,
+        .form-field-account select {
+            padding: 10px 14px;
+            font-size: 13px;
+        }
+
+    /* Connected accounts - full width */
+    .connected-accounts-section {
+        max-width: none;
+        min-width: auto;
+        width: 100%;
+        padding: 20px;
+        margin: 0;
+    }
+
+    /* Password field adjustments */
+    .password-input-wrapper {
+        max-width: 100%;
+    }
+
+    /* Save button */
+    .save-button-section {
+        margin-top: 24px;
+    }
+
+    .btn-save-profile {
+        padding: 14px 32px;
+        font-size: 15px;
+    }
+
+    /* Toggle groups - better spacing */
+    .toggle-group {
+        padding: 20px 0;
+        gap: 16px;
+    }
+
+    .toggle-buttons {
+        min-width: 160px;
+    }
+
+    .toggle-btn {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+
+    /* Form grids */
     .form-grid {
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         padding: 0 20px;
     }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+        max-width: 400px;
+    }
+
+    /* Notification and security items */
+    .notification-item,
+    .security-item,
+    .session-item {
+        padding: 16px 0;
+        gap: 16px;
+    }
+
+    .notification-info,
+    .security-info,
+    .session-info {
+        min-width: 250px;
+    }
+
+    /* Section padding */
+    .notification-section,
+    .privacy-section,
+    .security-section,
+    .language-section,
+    .accessibility-section,
+    .support-section,
+    .legal-section,
+    .account-actions-section {
+        padding: 32px;
+    }
+
+    /* Support grid */
+    .support-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .support-item {
+        padding: 20px;
+    }
+
+  
+    .action-buttons {
+        gap: 12px;
+    }
+
+    /* Button sizing */
+      .btn-save,
+        .btn-danger {
+            margin-left: 16px !important;
+            margin-right: 16px !important;
+            padding: 12px 20px !important;
+            font-size: 14px !important;
+            width: calc(100% - 32px) !important;
+            justify-content: center !important;
+        }
+
+    /* Legal links */
+    .legal-link {
+        padding: 16px 20px;
+    }
+
+    /* Security history section */
+    .security-section .security-item:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Improve container max-width for better centering */
+    .settings-layout {
+        margin: 0 auto;
+    }
+
+    /* Better phone input handling */
+    .phone-input-container {
+        max-width: 400px;
+    }
+
+    .btn-get-verified {
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+
+    /* Account connection items */
+    .account-connection-item {
+        padding: 12px 0;
+    }
+
+    .account-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+    }
+
+    .btn-connect {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+    .action-buttons {
+        flex-direction: column !important;
+        gap: 10px !important;
+        width: 100% !important;
+        padding: 0 15px !important;
+        box-sizing: border-box !important;
+    }
+
+        .action-buttons .btn-logout,
+        .action-buttons .btn-danger {
+            width: 100% !important;
+            margin: 0 !important;
+        }
+
+    .btn-danger {
+        justify-content: center;
+    }
+    /* Notification positioning for tablet */
+    .notification {
+        top: 24px;
+        right: 24px;
+        max-width: 350px;
+        padding: 16px 24px;
+        font-size: 15px;
+    }
+
+    /* Form field focus improvements */
+    .form-field input:focus,
+    .form-field select:focus,
+    .form-field-account input:focus,
+    .form-field-account select:focus {
+        box-shadow: 0 0 0 2px rgba(107, 144, 128, 0.1);
+    }
 }
 
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    /* Ensure content doesn't get too wide */
+    .profile-main-container,
+    .notification-section,
+    .privacy-section,
+    .security-section,
+    .language-section,
+    .accessibility-section,
+    .support-section,
+    .legal-section,
+    .account-actions-section {
+        max-width: 100%;
+        margin: 0 auto;
+    }
+
+    .support-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+        max-width: 500px;
+        margin: 0 auto 32px auto;
+    }
+
+    .support-item {
+        padding: 18px;
+        min-height: 110px;
+    }
+
+    .support-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+
+    .support-content h5 {
+        font-size: 14px;
+    }
+
+    .support-content p {
+        font-size: 12px;
+        margin: 0 0 12px 0;
+    }
+
+    .support-content .btn-secondary {
+        padding: 7px 14px;
+        font-size: 12px;
+    }
+
+    /* Improve form field max-widths */
+    .form-field input,
+    .form-field select {
+        max-width: 100%;
+    }
+
+    .form-field-account input,
+    .form-field-account select {
+        max-width: 100%;
+    }
+
+    /* Better toggle group layout */
+    .toggle-group {
+        align-items: flex-start;
+    }
+
+        .toggle-group > div {
+            margin-right: 20px;
+        }
+
+    /* Improve session items layout */
+    .session-item {
+        align-items: flex-start;
+    }
+
+    /* Better notification item layout */
+    .notification-item {
+        align-items: flex-start;
+    }
+
+    .notification-info-child {
+        margin-right: 16px;
+    }
+}
 /* ==========================================
    MOBILE 768PX AND BELOW FIXES
    ========================================== */
@@ -1360,7 +2605,7 @@ input:checked + .slider {
         display: flex !important;
         position: fixed !important;
         top: 15px !important;
-        left: 15px !important;
+        right: 15px !important;
         z-index: 1100 !important;
         width: 45px !important;
         height: 45px !important;
@@ -1379,636 +2624,658 @@ input:checked + .slider {
 }
 
 /* Settings container - proper mobile layout */
-@media (max-width: 768px) {
-    .settings-container {
-        margin-left: 0 !important;
-        width: 100% !important;
-        padding: 10px !important;
-        padding-top: 75px !important; /* Space for mobile toggle */
-        min-height: 100vh !important;
-        box-sizing: border-box !important;
-    }
-}
+
 
 /* Settings header - mobile alignment */
 @media (max-width: 768px) {
     .settings-header {
-        padding: 10px 0 20px 0 !important;
+        padding: 10px 15px 20px 15px !important;
         margin-bottom: 15px !important;
         margin-left: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
 
         .settings-header h1 {
-            font-size: 1.75rem !important;
+            font-size: 2rem !important; /* Increased from 1.75rem */
             margin-left: 0 !important;
-            flex-direction: column !important;
-            align-items: flex-start !important;
-            gap: 8px !important;
+            flex-direction: row !important; /* Changed from column to row */
+            align-items: center !important; /* Changed from flex-start to center */
+            gap: 12px !important; /* Increased gap for better spacing */
+            justify-content: flex-start !important;
+            flex-wrap: wrap !important; /* Allow wrapping if needed */
         }
 
     #current-tab-name {
-        font-size: 1.25rem !important;
+        font-size: 1.4rem !important; /* Increased from 1.25rem */
+    }
+
+    /* Ensure the chevron icon is visible and properly sized */
+    .settings-header h1 i {
+        font-size: 1.5rem !important;
+        color: var(--gray-600) !important;
+        margin: 0 4px !important;
+    }
+
+    /* Settings text styling */
+    .settings-header h1 span:first-child {
+        font-family: "Righteous", sans-serif !important;
+        font-weight: 400 !important;
+        color: var(--gray-800) !important;
+    }
+
+    /* Current tab name styling */
+    .settings-header h1 #current-tab-name {
+        font-family: "Montserrat", sans-serif !important;
+        font-weight: 500 !important;
+        color: var(--primary-color) !important;
     }
 }
 
-/* Settings layout - single column on mobile */
-@media (max-width: 768px) {
-    .settings-layout {
-        display: block !important;
-        grid-template-columns: none !important;
-        gap: 0 !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-    }
-}
-
-/* Sidebar - mobile overlay behavior */
-@media (max-width: 768px) {
-    .settings-sidebar {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        bottom: 0 !important;
-        width: 280px !important;
-        max-width: 80vw !important;
-        z-index: 1000 !important;
-        transform: translateX(-100%) !important;
-        transition: transform 0.3s ease !important;
-        border-radius: 0 !important;
-        height: 100vh !important;
-        overflow-y: auto !important;
+@media (max-width: 480px) {
+    .settings-header {
+        padding: 8px 12px 16px 12px !important;
     }
 
-        .settings-sidebar.mobile-open {
-            transform: translateX(0) !important;
+        .settings-header h1 {
+            font-size: 1.8rem !important; /* Slightly smaller but still bigger than before */
+            gap: 10px !important;
         }
 
-    .sidebar-close-btn {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
+    #current-tab-name {
+        font-size: 1.3rem !important;
+    }
+
+    .settings-header h1 i {
+        font-size: 1.3rem !important;
     }
 }
 
-/* Content area - full width on mobile */
-@media (max-width: 768px) {
-    .settings-content {
-        width: 100% !important;
-        margin: 0 !important;
-        border-radius: 12px !important;
+/* For very small screens (360px and below) */
+@media (max-width: 360px) {
+    .settings-header h1 {
+        font-size: 1.6rem !important;
+        gap: 8px !important;
     }
 
-    .content-header {
-        padding: 20px 16px !important;
+    #current-tab-name {
+        font-size: 1.2rem !important;
     }
 
-        .content-header h3 {
-            font-size: 1.5rem !important;
+    .settings-header h1 i {
+        font-size: 1.2rem !important;
+    }
+
+    /* Settings layout - single column on mobile */
+    @media (max-width: 768px) {
+        .settings-layout {
+            display: block !important;
+            grid-template-columns: none !important;
+            gap: 0 !important;
+            max-width: 100% !important;
+            margin: 0 !important;
         }
-}
-
-/* Profile section - mobile adjustments */
-@media (max-width: 768px) {
-    .profile-main-container {
-        padding: 16px !important;
     }
 
-    .profile-header-card {
-        flex-direction: column !important;
-        text-align: center !important;
-        gap: 16px !important;
-        padding: 20px 12px !important;
-        margin-bottom: 20px !important;
+    /* Sidebar - mobile overlay behavior */
+    @media (max-width: 768px) {
+        .settings-sidebar {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            bottom: 0 !important;
+            width: 280px !important;
+            max-width: 80vw !important;
+            z-index: 1000 !important;
+            transform: translateX(-100%) !important;
+            transition: transform 0.3s ease !important;
+            border-radius: 0 !important;
+            height: 100vh !important;
+            overflow-y: auto !important;
+        }
+
+            .settings-sidebar.mobile-open {
+                transform: translateX(0) !important;
+            }
+
+        .sidebar-close-btn {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
     }
 
-    .profile-avatar-section {
-        width: 100% !important;
-        justify-content: center !important;
-        flex-direction: column !important;
-        align-items: center !important;
+    /* Content area - full width on mobile */
+    @media (max-width: 768px) {
+        .settings-content {
+            width: 100% !important;
+            margin: 0 !important;
+            border-radius: 12px !important;
+        }
+
+
+
+        .content-header {
+            padding: 20px 16px !important;
+        }
+
+            .content-header h3 {
+                font-size: 1.5rem !important;
+            }
     }
 
-    .profile-avatar {
-        width: 100px !important;
-        height: 100px !important;
-        font-size: 2.5rem !important;
-        margin-bottom: 16px !important;
-    }
-}
+    /* Profile section - mobile adjustments */
+    @media (max-width: 768px) {
+        .profile-main-container {
+            padding: 16px !important;
+        }
 
-/* Form adjustments for mobile */
-@media (max-width: 768px) {
-    .form-row-top,
-    .form-row-bottom {
-        display: block !important;
-        grid-template-columns: none !important;
+        .profile-header-card {
+            flex-direction: column !important;
+            text-align: center !important;
+            gap: 16px !important;
+            padding: 20px 12px !important;
+            margin-bottom: 20px !important;
+        }
+
+        .profile-avatar-section {
+            width: 100% !important;
+            justify-content: center !important;
+            flex-direction: column !important;
+            align-items: center !important;
+        }
+
+        .profile-avatar {
+            width: 100px !important;
+            height: 100px !important;
+            font-size: 2.5rem !important;
+            margin-bottom: 16px !important;
+        }
     }
 
-    .form-field {
-        margin-bottom: 16px !important;
-        width: 100% !important;
+    /* Form adjustments for mobile */
+    @media (max-width: 768px) {
+        .form-row-top,
+        .form-row-bottom {
+            display: block !important;
+            grid-template-columns: none !important;
+        }
+
+        .form-field {
+            margin-bottom: 16px !important;
+            width: 100% !important;
+        }
+
+            .form-field input,
+            .form-field select {
+                width: 100% !important;
+                padding: 12px 14px !important;
+                font-size: 14px !important;
+            }
     }
+
+    /* Phone input mobile fix */
+    @media (max-width: 768px) {
+        .phone-input-container {
+            flex-direction: column !important;
+            gap: 8px !important;
+            align-items: stretch !important;
+        }
+
+            .phone-input-container input {
+                padding-right: 16px !important;
+                width: 100% !important;
+            }
+
+        .btn-get-verified {
+            position: static !important;
+            transform: none !important;
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 10px !important;
+            margin-top: 5px !important;
+        }
+    }
+
+    /* Account details section - mobile stack */
+    @media (max-width: 768px) {
+        .account-details-section {
+            display: block !important;
+            grid-template-columns: none !important;
+            padding: 20px 12px !important;
+            gap: 0 !important;
+        }
+
+        .account-form-left {
+            display: block !important;
+            grid-template-columns: none !important;
+            margin-bottom: 20px !important;
+        }
+
+        .form-field-account {
+            margin-bottom: 16px !important;
+            width: 100% !important;
+        }
+
+        .connected-accounts-section {
+            max-width: none !important;
+            min-width: auto !important;
+            margin: 0 !important;
+            padding: 16px !important;
+        }
+    }
+
+    /* Toggle groups - mobile stack */
+    @media (max-width: 768px) {
+        .toggle-group {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 12px !important;
+            padding: 16px 0 !important;
+        }
+
+        .toggle-buttons {
+            width: 100% !important;
+            min-width: auto !important;
+            justify-content: center !important;
+        }
+
+        .toggle-btn {
+            padding: 10px 16px !important;
+            font-size: 13px !important;
+        }
+    }
+
+    /* Form grid - mobile single column */
+    @media (max-width: 768px) {
+        .form-grid {
+            display: block !important;
+            grid-template-columns: none !important;
+            padding: 0 16px !important;
+        }
+
+        .form-group {
+            margin-bottom: 16px !important;
+            width: 100% !important;
+        }
+    }
+
+    /* Notification items - mobile stack */
+    @media (max-width: 768px) {
+        .notification-item,
+        .security-item,
+        .session-item {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 10px !important;
+            padding: 16px 0 !important;
+        }
+
+        .notification-info,
+        .security-info,
+        .session-info {
+            width: 100% !important;
+            min-width: auto !important;
+        }
+    }
+
+    /* Section padding - mobile adjustment */
+    @media (max-width: 768px) {
+        .notification-section,
+        .privacy-section,
+        .security-section,
+        .language-section,
+        .accessibility-section,
+        .support-section,
+        .legal-section,
+        .account-actions-section {
+            padding: 16px !important;
+        }
+    }
+
+    /* Buttons - mobile sizing */
+    @media (max-width: 768px) {
+        .btn-save,
+        .btn-danger {
+            margin-left: 16px !important;
+            margin-right: 16px !important;
+            padding: 12px 20px !important;
+            font-size: 14px !important;
+            width: calc(100% - 32px) !important;
+            justify-content: center !important;
+        }
+
+        .btn-save-profile {
+            padding: 12px 24px !important;
+            font-size: 14px !important;
+            width: auto !important;
+            min-width: 150px !important;
+        }
+
+        .action-buttons {
+            
+            gap: 10px !important;
+            width: 100% !important;
+        }
+    }
+
+    /* Support grid - mobile single column */
+    @media (max-width: 768px) {
+        .support-grid {
+            display: block !important;
+            grid-template-columns: none !important;
+        }
+
+        .support-item {
+            margin-bottom: 16px !important;
+        }
+    }
+
+    /* Prevent body scroll when sidebar open */
+    @media (max-width: 768px) {
+        body.sidebar-mobile-open {
+            overflow: hidden !important;
+            position: fixed !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+    }
+
+    /* Sidebar overlay */
+    @media (max-width: 768px) {
+        .sidebar-overlay {
+            display: none;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            background: rgba(0, 0, 0, 0.6) !important;
+            z-index: 999 !important;
+            backdrop-filter: blur(2px) !important;
+        }
+
+            .sidebar-overlay.active {
+                display: block !important;
+                opacity: 1 !important;
+            }
+    }
+
+    /* Notification positioning for mobile */
+    @media (max-width: 768px) {
+        .notification {
+            top: 80px !important;
+            left: 16px !important;
+            right: 16px !important;
+            max-width: none !important;
+            padding: 14px 16px !important;
+            font-size: 14px !important;
+        }
+    }
+
+    /* Mobile Landscape (481px - 640px) */
+    @media (max-width: 640px) and (min-width: 481px) {
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            font-size: 2.5rem;
+        }
 
         .form-field input,
         .form-field select {
-            width: 100% !important;
-            padding: 12px 14px !important;
-            font-size: 14px !important;
-        }
-}
-
-/* Phone input mobile fix */
-@media (max-width: 768px) {
-    .phone-input-container {
-        flex-direction: column !important;
-        gap: 8px !important;
-        align-items: stretch !important;
-    }
-
-        .phone-input-container input {
-            padding-right: 16px !important;
-            width: 100% !important;
+            padding: 12px 14px;
+            font-size: 14px;
         }
 
-    .btn-get-verified {
-        position: static !important;
-        transform: none !important;
-        width: 100% !important;
-        justify-content: center !important;
-        padding: 10px !important;
-        margin-top: 5px !important;
-    }
-}
-
-/* Account details section - mobile stack */
-@media (max-width: 768px) {
-    .account-details-section {
-        display: block !important;
-        grid-template-columns: none !important;
-        padding: 20px 12px !important;
-        gap: 0 !important;
-    }
-
-    .account-form-left {
-        display: block !important;
-        grid-template-columns: none !important;
-        margin-bottom: 20px !important;
-    }
-
-    .form-field-account {
-        margin-bottom: 16px !important;
-        width: 100% !important;
-    }
-
-    .connected-accounts-section {
-        max-width: none !important;
-        min-width: auto !important;
-        margin: 0 !important;
-        padding: 16px !important;
-    }
-}
-
-/* Toggle groups - mobile stack */
-@media (max-width: 768px) {
-    .toggle-group {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 12px !important;
-        padding: 16px 0 !important;
-    }
-
-    .toggle-buttons {
-        width: 100% !important;
-        min-width: auto !important;
-        justify-content: center !important;
-    }
-
-    .toggle-btn {
-        padding: 10px 16px !important;
-        font-size: 13px !important;
-    }
-}
-
-/* Form grid - mobile single column */
-@media (max-width: 768px) {
-    .form-grid {
-        display: block !important;
-        grid-template-columns: none !important;
-        padding: 0 16px !important;
-    }
-
-    .form-group {
-        margin-bottom: 16px !important;
-        width: 100% !important;
-    }
-}
-
-/* Notification items - mobile stack */
-@media (max-width: 768px) {
-    .notification-item,
-    .security-item,
-    .session-item {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 10px !important;
-        padding: 16px 0 !important;
-    }
-
-    .notification-info,
-    .security-info,
-    .session-info {
-        width: 100% !important;
-        min-width: auto !important;
-    }
-}
-
-/* Section padding - mobile adjustment */
-@media (max-width: 768px) {
-    .notification-section,
-    .privacy-section,
-    .security-section,
-    .language-section,
-    .accessibility-section,
-    .support-section,
-    .legal-section,
-    .account-actions-section {
-        padding: 16px !important;
-    }
-}
-
-/* Buttons - mobile sizing */
-@media (max-width: 768px) {
-    .btn-save,
-    .btn-danger {
-        margin-left: 16px !important;
-        margin-right: 16px !important;
-        padding: 12px 20px !important;
-        font-size: 14px !important;
-        width: calc(100% - 32px) !important;
-        justify-content: center !important;
-    }
-
-    .btn-save-profile {
-        padding: 12px 24px !important;
-        font-size: 14px !important;
-        width: auto !important;
-        min-width: 150px !important;
-    }
-
-    .action-buttons {
-        flex-direction: column !important;
-        gap: 10px !important;
-        width: 100% !important;
-    }
-}
-
-/* Support grid - mobile single column */
-@media (max-width: 768px) {
-    .support-grid {
-        display: block !important;
-        grid-template-columns: none !important;
-    }
-
-    .support-item {
-        margin-bottom: 16px !important;
-    }
-}
-
-/* Prevent body scroll when sidebar open */
-@media (max-width: 768px) {
-    body.sidebar-mobile-open {
-        overflow: hidden !important;
-        position: fixed !important;
-        width: 100% !important;
-        height: 100% !important;
-    }
-}
-
-/* Sidebar overlay */
-@media (max-width: 768px) {
-    .sidebar-overlay {
-        display: none;
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        bottom: 0 !important;
-        background: rgba(0, 0, 0, 0.6) !important;
-        z-index: 999 !important;
-        backdrop-filter: blur(2px) !important;
-    }
-
-        .sidebar-overlay.active {
-            display: block !important;
-            opacity: 1 !important;
+        .btn-save-profile {
+            padding: 14px 32px;
+            font-size: 14px;
         }
-}
-
-/* Notification positioning for mobile */
-@media (max-width: 768px) {
-    .notification {
-        top: 80px !important;
-        left: 16px !important;
-        right: 16px !important;
-        max-width: none !important;
-        padding: 14px 16px !important;
-        font-size: 14px !important;
-    }
-}
-
-/* Mobile Landscape (481px - 640px) */
-@media (max-width: 640px) and (min-width: 481px) {
-    .profile-avatar {
-        width: 100px;
-        height: 100px;
-        font-size: 2.5rem;
     }
 
-    .form-field input,
-    .form-field select {
-        padding: 12px 14px;
-        font-size: 14px;
-    }
-
-    .btn-save-profile {
-        padding: 14px 32px;
-        font-size: 14px;
-    }
-}
-
-/* Mobile Portrait (320px - 480px) */
-@media (max-width: 480px) {
-    .settings-container {
-        padding: 8px !important;
-        padding-top: 70px !important;
-    }
-
-    .mobile-menu-toggle {
-        width: 40px !important;
-        height: 40px !important;
-        top: 12px !important;
-        left: 12px !important;
-    }
-
-        .mobile-menu-toggle i {
-            font-size: 18px !important;
+    /* Mobile Portrait (320px - 480px) */
+    @media (max-width: 480px) {
+        .settings-container {
+            padding: 70px 3px 10px 3px !important;
         }
 
-    .settings-header {
-        padding: 8px 0 16px 0 !important;
+        .mobile-menu-toggle {
+            width: 40px !important;
+            height: 40px !important;
+            top: 12px !important;
+            right: 12px !important;
+        }
+
+            .mobile-menu-toggle i {
+                font-size: 18px !important;
+            }
+
+        .settings-header {
+            padding: 8px 12px 16px 12px !important;
+        }
+
+        .profile-main-container,
+        .notification-section,
+        .privacy-section,
+        .security-section,
+        .language-section,
+        .accessibility-section,
+        .support-section,
+        .legal-section,
+        .account-actions-section {
+            padding: 12px !important;
+        }
+
+        .content-header {
+            padding: 16px 12px !important;
+        }
+
+        .account-details-section {
+            padding: 16px 12px !important;
+        }
+
+        .form-grid {
+            padding: 0 12px !important;
+        }
+
+        .btn-save,
+        .btn-danger {
+            margin-left: 12px !important;
+            margin-right: 12px !important;
+            width: calc(100% - 24px) !important;
+        }
+
+        .action-buttons {
+            padding: 0 12px !important;
+        }
+
+        .save-button-section {
+            padding: 0 12px !important;
+        }
     }
+
+    /* Extra Small Screens (less than 360px) */
+    @media (max-width: 359px) {
+        .settings-container {
+            padding: 6px !important;
+            padding-top: 65px !important;
+        }
+
+        .mobile-menu-toggle {
+            width: 35px !important;
+            height: 35px !important;
+            top: 10px !important;
+            right: 10px !important;
+        }
 
         .settings-header h1 {
-            font-size: 1.5rem !important;
-        }
-
-    #current-tab-name {
-        font-size: 1.1rem !important;
-    }
-
-    .content-header {
-        padding: 20px 16px !important;
-    }
-
-        .content-header h3 {
             font-size: 1.25rem !important;
         }
 
-    .profile-main-container {
-        padding: 16px !important;
-    }
-
-    .profile-header-card {
-        padding: 20px 12px !important;
-    }
-
-    .profile-avatar {
-        width: 80px !important;
-        height: 80px !important;
-        font-size: 2rem !important;
-    }
-
-    .account-details-section {
-        padding: 20px 12px !important;
-        border-radius: 12px !important;
-    }
-
-    .connected-accounts-section {
-        padding: 20px 12px !important;
-        border-radius: 12px !important;
-        min-width: auto !important;
-    }
-
-    .form-field input,
-    .form-field select,
-    .form-field-account input,
-    .form-field-account select {
-        padding: 10px 12px !important;
-        font-size: 13px !important;
-    }
-
-    .sidebar-menu li a {
-        padding: 16px 20px !important;
-        font-size: 14px !important;
-    }
-
-        .sidebar-menu li a i {
-            font-size: 1.1rem !important;
+        .profile-header-card {
+            padding: 16px 8px !important;
         }
 
-    .btn-save-profile {
-        padding: 10px 20px !important;
-        font-size: 12px !important;
+        .account-details-section {
+            padding: 16px 8px !important;
+        }
+
+        .connected-accounts-section {
+            padding: 16px 8px !important;
+        }
+
+        .form-field input,
+        .form-field select,
+        .form-field-account input,
+        .form-field-account select {
+            padding: 8px 10px !important;
+            font-size: 12px !important;
+        }
+
+        .btn-save-profile {
+            padding: 8px 16px !important;
+            font-size: 11px !important;
+        }
     }
 
-    .toggle-btn {
-        padding: 8px 12px !important;
-        font-size: 12px !important;
-    }
-}
-
-/* Extra Small Screens (less than 360px) */
-@media (max-width: 359px) {
-    .settings-container {
-        padding: 6px !important;
-        padding-top: 65px !important;
-    }
-
-    .mobile-menu-toggle {
-        width: 35px !important;
-        height: 35px !important;
-        top: 10px !important;
-        left: 10px !important;
-    }
-
-    .settings-header h1 {
-        font-size: 1.25rem !important;
-    }
-
-    .profile-header-card {
-        padding: 16px 8px !important;
-    }
-
-    .account-details-section {
-        padding: 16px 8px !important;
-    }
-
-    .connected-accounts-section {
-        padding: 16px 8px !important;
-    }
-
-    .form-field input,
-    .form-field select,
-    .form-field-account input,
-    .form-field-account select {
-        padding: 8px 10px !important;
-        font-size: 12px !important;
-    }
-
-    .btn-save-profile {
-        padding: 8px 16px !important;
-        font-size: 11px !important;
-    }
-}
-
-/* ==========================================
+    /* ==========================================
    ACCESSIBILITY IMPROVEMENTS
    ========================================== */
 
-/* High Contrast Mode */
-@media (prefers-contrast: high) {
-    :root {
-        --background: #ffffff;
-        --text-color: #000000;
-        --primary-color: #000000;
-        --gray-200: #cccccc;
-        --gray-300: #aaaaaa;
+    /* High Contrast Mode */
+    @media (prefers-contrast: high) {
+        :root {
+            --background: #ffffff;
+            --text-color: #000000;
+            --primary-color: #000000;
+            --gray-200: #cccccc;
+            --gray-300: #aaaaaa;
+        }
+
+        .toggle-btn.active {
+            background-color: #000000;
+            color: #ffffff;
+        }
+
+        .profile-avatar {
+            border-width: 4px;
+        }
     }
 
-    .toggle-btn.active {
-        background-color: #000000;
-        color: #ffffff;
+    /* Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+        * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+
+        .settings-sidebar {
+            transition: none !important;
+        }
+
+        .sidebar-overlay {
+            transition: none !important;
+        }
     }
 
-    .profile-avatar {
-        border-width: 4px;
-    }
-}
-
-/* Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-    * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-
-    .settings-sidebar {
-        transition: none !important;
+    /* Focus Styles for Accessibility */
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-field input:focus,
+    .form-field select:focus,
+    .form-field-account input:focus,
+    .form-field-account select:focus,
+    .btn-connect:focus,
+    .btn-get-verified:focus,
+    .btn-toggle-password:focus,
+    .mobile-menu-toggle:focus {
+        outline: 3px solid var(--primary-color) !important;
+        outline-offset: 2px !important;
     }
 
-    .sidebar-overlay {
-        transition: none !important;
-    }
-}
-
-/* Focus Styles for Accessibility */
-.form-group input:focus,
-.form-group select:focus,
-.form-field input:focus,
-.form-field select:focus,
-.form-field-account input:focus,
-.form-field-account select:focus,
-.btn-connect:focus,
-.btn-get-verified:focus,
-.btn-toggle-password:focus,
-.mobile-menu-toggle:focus {
-    outline: 3px solid var(--primary-color) !important;
-    outline-offset: 2px !important;
-}
-
-/* Custom scrollbar for webkit browsers */
-.settings-content::-webkit-scrollbar,
-.settings-sidebar::-webkit-scrollbar {
-    width: 8px;
-}
-
-.settings-content::-webkit-scrollbar-track,
-.settings-sidebar::-webkit-scrollbar-track {
-    background: var(--gray-100);
-    border-radius: 4px;
-}
-
-.settings-content::-webkit-scrollbar-thumb,
-.settings-sidebar::-webkit-scrollbar-thumb {
-    background: var(--gray-300);
-    border-radius: 4px;
-}
-
-    .settings-content::-webkit-scrollbar-thumb:hover,
-    .settings-sidebar::-webkit-scrollbar-thumb:hover {
-        background: var(--primary-color);
+    /* Custom scrollbar for webkit browsers */
+    .settings-content::-webkit-scrollbar,
+    .settings-sidebar::-webkit-scrollbar {
+        width: 8px;
     }
 
-/* Print Styles */
-@media print {
-    .settings-sidebar,
-    .sidebar-overlay,
-    .mobile-menu-toggle,
-    .notification,
-    .btn-save,
-    .btn-secondary,
-    .btn-logout,
-    .btn-danger,
-    .btn-save-profile,
-    .btn-connect,
-    .btn-get-verified {
-        display: none !important;
+    .settings-content::-webkit-scrollbar-track,
+    .settings-sidebar::-webkit-scrollbar-track {
+        background: var(--gray-100);
+        border-radius: 4px;
     }
 
-    .settings-layout {
-        grid-template-columns: 1fr !important;
+    .settings-content::-webkit-scrollbar-thumb,
+    .settings-sidebar::-webkit-scrollbar-thumb {
+        background: var(--gray-300);
+        border-radius: 4px;
     }
 
-    .settings-container {
-        margin-left: 0 !important;
-        width: 100% !important;
-        padding: 0 !important;
+        .settings-content::-webkit-scrollbar-thumb:hover,
+        .settings-sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+
+    /* Print Styles */
+    @media print {
+        .settings-sidebar,
+        .sidebar-overlay,
+        .mobile-menu-toggle,
+        .notification,
+        .btn-save,
+        .btn-secondary,
+        .btn-logout,
+        .btn-danger,
+        .btn-save-profile,
+        .btn-connect,
+        .btn-get-verified {
+            display: none !important;
+        }
+
+        .settings-layout {
+            grid-template-columns: 1fr !important;
+        }
+
+        .settings-container {
+            margin-left: 0 !important;
+            width: 100% !important;
+            padding: 0 !important;
+        }
+
+        body {
+            background-color: white !important;
+        }
     }
 
-    body {
-        background-color: white !important;
-    }
-}
-
-/* Loading states */
-.loading {
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-    .loading * {
-        cursor: wait !important;
+    /* Loading states */
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
     }
 
-/* ==========================================
+        .loading * {
+            cursor: wait !important;
+        }
+
+    /* ==========================================
    UTILITY CLASSES FOR RESPONSIVE BEHAVIOR
    ========================================== */
 
-.mobile-only {
-    display: none;
-}
-
-.desktop-only {
-    display: block;
-}
-
-@media (max-width: 1024px) {
     .mobile-only {
-        display: block;
+        display: none;
     }
 
     .desktop-only {
-        display: none;
+        display: block;
     }
-}
+
+    @media (max-width: 768px) {
+        .mobile-only {
+            display: block;
+        }
+
+        .desktop-only {
+            display: none;
+        }
+    }
