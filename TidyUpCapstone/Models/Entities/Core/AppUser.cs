@@ -14,6 +14,38 @@ namespace TidyUpCapstone.Models.Entities.User
     [Table("app_user")]
     public class AppUser : IdentityUser<int>
     {
+
+        [StringLength(50)]
+        [Column("first_name")]
+        public string? FirstName { get; set; }
+
+        [StringLength(50)]
+        [Column("last_name")]
+        public string? LastName { get; set; }
+
+        [StringLength(100)]
+        [Column("location")]
+        public string? Location { get; set; }
+
+        [Column("birthday")]
+        public DateTime? Birthday { get; set; }
+
+        [StringLength(20)]
+        [Column("gender")]
+        public string? Gender { get; set; }
+
+        [StringLength(500)]
+        [Column("profile_picture_url")]
+        public string? ProfilePictureUrl { get; set; }
+
+        // Phone verification fields
+        [StringLength(6)]
+        [Column("verification_code")]
+        public string? VerificationCode { get; set; }
+
+        [Column("verification_code_expiry")]
+        public DateTime? VerificationCodeExpiry { get; set; }
+
         [Column("token_balance", TypeName = "decimal(10,2)")]
         public decimal TokenBalance { get; set; } = 0.00m;
 
@@ -73,6 +105,9 @@ namespace TidyUpCapstone.Models.Entities.User
 
         // AI-related navigation properties
         public virtual ICollection<AI.AiTrainingFeedback> AiTrainingFeedbacks { get; set; } = new List<AI.AiTrainingFeedback>();
+
+        public virtual UserPrivacySettings? PrivacySettings { get; set; }
+
     }
 
     public enum UserRole

@@ -12,6 +12,7 @@ using TidyUpCapstone.Models.Entities.System;
 using TidyUpCapstone.Models.Entities.Transactions;
 using TidyUpCapstone.Models.Entities.User;
 using TidyUpCapstone.Models.Entities.Core;
+using TidyUpCapstone.Models.Entities.Support;
 
 namespace TidyUpCapstone.Data
 {
@@ -83,6 +84,9 @@ namespace TidyUpCapstone.Data
         public DbSet<UserReport> UserReports { get; set; }
         public DbSet<AdminReport> AdminReports { get; set; }
 
+        public DbSet<UserPrivacySettings> UserPrivacySettings { get; set; }
+
+        public DbSet<ContactMessage> ContactMessages { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -189,6 +193,10 @@ namespace TidyUpCapstone.Data
             // Reporting entities
             builder.Entity<UserReport>().ToTable("user_reports");
             builder.Entity<AdminReport>().ToTable("admin_reports");
+
+            builder.Entity<UserPrivacySettings>().ToTable("user_privacy_settings");
+
+            builder.Entity<ContactMessage>().ToTable("contact_messages");
 
             // Configure JSON columns as nvarchar(max) for compatibility
             builder.Entity<Admin>()
@@ -478,7 +486,16 @@ namespace TidyUpCapstone.Data
                 .WithMany(u => u.EmailVerifications)
                 .HasForeignKey(ev => ev.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // UserPrivacySettings relationship (one-to-one)
+            builder.Entity<UserPrivacySettings>()
+                .HasOne(ups => ups.User)
+                .WithOne(u => u.PrivacySettings)
+                .HasForeignKey<UserPrivacySettings>(ups => ups.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
+
+
 
         private void ConfigureIndexes(ModelBuilder builder)
         {

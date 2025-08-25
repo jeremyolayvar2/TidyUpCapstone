@@ -1,0 +1,152 @@
+﻿@{
+    ViewData["Title"] = "Contact Support";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Contact Support</h3>
+                    <p class="mb-0">Get in touch with our support team for assistance</p>
+                </div>
+
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Your Name *</label>
+                            <input type="text" id="name" class="form-control" placeholder="Enter your full name" />
+                            <div class="text-danger" id="nameError"></div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email Address *</label>
+                            <input type="email" id="email" class="form-control" placeholder="Enter your email address" />
+                            <div class="text-danger" id="emailError"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">What can we help you with? *</label>
+                        <select id="category" class="form-select">
+                            <option value="">Please select a category</option>
+                            <option value="General">General Question</option>
+                            <option value="Bug">Bug Report</option>
+                            <option value="Trading">Trading Issue</option>
+                            <option value="Safety">Safety Concern</option>
+                        </select>
+                        <div class="text-danger" id="categoryError"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Subject *</label>
+                        <input type="text" id="subject" class="form-control" placeholder="Brief description of your issue" />
+                        <div class="text-danger" id="subjectError"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Please describe your issue in detail *</label>
+                        <textarea id="message" class="form-control" rows="6" placeholder="Please provide detailed information about your issue."></textarea>
+                        <div class="form-text">
+                            <span id="charCount">0</span>/2000 characters
+                        </div>
+                        <div class="text-danger" id="messageError"></div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <button type="button" class="btn btn-outline-secondary" onclick="history.back()">Back</button>
+                        <button type="button" class="btn btn-primary" id="submitBtn">Send Message</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Character counter
+        document.getElementById('message').addEventListener('input', function() {
+            const length = this.value.length;
+            document.getElementById('charCount').textContent = length;
+        });
+
+        // Form submission
+        document.getElementById('submitBtn').addEventListener('click', function() {
+            // Clear previous errors
+            document.querySelectorAll('.text-danger').forEach(el => el.textContent = '');
+
+            // Get values
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const category = document.getElementById('category').value;
+            const subject = document.getElementById('subject').value.trim();
+            const message = document.getElementById('message').value.trim();
+
+            // Validation
+            let isValid = true;
+
+            if (!name) {
+                document.getElementById('nameError').textContent = 'Name is required';
+                isValid = false;
+            }
+
+            if (!email) {
+                document.getElementById('emailError').textContent = 'Email is required';
+                isValid = false;
+            }
+
+            if (!category) {
+                document.getElementById('categoryError').textContent = 'Please select a category';
+                isValid = false;
+            }
+
+            if (!subject) {
+                document.getElementById('subjectError').textContent = 'Subject is required';
+                isValid = false;
+            }
+
+            if (!message) {
+                document.getElementById('messageError').textContent = 'Message is required';
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            // Show loading state
+            this.disabled = true;
+            this.innerHTML = 'Sending...';
+
+            // Send data
+               const formData = new URLSearchParams();
+    formData.append('name', name);
+    formData.append('email', email);
+    formData.append('category', category);
+    formData.append('subject', subject);
+    formData.append('message', message);
+
+    fetch('/Support/ContactUs', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData
+    })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/Support/ContactSuccess';
+                } else {
+                    alert(data.message || 'An error occurred. Please try again.');
+                    this.disabled = false;
+                    this.innerHTML = 'Send Message';
+                }
+            })
+            .catch(error => {
+                alert('An error occurred. Please try again.');
+                this.disabled = false;
+                this.innerHTML = 'Send Message';
+            });
+        });
+    });
+</script>

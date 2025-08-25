@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TidyUpCapstone.Data;
 
@@ -11,9 +12,11 @@ using TidyUpCapstone.Data;
 namespace TidyUpCapstone.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250822124603_AddContactMessagesTable")]
+    partial class AddContactMessagesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1858,58 +1861,6 @@ namespace TidyUpCapstone.Migrations
                     b.ToTable("user_sso_links", (string)null);
                 });
 
-            modelBuilder.Entity("TidyUpCapstone.Models.Entities.Support.ContactMessage", b =>
-                {
-                    b.Property<int>("ContactId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("contact_id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ContactId"));
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("category");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
-                        .HasColumnName("email");
-
-                    b.Property<bool>("IsResolved")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_resolved");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)")
-                        .HasColumnName("message");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("name");
-
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("subject");
-
-                    b.HasKey("ContactId");
-
-                    b.ToTable("contact_messages", (string)null);
-                });
-
             modelBuilder.Entity("TidyUpCapstone.Models.Entities.System.AuditLog", b =>
                 {
                     b.Property<long>("AuditId")
@@ -2230,10 +2181,6 @@ namespace TidyUpCapstone.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("admin_notes");
 
-                    b.Property<DateTime?>("Birthday")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("birthday");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -2250,29 +2197,9 @@ namespace TidyUpCapstone.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("FirstName")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("first_name");
-
-                    b.Property<string>("Gender")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("gender");
-
                     b.Property<DateTime?>("LastLogin")
                         .HasColumnType("datetime2")
                         .HasColumnName("last_login");
-
-                    b.Property<string>("LastName")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("last_name");
-
-                    b.Property<string>("Location")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("location");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -2302,11 +2229,6 @@ namespace TidyUpCapstone.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("ProfilePictureUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("profile_picture_url");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -2327,15 +2249,6 @@ namespace TidyUpCapstone.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)")
                         .HasColumnName("username");
-
-                    b.Property<string>("VerificationCode")
-                        .HasMaxLength(6)
-                        .HasColumnType("nvarchar(6)")
-                        .HasColumnName("verification_code");
-
-                    b.Property<DateTime?>("VerificationCodeExpiry")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("verification_code_expiry");
 
                     b.HasKey("Id");
 

@@ -8,6 +8,15 @@ namespace TidyUpCapstone.Models.DTOs.User
         public int UserId { get; set; }
         public string Username { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
+
+        // Add these new fields
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? Location { get; set; }
+        public DateTime? Birthday { get; set; }
+        public string? Gender { get; set; }
+        public string? ProfilePictureUrl { get; set; }
+
         public bool IsVerified { get; set; }
         public UserRole Role { get; set; }
         public decimal TokenBalance { get; set; }
@@ -29,8 +38,17 @@ namespace TidyUpCapstone.Models.DTOs.User
         [StringLength(255, MinimumLength = 3)]
         public string Username { get; set; } = string.Empty;
 
+        // Add these to match your form field names
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? Phone { get; set; }  // matches name="Phone" in form
+        public string? Email { get; set; }
+        public string? Location { get; set; }
+        public string? Gender { get; set; }
+        public DateTime? Birthday { get; set; }
+
         [StringLength(20)]
-        public string? PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }  // keep this for compatibility
 
         public bool MarketingEmailsEnabled { get; set; }
 

@@ -1,4 +1,6 @@
-﻿class ResponsiveSettingsManager {
+﻿console.log('Settings JavaScript loading...');
+
+class ResponsiveSettingsManager {
     constructor() {
         this.currentTab = 'profile';
         this.initialized = false;
@@ -20,32 +22,75 @@
     }
 
     init() {
-        console.log('🔄 Initializing Responsive Settings Manager...');
+        console.log('Initializing Settings Manager...');
 
-        // Wait for DOM to be ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => this.initializeComponents());
-        } else {
+        // Wait for DOM and jQuery to be ready
+        $(document).ready(() => {
             this.initializeComponents();
-        }
+        });
     }
 
     initializeComponents() {
-        // Force immediate fix for tab display
-        this.forceTabDisplay();
-
+        // Initialize components in correct order
+        this.initTabSwitching();           // Fix tabs first
         this.initResponsiveLayout();
         this.initMobileSidebar();
-        this.initTabSwitching();
         this.initProfileFeatures();
         this.initFormHandling();
         this.initNotifications();
-        this.initModalHandling();
         this.initAccessibility();
         this.initResizeHandler();
 
         this.initialized = true;
-        console.log('✅ Responsive Settings Manager initialized successfully');
+        console.log('Settings Manager initialized successfully');
+    }
+
+    // ==========================================
+    // FIXED TAB SWITCHING - Core functionality
+    // ==========================================
+
+    initTabSwitching() {
+        console.log('Initializing tab switching...');
+
+        // Simple, working tab switching
+        $('.tab-link').on('click', (e) => {
+            e.preventDefault();
+            const targetTab = $(e.currentTarget).data('tab');
+            if (targetTab) {
+                this.showTab(targetTab);
+            }
+        });
+
+        // Show initial tab
+        this.showTab('profile');
+
+        console.log('Tab switching initialized');
+    }
+
+    showTab(targetTab) {
+        console.log(`Switching to tab: ${targetTab}`);
+
+        // Hide all tabs - simple and effective
+        $('.tab-content').removeClass('active').hide();
+        $('.tab-link').removeClass('active').attr('aria-selected', 'false');
+
+        // Show target tab
+        $(`#${targetTab}`).addClass('active').show();
+        $(`.tab-link[data-tab="${targetTab}"]`).addClass('active').attr('aria-selected', 'true');
+
+        // Update header
+        const tabName = this.tabNames[targetTab] || targetTab;
+        $('#current-tab-name').text(tabName);
+
+        // Update state
+        this.currentTab = targetTab;
+
+        // Close mobile sidebar if open
+        if (this.isMobile && this.sidebarOpen) {
+            this.closeMobileSidebar();
+        }
+
+        console.log(`Successfully switched to ${targetTab} tab`);
     }
 
     // ==========================================
@@ -53,21 +98,19 @@
     // ==========================================
 
     initResponsiveLayout() {
-        console.log('🔄 Initializing responsive layout...');
-
+        console.log('Initializing responsive layout...');
         this.updateLayoutState();
         this.adjustContainerLayout();
     }
 
     updateLayoutState() {
         const wasMobile = this.isMobile;
-        // Changed breakpoint to 768px
         this.isMobile = window.innerWidth <= 768;
         this.isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
         this.isDesktop = window.innerWidth > 768;
 
         if (wasMobile !== this.isMobile) {
-            console.log(`📱 Layout changed: ${this.isMobile ? 'Mobile' : 'Desktop'}`);
+            console.log(`Layout changed: ${this.isMobile ? 'Mobile' : 'Desktop'}`);
             this.handleLayoutChange();
         }
     }
@@ -81,95 +124,86 @@
     }
 
     setupMobileLayout() {
-        const sidebar = document.getElementById('settings-sidebar');
-        const toggleBtn = document.getElementById('mobile-menu-toggle');
+        const sidebar = $('#settings-sidebar');
+        const toggleBtn = $('#mobile-menu-toggle');
 
-        if (sidebar) {
-            sidebar.classList.add('mobile-responsive');
-        }
-        if (toggleBtn) {
-            toggleBtn.style.display = 'flex';
-        }
+        sidebar.addClass('mobile-responsive');
+        toggleBtn.show();
         this.closeMobileSidebar();
     }
 
     setupDesktopLayout() {
-        const sidebar = document.getElementById('settings-sidebar');
-        const toggleBtn = document.getElementById('mobile-menu-toggle');
+        const sidebar = $('#settings-sidebar');
+        const toggleBtn = $('#mobile-menu-toggle');
 
-        if (sidebar) {
-            sidebar.classList.remove('mobile-responsive', 'mobile-open');
-        }
-        if (toggleBtn) {
-            toggleBtn.style.display = 'none';
-        }
+        sidebar.removeClass('mobile-responsive mobile-open');
+        toggleBtn.hide();
         this.sidebarOpen = false;
     }
 
     adjustContainerLayout() {
-        const container = document.querySelector('.settings-container');
-        const sidebar = document.getElementById('sidebar');
+        const container = $('.settings-container');
+        const sidebar = $('#sidebar');
 
-        if (!container) return;
+        if (!container.length) return;
 
         if (this.isMobile) {
-            // Mobile layout - full width with top padding
-            container.style.marginLeft = '0';
-            container.style.width = '100%';
+            container.css({
+                'margin-left': '0',
+                'width': '100%'
+            });
         } else {
-            // Desktop layout - adjust for main sidebar
-            if (sidebar && sidebar.classList.contains('close')) {
-                container.style.marginLeft = '82px';
-                container.style.width = 'calc(100% - 82px)';
+            if (sidebar.length && sidebar.hasClass('close')) {
+                container.css({
+                    'margin-left': '82px',
+                    'width': 'calc(100% - 82px)'
+                });
             } else {
-                container.style.marginLeft = '250px';
-                container.style.width = 'calc(100% - 250px)';
+                container.css({
+                    'margin-left': '250px',
+                    'width': 'calc(100% - 250px)'
+                });
             }
         }
     }
 
-    // Add this method to handle form layout
     adjustFormLayout() {
-        const formRows = document.querySelectorAll('.form-row-top, .form-row-bottom');
+        const formRows = $('.form-row-top, .form-row-bottom');
 
-        formRows.forEach(row => {
+        formRows.each(function () {
+            const row = $(this);
             if (window.innerWidth <= 480) {
-                // Stack all fields on very small screens
-                row.style.display = 'block';
+                row.css('display', 'block');
             } else if (window.innerWidth <= 768) {
-                // 1 column on mobile
-                row.style.display = 'grid';
-                row.style.gridTemplateColumns = '1fr';
+                row.css({
+                    'display': 'grid',
+                    'grid-template-columns': '1fr'
+                });
             } else {
-                // Original grid layout for desktop (769px+)
-                row.style.display = 'grid';
-                row.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
+                row.css({
+                    'display': 'grid',
+                    'grid-template-columns': 'repeat(auto-fit, minmax(250px, 1fr))'
+                });
             }
         });
     }
 
-    // Add this method:
     adjustProfileLayout() {
-        const profileSection = document.querySelector('.profile-avatar-section');
-        const accountDetails = document.querySelector('.account-details-section');
+        const profileSection = $('.profile-avatar-section');
+        const accountDetails = $('.account-details-section');
 
         if (window.innerWidth <= 768) {
-            if (profileSection) {
-                profileSection.style.flexDirection = 'column';
-                profileSection.style.textAlign = 'center';
-            }
-            if (accountDetails) {
-                accountDetails.style.display = 'block';
-            }
+            profileSection.css({
+                'flex-direction': 'column',
+                'text-align': 'center'
+            });
+            accountDetails.css('display', 'block');
         } else {
-            // Reset to original layout for desktop
-            if (profileSection) {
-                profileSection.style.flexDirection = 'row';
-                profileSection.style.textAlign = 'left';
-            }
-            if (accountDetails) {
-                accountDetails.style.display = 'grid';
-            }
+            profileSection.css({
+                'flex-direction': 'row',
+                'text-align': 'left'
+            });
+            accountDetails.css('display', 'grid');
         }
     }
 
@@ -178,61 +212,37 @@
     // ==========================================
 
     initMobileSidebar() {
-        console.log('🔄 Initializing mobile sidebar...');
-
-        const toggleBtn = document.getElementById('mobile-menu-toggle');
-        const closeBtn = document.getElementById('sidebar-close-btn');
-        const overlay = document.getElementById('sidebar-overlay');
-        const sidebar = document.getElementById('settings-sidebar');
-
-        if (!toggleBtn || !sidebar) {
-            console.warn('⚠️ Mobile sidebar elements not found');
-            return;
-        }
+        console.log('Initializing mobile sidebar...');
 
         // Toggle button click
-        toggleBtn.addEventListener('click', (e) => {
+        $('#mobile-menu-toggle').on('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             this.toggleMobileSidebar();
         });
 
         // Close button click
-        if (closeBtn) {
-            closeBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.closeMobileSidebar();
-            });
-        }
+        $('#sidebar-close-btn').on('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.closeMobileSidebar();
+        });
 
         // Overlay click
-        if (overlay) {
-            overlay.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.closeMobileSidebar();
-            });
-        }
-
-        // Close sidebar when tab is selected on mobile
-        const tabLinks = document.querySelectorAll('.tab-link');
-        tabLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                if (this.isMobile && this.sidebarOpen) {
-                    setTimeout(() => this.closeMobileSidebar(), 100);
-                }
-            });
+        $('#sidebar-overlay').on('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.closeMobileSidebar();
         });
 
         // Escape key to close sidebar
-        document.addEventListener('keydown', (e) => {
+        $(document).on('keydown', (e) => {
             if (e.key === 'Escape' && this.isMobile && this.sidebarOpen) {
                 this.closeMobileSidebar();
             }
         });
 
-        console.log('✅ Mobile sidebar initialized');
+        console.log('Mobile sidebar initialized');
     }
 
     toggleMobileSidebar() {
@@ -244,56 +254,29 @@
     }
 
     openMobileSidebar() {
-        console.log('📱 Opening mobile sidebar...');
+        console.log('Opening mobile sidebar...');
 
-        const sidebar = document.getElementById('settings-sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
-        const toggleBtn = document.getElementById('mobile-menu-toggle');
+        $('#settings-sidebar').addClass('mobile-open');
+        $('#sidebar-overlay').addClass('active');
+        $('#mobile-menu-toggle').html('<i class="bx bx-x"></i>').attr('aria-label', 'Close settings menu');
+        $('body').addClass('sidebar-mobile-open');
 
-        if (sidebar) {
-            sidebar.classList.add('mobile-open');
-        }
-
-        if (overlay) {
-            overlay.classList.add('active');
-        }
-
-        if (toggleBtn) {
-            toggleBtn.innerHTML = '<i class="bx bx-x"></i>';
-            toggleBtn.setAttribute('aria-label', 'Close settings menu');
-        }
-
-        document.body.classList.add('sidebar-mobile-open');
         this.sidebarOpen = true;
 
         // Focus first tab link for accessibility
-        const firstTabLink = sidebar?.querySelector('.tab-link');
-        if (firstTabLink) {
-            setTimeout(() => firstTabLink.focus(), 100);
-        }
+        setTimeout(() => {
+            $('#settings-sidebar .tab-link').first().focus();
+        }, 100);
     }
 
     closeMobileSidebar() {
-        console.log('📱 Closing mobile sidebar...');
+        console.log('Closing mobile sidebar...');
 
-        const sidebar = document.getElementById('settings-sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
-        const toggleBtn = document.getElementById('mobile-menu-toggle');
+        $('#settings-sidebar').removeClass('mobile-open');
+        $('#sidebar-overlay').removeClass('active');
+        $('#mobile-menu-toggle').html('<i class="bx bx-menu"></i>').attr('aria-label', 'Open settings menu');
+        $('body').removeClass('sidebar-mobile-open');
 
-        if (sidebar) {
-            sidebar.classList.remove('mobile-open');
-        }
-
-        if (overlay) {
-            overlay.classList.remove('active');
-        }
-
-        if (toggleBtn) {
-            toggleBtn.innerHTML = '<i class="bx bx-menu"></i>';
-            toggleBtn.setAttribute('aria-label', 'Open settings menu');
-        }
-
-        document.body.classList.remove('sidebar-mobile-open');
         this.sidebarOpen = false;
     }
 
@@ -304,7 +287,7 @@
     initResizeHandler() {
         let resizeTimer;
 
-        window.addEventListener('resize', () => {
+        $(window).on('resize', () => {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
                 this.handleResize();
@@ -313,7 +296,7 @@
     }
 
     handleResize() {
-        console.log('📏 Handling window resize...');
+        console.log('Handling window resize...');
 
         this.updateLayoutState();
         this.adjustContainerLayout();
@@ -326,131 +309,12 @@
         }
     }
 
-    // Force correct tab display immediately
-    forceTabDisplay() {
-        console.log('🔧 Forcing correct tab display...');
-
-        // Hide all tabs first
-        const allTabs = document.querySelectorAll('.tab-content');
-        allTabs.forEach(tab => {
-            tab.style.display = 'none';
-            tab.style.visibility = 'hidden';
-            tab.style.opacity = '0';
-            tab.style.position = 'absolute';
-            tab.style.left = '-9999px';
-            tab.classList.remove('active');
-        });
-
-        // Show profile tab
-        const profileTab = document.getElementById('profile');
-        if (profileTab) {
-            profileTab.style.display = 'block';
-            profileTab.style.visibility = 'visible';
-            profileTab.style.opacity = '1';
-            profileTab.style.position = 'relative';
-            profileTab.style.left = '0';
-            profileTab.classList.add('active');
-        }
-
-        // Set profile link as active
-        const profileLink = document.querySelector('[data-tab="profile"]');
-        if (profileLink) {
-            document.querySelectorAll('.tab-link').forEach(link => link.classList.remove('active'));
-            profileLink.classList.add('active');
-        }
-
-        console.log('✅ Tab display forced successfully');
-    }
-
-    // ==========================================
-    // TAB SWITCHING
-    // ==========================================
-
-    initTabSwitching() {
-        console.log('🔄 Initializing tab switching...');
-
-        const tabLinks = document.querySelectorAll('.tab-link');
-        const currentTabName = document.getElementById('current-tab-name');
-
-        if (!tabLinks.length) {
-            console.warn('⚠️ Tab elements not found');
-            return;
-        }
-
-        // Add click handlers
-        tabLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const targetTab = link.getAttribute('data-tab');
-                if (targetTab) {
-                    this.showTab(targetTab);
-                }
-            });
-        });
-
-        // Show initial tab
-        this.showTab('profile');
-
-        // Export for global access
-        window.showSettingsTab = (tab) => this.showTab(tab);
-    }
-
-    showTab(targetTab) {
-        console.log(`🔄 Switching to tab: ${targetTab}`);
-
-        // Hide all tab contents with force
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.remove('active');
-            content.style.display = 'none';
-            content.style.visibility = 'hidden';
-            content.style.opacity = '0';
-            content.style.position = 'absolute';
-            content.style.left = '-9999px';
-        });
-
-        // Remove active class from all links
-        document.querySelectorAll('.tab-link').forEach(link => {
-            link.classList.remove('active');
-        });
-
-        // Show target tab content with force
-        const targetContent = document.getElementById(targetTab);
-        if (targetContent) {
-            targetContent.style.display = 'block';
-            targetContent.style.visibility = 'visible';
-            targetContent.style.opacity = '1';
-            targetContent.style.position = 'relative';
-            targetContent.style.left = '0';
-            targetContent.classList.add('active');
-        } else {
-            console.error(`❌ Tab content not found: ${targetTab}`);
-            return;
-        }
-
-        // Set active link
-        const activeLink = document.querySelector(`[data-tab="${targetTab}"]`);
-        if (activeLink) {
-            activeLink.classList.add('active');
-        }
-
-        // Update header
-        const currentTabName = document.getElementById('current-tab-name');
-        if (currentTabName && this.tabNames[targetTab]) {
-            currentTabName.textContent = this.tabNames[targetTab];
-        }
-
-        // Update state
-        this.currentTab = targetTab;
-
-        console.log(`✅ Successfully switched to ${targetTab} tab`);
-    }
-
     // ==========================================
     // PROFILE FEATURES
     // ==========================================
 
     initProfileFeatures() {
-        console.log('🔄 Initializing profile features...');
+        console.log('Initializing profile features...');
 
         this.initProfilePictureUpload();
         this.initPasswordToggle();
@@ -458,221 +322,224 @@
         this.initPhoneVerification();
         this.initPhoneFormatting();
         this.initFormEditing();
+        this.initSaveButtonClick();
     }
 
     initProfilePictureUpload() {
-        const profileAvatar = document.getElementById('profile-avatar-upload');
+        const profileAvatar = $('#profile-avatar-upload');
+        const fileInput = $('#profile-picture-input');
 
-        if (!profileAvatar) return;
+        if (!profileAvatar.length || !fileInput.length) return;
 
-        const handleUpload = () => {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
+        profileAvatar.on('click', () => {
+            fileInput.click();
+        });
 
-            input.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    if (file.size > 5 * 1024 * 1024) {
-                        this.showNotification('File size must be less than 5MB', 'error');
-                        return;
-                    }
-
-                    if (!file.type.startsWith('image/')) {
-                        this.showNotification('Please select a valid image file', 'error');
-                        return;
-                    }
-
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        profileAvatar.style.backgroundImage = `url(${e.target.result})`;
-                        profileAvatar.style.backgroundSize = 'cover';
-                        profileAvatar.style.backgroundPosition = 'center';
-                        profileAvatar.innerHTML = '';
-                        this.showNotification('Profile picture updated successfully!', 'success');
-                    };
-                    reader.readAsDataURL(file);
+        fileInput.on('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    this.showNotification('File size must be less than 5MB', 'error');
+                    return;
                 }
-            });
 
-            input.click();
-        };
+                if (!file.type.startsWith('image/')) {
+                    this.showNotification('Please select a valid image file', 'error');
+                    return;
+                }
 
-        profileAvatar.addEventListener('click', handleUpload);
-
-        // Touch support for mobile
-        profileAvatar.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            handleUpload();
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    profileAvatar.css({
+                        'background-image': `url(${e.target.result})`,
+                        'background-size': 'cover',
+                        'background-position': 'center'
+                    }).html('');
+                    this.showNotification('Profile picture selected! Click Save Changes to upload.', 'success');
+                };
+                reader.readAsDataURL(file);
+            }
         });
     }
 
     initPasswordToggle() {
-        const toggleBtn = document.getElementById('toggle-password');
+        $('#toggle-password').on('click', () => {
+            const passwordInput = $('#password');
+            const isPassword = passwordInput.attr('type') === 'password';
 
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', () => {
-                const passwordInput = document.getElementById('password');
-                if (passwordInput) {
-                    const isPassword = passwordInput.type === 'password';
-                    passwordInput.type = isPassword ? 'text' : 'password';
-                    toggleBtn.innerHTML = isPassword ? '<i class="bx bx-show"></i>' : '<i class="bx bx-hide"></i>';
-                }
-            });
-        }
+            passwordInput.attr('type', isPassword ? 'text' : 'password');
+            $('#toggle-password').html(isPassword ? '<i class="bx bx-show"></i>' : '<i class="bx bx-hide"></i>');
+        });
     }
 
     initConnectedAccounts() {
-        const connectButtons = document.querySelectorAll('.btn-connect');
+        $('.btn-connect').on('click', function () {
+            const button = $(this);
+            const accountItem = button.closest('.account-connection-item');
+            const accountName = accountItem.find('.account-info span').text();
 
-        connectButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const accountItem = button.closest('.account-connection-item');
-                const accountName = accountItem?.querySelector('.account-info span')?.textContent;
-
-                if (button.classList.contains('connected')) {
-                    const confirmDisconnect = confirm(`Are you sure you want to disconnect ${accountName}?`);
-                    if (confirmDisconnect) {
-                        button.innerHTML = '<i class="bx bx-plus"></i>';
-                        button.classList.remove('connected');
-                        this.showNotification(`${accountName} disconnected`, 'info');
-                    }
-                    return;
+            if (button.hasClass('connected')) {
+                const confirmDisconnect = confirm(`Are you sure you want to disconnect ${accountName}?`);
+                if (confirmDisconnect) {
+                    button.html('<i class="bx bx-plus"></i>').removeClass('connected');
+                    settingsManager.showNotification(`${accountName} disconnected`, 'info');
                 }
+                return;
+            }
 
-                button.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i>';
-                button.disabled = true;
+            button.html('<i class="bx bx-loader-alt bx-spin"></i>').prop('disabled', true);
 
-                setTimeout(() => {
-                    button.innerHTML = '<i class="bx bx-check"></i>';
-                    button.classList.add('connected');
-                    button.disabled = false;
-                    this.showNotification(`${accountName} connected successfully!`, 'success');
-                }, 1500);
-            });
+            setTimeout(() => {
+                button.html('<i class="bx bx-check"></i>').addClass('connected').prop('disabled', false);
+                settingsManager.showNotification(`${accountName} connected successfully!`, 'success');
+            }, 1500);
         });
     }
 
     initFormEditing() {
-        // Make all form fields editable and add change detection
-        const formInputs = document.querySelectorAll('.profile-form input, .profile-form select');
-        const saveButton = document.querySelector('.btn-save-profile');
-
+        const formInputs = $('.profile-form input, .profile-form select');
+        const saveButton = $('.btn-save-profile');
         let hasChanges = false;
 
-        formInputs.forEach(input => {
-            const originalValue = input.value;
+        formInputs.each(function () {
+            const input = $(this);
+            const originalValue = input.val();
 
-            input.addEventListener('input', () => {
-                hasChanges = input.value !== originalValue;
-                this.updateSaveButtonState(saveButton, hasChanges);
+            input.on('input change', () => {
+                hasChanges = input.val() !== originalValue;
+                settingsManager.updateSaveButtonState(saveButton, hasChanges);
             });
 
-            input.addEventListener('change', () => {
-                hasChanges = input.value !== originalValue;
-                this.updateSaveButtonState(saveButton, hasChanges);
+            input.on('focus', () => {
+                input.parent().addClass('focused');
             });
 
-            // Add focus styles for better UX
-            input.addEventListener('focus', () => {
-                input.parentElement.classList.add('focused');
-            });
-
-            input.addEventListener('blur', () => {
-                input.parentElement.classList.remove('focused');
+            input.on('blur', () => {
+                input.parent().removeClass('focused');
             });
         });
-
-        // Handle form submission
-        const profileForm = document.querySelector('.profile-form');
-        if (profileForm) {
-            profileForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.handleProfileSave(saveButton);
-            });
-        }
     }
 
     updateSaveButtonState(button, hasChanges) {
-        if (!button) return;
+        if (!button.length) return;
 
         if (hasChanges) {
-            button.style.opacity = '1';
-            button.style.transform = 'scale(1.02)';
-            button.disabled = false;
+            button.css({
+                'opacity': '1',
+                'transform': 'scale(1.02)'
+            }).prop('disabled', false);
         } else {
-            button.style.opacity = '0.8';
-            button.style.transform = 'scale(1)';
+            button.css({
+                'opacity': '0.8',
+                'transform': 'scale(1)'
+            });
         }
+    }
+
+    initSaveButtonClick() {
+        $('.btn-save-profile').on('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.handleProfileSave($(e.currentTarget));
+        });
     }
 
     handleProfileSave(button) {
-        if (!button) return;
+        if (!button.length) return;
 
-        const originalText = button.innerHTML;
-        button.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Saving...';
-        button.disabled = true;
+        const originalText = button.html();
+        button.html('<i class="bx bx-loader-alt bx-spin"></i> Saving...').prop('disabled', true);
 
-        // Simulate API call
-        setTimeout(() => {
-            button.innerHTML = originalText;
-            button.disabled = false;
-            button.style.opacity = '0.8';
-            button.style.transform = 'scale(1)';
-            this.showNotification('Profile updated successfully!', 'success');
-        }, 2000);
+        // Create FormData to handle both regular fields and file upload
+        const formData = new FormData();
+
+        // Add regular form fields
+        formData.append('FirstName', $('#firstName').val() || '');
+        formData.append('LastName', $('#lastName').val() || '');
+        formData.append('Phone', $('#phone').val() || '');
+        formData.append('Email', $('#email').val() || '');
+        formData.append('Location', $('#location').val() || '');
+        formData.append('Username', $('#username').val() || '');
+        formData.append('Gender', $('#gender').val() || '');
+        formData.append('Birthday', $('#birthday').val() || '');
+
+        // Add profile picture file if selected
+        const fileInput = $('#profile-picture-input')[0];
+        if (fileInput && fileInput.files[0]) {
+            formData.append('ProfilePicture', fileInput.files[0]);
+        }
+
+        // Add anti-forgery token
+        const token = $('input[name="__RequestVerificationToken"]').val();
+        if (token) {
+            formData.append('__RequestVerificationToken', token);
+        }
+
+        // Submit to controller
+        fetch('/Settings/UpdateProfile', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                }
+                throw new Error('Network response was not ok');
+            })
+            .then(data => {
+                button.html(originalText).prop('disabled', false);
+                this.showNotification('Profile updated successfully!', 'success');
+
+                // Reload the page to show updated data
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            })
+            .catch(error => {
+                button.html(originalText).prop('disabled', false);
+                console.error('Error:', error);
+                this.showNotification('Error updating profile. Please try again.', 'error');
+            });
     }
 
     initPhoneFormatting() {
-        const phoneInput = document.getElementById('phone');
+        $('#phone').on('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
 
-        if (phoneInput) {
-            phoneInput.addEventListener('input', (e) => {
-                let value = e.target.value.replace(/\D/g, '');
-
-                // Auto-add Philippines country code if needed
-                if (value.length > 0 && !value.startsWith('63')) {
-                    if (value.startsWith('9')) {
-                        value = '63' + value;
-                    }
+            // Auto-add Philippines country code if needed
+            if (value.length > 0 && !value.startsWith('63')) {
+                if (value.startsWith('9')) {
+                    value = '63' + value;
                 }
+            }
 
-                // Format as +63 XXX XXX XXXX
-                let formattedValue = '';
-                if (value.length > 0) {
-                    if (value.startsWith('63')) {
-                        formattedValue = '+63';
-                        if (value.length > 2) {
-                            formattedValue += ' ' + value.slice(2, 5);
-                        }
-                        if (value.length > 5) {
-                            formattedValue += ' ' + value.slice(5, 8);
-                        }
-                        if (value.length > 8) {
-                            formattedValue += ' ' + value.slice(8, 12);
-                        }
-                    } else {
-                        formattedValue = value;
+            // Format as +63 XXX XXX XXXX
+            let formattedValue = '';
+            if (value.length > 0) {
+                if (value.startsWith('63')) {
+                    formattedValue = '+63';
+                    if (value.length > 2) {
+                        formattedValue += ' ' + value.slice(2, 5);
                     }
+                    if (value.length > 5) {
+                        formattedValue += ' ' + value.slice(5, 8);
+                    }
+                    if (value.length > 8) {
+                        formattedValue += ' ' + value.slice(8, 12);
+                    }
+                } else {
+                    formattedValue = value;
                 }
+            }
 
-                e.target.value = formattedValue;
-            });
-        }
+            e.target.value = formattedValue;
+        });
     }
 
-    // ==========================================
-    // PHONE VERIFICATION
-    // ==========================================
-
     initPhoneVerification() {
-        const verifyPhoneBtn = document.getElementById('verify-phone-btn');
-
-        if (verifyPhoneBtn) {
-            verifyPhoneBtn.addEventListener('click', () => {
-                this.showNotification('Phone verification feature coming soon!', 'info');
-            });
-        }
+        $('#verify-phone-btn').on('click', () => {
+            this.showNotification('Phone verification feature coming soon!', 'info');
+        });
     }
 
     // ==========================================
@@ -680,73 +547,75 @@
     // ==========================================
 
     initFormHandling() {
-        console.log('🔄 Initializing form handling...');
+        console.log('Initializing form handling...');
 
         this.initToggleButtons();
         this.initFormValidation();
         this.initNotificationSwitches();
         this.initSecurityFeatures();
+        this.initPrivacySettings();
     }
 
     initToggleButtons() {
-        const toggleGroups = document.querySelectorAll('.toggle-buttons');
+        $('.toggle-buttons').each(function () {
+            const group = $(this);
+            const buttons = group.find('.toggle-btn');
+            const hiddenInput = group.find('input[type="hidden"]');
 
-        toggleGroups.forEach(group => {
-            const buttons = group.querySelectorAll('.toggle-btn');
-            const hiddenInput = group.querySelector('input[type="hidden"]');
+            buttons.on('click', function () {
+                const btn = $(this);
 
-            buttons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    buttons.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
+                buttons.removeClass('active').attr('aria-checked', 'false');
+                btn.addClass('active').attr('aria-checked', 'true');
 
-                    const value = btn.getAttribute('data-value');
-                    if (hiddenInput && value) {
-                        hiddenInput.value = value;
-                    }
-                });
+                const value = btn.data('value');
+                if (hiddenInput.length && value) {
+                    hiddenInput.val(value);
+                }
+
+                if (group.closest('#privacy').length) {
+                    const settingName = settingsManager.getSettingDisplayName(hiddenInput.attr('name') || '');
+                    settingsManager.showNotification(`${settingName} updated to ${value}`, 'info');
+                }
             });
         });
     }
 
     initFormValidation() {
-        const forms = document.querySelectorAll('form');
+        $('form').each(function () {
+            const form = $(this);
+            const inputs = form.find('input[required], input[type="email"]');
 
-        forms.forEach(form => {
-            const inputs = form.querySelectorAll('input[required], input[type="email"]');
-
-            inputs.forEach(input => {
-                input.addEventListener('blur', () => this.validateField(input));
-                input.addEventListener('input', () => this.clearFieldError(input));
+            inputs.on('blur', function () {
+                settingsManager.validateField($(this));
             });
 
-            // Form submit handler
-            form.addEventListener('submit', (e) => {
+            inputs.on('input', function () {
+                settingsManager.clearFieldError($(this));
+            });
+
+            form.on('submit', function (e) {
                 let isValid = true;
-                inputs.forEach(input => {
-                    if (!this.validateField(input)) {
+                inputs.each(function () {
+                    if (!settingsManager.validateField($(this))) {
                         isValid = false;
                     }
                 });
 
                 if (!isValid) {
                     e.preventDefault();
-                    this.showNotification('Please fix the errors before submitting', 'error');
+                    settingsManager.showNotification('Please fix the errors before submitting', 'error');
                     return;
                 }
 
-                // Show loading state
-                const submitBtn = form.querySelector('button[type="submit"]');
-                if (submitBtn) {
-                    const originalText = submitBtn.innerHTML;
-                    submitBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Saving...';
-                    submitBtn.disabled = true;
+                const submitBtn = form.find('button[type="submit"]');
+                if (submitBtn.length) {
+                    const originalText = submitBtn.html();
+                    submitBtn.html('<i class="bx bx-loader-alt bx-spin"></i> Saving...').prop('disabled', true);
 
-                    // Simulate save process
                     setTimeout(() => {
-                        submitBtn.innerHTML = originalText;
-                        submitBtn.disabled = false;
-                        this.showNotification('Settings saved successfully!', 'success');
+                        submitBtn.html(originalText).prop('disabled', false);
+                        settingsManager.showNotification('Settings saved successfully!', 'success');
                     }, 2000);
                 }
             });
@@ -754,9 +623,9 @@
     }
 
     validateField(field) {
-        const value = field.value.trim();
-        const fieldType = field.type;
-        const isRequired = field.hasAttribute('required');
+        const value = field.val().trim();
+        const fieldType = field.attr('type');
+        const isRequired = field.is('[required]');
 
         this.clearFieldError(field);
 
@@ -785,124 +654,222 @@
     }
 
     showFieldError(field, message) {
-        field.classList.add('error');
+        field.addClass('error');
 
-        const existingError = field.parentNode.querySelector('.error-message');
-        if (existingError) {
-            existingError.remove();
-        }
+        const existingError = field.parent().find('.error-message');
+        existingError.remove();
 
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error-message';
-        errorDiv.textContent = message;
-        errorDiv.style.color = 'var(--error)';
-        errorDiv.style.fontSize = '12px';
-        errorDiv.style.marginTop = '4px';
-        errorDiv.style.fontWeight = '500';
-        field.parentNode.appendChild(errorDiv);
+        const errorDiv = $('<div class="error-message">' + message + '</div>');
+        errorDiv.css({
+            'color': 'var(--error)',
+            'font-size': '12px',
+            'margin-top': '4px',
+            'font-weight': '500'
+        });
+        field.parent().append(errorDiv);
     }
 
     clearFieldError(field) {
-        field.classList.remove('error');
-        const errorMessage = field.parentNode.querySelector('.error-message');
-        if (errorMessage) {
-            errorMessage.remove();
-        }
+        field.removeClass('error');
+        field.parent().find('.error-message').remove();
     }
 
     initNotificationSwitches() {
-        const switches = document.querySelectorAll('.switch input[type="checkbox"]');
+        $('.switch input[type="checkbox"]').on('change', function () {
+            const setting = $(this).attr('name');
+            const enabled = $(this).is(':checked');
+            console.log(`Notification setting ${setting} changed to ${enabled}`);
 
-        switches.forEach(switchEl => {
-            switchEl.addEventListener('change', () => {
-                const setting = switchEl.name;
-                const enabled = switchEl.checked;
-                console.log(`Notification setting ${setting} changed to ${enabled}`);
-
-                // Show feedback
-                this.showNotification(`${setting} ${enabled ? 'enabled' : 'disabled'}`, 'info');
-            });
+            settingsManager.showNotification(`${setting} ${enabled ? 'enabled' : 'disabled'}`, 'info');
         });
     }
 
     initSecurityFeatures() {
         // Enable 2FA
-        const enable2faBtn = document.getElementById('enable-2fa');
-        if (enable2faBtn) {
-            enable2faBtn.addEventListener('click', () => {
-                const originalText = enable2faBtn.textContent;
-                enable2faBtn.textContent = 'Setting up...';
-                enable2faBtn.disabled = true;
+        $('#enable-2fa').on('click', function () {
+            const btn = $(this);
+            const originalText = btn.text();
+            btn.text('Setting up...').prop('disabled', true);
 
-                setTimeout(() => {
-                    enable2faBtn.textContent = 'Enabled ✓';
-                    enable2faBtn.classList.remove('btn-secondary');
-                    enable2faBtn.classList.add('btn-save');
-                    this.showNotification('Two-factor authentication enabled successfully!', 'success');
-                }, 2000);
-            });
-        }
+            setTimeout(() => {
+                btn.text('Enabled ✓').removeClass('btn-secondary').addClass('btn-save');
+                settingsManager.showNotification('Two-factor authentication enabled successfully!', 'success');
+            }, 2000);
+        });
 
         // Logout button
-        const logoutBtn = document.getElementById('logout-btn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', (e) => {
-                e.preventDefault();
+        $('#logout-btn').on('click', function (e) {
+            e.preventDefault();
 
-                if (confirm('Are you sure you want to logout?')) {
-                    logoutBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Logging out...';
-                    logoutBtn.disabled = true;
+            if (confirm('Are you sure you want to logout?')) {
+                const form = $('<form method="POST" action="/Account/Logout"></form>');
 
-                    setTimeout(() => {
-                        // Redirect to logout endpoint
-                        window.location.href = '/Account/Logout';
-                    }, 1500);
+                const tokenElement = $('input[name="__RequestVerificationToken"]');
+                if (tokenElement.length) {
+                    const tokenInput = $('<input type="hidden" name="__RequestVerificationToken">');
+                    tokenInput.val(tokenElement.val());
+                    form.append(tokenInput);
                 }
-            });
-        }
+
+                const returnInput = $('<input type="hidden" name="returnUrl" value="/">');
+                form.append(returnInput);
+
+                $('body').append(form);
+                form.submit();
+            }
+        });
 
         // Delete account button
-        const deleteBtn = document.getElementById('delete-account-btn');
-        if (deleteBtn) {
-            deleteBtn.addEventListener('click', (e) => {
-                e.preventDefault();
+        $('#delete-account-btn').on('click', function (e) {
+            e.preventDefault();
 
-                if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-                    const deleteConfirmation = prompt('Please type "DELETE" to confirm:');
-                    if (deleteConfirmation === 'DELETE') {
-                        deleteBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Deleting...';
-                        deleteBtn.disabled = true;
-
-                        setTimeout(() => {
-                            this.showNotification('Account deletion initiated. You will receive an email confirmation.', 'info');
-                            // Redirect to delete endpoint
-                            setTimeout(() => {
-                                window.location.href = '/Account/DeleteAccount';
-                            }, 2000);
-                        }, 1500);
-                    } else {
-                        this.showNotification('Account deletion cancelled.', 'warning');
-                    }
-                }
-            });
-        }
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                window.location.href = '/Auth/DeleteAccount';
+            }
+        });
 
         // End session buttons
-        const endSessionBtns = document.querySelectorAll('.btn-danger-small');
-        endSessionBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const sessionInfo = btn.closest('.session-item').querySelector('.session-info span').textContent;
-                if (confirm(`End session for ${sessionInfo}?`)) {
-                    btn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i>';
-                    btn.disabled = true;
+        $('.btn-danger-small').on('click', function () {
+            const btn = $(this);
+            const sessionInfo = btn.closest('.session-item').find('.session-info span').text();
 
-                    setTimeout(() => {
-                        btn.closest('.session-item').remove();
-                        this.showNotification('Session ended successfully', 'success');
-                    }, 1000);
-                }
-            });
+            if (confirm(`End session for ${sessionInfo}?`)) {
+                btn.html('<i class="bx bx-loader-alt bx-spin"></i>').prop('disabled', true);
+
+                setTimeout(() => {
+                    btn.closest('.session-item').remove();
+                    settingsManager.showNotification('Session ended successfully', 'success');
+                }, 1000);
+            }
         });
+    }
+
+    initPrivacySettings() {
+        console.log('Initializing privacy settings...');
+
+        // Initialize privacy form submission
+        $('#privacy .btn-save').on('click', (e) => {
+            e.preventDefault();
+            this.handlePrivacySave();
+        });
+
+        // Load settings when privacy tab is clicked
+        $('.tab-link[data-tab="privacy"]').on('click', () => {
+            setTimeout(() => this.loadPrivacySettings(), 100);
+        });
+
+        console.log('Privacy settings initialized');
+    }
+
+    handlePrivacySave() {
+        const saveButton = $('#privacy .btn-save');
+        if (!saveButton.length) return;
+
+        const originalText = saveButton.html();
+        saveButton.html('<i class="bx bx-loader-alt bx-spin"></i> Saving Privacy Settings...').prop('disabled', true);
+
+        // Collect all privacy form data
+        const formData = new FormData();
+        const hiddenInputs = $('#privacy input[type="hidden"]');
+
+        hiddenInputs.each(function () {
+            const input = $(this);
+            if (input.attr('name') && input.attr('name') !== '__RequestVerificationToken') {
+                formData.append(input.attr('name'), input.val());
+                console.log(`Form data: ${input.attr('name')} = ${input.val()}`);
+            }
+        });
+
+        // Add anti-forgery token
+        const antiForgeryToken = $('#privacy input[name="__RequestVerificationToken"]');
+        if (antiForgeryToken.length) {
+            formData.append('__RequestVerificationToken', antiForgeryToken.val());
+        }
+
+        // Submit to your controller
+        fetch('/PrivacySettings/UpdatePrivacy', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                }
+                throw new Error('Network response was not ok');
+            })
+            .then(data => {
+                saveButton.html(originalText).prop('disabled', false);
+                this.showNotification('Privacy settings saved successfully!', 'success');
+                console.log('Privacy settings saved successfully');
+            })
+            .catch(error => {
+                saveButton.html(originalText).prop('disabled', false);
+                console.error('Error saving privacy settings:', error);
+                this.showNotification('Error saving privacy settings. Please try again.', 'error');
+            });
+    }
+
+    loadPrivacySettings() {
+        console.log('Loading privacy settings...');
+
+        fetch('/PrivacySettings/GetSettings')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load privacy settings');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Loaded privacy settings:', data);
+
+                Object.keys(data).forEach(key => {
+                    const inputName = this.mapApiKeyToInputName(key);
+                    const input = $(`#privacy input[name="${inputName}"]`);
+
+                    if (input.length) {
+                        input.val(data[key]);
+
+                        const group = input.closest('.toggle-buttons');
+                        if (group.length) {
+                            const buttons = group.find('.toggle-btn');
+
+                            buttons.removeClass('active').attr('aria-checked', 'false');
+                            buttons.filter(`[data-value="${data[key]}"]`).addClass('active').attr('aria-checked', 'true');
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error loading privacy settings:', error);
+                this.showNotification('Failed to load privacy settings', 'error');
+            });
+    }
+
+    mapApiKeyToInputName(apiKey) {
+        const keyMapping = {
+            'profileVisibility': 'ProfileVisibility',
+            'locationVisibility': 'LocationVisibility',
+            'activityStreaksVisibility': 'ActivityStreaksVisibility',
+            'onlineStatus': 'OnlineStatus',
+            'searchIndexing': 'SearchIndexing',
+            'contactVisibility': 'ContactVisibility',
+            'activityHistory': 'ActivityHistory'
+        };
+
+        return keyMapping[apiKey] || apiKey;
+    }
+
+    getSettingDisplayName(settingName) {
+        const displayNames = {
+            'ProfileVisibility': 'Profile Visibility',
+            'LocationVisibility': 'Location Sharing',
+            'ActivityStreaksVisibility': 'Activity Streaks',
+            'OnlineStatus': 'Online Status',
+            'SearchIndexing': 'Search Engine Indexing',
+            'ContactVisibility': 'Contact Information',
+            'ActivityHistory': 'Activity History'
+        };
+        return displayNames[settingName] || settingName;
     }
 
     // ==========================================
@@ -912,127 +879,42 @@
     initNotifications() {
         // Auto-hide existing notifications after page load
         setTimeout(() => {
-            const existingNotifications = document.querySelectorAll('.notification');
-            existingNotifications.forEach(notification => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            });
+            $('.notification').remove();
         }, 5000);
     }
 
     showNotification(message, type = 'info') {
-        // Remove existing notification
-        const existingNotification = document.querySelector('.notification');
-        if (existingNotification) {
-            existingNotification.remove();
-        }
+        $('.notification').remove();
 
-        // Create new notification
-        const notification = document.createElement('div');
-        notification.className = `notification notification-${type}`;
-        notification.textContent = message;
+        const notification = $('<div class="notification notification-' + type + '">' + message + '</div>');
 
-        // Add click to dismiss
-        notification.addEventListener('click', () => {
+        notification.css({
+            'position': 'fixed',
+            'top': this.isMobile ? '90px' : '20px',
+            'right': '20px',
+            'left': this.isMobile ? '20px' : 'auto',
+            'background': type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6',
+            'color': 'white',
+            'padding': '12px 20px',
+            'border-radius': '8px',
+            'z-index': '9999',
+            'box-shadow': '0 4px 12px rgba(0,0,0,0.15)',
+            'cursor': 'pointer',
+            'font-weight': '500',
+            'transition': 'all 0.3s ease'
+        });
+
+        $('body').append(notification);
+
+        notification.on('click', () => {
             notification.remove();
         });
 
-        // Position notification appropriately for mobile/desktop
-        if (this.isMobile) {
-            notification.style.top = '90px';
-            notification.style.left = '16px';
-            notification.style.right = '16px';
-            notification.style.maxWidth = 'none';
-        }
-
-        document.body.appendChild(notification);
-
-        // Auto-remove after 4 seconds
         setTimeout(() => {
-            if (notification.parentNode) {
-                notification.style.opacity = '0';
-                notification.style.transform = 'translateX(100%)';
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.parentNode.removeChild(notification);
-                    }
-                }, 300);
-            }
+            notification.fadeOut(() => {
+                notification.remove();
+            });
         }, 4000);
-    }
-
-    showMobileToast(message, type = 'info', duration = 3000) {
-        if (!this.isMobile) {
-            this.showNotification(message, type);
-            return;
-        }
-
-        const toast = document.createElement('div');
-        toast.className = `mobile-toast mobile-toast-${type}`;
-        toast.style.cssText = `
-            background: var(--${type === 'info' ? 'primary-color' : type});
-            color: var(--white);
-            padding: 16px 20px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            font-weight: 600;
-            font-size: 14px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            transform: translateY(100px);
-            opacity: 0;
-            transition: all 0.3s ease;
-            pointer-events: auto;
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            z-index: 1001;
-        `;
-        toast.textContent = message;
-
-        document.body.appendChild(toast);
-
-        // Animate in
-        setTimeout(() => {
-            toast.style.transform = 'translateY(0)';
-            toast.style.opacity = '1';
-        }, 10);
-
-        // Auto remove
-        setTimeout(() => {
-            toast.style.transform = 'translateY(100px)';
-            toast.style.opacity = '0';
-            setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.parentNode.removeChild(toast);
-                }
-            }, 300);
-        }, duration);
-
-        // Click to dismiss
-        toast.addEventListener('click', () => {
-            toast.style.transform = 'translateY(100px)';
-            toast.style.opacity = '0';
-            setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.parentNode.removeChild(toast);
-                }
-            }, 300);
-        });
-    }
-
-    // ==========================================
-    // MODAL HANDLING
-    // ==========================================
-
-    initModalHandling() {
-        // Close modal on outside click
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal-overlay')) {
-                // Close any open modals
-            }
-        });
     }
 
     // ==========================================
@@ -1041,26 +923,23 @@
 
     initAccessibility() {
         // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
+        $(document).on('keydown', (e) => {
             // Ctrl/Cmd + S to save
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
-                const activeForm = document.querySelector('.tab-content.active form');
-                if (activeForm) {
-                    const saveButton = activeForm.querySelector('.btn-save, .btn-save-profile');
-                    if (saveButton) {
+                const activeForm = $('.tab-content.active form');
+                if (activeForm.length) {
+                    const saveButton = activeForm.find('.btn-save, .btn-save-profile');
+                    if (saveButton.length) {
                         saveButton.click();
                         this.showNotification('Settings saved!', 'success');
                     }
                 }
             }
 
-            // Escape to close notifications, modals, and mobile sidebar
+            // Escape to close notifications and mobile sidebar
             if (e.key === 'Escape') {
-                const notification = document.querySelector('.notification');
-                if (notification) {
-                    notification.remove();
-                }
+                $('.notification').remove();
 
                 if (this.isMobile && this.sidebarOpen) {
                     this.closeMobileSidebar();
@@ -1069,11 +948,11 @@
 
             // Arrow keys for tab navigation (desktop only)
             if (!this.isMobile && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
-                const activeTab = document.querySelector('.tab-link.active');
-                if (activeTab && document.activeElement === activeTab) {
+                const activeTab = $('.tab-link.active');
+                if (activeTab.length && $(document.activeElement).is('.tab-link')) {
                     e.preventDefault();
-                    const tabLinks = Array.from(document.querySelectorAll('.tab-link'));
-                    const currentIndex = tabLinks.indexOf(activeTab);
+                    const tabLinks = $('.tab-link');
+                    const currentIndex = tabLinks.index(activeTab);
                     let nextIndex;
 
                     if (e.key === 'ArrowRight') {
@@ -1082,19 +961,17 @@
                         nextIndex = (currentIndex - 1 + tabLinks.length) % tabLinks.length;
                     }
 
-                    const nextTab = tabLinks[nextIndex];
-                    if (nextTab) {
-                        nextTab.click();
-                        nextTab.focus();
+                    const nextTab = tabLinks.eq(nextIndex);
+                    if (nextTab.length) {
+                        nextTab.click().focus();
                     }
                 }
             }
 
             // Mobile menu toggle with keyboard (M key)
             if (this.isMobile && e.key === 'm' && !e.ctrlKey && !e.metaKey && !e.altKey) {
-                const target = e.target;
-                // Only trigger if not in an input field
-                if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA' && target.tagName !== 'SELECT') {
+                const target = $(e.target);
+                if (!target.is('input, textarea, select')) {
                     e.preventDefault();
                     this.toggleMobileSidebar();
                 }
@@ -1102,38 +979,31 @@
         });
 
         // High contrast mode toggle
-        const highContrastToggle = document.querySelector('input[name="HighContrast"]');
-        if (highContrastToggle) {
-            highContrastToggle.addEventListener('change', () => {
-                document.body.classList.toggle('high-contrast', highContrastToggle.checked);
-                this.showNotification(`High contrast mode ${highContrastToggle.checked ? 'enabled' : 'disabled'}`, 'info');
-            });
-        }
+        $('input[name="HighContrast"]').on('change', function () {
+            const enabled = $(this).is(':checked');
+            $('body').toggleClass('high-contrast', enabled);
+            settingsManager.showNotification(`High contrast mode ${enabled ? 'enabled' : 'disabled'}`, 'info');
+        });
 
         // Reduce motion toggle
-        const reduceMotionToggle = document.querySelector('input[name="ReduceMotion"]');
-        if (reduceMotionToggle) {
-            reduceMotionToggle.addEventListener('change', () => {
-                document.body.classList.toggle('reduce-motion', reduceMotionToggle.checked);
-                this.showNotification(`Motion reduction ${reduceMotionToggle.checked ? 'enabled' : 'disabled'}`, 'info');
-            });
-        }
+        $('input[name="ReduceMotion"]').on('change', function () {
+            const enabled = $(this).is(':checked');
+            $('body').toggleClass('reduce-motion', enabled);
+            settingsManager.showNotification(`Motion reduction ${enabled ? 'enabled' : 'disabled'}`, 'info');
+        });
 
         // Large text toggle
-        const largeTextToggle = document.querySelector('input[name="LargeText"]');
-        if (largeTextToggle) {
-            largeTextToggle.addEventListener('change', () => {
-                document.body.classList.toggle('large-text', largeTextToggle.checked);
-                this.showNotification(`Large text ${largeTextToggle.checked ? 'enabled' : 'disabled'}`, 'info');
-            });
-        }
+        $('input[name="LargeText"]').on('change', function () {
+            const enabled = $(this).is(':checked');
+            $('body').toggleClass('large-text', enabled);
+            settingsManager.showNotification(`Large text ${enabled ? 'enabled' : 'disabled'}`, 'info');
+        });
 
         // Touch gesture support for mobile sidebar
         this.initTouchGestures();
     }
 
     initTouchGestures() {
-        // Only enable touch gestures on mobile
         if (window.innerWidth > 768) return;
 
         let startX = 0;
@@ -1142,16 +1012,16 @@
         let currentY = 0;
         let isScrolling = false;
 
-        const container = document.querySelector('.settings-container');
-        if (!container) return;
+        const container = $('.settings-container');
+        if (!container.length) return;
 
-        container.addEventListener('touchstart', (e) => {
+        container[0].addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
             startY = e.touches[0].clientY;
             isScrolling = false;
         }, { passive: true });
 
-        container.addEventListener('touchmove', (e) => {
+        container[0].addEventListener('touchmove', (e) => {
             if (!startX || !startY) return;
 
             currentX = e.touches[0].clientX;
@@ -1160,19 +1030,17 @@
             const diffX = startX - currentX;
             const diffY = startY - currentY;
 
-            // Determine if user is scrolling vertically
             if (Math.abs(diffY) > Math.abs(diffX)) {
                 isScrolling = true;
                 return;
             }
 
-            // Prevent default only for horizontal swipes
             if (Math.abs(diffX) > 10 && !isScrolling) {
                 e.preventDefault();
             }
         }, { passive: false });
 
-        container.addEventListener('touchend', (e) => {
+        container[0].addEventListener('touchend', (e) => {
             if (!startX || !startY || isScrolling) return;
 
             const diffX = startX - currentX;
@@ -1188,7 +1056,6 @@
                 this.closeMobileSidebar();
             }
 
-            // Reset values
             startX = 0;
             startY = 0;
             currentX = 0;
@@ -1217,47 +1084,27 @@
         return this.sidebarOpen;
     }
 
-    // Debug method
     debug() {
-        console.log('=== Responsive Settings Manager Debug Info ===');
+        console.log('=== Settings Manager Debug Info ===');
         console.log('Current tab:', this.currentTab);
         console.log('Initialized:', this.initialized);
         console.log('Is mobile:', this.isMobile);
         console.log('Sidebar open:', this.sidebarOpen);
         console.log('Window width:', window.innerWidth);
-        console.log('Active tab link:', document.querySelector('.tab-link.active'));
-        console.log('Active tab content:', document.querySelector('.tab-content.active'));
-
-        const profileTab = document.getElementById('profile');
-        if (profileTab) {
-            const styles = getComputedStyle(profileTab);
-            console.log('Profile tab styles:', {
-                display: styles.display,
-                visibility: styles.visibility,
-                opacity: styles.opacity
-            });
-        }
+        console.log('Active tab link:', $('.tab-link.active'));
+        console.log('Active tab content:', $('.tab-content.active'));
     }
 
-    // Force fix method for troubleshooting
     forceFix() {
-        console.log('🔧 Forcing settings display fix...');
-
-        // Force container width
+        console.log('Forcing settings display fix...');
         this.adjustContainerLayout();
-
-        // Force profile tab visibility
         this.showTab('profile');
-
-        // Close mobile sidebar if open
         if (this.sidebarOpen) {
             this.closeMobileSidebar();
         }
-
-        console.log('✅ Display fix applied');
+        console.log('Display fix applied');
     }
 
-    // Public methods for external access
     openSidebar() {
         if (this.isMobile) {
             this.openMobileSidebar();
@@ -1276,48 +1123,35 @@
         }
     }
 
-    // Cleanup method
     destroy() {
-        console.log('🧹 Cleaning up ResponsiveSettingsManager...');
-
-        // Remove event listeners
-        window.removeEventListener('resize', this.handleResize);
-        window.removeEventListener('orientationchange', this.handleResize);
-
-        // Clear any timers
-        if (this.resizeTimer) {
-            clearTimeout(this.resizeTimer);
-        }
-
+        console.log('Cleaning up Settings Manager...');
+        $(window).off('resize');
+        $(document).off('keydown');
         this.initialized = false;
-        console.log('✅ ResponsiveSettingsManager cleaned up');
+        console.log('Settings Manager cleaned up');
     }
 }
 
-// Initialize settings manager when DOM is ready
+// Initialize settings manager
 let settingsManager;
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        settingsManager = new ResponsiveSettingsManager();
-
-        // Handle main sidebar state changes if present
-        const mainSidebar = document.getElementById('sidebar');
-        if (mainSidebar) {
-            const observer = new MutationObserver(() => {
-                settingsManager.adjustContainerLayout();
-            });
-            observer.observe(mainSidebar, { attributes: true, attributeFilter: ['class'] });
-        }
-
-        // Initial layout adjustment
-        setTimeout(() => {
-            settingsManager.adjustContainerLayout();
-        }, 100);
-    });
-} else {
+$(document).ready(() => {
     settingsManager = new ResponsiveSettingsManager();
-}
+
+    // Handle main sidebar state changes if present
+    const mainSidebar = $('#sidebar');
+    if (mainSidebar.length) {
+        const observer = new MutationObserver(() => {
+            settingsManager.adjustContainerLayout();
+        });
+        observer.observe(mainSidebar[0], { attributes: true, attributeFilter: ['class'] });
+    }
+
+    // Initial layout adjustment
+    setTimeout(() => {
+        settingsManager.adjustContainerLayout();
+    }, 100);
+});
 
 // Export for global access
 window.ResponsiveSettingsManager = ResponsiveSettingsManager;
@@ -1328,72 +1162,25 @@ window.toggleSettingsSidebar = () => settingsManager?.toggleSidebar();
 window.openSettingsSidebar = () => settingsManager?.openSidebar();
 window.closeSettingsSidebar = () => settingsManager?.closeSidebar();
 
-// Emergency layout fix for immediate issues
-function emergencyLayoutFix() {
-    console.log('🚨 Applying emergency layout fix...');
+// Emergency layout fix function
+window.emergencyLayoutFix = function () {
+    console.log('Applying emergency layout fix...');
 
-    // Hide all tabs
-    const allTabs = document.querySelectorAll('.tab-content');
-    allTabs.forEach(tab => {
-        tab.style.display = 'none';
-        tab.style.visibility = 'hidden';
-        tab.style.opacity = '0';
-        tab.style.position = 'absolute';
-        tab.style.left = '-9999px';
-        tab.classList.remove('active');
-    });
+    $('.tab-content').removeClass('active').hide();
+    $('.tab-link').removeClass('active');
 
-    // Show profile tab with force
-    const profileTab = document.getElementById('profile');
-    if (profileTab) {
-        profileTab.style.setProperty('display', 'block', 'important');
-        profileTab.style.setProperty('visibility', 'visible', 'important');
-        profileTab.style.setProperty('opacity', '1', 'important');
-        profileTab.style.setProperty('position', 'relative', 'important');
-        profileTab.style.setProperty('left', '0', 'important');
-        profileTab.classList.add('active');
-    }
+    $('#profile').addClass('active').show();
+    $('.tab-link[data-tab="profile"]').addClass('active');
 
-    // Set profile link as active
-    const profileLink = document.querySelector('[data-tab="profile"]');
-    if (profileLink) {
-        document.querySelectorAll('.tab-link').forEach(link => link.classList.remove('active'));
-        profileLink.classList.add('active');
-    }
+    $('#settings-sidebar').removeClass('mobile-open');
+    $('#sidebar-overlay').removeClass('active');
+    $('body').removeClass('sidebar-mobile-open');
 
-    // Close mobile sidebar if open
-    const sidebar = document.getElementById('settings-sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
-
-    if (sidebar) {
-        sidebar.classList.remove('mobile-open');
-    }
-
-    if (overlay) {
-        overlay.classList.remove('active');
-    }
-
-    document.body.classList.remove('sidebar-mobile-open');
-
-    console.log('✅ Emergency layout fix applied');
-}
-
-// Apply emergency fix if needed
-window.emergencyLayoutFix = emergencyLayoutFix;
-
-// Auto-fix on page load if there are issues
-window.addEventListener('load', () => {
-    setTimeout(() => {
-        const profileTab = document.getElementById('profile');
-        if (profileTab && getComputedStyle(profileTab).display === 'none') {
-            console.warn('⚠️ Profile tab not visible, applying emergency fix...');
-            emergencyLayoutFix();
-        }
-    }, 1000);
-});
+    console.log('Emergency layout fix applied');
+};
 
 // Handle orientation change on mobile devices
-window.addEventListener('orientationchange', () => {
+$(window).on('orientationchange', () => {
     setTimeout(() => {
         if (settingsManager) {
             settingsManager.handleResize();
@@ -1403,7 +1190,7 @@ window.addEventListener('orientationchange', () => {
 });
 
 // Handle visibility change (when app comes back into focus)
-document.addEventListener('visibilitychange', () => {
+$(document).on('visibilitychange', () => {
     if (!document.hidden && settingsManager) {
         setTimeout(() => {
             settingsManager.adjustContainerLayout();
@@ -1411,4 +1198,15 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 
-console.log('✅ Settings JavaScript loaded successfully');
+// Auto-fix on page load if there are issues
+$(window).on('load', () => {
+    setTimeout(() => {
+        const profileTab = $('#profile');
+        if (profileTab.length && !profileTab.is(':visible')) {
+            console.warn('Profile tab not visible, applying emergency fix...');
+            window.emergencyLayoutFix();
+        }
+    }, 1000);
+});
+
+console.log('Settings JavaScript loaded successfully');

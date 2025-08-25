@@ -111,10 +111,18 @@
                     </div>
 
                     <!-- Profile Form -->
-                    <div method="post" asp-action="UpdateProfile" asp-controller="Settings" class="profile-form" novalidate>
+                    <div class="profile-form" novalidate>
+
                         @Html.AntiForgeryToken()
 
                         <!-- Top Row: First Name, Last Name, Phone -->
+
+                        <input type="file"
+                               id="profile-picture-input"
+                               name="ProfilePicture"
+                               accept="image/*"
+                               style="display: none;" />
+
                         <div class="form-row-top">
                             <div class="form-field">
                                 <label for="firstName">First Name *</label>
@@ -280,10 +288,10 @@
 
                         <!-- Save Button -->
                         <div class="save-button-section">
-                            <button type="submit" class="btn-save-profile">
+                            <button type="button" class="btn-save-profile">
                                 <i class="bx bx-save" aria-hidden="true"></i>
                                 Save Changes
-                            </button>
+                            </button>                                                                       
                         </div>
                     </div>
                 </div>
@@ -300,7 +308,7 @@
                     @Html.AntiForgeryToken()
 
                     <div class="privacy-section">
-                        
+
 
                         <div class="toggle-group">
                             <div>
@@ -395,6 +403,8 @@
                     </button>
                 </div>
             </div>
+
+
 
             <!-- NOTIFICATIONS TAB -->
             <div id="notifications" class="tab-content" role="tabpanel" aria-labelledby="notifications-tab">
@@ -861,7 +871,7 @@
                             <div class="support-content">
                                 <h5>Help Center</h5>
                                 <p>Browse our comprehensive help articles and guides</p>
-                                <a href="#" class="btn-secondary">Visit Help Center</a>
+                                <a href="/Support/HelpCenter" class="btn-secondary">Visit Help Center</a>
                             </div>
                         </div>
                         <div class="support-item">
@@ -871,27 +881,7 @@
                             <div class="support-content">
                                 <h5>Contact Support</h5>
                                 <p>Get in touch with our support team for assistance</p>
-                                <a href="#" class="btn-secondary">Contact Us</a>
-                            </div>
-                        </div>
-                        <div class="support-item">
-                            <div class="support-icon">
-                                <i class="bx bx-bug" aria-hidden="true"></i>
-                            </div>
-                            <div class="support-content">
-                                <h5>Report a Bug</h5>
-                                <p>Help us improve by reporting issues you encounter</p>
-                                <a href="#" class="btn-secondary">Report Bug</a>
-                            </div>
-                        </div>
-                        <div class="support-item">
-                            <div class="support-icon">
-                                <i class="bx bx-bulb" aria-hidden="true"></i>
-                            </div>
-                            <div class="support-content">
-                                <h5>Feature Request</h5>
-                                <p>Suggest new features or improvements</p>
-                                <a href="#" class="btn-secondary">Submit Idea</a>
+                                <a href="@Url.Action("ContactUs", "Support")" class="btn-secondary">Contact Us</a>
                             </div>
                         </div>
                     </div>
@@ -900,22 +890,22 @@
                 <div class="legal-section">
                     <h4>Legal Information</h4>
                     <div class="legal-links">
-                        <a href="#" class="legal-link">
+                        <a href="/Legal/PrivacyPolicy" class="legal-link">
                             <i class="bx bx-file-blank" aria-hidden="true"></i>
                             <span>Privacy Policy</span>
                             <i class="bx bx-chevron-right" aria-hidden="true"></i>
                         </a>
-                        <a href="#" class="legal-link">
+                        <a href="/Legal/TermsOfService" class="legal-link">
                             <i class="bx bx-file-blank" aria-hidden="true"></i>
                             <span>Terms of Service</span>
                             <i class="bx bx-chevron-right" aria-hidden="true"></i>
                         </a>
-                        <a href="#" class="legal-link">
+                        <a href="/Legal/CookiePolicy" class="legal-link">
                             <i class="bx bx-file-blank" aria-hidden="true"></i>
                             <span>Cookie Policy</span>
                             <i class="bx bx-chevron-right" aria-hidden="true"></i>
                         </a>
-                        <a href="#" class="legal-link">
+                        <a href="/Legal/DataProtection" class="legal-link">
                             <i class="bx bx-file-blank" aria-hidden="true"></i>
                             <span>Data Protection</span>
                             <i class="bx bx-chevron-right" aria-hidden="true"></i>
@@ -926,10 +916,11 @@
                 <div class="account-actions-section">
                     <h4>Account Actions</h4>
                     <div class="action-buttons">
+                      
                         <button type="button" class="btn-logout" id="logout-btn">
                             <i class="bx bx-log-out" aria-hidden="true"></i>
                             Logout
-                        </button>
+                        </button>[]
                         <button type="button" class="btn-danger" id="delete-account-btn">
                             <i class="bx bx-trash" aria-hidden="true"></i>
                             Delete Account
@@ -950,5 +941,5 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/settings.js"></script>
+    <script src="/js/settings.js"></script>
 }

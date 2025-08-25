@@ -2,12 +2,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-//using TidyUpCapstone.Models.DTOs;
-using TidyUpCapstone.Models.Entities;
-using TidyUpCapstone.Models.ViewModels;
+using TidyUpCapstone.Filters;
 //using TidyUpCapstone.Services.Interfaces;
 using TidyUpCapstone.Models;
+//using TidyUpCapstone.Models.DTOs;
+using TidyUpCapstone.Models.Entities;
 using TidyUpCapstone.Models.Entities.User;
+using TidyUpCapstone.Models.ViewModels;
 
 
 namespace TidyUp.Controllers
@@ -36,7 +37,8 @@ namespace TidyUp.Controllers
             return View();
         }
 
-
+        [Authorize]
+        [NoCache]
         public IActionResult SettingsPage()
         {
             return View();

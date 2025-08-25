@@ -13,7 +13,20 @@
     <link href="~/assets/logo-tidyup.png" rel="shortcut icon" type="image/svg" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
-    
+
+    @if (!User.Identity.IsAuthenticated)
+    {
+        <script>
+            // Prevent back button access to authenticated pages after logout
+            if (window.history && window.history.pushState) {
+                window.history.pushState(null, null, window.location.href);
+                window.onpopstate = function () {
+                    window.history.pushState(null, null, window.location.href);
+                };
+            }
+        </script>
+    }
+
     <!-- ADD THIS LINE: Render page-specific styles -->
     @await RenderSectionAsync("Styles", required: false)
 </head>
@@ -112,7 +125,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="/Home/SettingsPage">
                             <img class="icon" alt="Settings" src="~/assets/VectorSettings.svg" />
                             <span>Settings</span>
                         </a>
@@ -189,7 +202,7 @@
                         </div>
                         <div class="dock-label">Quests & Milestone</div>
                     </div>
-                    <div class="dock-item" data-label="Settings">
+                    <div class="dock-item" data-label="Settings" onclick="window.location.href='/Home/SettingsPage'">
                         <div class="dock-icon">
                             <img src="~/assets/VectorSettings.svg" />
                         </div>
