@@ -1,0 +1,2036 @@
+@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root {
+    --background: #F5F5F5;
+    --primary-color: #6B9080;
+    --secondary-color: #A4C3B2;
+    --accent-color: #EAF4F4;
+    --text-color: #000000;
+    --hover-effect: rgba(217, 217, 217, 0.6);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Montserrat", sans-serif;
+}
+
+/* Container Queries for Modern Browser Support */
+@supports (container-type: inline-size) {
+    .notification-page-container {
+        container-type: inline-size;
+    }
+
+    @container (max-width: 768px) {
+        .notification-card {
+            padding: 14px;
+            margin-bottom: 10px;
+        }
+
+        .notification-icon {
+            width: 32px;
+            height: 32px;
+        }
+    }
+
+    @container (min-width: 769px) and (max-width: 1024px) {
+        .notification-card {
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .notification-icon {
+            width: 36px;
+            height: 36px;
+        }
+    }
+}
+
+/* Main Container */
+.notification-page-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    background-color: var(--background);
+    min-height: 100vh;
+    min-height: 100dvh;
+    transition: all 0.3s ease;
+    margin-left: 0;
+    padding: 0 20px !important;
+}
+
+.notification-page-container-child1 {
+    display: flex;
+    flex-direction: column;
+    margin-top: 30px;
+    flex: 1;
+    max-width: 900px;
+}
+
+/* Header Section */
+.notification-header {
+    margin-bottom: 10px;
+}
+
+.notification-title {
+    font-size: clamp(32px, 5vw, 48px);
+    font-weight: 550;
+    color: #000000;
+    margin: 0 0 10px 0;
+    font-family: "Righteous", sans-serif;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Tab Navigation */
+.notification-tabs {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0;
+    border-bottom: 2px solid #E5E7EB;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.tab-button {
+    background: none;
+    border: none;
+    padding: 16px 20px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #6B7280;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+    font-family: "Montserrat", sans-serif;
+    white-space: nowrap;
+    min-width: fit-content;
+    position: relative;
+}
+
+    .tab-button:hover {
+        color: #374151;
+    }
+
+    .tab-button.active {
+        color: var(--primary-color);
+        border-bottom-color: var(--primary-color);
+    }
+
+    /* Enhanced Tab Button States */
+    .tab-button[data-count]::after {
+        content: '';
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 8px;
+        height: 8px;
+        background-color: #EF4444;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.6;
+        transform: scale(1.1);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Notifications Container */
+.notifications-container {
+    padding: 15px;
+    border: 2px solid var(--primary-color);
+    border-radius: 12px;
+    min-height: 300px;
+    max-height: min(60vh, 60dvh);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) transparent;
+    contain: layout style paint;
+}
+
+    .notifications-container::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .notifications-container::-webkit-scrollbar-track {
+        background: rgba(107, 144, 128, 0.1);
+        border-radius: 4px;
+    }
+
+    .notifications-container::-webkit-scrollbar-thumb {
+        background: var(--primary-color);
+        border-radius: 4px;
+        border: 2px solid transparent;
+        background-clip: content-box;
+    }
+
+        .notifications-container::-webkit-scrollbar-thumb:hover {
+            background: #5a7c6b;
+            background-clip: content-box;
+        }
+
+    .notifications-container::-webkit-scrollbar-corner {
+        background: transparent;
+    }
+
+/* Notification Card */
+.notification-card {
+    background: white;
+    border: 1px solid var(--primary-color);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    contain: layout style paint;
+}
+
+    .notification-card:last-child {
+        margin-bottom: 0;
+    }
+
+    .notification-card:hover {
+        background: var(--hover-effect);
+        border-color: var(--secondary-color);
+        box-shadow: 0 2px 8px rgba(107, 144, 128, 0.15);
+        transform: translateY(-1px);
+    }
+
+    .notification-card[data-read="false"]::before {
+        content: '';
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 10px;
+        height: 10px;
+        background-color: #3B82F6;
+        border-radius: 50%;
+        border: 2px solid white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        animation: bounce 2s infinite;
+    }
+
+/* Notification Content Layout */
+.notification-content {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.notification-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-color);
+    border-radius: 10px;
+    aspect-ratio: 1;
+}
+
+.notification-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-title-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.notification-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #000000;
+    margin: 0;
+    font-family: "Montserrat", sans-serif;
+    flex: 1;
+    line-height: 1.4;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.notification-time {
+    font-size: 12px;
+    color: #6B7280;
+    white-space: nowrap;
+    font-family: "Montserrat", sans-serif;
+    flex-shrink: 0;
+}
+
+/* Message Section */
+.notification-message {
+    margin-top: 8px;
+}
+
+.message-text {
+    font-size: 14px;
+    color: #6B7280;
+    margin: 0;
+    line-height: 1.5;
+    font-family: "Montserrat", sans-serif;
+}
+
+/* Modal Container */
+.notification-page-container-child2 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--primary-color);
+    padding: 30px;
+    min-height: 95vh;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    flex-shrink: 0;
+    height: 88vh;
+    width: 100%;
+    max-width: 600px;
+}
+
+.modal-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .modal-wrapper.hidden {
+        display: none;
+    }
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+    .modal-overlay.hidden {
+        display: none;
+    }
+
+.modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.modal-container {
+    position: relative;
+    z-index: 1001;
+    width: 100%;
+    max-width: 500px;
+}
+
+.modal-content {
+    background: var(--background);
+    border-radius: 16px;
+    padding: 32px;
+    animation: modalSlideIn 0.3s ease-out;
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    contain: layout style paint;
+}
+
+    .modal-content:focus {
+        outline: none;
+    }
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-content: center !important;
+    
+    flex-direction: row !important;
+    margin-bottom: 24px;
+    gap: 16px;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    color: #6B7280;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+    .modal-close:hover {
+        background: #F3F4F6;
+        color: #374151;
+    }
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #000000;
+    margin: 0;
+    font-family: "Montserrat", sans-serif;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+    .modal-title:focus {
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
+        border-radius: 4px;
+    }
+
+.modal-time {
+    font-size: 14px;
+    color: #6B7280;
+    white-space: nowrap;
+    font-family: "Montserrat", sans-serif;
+}
+
+.modal-body {
+    margin-bottom: 32px;
+}
+
+.modal-message-label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 8px 0;
+    font-family: "Montserrat", sans-serif;
+}
+
+.modal-message {
+    font-size: 16px;
+    color: #6B7280;
+    margin: 0 0 20px 0;
+    line-height: 1.5;
+    font-family: "Montserrat", sans-serif;
+}
+
+.transaction-details {
+    background: #F9FAFB;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 20px 0;
+}
+
+    .transaction-details p {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+        color: #374151;
+        font-family: "Montserrat", sans-serif;
+    }
+
+        .transaction-details p:last-child {
+            margin-bottom: 0;
+        }
+
+.confirmation-text {
+    font-size: 14px;
+    color: #6B7280;
+    margin: 16px 0 0 0;
+    line-height: 1.5;
+    font-style: italic;
+    font-family: "Montserrat", sans-serif;
+}
+
+/* Modal Actions */
+.modal-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.confirm-button,
+.cancel-button {
+    flex: 1;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: "Montserrat", sans-serif;
+    position: relative;
+    overflow: hidden;
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}
+
+.confirm-button {
+    background: var(--primary-color);
+    color: white;
+}
+
+    .confirm-button:hover {
+        background: #5a7c6b;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .confirm-button:active {
+        transform: translateY(0);
+        transition-duration: 0.1s;
+    }
+
+.cancel-button {
+    background: #E5E7EB;
+    color: #374151;
+}
+
+    .cancel-button:hover {
+        background: #D1D5DB;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .cancel-button:active {
+        transform: translateY(0);
+        transition-duration: 0.1s;
+    }
+
+    /* Enhanced Loading States */
+    .confirm-button:disabled,
+    .cancel-button:disabled {
+        cursor: not-allowed;
+        opacity: 0.7;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .confirm-button:disabled::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient( 90deg, transparent, rgba(255, 255, 255, 0.2), transparent );
+            animation: shimmer 1.5s infinite;
+        }
+
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+
+    100% {
+        left: 100%;
+    }
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: max(40px, 8vh) 20px;
+    color: #6B7280;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    min-height: 200px;
+    justify-content: center;
+}
+
+.empty-icon {
+    opacity: 0.6;
+}
+
+.empty-state h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    color: #374151;
+    font-family: "Montserrat", sans-serif;
+}
+
+.empty-state p {
+    font-size: 16px;
+    margin: 0;
+    font-family: "Montserrat", sans-serif;
+}
+
+/* Hidden utility */
+.hidden {
+    display: none;
+}
+
+/* Improved Load More Button */
+.load-more-btn {
+    width: 100%;
+    padding: 12px;
+    margin-top: 16px;
+    border: 2px solid var(--primary-color);
+    background: white;
+    color: var(--primary-color);
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+    .load-more-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient( 90deg, transparent, rgba(107, 144, 128, 0.1), transparent );
+        transition: left 0.5s;
+    }
+
+    .load-more-btn:hover {
+        background-color: var(--primary-color) !important;
+        color: white !important;
+        transform: translateY(-1px);
+    }
+
+        .load-more-btn:hover::before {
+            left: 100%;
+        }
+
+/* Sidebar Responsive Adjustments */
+body:not(.sidebar-closed) .notification-page-container {
+    margin-left: 250px;
+}
+
+body.sidebar-closed .notification-page-container {
+    margin-left: 82px;
+}
+
+/* Large Desktop (1440px and up) */
+@media (min-width: 1440px) {
+    .notification-page-container {
+        gap: 40px;
+        padding: 30px;
+    }
+
+    .notification-page-container-child1 {
+        max-width: 1000px;
+    }
+
+    .notification-page-container-child2 {
+        max-width: 500px;
+        min-height: 90vh;
+    }
+
+    .notifications-container {
+        max-height: 65vh;
+        max-height: 65dvh;
+    }
+}
+
+/* Desktop (1025px to 1439px) */
+@media (min-width: 1025px) and (max-width: 1439px) {
+    .notification-page-container {
+        gap: 30px;
+        padding: 25px;
+    }
+
+    .notification-page-container-child2 {
+        max-width: 450px;
+    }
+}
+
+/* IMPROVED TABLET LANDSCAPE (769px to 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+    /* Maintain sidebar functionality for tablet */
+    body:not(.sidebar-closed) .notification-page-container {
+        margin-left: 250px;
+    }
+
+    body.sidebar-closed .notification-page-container {
+        margin-left: 82px;
+    }
+
+    /* Adjust container to work with sidebar */
+    .notification-page-container {
+        display: flex;
+        flex-direction: row;
+        gap: 16px;
+        padding: 20px 16px;
+        min-height: 100vh;
+        min-height: 100dvh;
+        align-items: flex-start;
+        max-width: none;
+        justify-content: flex-start;
+    }
+
+    .notification-page-container-child1 {
+        flex: 1 1 auto;
+        max-width: none;
+        min-width: 280px;
+        margin-top: 20px;
+    }
+
+    /* Adjust child1 max-width based on sidebar state */
+    body.sidebar-open .notification-page-container-child1 {
+        max-width: calc(100vw - 250px - 360px - 32px); /* viewport - sidebar - child2 - gaps */
+    }
+
+    body.sidebar-closed .notification-page-container-child1 {
+        max-width: calc(100vw - 82px - 360px - 32px); /* viewport - closed sidebar - child2 - gaps */
+    }
+
+    .notification-page-container-child2 {
+        display: flex;
+        flex: 0 0 280px;
+        max-width: 280px;
+        min-width: 260px;
+        min-height: calc(100vh - 60px);
+        min-height: calc(100dvh - 60px);
+        height: auto;
+        padding: 16px;
+        margin-top: 20px;
+        border-radius: 12px;
+        align-self: stretch;
+        background: var(--primary-color);
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Ensure modal wrapper takes full space */
+    .modal-wrapper {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    /* Header adjustments for better tablet spacing */
+    .notification-title {
+        font-size: clamp(22px, 3vw, 28px);
+        margin-bottom: 12px;
+    }
+
+    .notification-tabs {
+        margin-bottom: 16px;
+        justify-content: flex-start;
+    }
+
+    .tab-button {
+        padding: 10px 14px;
+        font-size: 13px;
+        min-width: auto;
+    }
+
+    /* Notification container improvements */
+    .notifications-container {
+        max-height: calc(100vh - 180px);
+        max-height: calc(100dvh - 180px);
+        min-height: 350px;
+        padding: 14px;
+        border-radius: 10px;
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .notification-card {
+        padding: 14px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+    }
+
+    .notification-content {
+        gap: 12px;
+    }
+
+    .notification-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+        .notification-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+    .notification-title-section {
+        gap: 10px;
+        margin-bottom: 6px;
+    }
+
+    .notification-card-title {
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    .notification-time {
+        font-size: 10px;
+    }
+
+    .message-text {
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    /* Enhanced Tablet-Specific Modal Positioning */
+    .notification-page-container-child2 .modal-content {
+        margin: 0;
+        height: auto;
+        max-height: calc(100% - 32px);
+        overflow-y: auto;
+        border-radius: 10px;
+        padding: 18px;
+        max-width: 260px;
+        width: 100%;
+    }
+
+    .modal-title {
+        font-size: 15px;
+        line-height: 1.3;
+    }
+
+    .modal-time {
+        font-size: 10px;
+    }
+
+    .modal-header {
+        margin-bottom: 14px;
+        gap: 6px;
+    }
+
+    .modal-message-label {
+        font-size: 13px;
+    }
+
+    .modal-message {
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .transaction-details {
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 6px;
+    }
+
+        .transaction-details p {
+            font-size: 11px;
+            margin: 0 0 4px 0;
+        }
+
+    .confirmation-text {
+        font-size: 11px;
+        margin: 10px 0 0 0;
+    }
+
+    .modal-actions {
+        gap: 6px;
+        flex-direction: column;
+    }
+
+    .confirm-button,
+    .cancel-button {
+        padding: 8px 14px;
+        font-size: 12px;
+        border-radius: 6px;
+        width: 100%;
+    }
+
+    /* Empty state adjustments */
+    .empty-state {
+        padding: 40px 16px;
+        gap: 12px;
+    }
+
+        .empty-state h3 {
+            font-size: 16px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+    /* Ensure mobile modals still work on tablet */
+    .modal-overlay {
+        z-index: 2000;
+    }
+
+        .modal-overlay .modal-content {
+            max-width: 400px;
+            max-height: calc(100vh - 40px);
+            max-height: calc(100dvh - 40px);
+            padding: 24px;
+        }
+
+        .modal-overlay .modal-actions {
+            flex-direction: row;
+        }
+
+        .modal-overlay .confirm-button,
+        .modal-overlay .cancel-button {
+            flex: 1;
+            width: auto;
+        }
+}
+
+/* Enhanced Tablet Landscape Optimizations with Sidebar */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape) {
+    .notification-page-container {
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+        gap: 12px;
+        padding: 16px 12px;
+    }
+
+    .notification-page-container-child1 {
+        flex: 1 1 auto;
+        min-width: 250px;
+        overflow: hidden;
+    }
+
+    /* Tighter constraints for landscape with sidebar */
+    body.sidebar-open .notification-page-container-child1 {
+        max-width: calc(100vw - 250px - 280px - 24px);
+    }
+
+    body.sidebar-closed .notification-page-container-child1 {
+        max-width: calc(100vw - 82px - 280px - 24px);
+    }
+
+    .notification-page-container-child2 {
+        flex: 0 0 260px;
+        max-width: 260px;
+        height: 100%;
+        margin-top: 0;
+        border-radius: 8px;
+        border-top-left-radius: 12px;
+        border-bottom-left-radius: 12px;
+    }
+
+    .notifications-container {
+        max-height: calc(100vh - 160px);
+        max-height: calc(100dvh - 160px);
+        flex: 1;
+        overflow-y: auto;
+    }
+}
+
+/* Enhanced Tablet Portrait Optimizations with Sidebar */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: portrait) {
+    .notification-page-container {
+        gap: 20px;
+    }
+
+    .notification-page-container-child1 {
+        min-width: 300px;
+    }
+
+    /* Better space utilization in portrait with sidebar */
+    body.sidebar-open .notification-page-container-child1 {
+        max-width: calc(100vw - 250px - 300px - 40px);
+    }
+
+    body.sidebar-closed .notification-page-container-child1 {
+        max-width: calc(100vw - 82px - 300px - 40px);
+    }
+
+    .notification-page-container-child2 {
+        flex: 0 0 300px;
+        max-width: 300px;
+        min-height: 400px;
+    }
+
+    .modal-content {
+        max-height: 70vh;
+        max-height: 70dvh;
+        overflow-y: auto;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 900px) {
+    .notification-page-container {
+        gap: 16px;
+        padding: 16px 12px;
+    }
+
+    .notification-page-container-child1 {
+        min-width: 240px;
+    }
+
+    /* Adjust for smaller tablets with sidebar */
+    body.sidebar-open .notification-page-container-child1 {
+        max-width: calc(100vw - 250px - 260px - 32px);
+    }
+
+    body.sidebar-closed .notification-page-container-child1 {
+        max-width: calc(100vw - 82px - 260px - 32px);
+    }
+
+    .notification-page-container-child2 {
+        flex: 0 0 260px;
+        max-width: 260px;
+        padding: 16px;
+    }
+
+        .notification-page-container-child2 .modal-content {
+            max-width: 220px;
+            padding: 14px;
+        }
+
+    .modal-title {
+        font-size: 13px;
+    }
+
+    .modal-message-label {
+        font-size: 11px;
+    }
+
+    .modal-message {
+        font-size: 10px;
+    }
+
+    .transaction-details p {
+        font-size: 9px;
+    }
+
+    .confirmation-text {
+        font-size: 9px;
+    }
+
+    .confirm-button,
+    .cancel-button {
+        font-size: 10px;
+        padding: 6px 10px;
+        min-height: 28px;
+    }
+}
+
+@media (min-width: 901px) and (max-width: 1024px) {
+    .notification-page-container {
+        gap: 20px;
+        padding: 20px 16px;
+    }
+
+    .notification-page-container-child1 {
+        min-width: 280px;
+    }
+
+    /* Better spacing for larger tablets with sidebar */
+    body.sidebar-open .notification-page-container-child1 {
+        max-width: calc(100vw - 250px - 320px - 40px);
+    }
+
+    body.sidebar-closed .notification-page-container-child1 {
+        max-width: calc(100vw - 82px - 320px - 40px);
+    }
+
+    .notification-page-container-child2 {
+        flex: 0 0 300px;
+        max-width: 300px;
+        padding: 18px;
+    }
+
+        .notification-page-container-child2 .modal-content {
+            max-width: 260px;
+            padding: 16px;
+        }
+
+    .modal-title {
+        font-size: 15px;
+        line-height: 1.2;
+    }
+
+    .modal-message-label {
+        font-size: 12px;
+    }
+
+    .modal-message {
+        font-size: 11px;
+    }
+
+    .transaction-details p {
+        font-size: 10px;
+    }
+
+    .confirmation-text {
+        font-size: 10px;
+    }
+
+    .confirm-button,
+    .cancel-button {
+        font-size: 11px;
+        padding: 8px 12px;
+        min-height: 34px;
+    }
+}
+
+/* Tablet Portrait & Large Mobile (481px to 768px) */
+@media (max-width: 768px) {
+    .notification-page-container {
+        flex-direction: column;
+        padding: 15px;
+        padding-bottom: max(120px, env(safe-area-inset-bottom, 120px));
+        margin-left: 0 !important;
+        gap: 20px;
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
+
+    .notification-page-container-child1 {
+        margin-top: 10px;
+    }
+
+    .notification-page-container-child2 {
+        display: none;
+    }
+
+    .modal-overlay {
+        z-index: 2000;
+    }
+
+        .modal-overlay .modal-content {
+            margin: 20px;
+            margin-bottom: max(20px, env(safe-area-inset-bottom));
+            max-width: calc(100vw - 40px);
+            max-height: calc(100vh - 40px);
+            max-height: calc(100dvh - 40px);
+            overflow-y: auto;
+        }
+
+    .notification-title {
+        font-size: 28px;
+        margin-bottom: 15px;
+    }
+
+    .notification-tabs {
+        margin-bottom: 15px;
+        justify-content: flex-start;
+        border-bottom: 1px solid #E5E7EB;
+    }
+
+    .tab-button {
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+
+    .notifications-container {
+        max-height: 60vh;
+        max-height: 60dvh;
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    .notification-card {
+        padding: 16px;
+        margin-bottom: 12px;
+        border-radius: 8px;
+    }
+
+    .notification-content {
+        gap: 12px;
+    }
+
+    .notification-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+        .notification-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+    .notification-title-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        margin-bottom: 6px;
+    }
+
+    .notification-card-title {
+        font-size: 15px;
+        line-height: 1.3;
+    }
+
+    .notification-time {
+        font-size: 11px;
+    }
+
+    .message-text {
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    .modal-overlay {
+        padding: 16px;
+    }
+
+    .modal-content {
+        padding: 24px;
+        border-radius: 12px;
+    }
+
+    .modal-title {
+        font-size: 18px;
+        line-height: 1.3;
+    }
+
+    .modal-time {
+        font-size: 12px;
+    }
+
+    .modal-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+
+    .modal-message-label {
+        font-size: 14px;
+    }
+
+    .modal-message {
+        font-size: 14px;
+    }
+
+    .transaction-details {
+        padding: 14px;
+        margin: 16px 0;
+    }
+
+        .transaction-details p {
+            font-size: 13px;
+        }
+
+    .confirmation-text {
+        font-size: 13px;
+        margin: 12px 0 0 0;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .confirm-button,
+    .cancel-button {
+        width: 100%;
+        padding: 14px 20px;
+        font-size: 15px;
+        min-height: 44px;
+        touch-action: manipulation;
+    }
+}
+
+/* Improved Touch Targets for Mobile */
+@media (max-width: 768px) {
+    .notification-card,
+    .tab-button,
+    .confirm-button,
+    .cancel-button,
+    .modal-close {
+        min-height: 44px;
+        touch-action: manipulation;
+    }
+
+    .notification-card {
+        cursor: pointer;
+        -webkit-tap-highlight-color: rgba(107, 144, 128, 0.1);
+    }
+}
+
+/* Better Support for Landscape Mobile Devices */
+@media (max-width: 768px) and (orientation: landscape) {
+    .notification-page-container {
+        padding: 10px;
+        padding-bottom: 100px;
+    }
+
+    .notification-title {
+        font-size: 20px;
+        margin-bottom: 8px;
+    }
+
+    .notifications-container {
+        max-height: 40vh;
+        max-height: 40dvh;
+    }
+
+    .modal-overlay .modal-content {
+        max-height: 80vh;
+        max-height: 80dvh;
+        overflow-y: auto;
+    }
+}
+
+/* Small Mobile (320px to 480px) */
+@media (max-width: 480px) {
+    .notification-page-container {
+        padding: 12px;
+        padding-bottom: max(120px, env(safe-area-inset-bottom, 120px));
+    }
+
+    .notification-title {
+        font-size: clamp(20px, 6vw, 24px);
+        margin-bottom: 12px;
+        line-height: 1.2;
+    }
+
+    .tab-button {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+
+    .notifications-container {
+        padding: 12px;
+        max-height: 55vh;
+        max-height: 55dvh;
+    }
+
+    .notification-card {
+        padding: 14px;
+        margin-bottom: 10px;
+    }
+
+    .notification-content {
+        gap: 10px;
+    }
+
+    .notification-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+        .notification-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+    .notification-card-title {
+        font-size: clamp(13px, 4vw, 14px);
+        line-height: 1.3;
+    }
+
+    .notification-time {
+        font-size: 10px;
+    }
+
+    .message-text {
+        font-size: clamp(11px, 3.5vw, 12px);
+        line-height: 1.4;
+    }
+
+    .modal-content {
+        padding: 20px;
+    }
+
+    .modal-title {
+        font-size: 16px;
+    }
+
+    .modal-message-label,
+    .modal-message {
+        font-size: 13px;
+    }
+
+    .transaction-details {
+        padding: 12px;
+    }
+
+        .transaction-details p {
+            font-size: 12px;
+        }
+
+    .confirm-button,
+    .cancel-button {
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+}
+
+/* Extra Small Mobile (up to 320px) */
+@media (max-width: 320px) {
+    .notification-page-container {
+        padding: 10px;
+        padding-bottom: max(120px, env(safe-area-inset-bottom, 120px));
+    }
+
+    .notification-title {
+        font-size: 22px;
+    }
+
+    .notification-card {
+        padding: 12px;
+    }
+
+    .notification-content {
+        gap: 8px;
+    }
+
+    .notification-icon {
+        width: 28px;
+        height: 28px;
+    }
+
+        .notification-icon svg {
+            width: 16px;
+            height: 16px;
+        }
+}
+
+/* Enhanced Focus Indicators for Better Accessibility */
+.notification-card:focus-visible,
+.tab-button:focus-visible,
+.confirm-button:focus-visible,
+.cancel-button:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-radius: 8px;
+}
+
+.notification-card:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(107, 144, 128, 0.25);
+}
+
+/* Focus states for accessibility */
+.notification-card:focus,
+.confirm-button:focus,
+.cancel-button:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+
+/* Enhanced Color Contrast for Better Accessibility */
+@media (prefers-contrast: high) {
+    .notification-card {
+        border-width: 2px;
+        border-color: var(--text-color);
+    }
+
+    .tab-button.active {
+        border-bottom-width: 3px;
+        font-weight: 700;
+    }
+
+    .notification-time,
+    .message-text,
+    .modal-message {
+        color: var(--text-color);
+        opacity: 0.8;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: #1a1a1a;
+        --text-color: #ffffff;
+    }
+
+    .notification-card {
+        background: #2d2d2d;
+        border-color: #4a5568;
+        color: #e2e8f0;
+    }
+
+        .notification-card:hover {
+            background: #3a3a3a;
+            border-color: #6b7280;
+        }
+
+    .modal-content {
+        background: #1a202c;
+        color: #e2e8f0;
+    }
+
+    .modal-overlay {
+        background: rgba(0, 0, 0, 0.6);
+    }
+
+    .transaction-details {
+        background: #2d3748;
+        color: #e2e8f0;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .notification-card,
+    .modal-content,
+    .notification-page-container,
+    .tab-button,
+    .confirm-button,
+    .cancel-button {
+        transition: none;
+        animation: none;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+
+        .notification-card:hover,
+        .notification-card:focus {
+            transform: none !important;
+        }
+
+        .confirm-button:hover,
+        .cancel-button:hover {
+            transform: none !important;
+        }
+
+        .notification-card[data-read="false"]::before {
+            animation: none;
+        }
+}
+
+/* Animation for sidebar transitions */
+.notification-page-container {
+    transition: margin-left 0.3s ease-in-out;
+}
+
+/* Notification type specific styles */
+.transaction-notification .notification-icon {
+    background: rgba(107, 144, 128, 0.1);
+}
+
+.reaction-notification .notification-icon {
+    background: rgba(229, 62, 62, 0.1);
+}
+
+.comment-notification .notification-icon {
+    background: rgba(49, 130, 206, 0.1);
+}
+
+.delivery-notification .notification-icon {
+    background: rgba(56, 161, 105, 0.1);
+}
+
+/* Smooth scrolling */
+.notifications-container {
+    scroll-behavior: smooth;
+}
+
+/* Notification toast styles */
+.notification-toast {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.4;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    max-width: min(400px, calc(100vw - 40px));
+    word-wrap: break-word;
+    position: fixed;
+    z-index: 2000;
+}
+
+/* Read notification styling */
+.notification-card.read {
+    opacity: 0.7;
+}
+
+.notification-card[data-read="true"] {
+    background: #f8f9fa;
+}
+
+/* Enhanced Loading Animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.notification-card.visible {
+    animation: fadeInUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Bounce animation for unread notifications */
+@keyframes bounce {
+    0%, 20%, 53%, 80%, 100% {
+        animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+        transform: translate3d(0,0,0);
+    }
+
+    40%, 43% {
+        animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
+        transform: translate3d(0, -8px, 0);
+    }
+
+    70% {
+        animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
+        transform: translate3d(0, -4px, 0);
+    }
+
+    90% {
+        transform: translate3d(0, -1px, 0);
+    }
+}
+
+/* Improved Input Handling for Touch Devices */
+@media (hover: none) and (pointer: coarse) {
+    .notification-card:hover {
+        background: var(--background);
+        transform: none;
+    }
+
+    .notification-card:active {
+        background: var(--hover-effect);
+        transform: scale(0.98);
+    }
+}
+
+/* Improved Button Spacing on Touch Devices */
+@media (pointer: coarse) {
+    .modal-actions {
+        gap: 16px;
+    }
+
+        .modal-actions .confirm-button,
+        .modal-actions .cancel-button {
+            padding: 16px 24px;
+            min-height: 48px;
+        }
+
+    .notification-card {
+        padding: 18px;
+        margin-bottom: 14px;
+    }
+
+    .tab-button {
+        padding: 14px 18px;
+    }
+
+    .modal-close {
+        padding: 8px;
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+/* Enhanced Safe Area Support for Modern Mobile Devices */
+@supports (padding: env(safe-area-inset-bottom)) {
+    @media (max-width: 768px) {
+        .notification-page-container {
+            padding-bottom: calc(120px + env(safe-area-inset-bottom));
+            padding-top: max(15px, env(safe-area-inset-top));
+            padding-left: max(15px, env(safe-area-inset-left));
+            padding-right: max(15px, env(safe-area-inset-right));
+        }
+
+        .modal-overlay .modal-content {
+            margin-bottom: max(20px, env(safe-area-inset-bottom));
+        }
+    }
+}
+
+/* Enhanced animation performance */
+@media (prefers-reduced-motion: no-preference) {
+    .notification-card {
+        transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease;
+    }
+
+    .modal-content {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+}
+
+/* Better support for pointer precision */
+@media (pointer: fine) {
+    .notification-card {
+        transition-duration: 0.2s;
+    }
+
+        .notification-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(107, 144, 128, 0.2);
+        }
+}
+
+/* Focus within states for better keyboard navigation */
+.notification-page-container:focus-within .notification-card {
+    border-color: var(--secondary-color);
+}
+
+/* Enhanced Scrollbar for Firefox */
+@-moz-document url-prefix() {
+    .notifications-container {
+        scrollbar-width: thin;
+        scrollbar-color: var(--primary-color) transparent;
+    }
+}
+
+/* Support for prefers-reduced-data */
+@media (prefers-reduced-data: reduce) {
+    .notification-card {
+        box-shadow: none;
+    }
+
+        .notification-card:hover {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+    .modal-overlay {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    .notification-toast {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+}
+
+/* Support for wide color gamuts */
+@media (color-gamut: p3) {
+    :root {
+        --primary-color: color(display-p3 0.42 0.56 0.50);
+        --secondary-color: color(display-p3 0.64 0.76 0.70);
+    }
+}
+
+/* Foldable device support */
+@media (spanning: single-fold-vertical) {
+    .notification-page-container {
+        flex-direction: column;
+    }
+
+    .notification-page-container-child1,
+    .notification-page-container-child2 {
+        width: 100%;
+        max-width: none;
+    }
+}
+
+@media (spanning: single-fold-horizontal) {
+    .notification-page-container {
+        flex-direction: row;
+    }
+
+    .notification-page-container-child1 {
+        flex: 1;
+    }
+
+    .notification-page-container-child2 {
+        flex: 1;
+        max-width: 50%;
+    }
+}
+
+/* Forced colors mode support (Windows High Contrast) */
+@media (forced-colors: active) {
+    .notification-card {
+        border: 1px solid ButtonText;
+        background: ButtonFace;
+        color: ButtonText;
+    }
+
+        .notification-card:hover,
+        .notification-card:focus {
+            border: 2px solid Highlight;
+            background: Highlight;
+            color: HighlightText;
+        }
+
+    .tab-button.active {
+        background: Highlight;
+        color: HighlightText;
+    }
+
+    .confirm-button {
+        background: Highlight;
+        color: HighlightText;
+        border: 1px solid ButtonText;
+    }
+}
+
+/* Container size optimizations */
+@container (min-width: 400px) {
+    .notification-card-title {
+        font-size: 17px;
+    }
+
+    .message-text {
+        font-size: 15px;
+    }
+}
+
+@container (min-width: 600px) {
+    .notification-card {
+        padding: 22px;
+    }
+
+    .notification-icon {
+        width: 44px;
+        height: 44px;
+    }
+}
+
+/* CSS Subgrid support (future-proofing) */
+@supports (grid-template-rows: subgrid) {
+    .notification-content {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        grid-template-rows: subgrid;
+        gap: 16px;
+    }
+}
+
+/* Logical properties for better RTL support */
+@supports (margin-inline-start: 0) {
+    .notification-card {
+        margin-block-end: 16px;
+        padding-block: 20px;
+        padding-inline: 20px;
+    }
+
+    .notification-title-section {
+        gap: 16px;
+        margin-block-end: 8px;
+    }
+
+    .modal-content {
+        padding-block: 32px;
+        padding-inline: 32px;
+    }
+}
+
+/* View transitions API support (experimental) */
+@supports (view-transition-name: none) {
+    .notification-card {
+        view-transition-name: notification-card;
+    }
+
+    .modal-content {
+        view-transition-name: modal-content;
+    }
+}
+
+/* Print styles */
+@media print {
+    .notification-page-container-child2,
+    .modal-overlay,
+    .notification-tabs {
+        display: none;
+    }
+
+    .notification-page-container {
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .notification-page-container-child1 {
+        margin: 0 !important;
+        max-width: none !important;
+    }
+
+    .notification-card {
+        border: 2px solid #000 !important;
+        page-break-inside: avoid;
+        margin-bottom: 15px !important;
+        padding: 15px !important;
+        box-shadow: none !important;
+        background: white !important;
+    }
+
+    .notification-title {
+        color: #000 !important;
+        font-size: 24px !important;
+    }
+
+    .notification-card-title {
+        color: #000 !important;
+        font-weight: bold !important;
+    }
+
+    .message-text {
+        color: #333 !important;
+    }
+}
+
+/* CSS Grid Fallback for Older Browsers */
+@supports not (display: grid) {
+    .notification-page-container {
+        display: flex;
+    }
+}
+
+/* High DPI/Retina Display Support */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi), (min-resolution: 2dppx) {
+    .notification-icon svg,
+    .modal-close svg {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+}
+
+/* Performance Optimizations */
+.notification-card,
+.modal-content {
+    contain: layout style paint;
+}
+
+/* GPU Acceleration for Smooth Animations */
+.notification-card,
+.modal-content,
+.confirm-button,
+.cancel-button {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}
+
+/* Screen Reader Only Content */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+/* Spinner Animation for Loading States */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Additional Utility Classes */
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.fade-out {
+    animation: fadeOut 0.3s ease-out;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+/* Final fallback for very old browsers */
+@supports not (display: flex) {
+    .notification-page-container {
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .notification-page-container-child1 {
+        float: left;
+        width: 60%;
+    }
+
+    .notification-page-container-child2 {
+        float: right;
+        width: 35%;
+    }
+
+    .notification-card {
+        zoom: 1;
+    }
+
+    .modal-actions:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+
+    .confirm-button,
+    .cancel-button {
+        float: left;
+        width: 48%;
+        margin-right: 4%;
+    }
+
+    .cancel-button {
+        margin-right: 0;
+    }
+}
