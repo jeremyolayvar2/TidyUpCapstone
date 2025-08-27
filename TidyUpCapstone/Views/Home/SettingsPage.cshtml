@@ -772,29 +772,27 @@
             <!-- LANGUAGE TAB -->
             <div id="language" class="tab-content" role="tabpanel" aria-labelledby="language-tab">
                 <div class="content-header">
-                    <h3>Language & Accessibility</h3>
-                    <p>Customize your language preferences and accessibility options</p>
+                    <h3 data-translate="language_accessibility_title">Language & Accessibility</h3>
+                    <p data-translate="language_accessibility_desc">Customize your language preferences and accessibility options</p>
                 </div>
-
                 <div method="post" asp-action="UpdateLanguage" asp-controller="Settings">
                     @Html.AntiForgeryToken()
-
                     <div class="language-section">
-                        <h4>Language Preferences</h4>
+                        <h4 data-translate="language_preferences">Language Preferences</h4>
                         <div class="form-grid">
                             <div class="form-group">
-                                <label for="language">Display Language</label>
+                                <label for="language" data-translate="display_language">Display Language</label>
                                 <select id="language" name="Language">
-                                    <option value="en" selected>English</option>
+                                    <option value="en">English</option>
                                     <option value="tl">Filipino (Tagalog)</option>
                                     <option value="es">Spanish</option>
                                     <option value="zh">Chinese</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="timezone">Timezone</label>
+                                <label for="timezone" data-translate="timezone">Timezone</label>
                                 <select id="timezone" name="Timezone">
-                                    <option value="Asia/Manila" selected>Asia/Manila (GMT+8)</option>
+                                    <option value="Asia/Manila">Asia/Manila (GMT+8)</option>
                                     <option value="UTC">UTC (GMT+0)</option>
                                     <option value="America/New_York">Eastern Time (GMT-5)</option>
                                     <option value="America/Los_Angeles">Pacific Time (GMT-8)</option>
@@ -802,13 +800,12 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="accessibility-section">
-                        <h4>Accessibility Options</h4>
+                        <h4 data-translate="accessibility_options">Accessibility Options</h4>
                         <div class="notification-item">
                             <div class="notification-info-child">
-                                <span>High Contrast Mode</span>
-                                <small>Increase contrast for better visibility</small>
+                                <span data-translate="high_contrast">High Contrast Mode</span>
+                                <small data-translate="high_contrast_desc">Increase contrast for better visibility</small>
                             </div>
                             <label class="switch">
                                 <input type="checkbox" name="HighContrast" aria-label="Enable high contrast mode">
@@ -817,8 +814,8 @@
                         </div>
                         <div class="notification-item">
                             <div class="notification-info-child">
-                                <span>Large Text</span>
-                                <small>Increase text size for better readability</small>
+                                <span data-translate="large_text">Large Text</span>
+                                <small data-translate="large_text_desc">Increase text size for better readability</small>
                             </div>
                             <label class="switch">
                                 <input type="checkbox" name="LargeText" aria-label="Enable large text">
@@ -827,8 +824,8 @@
                         </div>
                         <div class="notification-item">
                             <div class="notification-info-child">
-                                <span>Reduce Motion</span>
-                                <small>Minimize animations and transitions</small>
+                                <span data-translate="reduce_motion">Reduce Motion</span>
+                                <small data-translate="reduce_motion_desc">Minimize animations and transitions</small>
                             </div>
                             <label class="switch">
                                 <input type="checkbox" name="ReduceMotion" aria-label="Reduce motion">
@@ -837,8 +834,8 @@
                         </div>
                         <div class="notification-item">
                             <div class="notification-info-child">
-                                <span>Screen Reader Support</span>
-                                <small>Optimize interface for screen readers</small>
+                                <span data-translate="screen_reader">Screen Reader Support</span>
+                                <small data-translate="screen_reader_desc">Optimize interface for screen readers</small>
                             </div>
                             <label class="switch">
                                 <input type="checkbox" name="ScreenReader" aria-label="Enable screen reader support">
@@ -846,10 +843,9 @@
                             </label>
                         </div>
                     </div>
-
                     <button type="submit" class="btn-save">
                         <i class="bx bx-save" aria-hidden="true"></i>
-                        Save Language & Accessibility Settings
+                        <span data-translate="save_button">Save Language & Accessibility Settings</span>
                     </button>
                 </div>
             </div>

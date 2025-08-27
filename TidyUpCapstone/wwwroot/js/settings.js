@@ -1,9 +1,8 @@
-﻿console.log('Settings JavaScript loading...');
-
-class ResponsiveSettingsManager {
+﻿class ResponsiveSettingsManager {
     constructor() {
         this.currentTab = 'profile';
         this.initialized = false;
+        this.languageSettingsLoaded = false;
         this.isMobile = window.innerWidth <= 768;
         this.isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
         this.isDesktop = window.innerWidth > 768;
@@ -22,75 +21,32 @@ class ResponsiveSettingsManager {
     }
 
     init() {
-        console.log('Initializing Settings Manager...');
+        console.log('🔄 Initializing Responsive Settings Manager...');
 
-        // Wait for DOM and jQuery to be ready
-        $(document).ready(() => {
+        // Wait for DOM to be ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.initializeComponents());
+        } else {
             this.initializeComponents();
-        });
+        }
     }
 
     initializeComponents() {
-        // Initialize components in correct order
-        this.initTabSwitching();           // Fix tabs first
+        // Initialize tab display first without forcing
+        this.initTabDisplay();
+
         this.initResponsiveLayout();
         this.initMobileSidebar();
+        this.initTabSwitching();
         this.initProfileFeatures();
         this.initFormHandling();
         this.initNotifications();
+        this.initModalHandling();
         this.initAccessibility();
         this.initResizeHandler();
 
         this.initialized = true;
-        console.log('Settings Manager initialized successfully');
-    }
-
-    // ==========================================
-    // FIXED TAB SWITCHING - Core functionality
-    // ==========================================
-
-    initTabSwitching() {
-        console.log('Initializing tab switching...');
-
-        // Simple, working tab switching
-        $('.tab-link').on('click', (e) => {
-            e.preventDefault();
-            const targetTab = $(e.currentTarget).data('tab');
-            if (targetTab) {
-                this.showTab(targetTab);
-            }
-        });
-
-        // Show initial tab
-        this.showTab('profile');
-
-        console.log('Tab switching initialized');
-    }
-
-    showTab(targetTab) {
-        console.log(`Switching to tab: ${targetTab}`);
-
-        // Hide all tabs - simple and effective
-        $('.tab-content').removeClass('active').hide();
-        $('.tab-link').removeClass('active').attr('aria-selected', 'false');
-
-        // Show target tab
-        $(`#${targetTab}`).addClass('active').show();
-        $(`.tab-link[data-tab="${targetTab}"]`).addClass('active').attr('aria-selected', 'true');
-
-        // Update header
-        const tabName = this.tabNames[targetTab] || targetTab;
-        $('#current-tab-name').text(tabName);
-
-        // Update state
-        this.currentTab = targetTab;
-
-        // Close mobile sidebar if open
-        if (this.isMobile && this.sidebarOpen) {
-            this.closeMobileSidebar();
-        }
-
-        console.log(`Successfully switched to ${targetTab} tab`);
+        console.log('Responsive Settings Manager initialized successfully');
     }
 
     // ==========================================
@@ -98,19 +54,21 @@ class ResponsiveSettingsManager {
     // ==========================================
 
     initResponsiveLayout() {
-        console.log('Initializing responsive layout...');
+        console.log('🔄 Initializing responsive layout...');
+
         this.updateLayoutState();
         this.adjustContainerLayout();
     }
 
     updateLayoutState() {
         const wasMobile = this.isMobile;
+        // Changed breakpoint to 768px
         this.isMobile = window.innerWidth <= 768;
         this.isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
         this.isDesktop = window.innerWidth > 768;
 
         if (wasMobile !== this.isMobile) {
-            console.log(`Layout changed: ${this.isMobile ? 'Mobile' : 'Desktop'}`);
+            console.log(`📱 Layout changed: ${this.isMobile ? 'Mobile' : 'Desktop'}`);
             this.handleLayoutChange();
         }
     }
@@ -124,125 +82,273 @@ class ResponsiveSettingsManager {
     }
 
     setupMobileLayout() {
-        const sidebar = $('#settings-sidebar');
-        const toggleBtn = $('#mobile-menu-toggle');
+        const sidebar = document.getElementById('settings-sidebar');
+        const toggleBtn = document.getElementById('mobile-menu-toggle');
 
-        sidebar.addClass('mobile-responsive');
-        toggleBtn.show();
+        if (sidebar) {
+            sidebar.classList.add('mobile-responsive');
+        }
+        if (toggleBtn) {
+            toggleBtn.style.display = 'flex';
+        }
         this.closeMobileSidebar();
     }
 
     setupDesktopLayout() {
-        const sidebar = $('#settings-sidebar');
-        const toggleBtn = $('#mobile-menu-toggle');
+        const sidebar = document.getElementById('settings-sidebar');
+        const toggleBtn = document.getElementById('mobile-menu-toggle');
 
-        sidebar.removeClass('mobile-responsive mobile-open');
-        toggleBtn.hide();
+        if (sidebar) {
+            sidebar.classList.remove('mobile-responsive', 'mobile-open');
+        }
+        if (toggleBtn) {
+            toggleBtn.style.display = 'none';
+        }
         this.sidebarOpen = false;
     }
 
     adjustContainerLayout() {
-        const container = $('.settings-container');
-        const sidebar = $('#sidebar');
+        const container = document.querySelector('.settings-container');
+        const sidebar = document.getElementById('sidebar');
 
-        if (!container.length) return;
+        if (!container) return;
 
         if (this.isMobile) {
-            container.css({
-                'margin-left': '0',
-                'width': '100%'
-            });
+            // Mobile layout - full width with top padding
+            container.style.marginLeft = '0';
+            container.style.width = '100%';
         } else {
-            if (sidebar.length && sidebar.hasClass('close')) {
-                container.css({
-                    'margin-left': '82px',
-                    'width': 'calc(100% - 82px)'
-                });
+            // Desktop layout - adjust for main sidebar
+            if (sidebar && sidebar.classList.contains('close')) {
+                container.style.marginLeft = '82px';
+                container.style.width = 'calc(100% - 82px)';
             } else {
-                container.css({
-                    'margin-left': '250px',
-                    'width': 'calc(100% - 250px)'
-                });
+                container.style.marginLeft = '250px';
+                container.style.width = 'calc(100% - 250px)';
             }
         }
     }
 
+    // Add this method to handle form layout
     adjustFormLayout() {
-        const formRows = $('.form-row-top, .form-row-bottom');
+        const formRows = document.querySelectorAll('.form-row-top, .form-row-bottom');
 
-        formRows.each(function () {
-            const row = $(this);
+        formRows.forEach(row => {
             if (window.innerWidth <= 480) {
-                row.css('display', 'block');
+                // Stack all fields on very small screens
+                row.style.display = 'block';
             } else if (window.innerWidth <= 768) {
-                row.css({
-                    'display': 'grid',
-                    'grid-template-columns': '1fr'
-                });
+                // 1 column on mobile
+                row.style.display = 'grid';
+                row.style.gridTemplateColumns = '1fr';
             } else {
-                row.css({
-                    'display': 'grid',
-                    'grid-template-columns': 'repeat(auto-fit, minmax(250px, 1fr))'
-                });
+                // Original grid layout for desktop (769px+)
+                row.style.display = 'grid';
+                row.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
             }
         });
     }
 
+    // Add this method:
     adjustProfileLayout() {
-        const profileSection = $('.profile-avatar-section');
-        const accountDetails = $('.account-details-section');
+        const profileSection = document.querySelector('.profile-avatar-section');
+        const accountDetails = document.querySelector('.account-details-section');
 
         if (window.innerWidth <= 768) {
-            profileSection.css({
-                'flex-direction': 'column',
-                'text-align': 'center'
-            });
-            accountDetails.css('display', 'block');
+            if (profileSection) {
+                profileSection.style.flexDirection = 'column';
+                profileSection.style.textAlign = 'center';
+            }
+            if (accountDetails) {
+                accountDetails.style.display = 'block';
+            }
         } else {
-            profileSection.css({
-                'flex-direction': 'row',
-                'text-align': 'left'
-            });
-            accountDetails.css('display', 'grid');
+            // Reset to original layout for desktop
+            if (profileSection) {
+                profileSection.style.flexDirection = 'row';
+                profileSection.style.textAlign = 'left';
+            }
+            if (accountDetails) {
+                accountDetails.style.display = 'grid';
+            }
+        }
+    }
+    async applyLanguageChangesImmediately(language, timezone, accessibilitySettings) {
+        // 1. Apply language changes
+        await this.applyLanguageImmediately(language);
+
+        // 2. Apply timezone changes  
+        this.applyTimezoneImmediately(timezone);
+
+        // 3. Apply accessibility settings
+        this.applyAccessibilitySettingsImmediately(accessibilitySettings);
+
+        // 4. Update browser cookie for future requests
+        this.updateLanguageCookie(language);
+    }
+
+    async applyLanguageImmediately(languageCode) {
+        try {
+            // Fetch translations for the new language
+            const response = await fetch(`/Settings/GetTranslations?languageCode=${languageCode}`);
+            const data = await response.json();
+
+            if (data.success) {
+                this.currentTranslations = data.translations;
+
+                // Apply to document
+                document.documentElement.setAttribute('lang', languageCode);
+                document.documentElement.setAttribute('data-language', languageCode);
+
+                // Apply RTL/LTR
+                const direction = ['ar', 'he', 'fa'].includes(languageCode) ? 'rtl' : 'ltr';
+                document.documentElement.setAttribute('dir', direction);
+
+                // Update all translatable elements
+                this.updateAllTranslatableElements();
+
+                console.log(`Language applied immediately: ${languageCode}`);
+            }
+        } catch (error) {
+            console.error('Error applying language:', error);
         }
     }
 
+    applyTimezoneImmediately(timezone) {
+        // Update any displayed times on the current page
+        this.displayTimezoneInfo(timezone);
+
+        // Store timezone for future use
+        this.currentTimezone = timezone;
+
+        console.log(`Timezone applied immediately: ${timezone}`);
+    }
+
+    applyAccessibilitySettingsImmediately(settings) {
+        this.toggleHighContrast(settings.highContrast);
+        this.toggleLargeText(settings.largeText);
+        this.toggleReduceMotion(settings.reduceMotion);
+        this.toggleScreenReaderMode(settings.screenReader);
+
+        console.log('Accessibility settings applied immediately');
+    }
+
+    updateAllTranslatableElements() {
+        document.querySelectorAll('[data-translate]').forEach(element => {
+            const key = element.getAttribute('data-translate');
+            const translation = this.getTranslation(key);
+            if (translation) {
+                element.textContent = translation;
+            }
+        });
+    }
+
+    getTranslation(key) {
+        return this.currentTranslations && this.currentTranslations[key]
+            ? this.currentTranslations[key]
+            : key;
+    }
+
+    updateLanguageCookie(language) {
+        // Set cookie so server knows about language preference on next request
+        document.cookie = `user_language=${language}; path=/; max-age=${365 * 24 * 60 * 60}`; // 1 year
+    }
+
+    displayTimezoneInfo(timezone) {
+        // Create or update timezone info display
+        let timezoneInfo = document.getElementById('timezone-info');
+
+        if (!timezoneInfo) {
+            timezoneInfo = document.createElement('div');
+            timezoneInfo.id = 'timezone-info';
+            timezoneInfo.className = 'timezone-info';
+
+            const timezoneSelect = document.querySelector('select[name="Timezone"]');
+            if (timezoneSelect) {
+                timezoneSelect.parentNode.appendChild(timezoneInfo);
+            }
+        }
+
+        try {
+            const now = new Date();
+            const timeInTimezone = new Intl.DateTimeFormat('en-US', {
+                timeZone: timezone,
+                weekday: 'short',
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZoneName: 'short'
+            }).format(now);
+
+            timezoneInfo.innerHTML = `
+            <small style="color: var(--text-secondary); margin-top: 8px; display: block;">
+                Current time: ${timeInTimezone}
+            </small>
+        `;
+
+        } catch (error) {
+            timezoneInfo.innerHTML = `<small style="color: var(--error);">Invalid timezone</small>`;
+        }
+    }
     // ==========================================
     // MOBILE SIDEBAR FUNCTIONALITY
     // ==========================================
 
     initMobileSidebar() {
-        console.log('Initializing mobile sidebar...');
+        console.log('🔄 Initializing mobile sidebar...');
+
+        const toggleBtn = document.getElementById('mobile-menu-toggle');
+        const closeBtn = document.getElementById('sidebar-close-btn');
+        const overlay = document.getElementById('sidebar-overlay');
+        const sidebar = document.getElementById('settings-sidebar');
+
+        if (!toggleBtn || !sidebar) {
+            console.warn('⚠️ Mobile sidebar elements not found');
+            return;
+        }
 
         // Toggle button click
-        $('#mobile-menu-toggle').on('click', (e) => {
+        toggleBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             this.toggleMobileSidebar();
         });
 
         // Close button click
-        $('#sidebar-close-btn').on('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.closeMobileSidebar();
-        });
+        if (closeBtn) {
+            closeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.closeMobileSidebar();
+            });
+        }
 
         // Overlay click
-        $('#sidebar-overlay').on('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.closeMobileSidebar();
+        if (overlay) {
+            overlay.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.closeMobileSidebar();
+            });
+        }
+
+        // Close sidebar when tab is selected on mobile
+        const tabLinks = document.querySelectorAll('.tab-link');
+        tabLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (this.isMobile && this.sidebarOpen) {
+                    setTimeout(() => this.closeMobileSidebar(), 100);
+                }
+            });
         });
 
         // Escape key to close sidebar
-        $(document).on('keydown', (e) => {
+        document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && this.isMobile && this.sidebarOpen) {
                 this.closeMobileSidebar();
             }
         });
 
-        console.log('Mobile sidebar initialized');
+        console.log('✅ Mobile sidebar initialized');
     }
 
     toggleMobileSidebar() {
@@ -254,29 +360,56 @@ class ResponsiveSettingsManager {
     }
 
     openMobileSidebar() {
-        console.log('Opening mobile sidebar...');
+        console.log('📱 Opening mobile sidebar...');
 
-        $('#settings-sidebar').addClass('mobile-open');
-        $('#sidebar-overlay').addClass('active');
-        $('#mobile-menu-toggle').html('<i class="bx bx-x"></i>').attr('aria-label', 'Close settings menu');
-        $('body').addClass('sidebar-mobile-open');
+        const sidebar = document.getElementById('settings-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const toggleBtn = document.getElementById('mobile-menu-toggle');
 
+        if (sidebar) {
+            sidebar.classList.add('mobile-open');
+        }
+
+        if (overlay) {
+            overlay.classList.add('active');
+        }
+
+        if (toggleBtn) {
+            toggleBtn.innerHTML = '<i class="bx bx-x"></i>';
+            toggleBtn.setAttribute('aria-label', 'Close settings menu');
+        }
+
+        document.body.classList.add('sidebar-mobile-open');
         this.sidebarOpen = true;
 
         // Focus first tab link for accessibility
-        setTimeout(() => {
-            $('#settings-sidebar .tab-link').first().focus();
-        }, 100);
+        const firstTabLink = sidebar?.querySelector('.tab-link');
+        if (firstTabLink) {
+            setTimeout(() => firstTabLink.focus(), 100);
+        }
     }
 
     closeMobileSidebar() {
-        console.log('Closing mobile sidebar...');
+        console.log('📱 Closing mobile sidebar...');
 
-        $('#settings-sidebar').removeClass('mobile-open');
-        $('#sidebar-overlay').removeClass('active');
-        $('#mobile-menu-toggle').html('<i class="bx bx-menu"></i>').attr('aria-label', 'Open settings menu');
-        $('body').removeClass('sidebar-mobile-open');
+        const sidebar = document.getElementById('settings-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const toggleBtn = document.getElementById('mobile-menu-toggle');
 
+        if (sidebar) {
+            sidebar.classList.remove('mobile-open');
+        }
+
+        if (overlay) {
+            overlay.classList.remove('active');
+        }
+
+        if (toggleBtn) {
+            toggleBtn.innerHTML = '<i class="bx bx-menu"></i>';
+            toggleBtn.setAttribute('aria-label', 'Open settings menu');
+        }
+
+        document.body.classList.remove('sidebar-mobile-open');
         this.sidebarOpen = false;
     }
 
@@ -287,7 +420,7 @@ class ResponsiveSettingsManager {
     initResizeHandler() {
         let resizeTimer;
 
-        $(window).on('resize', () => {
+        window.addEventListener('resize', () => {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
                 this.handleResize();
@@ -296,7 +429,7 @@ class ResponsiveSettingsManager {
     }
 
     handleResize() {
-        console.log('Handling window resize...');
+        console.log('📏 Handling window resize...');
 
         this.updateLayoutState();
         this.adjustContainerLayout();
@@ -309,12 +442,114 @@ class ResponsiveSettingsManager {
         }
     }
 
+    // Simple tab display initialization
+    initTabDisplay() {
+        console.log('Initializing tab display...');
+
+        // Hide all tabs simply
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.remove('active');
+        });
+
+        // Show profile tab
+        const profileTab = document.getElementById('profile');
+        if (profileTab) {
+            profileTab.classList.add('active');
+        }
+
+        // Set profile link as active
+        const profileLink = document.querySelector('[data-tab="profile"]');
+        if (profileLink) {
+            document.querySelectorAll('.tab-link').forEach(link => link.classList.remove('active'));
+            profileLink.classList.add('active');
+        }
+
+        console.log('Tab display initialized');
+    }
+
+    // ==========================================
+    // TAB SWITCHING
+    // ==========================================
+
+    initTabSwitching() {
+        console.log('🔄 Initializing tab switching...');
+
+        const tabLinks = document.querySelectorAll('.tab-link');
+        const currentTabName = document.getElementById('current-tab-name');
+
+        if (!tabLinks.length) {
+            console.warn('⚠️ Tab elements not found');
+            return;
+        }
+
+        // Add click handlers
+        tabLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetTab = link.getAttribute('data-tab');
+                if (targetTab) {
+                    this.showTab(targetTab);
+                }
+            });
+        });
+
+        // Show initial tab
+        this.showTab('profile');
+
+        // Export for global access
+        window.showSettingsTab = (tab) => this.showTab(tab);
+    }
+
+    showTab(targetTab) {
+        console.log(`Switching to tab: ${targetTab}`);
+
+        // Simple hide/show approach
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-link').forEach(link => {
+            link.classList.remove('active');
+        });
+
+        // Show target tab
+        const targetContent = document.getElementById(targetTab);
+        if (targetContent) {
+            targetContent.classList.add('active');
+        } else {
+            console.error(`Tab content not found: ${targetTab}`);
+            return;
+        }
+
+        // Set active link
+        const activeLink = document.querySelector(`[data-tab="${targetTab}"]`);
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
+
+        // Update header
+        const currentTabName = document.getElementById('current-tab-name');
+        if (currentTabName && this.tabNames[targetTab]) {
+            currentTabName.textContent = this.tabNames[targetTab];
+        }
+
+        if (targetTab === 'language' && !this.languageSettingsLoaded) {
+            setTimeout(() => {
+                this.loadLanguageSettings();
+                this.languageSettingsLoaded = true;
+            }, 100);
+        }
+
+        // Update state
+        this.currentTab = targetTab;
+        console.log(`Successfully switched to ${targetTab} tab`);
+    }
+
     // ==========================================
     // PROFILE FEATURES
     // ==========================================
 
     initProfileFeatures() {
-        console.log('Initializing profile features...');
+        console.log('🔄 Initializing profile features...');
 
         this.initProfilePictureUpload();
         this.initPasswordToggle();
@@ -325,17 +560,35 @@ class ResponsiveSettingsManager {
         this.initSaveButtonClick();
     }
 
+    initSaveButtonClick() {
+        const saveButton = document.querySelector('.btn-save-profile');
+        if (saveButton) {
+            console.log('Setting up save button click handler');
+
+            // Add the click handler
+            saveButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Save button clicked - calling handleProfileSave');
+                this.handleProfileSave(saveButton);
+            });
+        } else {
+            console.warn('Save button not found');
+        }
+    }
+
     initProfilePictureUpload() {
-        const profileAvatar = $('#profile-avatar-upload');
-        const fileInput = $('#profile-picture-input');
+        const profileAvatar = document.getElementById('profile-avatar-upload');
+        const fileInput = document.getElementById('profile-picture-input'); // Use the existing hidden input
 
-        if (!profileAvatar.length || !fileInput.length) return;
+        if (!profileAvatar || !fileInput) return;
 
-        profileAvatar.on('click', () => {
-            fileInput.click();
-        });
+        const handleUpload = () => {
+            fileInput.click(); // Trigger the hidden file input
+        };
 
-        fileInput.on('change', (e) => {
+        // Handle file selection
+        fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
                 if (file.size > 5 * 1024 * 1024) {
@@ -350,129 +603,153 @@ class ResponsiveSettingsManager {
 
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    profileAvatar.css({
-                        'background-image': `url(${e.target.result})`,
-                        'background-size': 'cover',
-                        'background-position': 'center'
-                    }).html('');
+                    profileAvatar.style.backgroundImage = `url(${e.target.result})`;
+                    profileAvatar.style.backgroundSize = 'cover';
+                    profileAvatar.style.backgroundPosition = 'center';
+                    profileAvatar.innerHTML = '';
                     this.showNotification('Profile picture selected! Click Save Changes to upload.', 'success');
                 };
                 reader.readAsDataURL(file);
             }
         });
-    }
 
-    initPasswordToggle() {
-        $('#toggle-password').on('click', () => {
-            const passwordInput = $('#password');
-            const isPassword = passwordInput.attr('type') === 'password';
-
-            passwordInput.attr('type', isPassword ? 'text' : 'password');
-            $('#toggle-password').html(isPassword ? '<i class="bx bx-show"></i>' : '<i class="bx bx-hide"></i>');
+        profileAvatar.addEventListener('click', handleUpload);
+        profileAvatar.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            handleUpload();
         });
     }
 
-    initConnectedAccounts() {
-        $('.btn-connect').on('click', function () {
-            const button = $(this);
-            const accountItem = button.closest('.account-connection-item');
-            const accountName = accountItem.find('.account-info span').text();
+    initPasswordToggle() {
+        const toggleBtn = document.getElementById('toggle-password');
 
-            if (button.hasClass('connected')) {
-                const confirmDisconnect = confirm(`Are you sure you want to disconnect ${accountName}?`);
-                if (confirmDisconnect) {
-                    button.html('<i class="bx bx-plus"></i>').removeClass('connected');
-                    settingsManager.showNotification(`${accountName} disconnected`, 'info');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                const passwordInput = document.getElementById('password');
+                if (passwordInput) {
+                    const isPassword = passwordInput.type === 'password';
+                    passwordInput.type = isPassword ? 'text' : 'password';
+                    toggleBtn.innerHTML = isPassword ? '<i class="bx bx-show"></i>' : '<i class="bx bx-hide"></i>';
                 }
-                return;
-            }
+            });
+        }
+    }
 
-            button.html('<i class="bx bx-loader-alt bx-spin"></i>').prop('disabled', true);
+    initConnectedAccounts() {
+        const connectButtons = document.querySelectorAll('.btn-connect');
 
-            setTimeout(() => {
-                button.html('<i class="bx bx-check"></i>').addClass('connected').prop('disabled', false);
-                settingsManager.showNotification(`${accountName} connected successfully!`, 'success');
-            }, 1500);
+        connectButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const accountItem = button.closest('.account-connection-item');
+                const accountName = accountItem?.querySelector('.account-info span')?.textContent;
+
+                if (button.classList.contains('connected')) {
+                    const confirmDisconnect = confirm(`Are you sure you want to disconnect ${accountName}?`);
+                    if (confirmDisconnect) {
+                        button.innerHTML = '<i class="bx bx-plus"></i>';
+                        button.classList.remove('connected');
+                        this.showNotification(`${accountName} disconnected`, 'info');
+                    }
+                    return;
+                }
+
+                button.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i>';
+                button.disabled = true;
+
+                setTimeout(() => {
+                    button.innerHTML = '<i class="bx bx-check"></i>';
+                    button.classList.add('connected');
+                    button.disabled = false;
+                    this.showNotification(`${accountName} connected successfully!`, 'success');
+                }, 1500);
+            });
         });
     }
 
     initFormEditing() {
-        const formInputs = $('.profile-form input, .profile-form select');
-        const saveButton = $('.btn-save-profile');
+        // Make all form fields editable and add change detection
+        const formInputs = document.querySelectorAll('.profile-form input, .profile-form select');
+        const saveButton = document.querySelector('.btn-save-profile');
+
         let hasChanges = false;
 
-        formInputs.each(function () {
-            const input = $(this);
-            const originalValue = input.val();
+        formInputs.forEach(input => {
+            const originalValue = input.value;
 
-            input.on('input change', () => {
-                hasChanges = input.val() !== originalValue;
-                settingsManager.updateSaveButtonState(saveButton, hasChanges);
+            input.addEventListener('input', () => {
+                hasChanges = input.value !== originalValue;
+                this.updateSaveButtonState(saveButton, hasChanges);
             });
 
-            input.on('focus', () => {
-                input.parent().addClass('focused');
+            input.addEventListener('change', () => {
+                hasChanges = input.value !== originalValue;
+                this.updateSaveButtonState(saveButton, hasChanges);
             });
 
-            input.on('blur', () => {
-                input.parent().removeClass('focused');
+            // Add focus styles for better UX
+            input.addEventListener('focus', () => {
+                input.parentElement.classList.add('focused');
+            });
+
+            input.addEventListener('blur', () => {
+                input.parentElement.classList.remove('focused');
             });
         });
     }
 
     updateSaveButtonState(button, hasChanges) {
-        if (!button.length) return;
+        if (!button) return;
 
         if (hasChanges) {
-            button.css({
-                'opacity': '1',
-                'transform': 'scale(1.02)'
-            }).prop('disabled', false);
+            button.style.opacity = '1';
+            button.style.transform = 'scale(1.02)';
+            button.disabled = false;
         } else {
-            button.css({
-                'opacity': '0.8',
-                'transform': 'scale(1)'
-            });
+            button.style.opacity = '0.8';
+            button.style.transform = 'scale(1)';
         }
     }
 
-    initSaveButtonClick() {
-        $('.btn-save-profile').on('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.handleProfileSave($(e.currentTarget));
-        });
-    }
-
     handleProfileSave(button) {
-        if (!button.length) return;
+        if (!button) return;
 
-        const originalText = button.html();
-        button.html('<i class="bx bx-loader-alt bx-spin"></i> Saving...').prop('disabled', true);
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Saving...';
+        button.disabled = true;
 
         // Create FormData to handle both regular fields and file upload
         const formData = new FormData();
 
-        // Add regular form fields
-        formData.append('FirstName', $('#firstName').val() || '');
-        formData.append('LastName', $('#lastName').val() || '');
-        formData.append('Phone', $('#phone').val() || '');
-        formData.append('Email', $('#email').val() || '');
-        formData.append('Location', $('#location').val() || '');
-        formData.append('Username', $('#username').val() || '');
-        formData.append('Gender', $('#gender').val() || '');
-        formData.append('Birthday', $('#birthday').val() || '');
+        // Add fields that match UpdateUserProfileDto exactly
+        formData.append('Username', document.getElementById('username')?.value || '');
+        formData.append('FirstName', document.getElementById('firstName')?.value || '');
+        formData.append('LastName', document.getElementById('lastName')?.value || '');
+        formData.append('Phone', document.getElementById('phone')?.value || '');
+        formData.append('PhoneNumber', document.getElementById('phone')?.value || ''); // DTO has both Phone and PhoneNumber
+        formData.append('Email', document.getElementById('email')?.value || '');
+        formData.append('Location', document.getElementById('location')?.value || '');
+        formData.append('Gender', document.getElementById('gender')?.value || '');
+        formData.append('Birthday', document.getElementById('birthday')?.value || '');
+        formData.append('MarketingEmailsEnabled', 'false'); // Default value for required DTO field
+        formData.append('AvatarUrl', ''); // Default value
 
         // Add profile picture file if selected
-        const fileInput = $('#profile-picture-input')[0];
+        const fileInput = document.getElementById('profile-picture-input');
         if (fileInput && fileInput.files[0]) {
             formData.append('ProfilePicture', fileInput.files[0]);
+            console.log('Profile picture file added to form data');
         }
 
         // Add anti-forgery token
-        const token = $('input[name="__RequestVerificationToken"]').val();
+        const token = document.querySelector('input[name="__RequestVerificationToken"]');
         if (token) {
-            formData.append('__RequestVerificationToken', token);
+            formData.append('__RequestVerificationToken', token.value);
+        }
+
+        // Log what we're sending
+        console.log('Sending form data:');
+        for (let pair of formData.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
         }
 
         // Submit to controller
@@ -481,65 +758,77 @@ class ResponsiveSettingsManager {
             body: formData
         })
             .then(response => {
-                if (response.ok) {
-                    return response.text();
-                }
-                throw new Error('Network response was not ok');
-            })
-            .then(data => {
-                button.html(originalText).prop('disabled', false);
-                this.showNotification('Profile updated successfully!', 'success');
+                console.log('Response status:', response.status);
+                button.innerHTML = originalText;
+                button.disabled = false;
 
-                // Reload the page to show updated data
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
+                if (response.status === 200 || response.status === 302) {
+                    this.showNotification('Profile updated successfully!', 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
             })
             .catch(error => {
-                button.html(originalText).prop('disabled', false);
+                button.innerHTML = originalText;
+                button.disabled = false;
                 console.error('Error:', error);
                 this.showNotification('Error updating profile. Please try again.', 'error');
             });
     }
 
     initPhoneFormatting() {
-        $('#phone').on('input', (e) => {
-            let value = e.target.value.replace(/\D/g, '');
+        const phoneInput = document.getElementById('phone');
 
-            // Auto-add Philippines country code if needed
-            if (value.length > 0 && !value.startsWith('63')) {
-                if (value.startsWith('9')) {
-                    value = '63' + value;
+        if (phoneInput) {
+            phoneInput.addEventListener('input', (e) => {
+                let value = e.target.value.replace(/\D/g, '');
+
+                // Auto-add Philippines country code if needed
+                if (value.length > 0 && !value.startsWith('63')) {
+                    if (value.startsWith('9')) {
+                        value = '63' + value;
+                    }
                 }
-            }
 
-            // Format as +63 XXX XXX XXXX
-            let formattedValue = '';
-            if (value.length > 0) {
-                if (value.startsWith('63')) {
-                    formattedValue = '+63';
-                    if (value.length > 2) {
-                        formattedValue += ' ' + value.slice(2, 5);
+                // Format as +63 XXX XXX XXXX
+                let formattedValue = '';
+                if (value.length > 0) {
+                    if (value.startsWith('63')) {
+                        formattedValue = '+63';
+                        if (value.length > 2) {
+                            formattedValue += ' ' + value.slice(2, 5);
+                        }
+                        if (value.length > 5) {
+                            formattedValue += ' ' + value.slice(5, 8);
+                        }
+                        if (value.length > 8) {
+                            formattedValue += ' ' + value.slice(8, 12);
+                        }
+                    } else {
+                        formattedValue = value;
                     }
-                    if (value.length > 5) {
-                        formattedValue += ' ' + value.slice(5, 8);
-                    }
-                    if (value.length > 8) {
-                        formattedValue += ' ' + value.slice(8, 12);
-                    }
-                } else {
-                    formattedValue = value;
                 }
-            }
 
-            e.target.value = formattedValue;
-        });
+                e.target.value = formattedValue;
+            });
+        }
     }
 
+    // ==========================================
+    // PHONE VERIFICATION
+    // ==========================================
+
     initPhoneVerification() {
-        $('#verify-phone-btn').on('click', () => {
-            this.showNotification('Phone verification feature coming soon!', 'info');
-        });
+        const verifyPhoneBtn = document.getElementById('verify-phone-btn');
+
+        if (verifyPhoneBtn) {
+            verifyPhoneBtn.addEventListener('click', () => {
+                this.showNotification('Phone verification feature coming soon!', 'info');
+            });
+        }
     }
 
     // ==========================================
@@ -547,75 +836,93 @@ class ResponsiveSettingsManager {
     // ==========================================
 
     initFormHandling() {
-        console.log('Initializing form handling...');
+        console.log('🔄 Initializing form handling...');
 
         this.initToggleButtons();
         this.initFormValidation();
         this.initNotificationSwitches();
         this.initSecurityFeatures();
         this.initPrivacySettings();
+        this.initLanguageSettings();
+
+        // Handle privacy form submission specifically
+        const privacyForm = document.querySelector('#privacy form');
+        if (privacyForm) {
+            privacyForm.addEventListener('submit', (e) => {
+                this.handlePrivacyFormSubmit(privacyForm);
+            });
+        }
     }
 
     initToggleButtons() {
-        $('.toggle-buttons').each(function () {
-            const group = $(this);
-            const buttons = group.find('.toggle-btn');
-            const hiddenInput = group.find('input[type="hidden"]');
+        const toggleGroups = document.querySelectorAll('.toggle-buttons');
 
-            buttons.on('click', function () {
-                const btn = $(this);
+        toggleGroups.forEach(group => {
+            const buttons = group.querySelectorAll('.toggle-btn');
+            const hiddenInput = group.querySelector('input[type="hidden"]');
 
-                buttons.removeClass('active').attr('aria-checked', 'false');
-                btn.addClass('active').attr('aria-checked', 'true');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    buttons.forEach(b => {
+                        b.classList.remove('active');
+                        b.setAttribute('aria-checked', 'false');
+                    });
 
-                const value = btn.data('value');
-                if (hiddenInput.length && value) {
-                    hiddenInput.val(value);
-                }
+                    btn.classList.add('active');
+                    btn.setAttribute('aria-checked', 'true');
 
-                if (group.closest('#privacy').length) {
-                    const settingName = settingsManager.getSettingDisplayName(hiddenInput.attr('name') || '');
-                    settingsManager.showNotification(`${settingName} updated to ${value}`, 'info');
-                }
+                    const value = btn.getAttribute('data-value');
+                    if (hiddenInput && value) {
+                        hiddenInput.value = value;
+                    }
+
+                    if (group.closest('#privacy')) {
+                        const settingName = this.getSettingDisplayName(hiddenInput?.name || '');
+                        this.showNotification(`${settingName} updated to ${value}`, 'info');
+                    }
+                });
             });
         });
     }
 
     initFormValidation() {
-        $('form').each(function () {
-            const form = $(this);
-            const inputs = form.find('input[required], input[type="email"]');
+        const forms = document.querySelectorAll('form');
 
-            inputs.on('blur', function () {
-                settingsManager.validateField($(this));
+        forms.forEach(form => {
+            const inputs = form.querySelectorAll('input[required], input[type="email"]');
+
+            inputs.forEach(input => {
+                input.addEventListener('blur', () => this.validateField(input));
+                input.addEventListener('input', () => this.clearFieldError(input));
             });
 
-            inputs.on('input', function () {
-                settingsManager.clearFieldError($(this));
-            });
-
-            form.on('submit', function (e) {
+            // Form submit handler
+            form.addEventListener('submit', (e) => {
                 let isValid = true;
-                inputs.each(function () {
-                    if (!settingsManager.validateField($(this))) {
+                inputs.forEach(input => {
+                    if (!this.validateField(input)) {
                         isValid = false;
                     }
                 });
 
                 if (!isValid) {
                     e.preventDefault();
-                    settingsManager.showNotification('Please fix the errors before submitting', 'error');
+                    this.showNotification('Please fix the errors before submitting', 'error');
                     return;
                 }
 
-                const submitBtn = form.find('button[type="submit"]');
-                if (submitBtn.length) {
-                    const originalText = submitBtn.html();
-                    submitBtn.html('<i class="bx bx-loader-alt bx-spin"></i> Saving...').prop('disabled', true);
+                // Show loading state
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Saving...';
+                    submitBtn.disabled = true;
 
+                    // Simulate save process
                     setTimeout(() => {
-                        submitBtn.html(originalText).prop('disabled', false);
-                        settingsManager.showNotification('Settings saved successfully!', 'success');
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                        this.showNotification('Settings saved successfully!', 'success');
                     }, 2000);
                 }
             });
@@ -623,9 +930,9 @@ class ResponsiveSettingsManager {
     }
 
     validateField(field) {
-        const value = field.val().trim();
-        const fieldType = field.attr('type');
-        const isRequired = field.is('[required]');
+        const value = field.value.trim();
+        const fieldType = field.type;
+        const isRequired = field.hasAttribute('required');
 
         this.clearFieldError(field);
 
@@ -654,136 +961,281 @@ class ResponsiveSettingsManager {
     }
 
     showFieldError(field, message) {
-        field.addClass('error');
+        field.classList.add('error');
 
-        const existingError = field.parent().find('.error-message');
-        existingError.remove();
+        const existingError = field.parentNode.querySelector('.error-message');
+        if (existingError) {
+            existingError.remove();
+        }
 
-        const errorDiv = $('<div class="error-message">' + message + '</div>');
-        errorDiv.css({
-            'color': 'var(--error)',
-            'font-size': '12px',
-            'margin-top': '4px',
-            'font-weight': '500'
-        });
-        field.parent().append(errorDiv);
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = message;
+        errorDiv.style.color = 'var(--error)';
+        errorDiv.style.fontSize = '12px';
+        errorDiv.style.marginTop = '4px';
+        errorDiv.style.fontWeight = '500';
+        field.parentNode.appendChild(errorDiv);
     }
 
     clearFieldError(field) {
-        field.removeClass('error');
-        field.parent().find('.error-message').remove();
+        field.classList.remove('error');
+        const errorMessage = field.parentNode.querySelector('.error-message');
+        if (errorMessage) {
+            errorMessage.remove();
+        }
     }
 
     initNotificationSwitches() {
-        $('.switch input[type="checkbox"]').on('change', function () {
-            const setting = $(this).attr('name');
-            const enabled = $(this).is(':checked');
-            console.log(`Notification setting ${setting} changed to ${enabled}`);
+        const switches = document.querySelectorAll('.switch input[type="checkbox"]');
 
-            settingsManager.showNotification(`${setting} ${enabled ? 'enabled' : 'disabled'}`, 'info');
+        switches.forEach(switchEl => {
+            switchEl.addEventListener('change', () => {
+                const setting = switchEl.name;
+                const enabled = switchEl.checked;
+                console.log(`Notification setting ${setting} changed to ${enabled}`);
+
+                // Show feedback
+                this.showNotification(`${setting} ${enabled ? 'enabled' : 'disabled'}`, 'info');
+            });
         });
     }
 
     initSecurityFeatures() {
         // Enable 2FA
-        $('#enable-2fa').on('click', function () {
-            const btn = $(this);
-            const originalText = btn.text();
-            btn.text('Setting up...').prop('disabled', true);
-
-            setTimeout(() => {
-                btn.text('Enabled ✓').removeClass('btn-secondary').addClass('btn-save');
-                settingsManager.showNotification('Two-factor authentication enabled successfully!', 'success');
-            }, 2000);
-        });
-
-        // Logout button
-        $('#logout-btn').on('click', function (e) {
-            e.preventDefault();
-
-            if (confirm('Are you sure you want to logout?')) {
-                const form = $('<form method="POST" action="/Account/Logout"></form>');
-
-                const tokenElement = $('input[name="__RequestVerificationToken"]');
-                if (tokenElement.length) {
-                    const tokenInput = $('<input type="hidden" name="__RequestVerificationToken">');
-                    tokenInput.val(tokenElement.val());
-                    form.append(tokenInput);
-                }
-
-                const returnInput = $('<input type="hidden" name="returnUrl" value="/">');
-                form.append(returnInput);
-
-                $('body').append(form);
-                form.submit();
-            }
-        });
-
-        // Delete account button
-        $('#delete-account-btn').on('click', function (e) {
-            e.preventDefault();
-
-            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-                window.location.href = '/Auth/DeleteAccount';
-            }
-        });
-
-        // End session buttons
-        $('.btn-danger-small').on('click', function () {
-            const btn = $(this);
-            const sessionInfo = btn.closest('.session-item').find('.session-info span').text();
-
-            if (confirm(`End session for ${sessionInfo}?`)) {
-                btn.html('<i class="bx bx-loader-alt bx-spin"></i>').prop('disabled', true);
+        const enable2faBtn = document.getElementById('enable-2fa');
+        if (enable2faBtn) {
+            enable2faBtn.addEventListener('click', () => {
+                const originalText = enable2faBtn.textContent;
+                enable2faBtn.textContent = 'Setting up...';
+                enable2faBtn.disabled = true;
 
                 setTimeout(() => {
-                    btn.closest('.session-item').remove();
-                    settingsManager.showNotification('Session ended successfully', 'success');
-                }, 1000);
-            }
+                    enable2faBtn.textContent = 'Enabled ✓';
+                    enable2faBtn.classList.remove('btn-secondary');
+                    enable2faBtn.classList.add('btn-save');
+                    this.showNotification('Two-factor authentication enabled successfully!', 'success');
+                }, 2000);
+            });
+        }
+
+        // Logout button
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+
+                if (confirm('Are you sure you want to logout?')) {
+                    // Create a form and submit it to Identity's logout
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/Account/Logout';
+
+                    // Add anti-forgery token
+                    const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+                    if (tokenElement) {
+                        const tokenInput = document.createElement('input');
+                        tokenInput.type = 'hidden';
+                        tokenInput.name = '__RequestVerificationToken';
+                        tokenInput.value = tokenElement.value;
+                        form.appendChild(tokenInput);
+                    }
+
+                    // Add return URL
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+
+        // Delete account button
+        const deleteBtn = document.getElementById('delete-account-btn');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+
+                if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                    window.location.href = '/Auth/DeleteAccount';
+                }
+            });
+        }
+
+        // End session buttons
+        const endSessionBtns = document.querySelectorAll('.btn-danger-small');
+        endSessionBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const sessionInfo = btn.closest('.session-item').querySelector('.session-info span').textContent;
+                if (confirm(`End session for ${sessionInfo}?`)) {
+                    btn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i>';
+                    btn.disabled = true;
+
+                    setTimeout(() => {
+                        btn.closest('.session-item').remove();
+                        this.showNotification('Session ended successfully', 'success');
+                    }, 1000);
+                }
+            });
         });
     }
+
+    // ==========================================
+    // NOTIFICATIONS
+    // ==========================================
+
+    initNotifications() {
+        // Auto-hide existing notifications after page load
+        setTimeout(() => {
+            const existingNotifications = document.querySelectorAll('.notification');
+            existingNotifications.forEach(notification => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            });
+        }, 5000);
+    }
+
+    showNotification(message, type = 'info') {
+        // Remove existing notification
+        const existingNotification = document.querySelector('.notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+
+        // Create new notification
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.textContent = message;
+
+        // Add click to dismiss
+        notification.addEventListener('click', () => {
+            notification.remove();
+        });
+
+        // Position notification appropriately for mobile/desktop
+        if (this.isMobile) {
+            notification.style.top = '90px';
+            notification.style.left = '16px';
+            notification.style.right = '16px';
+            notification.style.maxWidth = 'none';
+        }
+
+        document.body.appendChild(notification);
+
+        // Auto-remove after 4 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }
+        }, 4000);
+    }
+
+    // ==========================================
+    // PRIVACY SETTINGS FUNCTIONALITY
+    // ==========================================
 
     initPrivacySettings() {
         console.log('Initializing privacy settings...');
 
+        // Initialize privacy toggle buttons specifically
+        this.initPrivacyToggleButtons();
+
         // Initialize privacy form submission
-        $('#privacy .btn-save').on('click', (e) => {
-            e.preventDefault();
-            this.handlePrivacySave();
-        });
+        this.initPrivacyFormSubmission();
 
         // Load settings when privacy tab is clicked
-        $('.tab-link[data-tab="privacy"]').on('click', () => {
-            setTimeout(() => this.loadPrivacySettings(), 100);
-        });
+        const privacyTab = document.querySelector('[data-tab="privacy"]');
+        if (privacyTab) {
+            privacyTab.addEventListener('click', () => {
+                setTimeout(() => this.loadPrivacySettings(), 100);
+            });
+        }
+
+        // Load settings if privacy tab is already active
+        if (document.querySelector('#privacy.active')) {
+            this.loadPrivacySettings();
+        }
 
         console.log('Privacy settings initialized');
     }
 
-    handlePrivacySave() {
-        const saveButton = $('#privacy .btn-save');
-        if (!saveButton.length) return;
+    initPrivacyToggleButtons() {
+        // Get privacy-specific toggle groups
+        const privacyToggles = document.querySelectorAll('#privacy .toggle-buttons');
 
-        const originalText = saveButton.html();
-        saveButton.html('<i class="bx bx-loader-alt bx-spin"></i> Saving Privacy Settings...').prop('disabled', true);
+        privacyToggles.forEach(group => {
+            const buttons = group.querySelectorAll('.toggle-btn');
+            const hiddenInput = group.querySelector('input[type="hidden"]');
+
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Remove active from all buttons in this group
+                    buttons.forEach(b => {
+                        b.classList.remove('active');
+                        b.setAttribute('aria-checked', 'false');
+                    });
+
+                    // Add active to clicked button
+                    btn.classList.add('active');
+                    btn.setAttribute('aria-checked', 'true');
+
+                    // Update hidden input value
+                    const value = btn.getAttribute('data-value');
+                    if (hiddenInput && value) {
+                        hiddenInput.value = value;
+                        console.log(`Updated ${hiddenInput.name} to: ${value}`);
+                    }
+
+                    // Show feedback notification
+                    if (hiddenInput?.name) {
+                        const settingName = this.getSettingDisplayName(hiddenInput.name);
+                        this.showNotification(`${settingName} updated to ${value}`, 'info');
+                    }
+                });
+            });
+        });
+    }
+
+    initPrivacyFormSubmission() {
+        // Handle the save button in privacy tab
+        const saveButton = document.querySelector('#privacy .btn-save');
+
+        if (saveButton) {
+            saveButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handlePrivacySave();
+            });
+        }
+    }
+
+    handlePrivacySave() {
+        const saveButton = document.querySelector('#privacy .btn-save');
+        if (!saveButton) return;
+
+        const originalText = saveButton.innerHTML;
+        saveButton.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Saving Privacy Settings...';
+        saveButton.disabled = true;
 
         // Collect all privacy form data
         const formData = new FormData();
-        const hiddenInputs = $('#privacy input[type="hidden"]');
+        const hiddenInputs = document.querySelectorAll('#privacy input[type="hidden"]');
 
-        hiddenInputs.each(function () {
-            const input = $(this);
-            if (input.attr('name') && input.attr('name') !== '__RequestVerificationToken') {
-                formData.append(input.attr('name'), input.val());
-                console.log(`Form data: ${input.attr('name')} = ${input.val()}`);
+        hiddenInputs.forEach(input => {
+            if (input.name && input.name !== '__RequestVerificationToken') {
+                formData.append(input.name, input.value);
+                console.log(`Form data: ${input.name} = ${input.value}`);
             }
         });
 
         // Add anti-forgery token
-        const antiForgeryToken = $('#privacy input[name="__RequestVerificationToken"]');
-        if (antiForgeryToken.length) {
-            formData.append('__RequestVerificationToken', antiForgeryToken.val());
+        const antiForgeryToken = document.querySelector('#privacy input[name="__RequestVerificationToken"]');
+        if (antiForgeryToken) {
+            formData.append('__RequestVerificationToken', antiForgeryToken.value);
         }
 
         // Submit to your controller
@@ -798,12 +1250,14 @@ class ResponsiveSettingsManager {
                 throw new Error('Network response was not ok');
             })
             .then(data => {
-                saveButton.html(originalText).prop('disabled', false);
+                saveButton.innerHTML = originalText;
+                saveButton.disabled = false;
                 this.showNotification('Privacy settings saved successfully!', 'success');
                 console.log('Privacy settings saved successfully');
             })
             .catch(error => {
-                saveButton.html(originalText).prop('disabled', false);
+                saveButton.innerHTML = originalText;
+                saveButton.disabled = false;
                 console.error('Error saving privacy settings:', error);
                 this.showNotification('Error saving privacy settings. Please try again.', 'error');
             });
@@ -822,19 +1276,29 @@ class ResponsiveSettingsManager {
             .then(data => {
                 console.log('Loaded privacy settings:', data);
 
+                // Map the response data to form fields
                 Object.keys(data).forEach(key => {
+                    // Convert API response keys to match your HTML input names
                     const inputName = this.mapApiKeyToInputName(key);
-                    const input = $(`#privacy input[name="${inputName}"]`);
+                    const input = document.querySelector(`#privacy input[name="${inputName}"]`);
 
-                    if (input.length) {
-                        input.val(data[key]);
+                    if (input) {
+                        input.value = data[key];
 
+                        // Update the toggle button display
                         const group = input.closest('.toggle-buttons');
-                        if (group.length) {
-                            const buttons = group.find('.toggle-btn');
+                        if (group) {
+                            const buttons = group.querySelectorAll('.toggle-btn');
 
-                            buttons.removeClass('active').attr('aria-checked', 'false');
-                            buttons.filter(`[data-value="${data[key]}"]`).addClass('active').attr('aria-checked', 'true');
+                            buttons.forEach(btn => {
+                                btn.classList.remove('active');
+                                btn.setAttribute('aria-checked', 'false');
+
+                                if (btn.dataset.value === data[key]) {
+                                    btn.classList.add('active');
+                                    btn.setAttribute('aria-checked', 'true');
+                                }
+                            });
                         }
                     }
                 });
@@ -845,7 +1309,249 @@ class ResponsiveSettingsManager {
             });
     }
 
+    initLanguageSettings() {
+    console.log('Initializing language & accessibility settings...');
+
+    const languageSaveButton = document.querySelector('#language .btn-save');
+    if (languageSaveButton) {
+        languageSaveButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.handleLanguageSave();
+        });
+    }
+
+    // Always load settings from DB
+    this.loadLanguageSettings();
+    this.languageSettingsLoaded = true;
+    this.initAccessibilitySwitches();
+    
+    // Load translations immediately for current language
+    this.loadAndApplyCurrentLanguage();
+}
+
+async loadAndApplyCurrentLanguage() {
+    try {
+        // Get the user's saved language
+        const response = await fetch('/Settings/GetLanguageSettings');
+        const data = await response.json();
+        
+        if (data.success && data.data.language) {
+            // Apply the language immediately without saving
+            await this.applyLanguageImmediately(data.data.language);
+            console.log(`Applied saved language on page load: ${data.data.language}`);
+        }
+    } catch (error) {
+        console.error('Error loading current language:', error);
+    }
+}
+
+    // Handle language settings save
+    handleLanguageSave() {
+        const saveButton = document.querySelector('#language .btn-save');
+        if (!saveButton) return;
+
+        const originalText = saveButton.innerHTML;
+        saveButton.innerHTML = '<i class="bx bx-loader-alt bx-spin" aria-hidden="true"></i> <span data-translate="saving">Saving...</span>';
+        saveButton.disabled = true;
+
+        // Get form data
+        const language = document.querySelector('select[name="Language"]')?.value;
+        const timezone = document.querySelector('select[name="Timezone"]')?.value;
+        const highContrast = document.querySelector('input[name="HighContrast"]')?.checked || false;
+        const largeText = document.querySelector('input[name="LargeText"]')?.checked || false;
+        const reduceMotion = document.querySelector('input[name="ReduceMotion"]')?.checked || false;
+        const screenReader = document.querySelector('input[name="ScreenReader"]')?.checked || false;
+
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+        const formData = new FormData();
+        formData.append('Language', language || 'en');
+        formData.append('Timezone', timezone || 'Asia/Manila');
+        formData.append('HighContrast', highContrast);
+        formData.append('LargeText', largeText);
+        formData.append('ReduceMotion', reduceMotion);
+        formData.append('ScreenReader', screenReader);
+
+        if (token) {
+            formData.append('__RequestVerificationToken', token);
+        }
+
+        // Save to server
+        fetch('/Settings/UpdateLanguage', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                saveButton.innerHTML = originalText;
+                saveButton.disabled = false;
+
+                if (data.success) {
+                    // Apply changes immediately in settings page
+                    this.applyLanguageChangesImmediately(language, timezone, {
+                        highContrast, largeText, reduceMotion, screenReader
+                    });
+
+                    // Refresh global accessibility for entire application
+                    if (window.globalAccessibility) {
+                        window.globalAccessibility.refresh();
+                    }
+
+                    this.showNotification(this.getTranslation('settings_saved') || data.message, 'success');
+                } else {
+                    this.showNotification(this.getTranslation('error_saving') || data.message, 'error');
+                }
+            })
+            .catch(error => {
+                saveButton.innerHTML = originalText;
+                saveButton.disabled = false;
+                console.error('Error:', error);
+                this.showNotification(this.getTranslation('error_saving') || 'An error occurred while saving settings. Please try again.', 'error');
+            });
+    }
+    // Load current language settings
+    loadLanguageSettings() {
+        fetch('/Settings/GetLanguageSettings')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Populate the form with current settings
+                    const languageSelect = document.querySelector('select[name="Language"]');
+                    const timezoneSelect = document.querySelector('select[name="Timezone"]');
+                    const highContrastCheckbox = document.querySelector('input[name="HighContrast"]');
+                    const largeTextCheckbox = document.querySelector('input[name="LargeText"]');
+                    const reduceMotionCheckbox = document.querySelector('input[name="ReduceMotion"]');
+                    const screenReaderCheckbox = document.querySelector('input[name="ScreenReader"]');
+
+                    // CHANGE THESE LINES - use lowercase property names
+                    if (languageSelect) languageSelect.value = data.data.language || 'en';
+                    if (timezoneSelect) timezoneSelect.value = data.data.timezone || 'Asia/Manila';
+                    if (highContrastCheckbox) highContrastCheckbox.checked = data.data.highContrast || false;
+                    if (largeTextCheckbox) largeTextCheckbox.checked = data.data.largeText || false;
+                    if (reduceMotionCheckbox) reduceMotionCheckbox.checked = data.data.reduceMotion || false;
+                    if (screenReaderCheckbox) screenReaderCheckbox.checked = data.data.screenReader || false;
+
+                    // Apply current accessibility settings to the page
+                    this.applyAccessibilitySettings(
+                        data.data.highContrast || false,
+                        data.data.largeText || false,
+                        data.data.reduceMotion || false
+                    );
+                }
+            })
+            .catch(error => {
+                console.error('Error loading language settings:', error);
+            });
+    }
+
+    // Initialize accessibility switches with immediate feedback
+    initAccessibilitySwitches() {
+        const accessibilitySwitches = document.querySelectorAll('#language .switch input[type="checkbox"]');
+
+        accessibilitySwitches.forEach(switchEl => {
+            switchEl.addEventListener('change', () => {
+                const setting = switchEl.name;
+                const enabled = switchEl.checked;
+
+                // Apply the setting immediately for better UX
+                switch (setting) {
+                    case 'HighContrast':
+                        this.toggleHighContrast(enabled);
+                        break;
+                    case 'LargeText':
+                        this.toggleLargeText(enabled);
+                        break;
+                    case 'ReduceMotion':
+                        this.toggleReduceMotion(enabled);
+                        break;
+                    case 'ScreenReader':
+                        this.toggleScreenReaderMode(enabled);
+                        break;
+                }
+
+                // Show immediate feedback
+                const settingName = this.getAccessibilitySettingName(setting);
+                this.showNotification(`${settingName} ${enabled ? 'enabled' : 'disabled'}`, 'info');
+            });
+        });
+    }
+
+    // Apply accessibility settings to the page
+    applyAccessibilitySettings(highContrast, largeText, reduceMotion) {
+        this.toggleHighContrast(highContrast);
+        this.toggleLargeText(largeText);
+        this.toggleReduceMotion(reduceMotion);
+    }
+
+    // Individual accessibility setting toggles
+    toggleHighContrast(enabled) {
+        const body = document.body;
+        if (enabled) {
+            body.classList.add('high-contrast-mode');
+        } else {
+            body.classList.remove('high-contrast-mode');
+        }
+    }
+
+    toggleLargeText(enabled) {
+        const body = document.body;
+        if (enabled) {
+            body.classList.add('large-text-mode');
+        } else {
+            body.classList.remove('large-text-mode');
+        }
+    }
+
+    toggleReduceMotion(enabled) {
+        const body = document.body;
+        if (enabled) {
+            body.classList.add('reduce-motion-mode');
+        } else {
+            body.classList.remove('reduce-motion-mode');
+        }
+    }
+
+    toggleScreenReaderMode(enabled) {
+        // Add screen reader optimizations
+        const body = document.body;
+        if (enabled) {
+            body.classList.add('screen-reader-mode');
+            // Add aria-live regions, focus management, etc.
+            this.enhanceScreenReaderSupport();
+        } else {
+            body.classList.remove('screen-reader-mode');
+        }
+    }
+
+    enhanceScreenReaderSupport() {
+        // Add live region for announcements if it doesn't exist
+        if (!document.getElementById('sr-live-region')) {
+            const liveRegion = document.createElement('div');
+            liveRegion.id = 'sr-live-region';
+            liveRegion.setAttribute('aria-live', 'polite');
+            liveRegion.setAttribute('aria-atomic', 'true');
+            liveRegion.style.position = 'absolute';
+            liveRegion.style.left = '-10000px';
+            liveRegion.style.width = '1px';
+            liveRegion.style.height = '1px';
+            liveRegion.style.overflow = 'hidden';
+            document.body.appendChild(liveRegion);
+        }
+    }
+
+    // Helper method to get user-friendly setting names
+    getAccessibilitySettingName(settingName) {
+        const names = {
+            'HighContrast': 'High Contrast Mode',
+            'LargeText': 'Large Text',
+            'ReduceMotion': 'Reduce Motion',
+            'ScreenReader': 'Screen Reader Support'
+        };
+        return names[settingName] || settingName;
+    }
+
     mapApiKeyToInputName(apiKey) {
+        // Map API response keys to your HTML input names
         const keyMapping = {
             'profileVisibility': 'ProfileVisibility',
             'locationVisibility': 'LocationVisibility',
@@ -872,49 +1578,31 @@ class ResponsiveSettingsManager {
         return displayNames[settingName] || settingName;
     }
 
-    // ==========================================
-    // NOTIFICATIONS
-    // ==========================================
+    handlePrivacyFormSubmit(form) {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (!submitBtn) return;
 
-    initNotifications() {
-        // Auto-hide existing notifications after page load
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Saving Privacy Settings...';
+        submitBtn.disabled = true;
+
         setTimeout(() => {
-            $('.notification').remove();
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
         }, 5000);
     }
 
-    showNotification(message, type = 'info') {
-        $('.notification').remove();
+    // ==========================================
+    // MODAL HANDLING
+    // ==========================================
 
-        const notification = $('<div class="notification notification-' + type + '">' + message + '</div>');
-
-        notification.css({
-            'position': 'fixed',
-            'top': this.isMobile ? '90px' : '20px',
-            'right': '20px',
-            'left': this.isMobile ? '20px' : 'auto',
-            'background': type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6',
-            'color': 'white',
-            'padding': '12px 20px',
-            'border-radius': '8px',
-            'z-index': '9999',
-            'box-shadow': '0 4px 12px rgba(0,0,0,0.15)',
-            'cursor': 'pointer',
-            'font-weight': '500',
-            'transition': 'all 0.3s ease'
+    initModalHandling() {
+        // Close modal on outside click
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                // Close any open modals
+            }
         });
-
-        $('body').append(notification);
-
-        notification.on('click', () => {
-            notification.remove();
-        });
-
-        setTimeout(() => {
-            notification.fadeOut(() => {
-                notification.remove();
-            });
-        }, 4000);
     }
 
     // ==========================================
@@ -923,290 +1611,49 @@ class ResponsiveSettingsManager {
 
     initAccessibility() {
         // Keyboard shortcuts
-        $(document).on('keydown', (e) => {
+        document.addEventListener('keydown', (e) => {
             // Ctrl/Cmd + S to save
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
-                const activeForm = $('.tab-content.active form');
-                if (activeForm.length) {
-                    const saveButton = activeForm.find('.btn-save, .btn-save-profile');
-                    if (saveButton.length) {
+                const activeForm = document.querySelector('.tab-content.active form');
+                if (activeForm) {
+                    const saveButton = activeForm.querySelector('.btn-save, .btn-save-profile');
+                    if (saveButton) {
                         saveButton.click();
                         this.showNotification('Settings saved!', 'success');
                     }
                 }
             }
 
-            // Escape to close notifications and mobile sidebar
+            // Escape to close notifications, modals, and mobile sidebar
             if (e.key === 'Escape') {
-                $('.notification').remove();
+                const notification = document.querySelector('.notification');
+                if (notification) {
+                    notification.remove();
+                }
 
                 if (this.isMobile && this.sidebarOpen) {
                     this.closeMobileSidebar();
                 }
             }
-
-            // Arrow keys for tab navigation (desktop only)
-            if (!this.isMobile && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
-                const activeTab = $('.tab-link.active');
-                if (activeTab.length && $(document.activeElement).is('.tab-link')) {
-                    e.preventDefault();
-                    const tabLinks = $('.tab-link');
-                    const currentIndex = tabLinks.index(activeTab);
-                    let nextIndex;
-
-                    if (e.key === 'ArrowRight') {
-                        nextIndex = (currentIndex + 1) % tabLinks.length;
-                    } else {
-                        nextIndex = (currentIndex - 1 + tabLinks.length) % tabLinks.length;
-                    }
-
-                    const nextTab = tabLinks.eq(nextIndex);
-                    if (nextTab.length) {
-                        nextTab.click().focus();
-                    }
-                }
-            }
-
-            // Mobile menu toggle with keyboard (M key)
-            if (this.isMobile && e.key === 'm' && !e.ctrlKey && !e.metaKey && !e.altKey) {
-                const target = $(e.target);
-                if (!target.is('input, textarea, select')) {
-                    e.preventDefault();
-                    this.toggleMobileSidebar();
-                }
-            }
         });
-
-        // High contrast mode toggle
-        $('input[name="HighContrast"]').on('change', function () {
-            const enabled = $(this).is(':checked');
-            $('body').toggleClass('high-contrast', enabled);
-            settingsManager.showNotification(`High contrast mode ${enabled ? 'enabled' : 'disabled'}`, 'info');
-        });
-
-        // Reduce motion toggle
-        $('input[name="ReduceMotion"]').on('change', function () {
-            const enabled = $(this).is(':checked');
-            $('body').toggleClass('reduce-motion', enabled);
-            settingsManager.showNotification(`Motion reduction ${enabled ? 'enabled' : 'disabled'}`, 'info');
-        });
-
-        // Large text toggle
-        $('input[name="LargeText"]').on('change', function () {
-            const enabled = $(this).is(':checked');
-            $('body').toggleClass('large-text', enabled);
-            settingsManager.showNotification(`Large text ${enabled ? 'enabled' : 'disabled'}`, 'info');
-        });
-
-        // Touch gesture support for mobile sidebar
-        this.initTouchGestures();
-    }
-
-    initTouchGestures() {
-        if (window.innerWidth > 768) return;
-
-        let startX = 0;
-        let startY = 0;
-        let currentX = 0;
-        let currentY = 0;
-        let isScrolling = false;
-
-        const container = $('.settings-container');
-        if (!container.length) return;
-
-        container[0].addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-            isScrolling = false;
-        }, { passive: true });
-
-        container[0].addEventListener('touchmove', (e) => {
-            if (!startX || !startY) return;
-
-            currentX = e.touches[0].clientX;
-            currentY = e.touches[0].clientY;
-
-            const diffX = startX - currentX;
-            const diffY = startY - currentY;
-
-            if (Math.abs(diffY) > Math.abs(diffX)) {
-                isScrolling = true;
-                return;
-            }
-
-            if (Math.abs(diffX) > 10 && !isScrolling) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        container[0].addEventListener('touchend', (e) => {
-            if (!startX || !startY || isScrolling) return;
-
-            const diffX = startX - currentX;
-            const threshold = Math.min(50, window.innerWidth * 0.15);
-
-            // Swipe right to open sidebar (from left edge)
-            if (diffX < -threshold && startX < 50 && !this.sidebarOpen) {
-                this.openMobileSidebar();
-            }
-
-            // Swipe left to close sidebar
-            if (diffX > threshold && this.sidebarOpen) {
-                this.closeMobileSidebar();
-            }
-
-            startX = 0;
-            startY = 0;
-            currentX = 0;
-            currentY = 0;
-            isScrolling = false;
-        }, { passive: true });
-    }
-
-    // ==========================================
-    // UTILITY METHODS
-    // ==========================================
-
-    getCurrentTab() {
-        return this.currentTab;
-    }
-
-    isInitialized() {
-        return this.initialized;
-    }
-
-    isMobileLayout() {
-        return this.isMobile;
-    }
-
-    isSidebarOpen() {
-        return this.sidebarOpen;
-    }
-
-    debug() {
-        console.log('=== Settings Manager Debug Info ===');
-        console.log('Current tab:', this.currentTab);
-        console.log('Initialized:', this.initialized);
-        console.log('Is mobile:', this.isMobile);
-        console.log('Sidebar open:', this.sidebarOpen);
-        console.log('Window width:', window.innerWidth);
-        console.log('Active tab link:', $('.tab-link.active'));
-        console.log('Active tab content:', $('.tab-content.active'));
-    }
-
-    forceFix() {
-        console.log('Forcing settings display fix...');
-        this.adjustContainerLayout();
-        this.showTab('profile');
-        if (this.sidebarOpen) {
-            this.closeMobileSidebar();
-        }
-        console.log('Display fix applied');
-    }
-
-    openSidebar() {
-        if (this.isMobile) {
-            this.openMobileSidebar();
-        }
-    }
-
-    closeSidebar() {
-        if (this.isMobile) {
-            this.closeMobileSidebar();
-        }
-    }
-
-    toggleSidebar() {
-        if (this.isMobile) {
-            this.toggleMobileSidebar();
-        }
-    }
-
-    destroy() {
-        console.log('Cleaning up Settings Manager...');
-        $(window).off('resize');
-        $(document).off('keydown');
-        this.initialized = false;
-        console.log('Settings Manager cleaned up');
     }
 }
 
-// Initialize settings manager
+// Initialize settings manager when DOM is ready
 let settingsManager;
 
-$(document).ready(() => {
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        settingsManager = new ResponsiveSettingsManager();
+    });
+} else {
     settingsManager = new ResponsiveSettingsManager();
-
-    // Handle main sidebar state changes if present
-    const mainSidebar = $('#sidebar');
-    if (mainSidebar.length) {
-        const observer = new MutationObserver(() => {
-            settingsManager.adjustContainerLayout();
-        });
-        observer.observe(mainSidebar[0], { attributes: true, attributeFilter: ['class'] });
-    }
-
-    // Initial layout adjustment
-    setTimeout(() => {
-        settingsManager.adjustContainerLayout();
-    }, 100);
-});
+}
 
 // Export for global access
 window.ResponsiveSettingsManager = ResponsiveSettingsManager;
 window.showSettingsTab = (tab) => settingsManager?.showTab(tab);
 window.debugSettings = () => settingsManager?.debug();
-window.fixSettingsDisplay = () => settingsManager?.forceFix();
-window.toggleSettingsSidebar = () => settingsManager?.toggleSidebar();
-window.openSettingsSidebar = () => settingsManager?.openSidebar();
-window.closeSettingsSidebar = () => settingsManager?.closeSidebar();
-
-// Emergency layout fix function
-window.emergencyLayoutFix = function () {
-    console.log('Applying emergency layout fix...');
-
-    $('.tab-content').removeClass('active').hide();
-    $('.tab-link').removeClass('active');
-
-    $('#profile').addClass('active').show();
-    $('.tab-link[data-tab="profile"]').addClass('active');
-
-    $('#settings-sidebar').removeClass('mobile-open');
-    $('#sidebar-overlay').removeClass('active');
-    $('body').removeClass('sidebar-mobile-open');
-
-    console.log('Emergency layout fix applied');
-};
-
-// Handle orientation change on mobile devices
-$(window).on('orientationchange', () => {
-    setTimeout(() => {
-        if (settingsManager) {
-            settingsManager.handleResize();
-            settingsManager.adjustFormLayout();
-        }
-    }, 200);
-});
-
-// Handle visibility change (when app comes back into focus)
-$(document).on('visibilitychange', () => {
-    if (!document.hidden && settingsManager) {
-        setTimeout(() => {
-            settingsManager.adjustContainerLayout();
-        }, 100);
-    }
-});
-
-// Auto-fix on page load if there are issues
-$(window).on('load', () => {
-    setTimeout(() => {
-        const profileTab = $('#profile');
-        if (profileTab.length && !profileTab.is(':visible')) {
-            console.warn('Profile tab not visible, applying emergency fix...');
-            window.emergencyLayoutFix();
-        }
-    }, 1000);
-});
 
 console.log('Settings JavaScript loaded successfully');

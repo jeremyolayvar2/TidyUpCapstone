@@ -65,6 +65,26 @@ namespace TidyUpCapstone.Models.Entities.User
         [Column("last_login")]
         public DateTime? LastLogin { get; set; }
 
+        [StringLength(10)]
+        [Column("language")]
+        public string Language { get; set; } = "en";
+
+        [StringLength(50)]
+        [Column("timezone")]
+        public string Timezone { get; set; } = "Asia/Manila";
+
+        [Column("high_contrast")]
+        public bool HighContrast { get; set; } = false;
+
+        [Column("large_text")]
+        public bool LargeText { get; set; } = false;
+
+        [Column("reduce_motion")]
+        public bool ReduceMotion { get; set; } = false;
+
+        [Column("screen_reader")]
+        public bool ScreenReader { get; set; } = false;
+
         // Navigation Properties
         [ForeignKey("ManagedByAdminId")]
         public virtual AppUser? ManagedByAdmin { get; set; }

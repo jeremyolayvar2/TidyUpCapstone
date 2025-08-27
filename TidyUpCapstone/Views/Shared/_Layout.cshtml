@@ -13,6 +13,7 @@
     <link href="~/assets/logo-tidyup.png" rel="shortcut icon" type="image/svg" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/accessibility.css" asp-append-version="true" />
 
     @if (!User.Identity.IsAuthenticated)
     {
@@ -229,6 +230,8 @@
                 </footer>
             </div>
         </div>
+
+    <script src="~/js/global-accessibility.js" asp-append-version="true"></script>
         <script src="~/lib/jquery/dist/jquery.min.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
         <script src="~/js/site.js" asp-append-version="true"></script>

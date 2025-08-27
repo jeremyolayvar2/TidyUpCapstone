@@ -105,6 +105,22 @@ namespace TidyUpCapstone.Data
                 entity.Property(e => e.AdminNotes).HasColumnName("admin_notes");
                 entity.Property(e => e.Status).HasColumnName("status");
                 entity.Property(e => e.LastLogin).HasColumnName("last_login");
+
+                entity.Property(e => e.FirstName).HasColumnName("first_name");
+                entity.Property(e => e.LastName).HasColumnName("last_name");
+                entity.Property(e => e.Gender).HasColumnName("gender");
+                entity.Property(e => e.Birthday).HasColumnName("birthday");
+                entity.Property(e => e.Location).HasColumnName("location");
+                entity.Property(e => e.ProfilePictureUrl).HasColumnName("profile_picture_url");
+                entity.Property(e => e.PhoneNumber).HasColumnName("PhoneNumber");
+
+                // Language & Accessibility Properties
+                entity.Property(e => e.Language).HasColumnName("language");
+                entity.Property(e => e.Timezone).HasColumnName("timezone");
+                entity.Property(e => e.HighContrast).HasColumnName("high_contrast");
+                entity.Property(e => e.LargeText).HasColumnName("large_text");
+                entity.Property(e => e.ReduceMotion).HasColumnName("reduce_motion");
+                entity.Property(e => e.ScreenReader).HasColumnName("screen_reader");
             });
 
             builder.Entity<IdentityRole<int>>().ToTable("AspNetRoles");

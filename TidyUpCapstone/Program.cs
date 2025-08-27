@@ -56,6 +56,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 // Register services
 builder.Services.AddScoped<IPrivacyService, PrivacyService>();
+builder.Services.AddScoped<ILanguageService, LanguageService>();
 
 // Add services to the container
 builder.Services.AddControllersWithViews();

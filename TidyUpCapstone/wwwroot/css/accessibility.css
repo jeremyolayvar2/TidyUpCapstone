@@ -1,0 +1,70 @@
+﻿hey chat is this true:
+/* ==========================================
+   GLOBAL ACCESSIBILITY SETTINGS
+   ========================================== */
+/* High Contrast Mode - More selective targeting */
+body.high-contrast-mode {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+body.high-contrast-mode .main-content,
+body.high-contrast-mode .settings-content,
+body.high-contrast-mode .container {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
+body.high-contrast-mode input,
+body.high-contrast-mode select,
+body.high-contrast-mode button,
+body.high-contrast-mode textarea {
+    background-color: #333333 !important;
+    color: #ffffff !important;
+    border: 1px solid #ffffff !important;
+}
+
+body.high-contrast-mode a {
+    color: #ffff00 !important;
+}
+
+/* Large Text Mode - Reasonable 20% increase */
+body.large-text-mode {
+    font-size: 1.4em;
+}
+
+    body.large-text-mode h1 {
+        font-size: 2.8rem !important;
+    }
+
+    body.large-text-mode h2 {
+        font-size: 2.3rem !important;
+    }
+
+    body.large-text-mode h3 {
+        font-size: 2rem !important;
+    
+
+    body.large-text-mode h4 {
+        font-size: 1.7rem !important;
+    }
+
+/* Reduce Motion Mode */
+body.reduce-motion-mode *,
+body.reduce-motion-mode *::before,
+body.reduce-motion-mode *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+}
+
+/* Screen Reader Mode */
+body.screen-reader-mode {
+    font-family: Arial, sans-serif !important;
+}
+
+/* RTL Support */
+[dir="rtl"] {
+    text-align: right !important;
+    direction: rtl !important;
+}
