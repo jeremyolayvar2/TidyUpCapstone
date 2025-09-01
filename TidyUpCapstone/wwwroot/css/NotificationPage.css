@@ -227,7 +227,7 @@
         border-radius: 50%;
         border: 2px solid white;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        animation: bounce 2s infinite;
+        
     }
 
 /* Notification Content Layout */
@@ -995,8 +995,8 @@ body.sidebar-closed .notification-page-container {
     }
 
     .modal-content {
-        max-height: 70vh;
-        max-height: 70dvh;
+        max-height: 60vh;
+        max-height: 60dvh;
         overflow-y: auto;
     }
 }
@@ -1085,7 +1085,7 @@ body.sidebar-closed .notification-page-container {
     }
 
         .notification-page-container-child2 .modal-content {
-            max-width: 260px;
+            max-width: 300px;
             padding: 16px;
         }
 
