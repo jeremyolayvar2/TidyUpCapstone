@@ -13,35 +13,16 @@ function initializeLeaderboard() {
 // Enhanced sidebar responsiveness handler
 function initializeSidebarResponsiveness() {
     const sidebar = document.getElementById('sidebar');
-    const toggleButton = sidebar?.querySelector('#icon-toggle');
 
     if (!sidebar) return;
 
-    // Set initial sidebar state class
-    updateSidebarState();
-
-    // Listen for sidebar toggle events
-    if (toggleButton) {
-        toggleButton.addEventListener('click', handleSidebarToggle);
-    }
-
-    // Monitor sidebar state changes using MutationObserver
-    const observer = new MutationObserver(function (mutations) {
-        mutations.forEach(function (mutation) {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                handleSidebarStateChange();
-            }
-        });
-    });
-
-    observer.observe(sidebar, {
-        attributes: true,
-        attributeFilter: ['class']
+    // Listen for the custom sidebar toggle event from site.js
+    document.addEventListener('sidebarToggled', function (event) {
+        handleSidebarStateChange(event.detail.isOpen);
     });
 
     // Handle window resize events
     window.addEventListener('resize', debounce(() => {
-        updateSidebarState();
         adjustLayoutForSidebar();
     }, 250));
 
@@ -49,36 +30,8 @@ function initializeSidebarResponsiveness() {
     adjustLayoutForSidebar();
 }
 
-function handleSidebarToggle() {
-    // Small delay to ensure CSS transitions work smoothly
-    setTimeout(() => {
-        updateSidebarState();
-        handleSidebarStateChange();
-    }, 50);
-}
-
-function handleSidebarStateChange() {
-    updateSidebarState();
+function handleSidebarStateChange(isOpen) {
     adjustLayoutForSidebar();
-    
-    // Add smooth transition feedback
-    showSidebarTransitionFeedback();
-}
-
-function updateSidebarState() {
-    const sidebar = document.getElementById('sidebar');
-    if (!sidebar || window.innerWidth <= 768) return;
-
-    const isClosed = sidebar.classList.contains('close');
-    
-    // Update body class for CSS targeting
-    if (isClosed) {
-        document.body.classList.add('sidebar-closed');
-        document.body.classList.remove('sidebar-open');
-    } else {
-        document.body.classList.add('sidebar-open');
-        document.body.classList.remove('sidebar-closed');
-    }
 }
 
 function adjustLayoutForSidebar() {
@@ -95,7 +48,7 @@ function adjustLayoutForSidebar() {
     }
 
     const isClosed = sidebar.classList.contains('close');
-    const sidebarWidth = isClosed ? 82 : 250;
+    const sidebarWidth = isClosed ? 12 : 2;
 
     // Adjust background text positioning
     if (backgroundText) {
@@ -112,11 +65,11 @@ function adjustLayoutForSidebar() {
 
     // Optimize content width based on available space
     const availableWidth = window.innerWidth - sidebarWidth;
-    
+
     if (topThreeContainer && availableWidth < 900) {
         // Adjust card layout for smaller available space
         topThreeContainer.style.gap = '1rem';
-        
+
         const cards = topThreeContainer.querySelectorAll('.winner-card');
         cards.forEach(card => {
             card.style.padding = '1.5rem';
@@ -124,7 +77,7 @@ function adjustLayoutForSidebar() {
     } else if (topThreeContainer) {
         // Reset to default for larger spaces
         topThreeContainer.style.gap = '2rem';
-        
+
         const cards = topThreeContainer.querySelectorAll('.winner-card');
         cards.forEach(card => {
             card.style.padding = '2rem';
@@ -160,51 +113,6 @@ function resetMobileLayout() {
     }
 }
 
-//function showSidebarTransitionFeedback() {
-//    // Visual feedback for sidebar state change
-//    const feedback = document.createElement('div');
-//    const sidebar = document.getElementById('sidebar');
-//    const isClosed = sidebar?.classList.contains('close');
-    
-//    feedback.textContent = isClosed ? 'Sidebar minimized' : 'Sidebar expanded';
-//    feedback.className = 'sidebar-feedback';
-//    feedback.style.cssText = `
-//        position: fixed;
-//        top: 1rem;
-//        left: 50%;
-//        transform: translateX(-50%);
-//        background: var(--primary-color);
-//        color: white;
-//        padding: 0.5rem 1rem;
-//        border-radius: 20px;
-//        font-size: 0.875rem;
-//        font-weight: 600;
-//        z-index: 10000;
-//        opacity: 0;
-//        transition: all 0.3s ease;
-//        pointer-events: none;
-//    `;
-
-//    document.body.appendChild(feedback);
-
-//    // Animate in
-//    setTimeout(() => {
-//        feedback.style.opacity = '1';
-//        feedback.style.transform = 'translateX(-50%) translateY(0)';
-//    }, 100);
-
-//    // Remove after delay
-//    setTimeout(() => {
-//        feedback.style.opacity = '0';
-//        feedback.style.transform = 'translateX(-50%) translateY(-20px)';
-//        setTimeout(() => {
-//            if (feedback.parentNode) {
-//                feedback.remove();
-//            }
-//        }, 300);
-//    }, 1500);
-//}
-
 // Filter functionality
 function initializeFilters() {
     const filterButtons = document.querySelectorAll('.filter-btn');
@@ -233,9 +141,6 @@ function applyFilter(filterType) {
     // Add loading state
     container.style.opacity = '0.7';
     container.style.pointerEvents = 'none';
-
-    // Show loading feedback
-    showLoadingFeedback();
 
     // Simulate API call or data filtering
     setTimeout(() => {
@@ -298,71 +203,6 @@ function updateLeaderboardData(filterType) {
         }
     });
 }
-
-//function showLoadingFeedback() {
-//    const loading = document.createElement('div');
-//    loading.id = 'loading-indicator';
-//    loading.innerHTML = `
-//        <div class="loading-content">
-//            <div class="loading-spinner"></div>
-//            <span>Updating rankings...</span>
-//        </div>
-//    `;
-//    loading.style.cssText = `
-//        position: fixed;
-//        top: 0;
-//        left: 0;
-//        right: 0;
-//        bottom: 0;
-//        background: rgba(107, 144, 128, 0.9);
-//        display: flex;
-//        justify-content: center;
-//        align-items: center;
-//        z-index: 9999;
-//        backdrop-filter: blur(10px);
-//    `;
-
-//    const loadingContent = loading.querySelector('.loading-content');
-//    loadingContent.style.cssText = `
-//        text-align: center;
-//        color: white;
-//        font-weight: 600;
-//        font-size: 1.1rem;
-//    `;
-
-//    const spinner = loading.querySelector('.loading-spinner');
-//    spinner.style.cssText = `
-//        width: 40px;
-//        height: 40px;
-//        border: 4px solid rgba(255, 255, 255, 0.3);
-//        border-top: 4px solid white;
-//        border-radius: 50%;
-//        animation: spin 1s linear infinite;
-//        margin: 0 auto 1rem;
-//    `;
-
-//    // Add spinner animation
-//    if (!document.querySelector('#spinner-keyframes')) {
-//        const style = document.createElement('style');
-//        style.id = 'spinner-keyframes';
-//        style.textContent = `
-//            @keyframes spin {
-//                0% { transform: rotate(0deg); }
-//                100% { transform: rotate(360deg); }
-//            }
-//        `;
-//        document.head.appendChild(style);
-//    }
-
-//    document.body.appendChild(loading);
-
-//    // Remove loading after delay
-//    setTimeout(() => {
-//        if (loading.parentNode) {
-//            loading.remove();
-//        }
-//    }, 700);
-//}
 
 function showFilterFeedback(filterType) {
     const feedback = document.createElement('div');
@@ -591,7 +431,6 @@ function initializeResponsiveFeatures() {
 
 // Responsive table handling
 function initializeResponsiveTable() {
-    const table = document.querySelector('.leaderboard-table');
     const container = document.querySelector('.leaderboard-table-container');
 
     if (!container) return;
@@ -696,25 +535,11 @@ function debounce(func, wait) {
     };
 }
 
-function throttle(func, limit) {
-    let inThrottle;
-    return function () {
-        const args = arguments;
-        const context = this;
-        if (!inThrottle) {
-            func.apply(context, args);
-            inThrottle = true;
-            setTimeout(() => inThrottle = false, limit);
-        }
-    }
-}
-
 // Export functions for external use
 window.LeaderboardPage = {
     applyFilter,
     initializeLeaderboard,
     updateLeaderboardData,
     showFilterFeedback,
-    adjustLayoutForSidebar,
-    updateSidebarState
+    adjustLayoutForSidebar
 };

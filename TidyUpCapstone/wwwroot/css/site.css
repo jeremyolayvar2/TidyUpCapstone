@@ -1,3 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root {
+    --background: #F5F5F5;
+    --primary-color: #6B9080;
+    --secondary-color: #A4C3B2;
+    --accent-color: #EAF4F4;
+    --text-color: #000000;
+    --hover-effect: rgba(217, 217, 217, 0.6);
+}
+
+* {
+    scroll-behavior: smooth;
+}
+
 html {
     background-color: var(--background);
     font-size: 14px;
@@ -14,7 +30,6 @@ html {
     display: none;
 }
 
-
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
     box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
@@ -24,17 +39,53 @@ body {
     line-height: normal;
     min-height: 100vh;
     min-height: 100dvh;
-    display: grid;
-    grid-template-columns: auto 1fr 1fr;
-    justify-content: center;
+    background-color: var(--background);
+    transition: background-color 0.3s ease;
 }
 
-
-
+/* Layout wrapper for pages WITH navigation */
 .layout-wrapper {
     width: 100vw;
+    display: flex;
+    min-height: 100vh;
 }
 
+    .layout-wrapper .main-content {
+        flex: 1;
+        transition: all 0.3s ease-in-out;
+        min-height: 100vh;
+        padding: 0;
+        margin-left: 0;
+    }
+
+/* Desktop styles - ONLY apply sidebar margins on screens larger than 768px */
+@media (min-width: 769px) {
+    .layout-wrapper .main-content {
+        margin-left: 250px; /* Default expanded sidebar width */
+    }
+
+    /* When sidebar is closed - ONLY for desktop */
+    .layout-wrapper.sidebar-closed .main-content {
+        margin-left: 82px; /* Collapsed sidebar width */
+    }
+}
+
+/* Page-specific body classes for theme identification */
+body.main-page {
+    /* Main page uses default theme */
+}
+
+body.quest-page {
+    /* Quest page theme */
+}
+
+body.leaderboard-page {
+    /* Leaderboard page theme */
+}
+
+body.shop-page {
+    /* Shop page theme */
+}
 
 /*SideBar - Default -----------------------------*/
 #sidebar {
@@ -44,18 +95,50 @@ body {
     background-color: var(--primary-color);
     position: fixed;
     top: 0;
+    left: 0;
     align-self: start;
     border-top-right-radius: 20px;
     border-bottom-right-radius: 20px;
-    transition: 300ms ease-in-out;
+    transition: all 300ms ease-in-out;
     overflow: hidden;
     text-wrap: nowrap;
     display: block;
+    z-index: 1000;
 }
 
-.active a {
-    color: var(--accent-color);
+/* Sidebar theme for leaderboard page */
+body.leaderboard-page #sidebar {
+    background-color: var(--background); /* #F5F5F5 */
 }
+
+    body.leaderboard-page #sidebar a {
+        color: var(--primary-color); /* Dark text for light background */
+    }
+
+    body.leaderboard-page #sidebar .icon {
+        filter: brightness(0.4); /* Darker icons for light background */
+    }
+
+    body.leaderboard-page #sidebar .toggle {
+        background-color: var(--background);
+    }
+
+        body.leaderboard-page #sidebar .toggle img {
+            filter: brightness(0.4);
+        }
+
+/* Default sidebar styles */
+body:not(.leaderboard-page) #sidebar {
+    background-color: var(--primary-color);
+}
+
+    body:not(.leaderboard-page) #sidebar a {
+        color: var(--background); /* Light text for dark background */
+    }
+
+    body:not(.leaderboard-page) #sidebar .icon {
+        filter: brightness(1); /* Normal brightness for dark background */
+    }
 
 #sidebar.close {
     padding: 5px;
@@ -77,8 +160,8 @@ body {
     border: none;
     border-radius: 0.5em;
     background: none;
-    background-color: var(--primary-color);
     cursor: pointer;
+    transition: all 0.3s ease;
 }
 
     .toggle:hover {
@@ -94,8 +177,6 @@ body {
     scrollbar-color: var(--background) transparent;
 }
 
-
-    /*di pa to naganaa*/
     #tab-container li span {
         width: 200px;
     }
@@ -109,6 +190,7 @@ body {
     width: 20px;
     height: 20px;
     object-fit: contain;
+    transition: filter 0.3s ease;
 }
 
 .nav-profile-container {
@@ -135,12 +217,10 @@ body {
     border-radius: 8px;
 }
 
-
 .toggle-container {
     display: flex;
     justify-content: flex-end;
 }
-
 
 #sidebar a {
     border-radius: 0.5em;
@@ -150,12 +230,12 @@ body {
     align-items: center;
     gap: 1em;
     padding: 0.85em;
+    transition: all 0.3s ease;
 }
 
     #sidebar a:hover {
         background-color: var(--hover-effect);
     }
-
 
 #sidebar.close #verification-v2 {
     background-color: var(--background);
@@ -195,102 +275,26 @@ body {
     transition: 300ms ease-in-out;
 }
 
-
-
-
-
-@media (max-width: 800px) {
-    body {
-        grid-template-columns: 1fr;
+/* Mobile styles - 768px and below */
+@media (max-width: 768px) {
+    #sidebar {
+        display: none;
     }
 
-    main {
-        /*        padding: 2em 1em 60px 1em;*/
+    .layout-wrapper .main-content {
+        margin-left: 0 !important;
+        padding-bottom: 80px;
+        width: 100vw;
     }
 
-    /*      #sidebar {
-        height: 60px;
-        width: 100%;
-        padding: 0;
-        position: fixed;
-        bottom: 0;
-        top: unset;
-        z-index: 999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-top-left-radius: 10px;
-        border-top-right-radius: 10px;
-        border-bottom-right-radius: 0;
-        transition: none;
-        background-color: var(--primary-color); 
-    }
-
-        #sidebar ul {
-            width: 100%;
-            margin: 0;
-            margin-bottom: 40px;
-            padding: 0;
-            display: grid;
-            grid-auto-columns: 60px;
-            grid-auto-flow: column;
-            overflow-x: scroll;
-        }
-
-            #sidebar ul li {
-                height: 100%;
-            }
-
-
-        #sidebar > ul > li:first-child {
-            display: none;
-        }
-
-    .nav-profile-container {
+    .main-container {
+        width: 100vw;
         margin: 0;
-        display: none;
-    }
-
-  
-
-    #verification-v2 {
-        display: none;
-    }
-
-    #sidebar.close {
-        height: 80px;
-        width: 100%;
         padding: 0;
-
     }
-
-        #sidebar.close .icon {
-            width: 30px;
-            height: 30px;
-        }
-
-    #tab-container {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-around;
-        margin-top: 0;
-        padding: 10px;
-        max-height: 100%;
-        overflow: visible;
-        gap: 19px;
-    }
-
-        #tab-container li {
-            text-align: center;
-        }
-*/
-
 }
 
-
 /*Phone nav bar ------------------------------------------------*/
-
 .dock-outer {
     position: fixed;
     bottom: 0;
@@ -300,6 +304,7 @@ body {
     justify-content: center;
     width: 100%;
     pointer-events: none;
+    z-index: 1000;
 }
 
 .dock-panel {
@@ -310,6 +315,33 @@ body {
     border-radius: 8px;
     padding: 0.5rem 1rem;
     align-items: flex-end;
+    transition: background-color 0.3s ease;
+}
+
+/* Dock theme for leaderboard page */
+body.leaderboard-page .dock-panel {
+    background-color: var(--background); /* #F5F5F5 */
+}
+
+body.leaderboard-page .dock-item {
+    background-color: var(--background);
+}
+
+body.leaderboard-page .dock-icon img {
+    filter: brightness(0.4); /* Darker icons for light background */
+}
+
+/* Default dock styles */
+body:not(.leaderboard-page) .dock-panel {
+    background-color: var(--primary-color);
+}
+
+body:not(.leaderboard-page) .dock-item {
+    background-color: var(--primary-color);
+}
+
+body:not(.leaderboard-page) .dock-icon img {
+    filter: brightness(1); /* Normal brightness for dark background */
 }
 
 .dock-item {
@@ -320,7 +352,7 @@ body {
     border-radius: 10px;
     background-color: var(--primary-color);
     cursor: pointer;
-    transition: transform 0.15s ease;
+    transition: all 0.15s ease;
 }
 
     .dock-item:hover {
@@ -331,7 +363,7 @@ body {
     padding: 10px;
     width: 40px;
     height: 40px;
-    transition: transform 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 .dock-label {
@@ -350,11 +382,8 @@ body {
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
+/* Mobile dock display */
 @media (max-width: 768px) {
-    #sidebar {
-        display: none;
-    }
-
     .dock-outer {
         display: block;
         width: 100%;
@@ -369,9 +398,18 @@ body {
         overflow-x: auto;
         justify-content: space-around;
         padding: 0.5em;
+        margin: 0 0.5rem 0.5rem 0.5rem;
     }
 
     .dock-item {
         flex: 0 0 auto;
     }
+}
+
+/* Pages WITHOUT navigation should not be affected */
+.main-container {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
 }

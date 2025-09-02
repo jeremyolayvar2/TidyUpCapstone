@@ -36,6 +36,8 @@ namespace TidyUp.Controllers
 
         public IActionResult LeaderboardPage()
         {
+            ViewData["Title"] = "Leaderboards";
+            ViewData["PageType"] = "leaderboard";
             return View();
         }
 

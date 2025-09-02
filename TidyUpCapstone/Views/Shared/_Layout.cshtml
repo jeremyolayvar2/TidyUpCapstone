@@ -15,32 +15,27 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
 </head>
 <body data-userid="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value"
-      data-username="@User.Identity?.Name">
-        <div class="layout-wrapper d-flex">
+      data-username="@User.Identity?.Name"
+      class="leaderboard-page sidebar-closed">
 
-            @if (ViewBag.HideNavigation == null || ViewBag.HideNavigation == false) 
-            {
-
-                
-            <!-- Sidebar Navigation - Default -->
-
-                <nav id="sidebar" class="close">
-               
+    <div class="layout-wrapper d-flex sidebar-closed">
+        @if (ViewBag.HideNavigation == null || ViewBag.HideNavigation == false) 
+        {
+            <!-- Sidebar Navigation - DEFAULT CLOSED -->
+            <nav id="sidebar" class="close">
                 <ul>
                     <li class="toggle-container">
-                        <button onclick="toggleSidebar()" id="icon-toggle">
+                        <button id="icon-toggle" type="button">
                             <img class="toggle" alt="Toggle" src="~/assets/Toggle.svg" />
                         </button>
                     </li>
                 </ul>
 
-                
                 <div class="nav-profile-container">
                     <div class="property-1default-child" id="rectangle2"> </div>
                     <img id="verification-v2" alt="Verified" src="~/assets/verified-icon.svg" />
                 </div>
 
-          
                 <ul id="tab-container">
                     <li>
                         <a href="#">
@@ -48,7 +43,7 @@
                             <span>Home</span>
                         </a>
                     </li>
-                        <li>
+                    <li>
                         <a href="#">
                             <img class="icon" alt="Browse" src="~/assets/VectorBrowse.svg" />
                             <span>Browse Items</span>
@@ -97,7 +92,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="#" class="active">
                             <img class="icon" alt="Leaderboard" src="~/assets/VectorLB.svg" />
                             <span>Leaderboards</span>
                         </a>
@@ -117,7 +112,7 @@
                 </ul>
             </nav>
 
-
+            <!-- Mobile Dock -->
             <div class="dock-outer">
                 <div class="dock-panel" id="dockPanel">
                     <div class="dock-item" data-label="Home">
@@ -174,7 +169,7 @@
                         </div>
                         <div class="dock-label">Notification</div>
                     </div>
-                    <div class="dock-item" data-label="Leaderboards">
+                    <div class="dock-item active" data-label="Leaderboards">
                         <div class="dock-icon">
                             <img src="~/assets/VectorLB.svg" />
                         </div>
@@ -194,36 +189,29 @@
                     </div>
                 </div>
             </div>
+        }
 
-            }
+        <!-- Main Content -->
+        <div class="main-content">
+            <main role="main" class="pb-3">
+                @RenderBody()
+                <script src="~/js/openModal.js"></script>
+            </main>
 
-
-
-            <!-- Main Content -->
-            <div class="main-content">
-                <main role="main" class="pb-3">
-                    @RenderBody()
-                    <script src="~/js/openModal.js"></script>
-                </main>
-
-                <footer class="border-top footer text-muted mt-5">
-                    <div class="container">
-                        &copy; 2025 - Tidy Up - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                    </div>
-                </footer>
-            </div>
+            <footer class="border-top footer text-muted mt-5">
+                <div class="container">
+                    &copy; 2025 - Tidy Up - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                </div>
+            </footer>
         </div>
-        <script src="~/lib/jquery/dist/jquery.min.js"></script>
-        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="~/js/site.js" asp-append-version="true"></script>
-        
+    </div>
 
-        @await RenderSectionAsync("Scripts", required: false)
-        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAF_C-FLyLhoGKOAmfQH5sB6ySBQffrvdo&libraries=places"></script>
-        <script src="https://cdn.jsdelivr.net/npm/motion@12.16.0/dist/motion.umd.min.js"></script>
-        
-        <!--Open a modal for posting-->
-      
-
-    </body>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    @await RenderSectionAsync("Scripts", required: false)
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAF_C-FLyLhoGKOAmfQH5sB6ySBQffrvdo&libraries=places"></script>
+    <script src="https://cdn.jsdelivr.net/npm/motion@12.16.0/dist/motion.umd.min.js"></script>
+</body>
 </html>
