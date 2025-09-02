@@ -617,40 +617,6 @@
                     </div>
 
                     <div class="security-section">
-                        <h4>Two-Factor Authentication</h4>
-                        <div class="security-item">
-                            <div class="security-info">
-                                <span>Enable 2FA</span>
-                                <small>Add an extra layer of security to your account using an authenticator app</small>
-                            </div>
-                            <button type="button" class="btn-secondary" id="enable-2fa">
-                                <i class="bx bx-shield-check" aria-hidden="true"></i>
-                                Enable
-                            </button>
-                        </div>
-                        <div class="security-item">
-                            <div class="security-info">
-                                <span>Backup Codes</span>
-                                <small>Generate backup codes in case you lose access to your authenticator</small>
-                            </div>
-                            <button type="button" class="btn-secondary" id="generate-backup-codes">
-                                <i class="bx bx-download" aria-hidden="true"></i>
-                                Generate Codes
-                            </button>
-                        </div>
-                        <div class="security-item">
-                            <div class="security-info">
-                                <span>Recovery Email</span>
-                                <small>Set an alternative email for account recovery</small>
-                            </div>
-                            <button type="button" class="btn-secondary" id="set-recovery-email">
-                                <i class="bx bx-envelope" aria-hidden="true"></i>
-                                Set Email
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="security-section">
                         <h4>Login Security</h4>
                         <div class="form-grid">
                             <div class="form-group">
@@ -662,14 +628,6 @@
                                     <option value="120">2 hours</option>
                                     <option value="240">4 hours</option>
                                     <option value="0">Never</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="loginAlerts">Login Alerts</label>
-                                <select id="loginAlerts" name="LoginAlerts">
-                                    <option value="all" selected>All logins</option>
-                                    <option value="suspicious">Suspicious only</option>
-                                    <option value="none">Disabled</option>
                                 </select>
                             </div>
                         </div>
@@ -694,26 +652,6 @@
                                 End Session
                             </button>
                         </div>
-                        <div class="session-item">
-                            <div class="session-info">
-                                <span>Firefox Browser</span>
-                                <small>Firefox on Mac • Quezon City, Philippines • Last seen yesterday</small>
-                            </div>
-                            <button type="button" class="btn-danger-small" aria-label="End Firefox session">
-                                <i class="bx bx-x" aria-hidden="true"></i>
-                                End Session
-                            </button>
-                        </div>
-                        <div class="session-item">
-                            <div class="session-info">
-                                <span>Safari Browser</span>
-                                <small>Safari on iPhone • Manila, Philippines • Last seen 3 days ago</small>
-                            </div>
-                            <button type="button" class="btn-danger-small" aria-label="End Safari session">
-                                <i class="bx bx-x" aria-hidden="true"></i>
-                                End Session
-                            </button>
-                        </div>
                     </div>
 
                     <div class="security-section">
@@ -728,22 +666,13 @@
                                     <small style="color: var(--gray-600);">Chrome on Windows • Manila, Philippines • 2 hours ago</small>
                                 </div>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--gray-200);">
+                            <div style="display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: none;">
                                 <div style="width: 40px; height: 40px; background-color: var(--warning); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
                                     <i class="bx bx-shield" style="font-size: 20px;" aria-hidden="true"></i>
                                 </div>
                                 <div style="flex: 1;">
                                     <div style="font-weight: 600; color: var(--gray-800);">Password changed</div>
                                     <small style="color: var(--gray-600);">Security settings updated • Yesterday</small>
-                                </div>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: none;">
-                                <div style="width: 40px; height: 40px; background-color: var(--error); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
-                                    <i class="bx bx-x" style="font-size: 20px;" aria-hidden="true"></i>
-                                </div>
-                                <div style="flex: 1;">
-                                    <div style="font-weight: 600; color: var(--gray-800);">Failed login attempt</div>
-                                    <small style="color: var(--gray-600);">Unknown device • Cebu, Philippines • 3 days ago</small>
                                 </div>
                             </div>
                         </div>

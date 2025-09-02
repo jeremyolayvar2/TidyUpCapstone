@@ -21,9 +21,8 @@
     }
 
     init() {
-        console.log('🔄 Initializing Responsive Settings Manager...');
+        console.log('Initializing Responsive Settings Manager...');
 
-        // Wait for DOM to be ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.initializeComponents());
         } else {
@@ -32,9 +31,7 @@
     }
 
     initializeComponents() {
-        // Initialize tab display first without forcing
         this.initTabDisplay();
-
         this.initResponsiveLayout();
         this.initMobileSidebar();
         this.initTabSwitching();
@@ -49,26 +46,21 @@
         console.log('Responsive Settings Manager initialized successfully');
     }
 
-    // ==========================================
     // RESPONSIVE LAYOUT MANAGEMENT
-    // ==========================================
-
     initResponsiveLayout() {
-        console.log('🔄 Initializing responsive layout...');
-
+        console.log('Initializing responsive layout...');
         this.updateLayoutState();
         this.adjustContainerLayout();
     }
 
     updateLayoutState() {
         const wasMobile = this.isMobile;
-        // Changed breakpoint to 768px
         this.isMobile = window.innerWidth <= 768;
         this.isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
         this.isDesktop = window.innerWidth > 768;
 
         if (wasMobile !== this.isMobile) {
-            console.log(`📱 Layout changed: ${this.isMobile ? 'Mobile' : 'Desktop'}`);
+            console.log(`Layout changed: ${this.isMobile ? 'Mobile' : 'Desktop'}`);
             this.handleLayoutChange();
         }
     }
@@ -114,11 +106,9 @@
         if (!container) return;
 
         if (this.isMobile) {
-            // Mobile layout - full width with top padding
             container.style.marginLeft = '0';
             container.style.width = '100%';
         } else {
-            // Desktop layout - adjust for main sidebar
             if (sidebar && sidebar.classList.contains('close')) {
                 container.style.marginLeft = '82px';
                 container.style.width = 'calc(100% - 82px)';
@@ -129,27 +119,22 @@
         }
     }
 
-    // Add this method to handle form layout
     adjustFormLayout() {
         const formRows = document.querySelectorAll('.form-row-top, .form-row-bottom');
 
         formRows.forEach(row => {
             if (window.innerWidth <= 480) {
-                // Stack all fields on very small screens
                 row.style.display = 'block';
             } else if (window.innerWidth <= 768) {
-                // 1 column on mobile
                 row.style.display = 'grid';
                 row.style.gridTemplateColumns = '1fr';
             } else {
-                // Original grid layout for desktop (769px+)
                 row.style.display = 'grid';
                 row.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
             }
         });
     }
 
-    // Add this method:
     adjustProfileLayout() {
         const profileSection = document.querySelector('.profile-avatar-section');
         const accountDetails = document.querySelector('.account-details-section');
@@ -163,7 +148,6 @@
                 accountDetails.style.display = 'block';
             }
         } else {
-            // Reset to original layout for desktop
             if (profileSection) {
                 profileSection.style.flexDirection = 'row';
                 profileSection.style.textAlign = 'left';
@@ -173,40 +157,29 @@
             }
         }
     }
+
     async applyLanguageChangesImmediately(language, timezone, accessibilitySettings) {
-        // 1. Apply language changes
         await this.applyLanguageImmediately(language);
-
-        // 2. Apply timezone changes  
         this.applyTimezoneImmediately(timezone);
-
-        // 3. Apply accessibility settings
         this.applyAccessibilitySettingsImmediately(accessibilitySettings);
-
-        // 4. Update browser cookie for future requests
         this.updateLanguageCookie(language);
     }
 
     async applyLanguageImmediately(languageCode) {
         try {
-            // Fetch translations for the new language
             const response = await fetch(`/Settings/GetTranslations?languageCode=${languageCode}`);
             const data = await response.json();
 
             if (data.success) {
                 this.currentTranslations = data.translations;
 
-                // Apply to document
                 document.documentElement.setAttribute('lang', languageCode);
                 document.documentElement.setAttribute('data-language', languageCode);
 
-                // Apply RTL/LTR
                 const direction = ['ar', 'he', 'fa'].includes(languageCode) ? 'rtl' : 'ltr';
                 document.documentElement.setAttribute('dir', direction);
 
-                // Update all translatable elements
                 this.updateAllTranslatableElements();
-
                 console.log(`Language applied immediately: ${languageCode}`);
             }
         } catch (error) {
@@ -215,12 +188,8 @@
     }
 
     applyTimezoneImmediately(timezone) {
-        // Update any displayed times on the current page
         this.displayTimezoneInfo(timezone);
-
-        // Store timezone for future use
         this.currentTimezone = timezone;
-
         console.log(`Timezone applied immediately: ${timezone}`);
     }
 
@@ -229,7 +198,6 @@
         this.toggleLargeText(settings.largeText);
         this.toggleReduceMotion(settings.reduceMotion);
         this.toggleScreenReaderMode(settings.screenReader);
-
         console.log('Accessibility settings applied immediately');
     }
 
@@ -250,12 +218,10 @@
     }
 
     updateLanguageCookie(language) {
-        // Set cookie so server knows about language preference on next request
-        document.cookie = `user_language=${language}; path=/; max-age=${365 * 24 * 60 * 60}`; // 1 year
+        document.cookie = `user_language=${language}; path=/; max-age=${365 * 24 * 60 * 60}`;
     }
 
     displayTimezoneInfo(timezone) {
-        // Create or update timezone info display
         let timezoneInfo = document.getElementById('timezone-info');
 
         if (!timezoneInfo) {
@@ -280,21 +246,18 @@
             }).format(now);
 
             timezoneInfo.innerHTML = `
-            <small style="color: var(--text-secondary); margin-top: 8px; display: block;">
-                Current time: ${timeInTimezone}
-            </small>
-        `;
-
+                <small style="color: var(--text-secondary); margin-top: 8px; display: block;">
+                    Current time: ${timeInTimezone}
+                </small>
+            `;
         } catch (error) {
             timezoneInfo.innerHTML = `<small style="color: var(--error);">Invalid timezone</small>`;
         }
     }
-    // ==========================================
-    // MOBILE SIDEBAR FUNCTIONALITY
-    // ==========================================
 
+    // MOBILE SIDEBAR FUNCTIONALITY
     initMobileSidebar() {
-        console.log('🔄 Initializing mobile sidebar...');
+        console.log('Initializing mobile sidebar...');
 
         const toggleBtn = document.getElementById('mobile-menu-toggle');
         const closeBtn = document.getElementById('sidebar-close-btn');
@@ -302,18 +265,16 @@
         const sidebar = document.getElementById('settings-sidebar');
 
         if (!toggleBtn || !sidebar) {
-            console.warn('⚠️ Mobile sidebar elements not found');
+            console.warn('Mobile sidebar elements not found');
             return;
         }
 
-        // Toggle button click
         toggleBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             this.toggleMobileSidebar();
         });
 
-        // Close button click
         if (closeBtn) {
             closeBtn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -322,7 +283,6 @@
             });
         }
 
-        // Overlay click
         if (overlay) {
             overlay.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -331,7 +291,6 @@
             });
         }
 
-        // Close sidebar when tab is selected on mobile
         const tabLinks = document.querySelectorAll('.tab-link');
         tabLinks.forEach(link => {
             link.addEventListener('click', () => {
@@ -341,14 +300,13 @@
             });
         });
 
-        // Escape key to close sidebar
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && this.isMobile && this.sidebarOpen) {
                 this.closeMobileSidebar();
             }
         });
 
-        console.log('✅ Mobile sidebar initialized');
+        console.log('Mobile sidebar initialized');
     }
 
     toggleMobileSidebar() {
@@ -360,7 +318,7 @@
     }
 
     openMobileSidebar() {
-        console.log('📱 Opening mobile sidebar...');
+        console.log('Opening mobile sidebar...');
 
         const sidebar = document.getElementById('settings-sidebar');
         const overlay = document.getElementById('sidebar-overlay');
@@ -382,7 +340,6 @@
         document.body.classList.add('sidebar-mobile-open');
         this.sidebarOpen = true;
 
-        // Focus first tab link for accessibility
         const firstTabLink = sidebar?.querySelector('.tab-link');
         if (firstTabLink) {
             setTimeout(() => firstTabLink.focus(), 100);
@@ -390,7 +347,7 @@
     }
 
     closeMobileSidebar() {
-        console.log('📱 Closing mobile sidebar...');
+        console.log('Closing mobile sidebar...');
 
         const sidebar = document.getElementById('settings-sidebar');
         const overlay = document.getElementById('sidebar-overlay');
@@ -413,10 +370,7 @@
         this.sidebarOpen = false;
     }
 
-    // ==========================================
     // RESIZE HANDLER
-    // ==========================================
-
     initResizeHandler() {
         let resizeTimer;
 
@@ -429,35 +383,31 @@
     }
 
     handleResize() {
-        console.log('📏 Handling window resize...');
+        console.log('Handling window resize...');
 
         this.updateLayoutState();
         this.adjustContainerLayout();
         this.adjustFormLayout();
         this.adjustProfileLayout();
 
-        // Close mobile sidebar if switching to desktop
         if (!this.isMobile && this.sidebarOpen) {
             this.closeMobileSidebar();
         }
     }
 
-    // Simple tab display initialization
+    // TAB DISPLAY
     initTabDisplay() {
         console.log('Initializing tab display...');
 
-        // Hide all tabs simply
         document.querySelectorAll('.tab-content').forEach(tab => {
             tab.classList.remove('active');
         });
 
-        // Show profile tab
         const profileTab = document.getElementById('profile');
         if (profileTab) {
             profileTab.classList.add('active');
         }
 
-        // Set profile link as active
         const profileLink = document.querySelector('[data-tab="profile"]');
         if (profileLink) {
             document.querySelectorAll('.tab-link').forEach(link => link.classList.remove('active'));
@@ -467,22 +417,17 @@
         console.log('Tab display initialized');
     }
 
-    // ==========================================
     // TAB SWITCHING
-    // ==========================================
-
     initTabSwitching() {
-        console.log('🔄 Initializing tab switching...');
+        console.log('Initializing tab switching...');
 
         const tabLinks = document.querySelectorAll('.tab-link');
-        const currentTabName = document.getElementById('current-tab-name');
 
         if (!tabLinks.length) {
-            console.warn('⚠️ Tab elements not found');
+            console.warn('Tab elements not found');
             return;
         }
 
-        // Add click handlers
         tabLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -493,17 +438,13 @@
             });
         });
 
-        // Show initial tab
         this.showTab('profile');
-
-        // Export for global access
         window.showSettingsTab = (tab) => this.showTab(tab);
     }
 
     showTab(targetTab) {
         console.log(`Switching to tab: ${targetTab}`);
 
-        // Simple hide/show approach
         document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.remove('active');
         });
@@ -511,7 +452,6 @@
             link.classList.remove('active');
         });
 
-        // Show target tab
         const targetContent = document.getElementById(targetTab);
         if (targetContent) {
             targetContent.classList.add('active');
@@ -520,13 +460,11 @@
             return;
         }
 
-        // Set active link
         const activeLink = document.querySelector(`[data-tab="${targetTab}"]`);
         if (activeLink) {
             activeLink.classList.add('active');
         }
 
-        // Update header
         const currentTabName = document.getElementById('current-tab-name');
         if (currentTabName && this.tabNames[targetTab]) {
             currentTabName.textContent = this.tabNames[targetTab];
@@ -539,17 +477,13 @@
             }, 100);
         }
 
-        // Update state
         this.currentTab = targetTab;
         console.log(`Successfully switched to ${targetTab} tab`);
     }
 
-    // ==========================================
     // PROFILE FEATURES
-    // ==========================================
-
     initProfileFeatures() {
-        console.log('🔄 Initializing profile features...');
+        console.log('Initializing profile features...');
 
         this.initProfilePictureUpload();
         this.initPasswordToggle();
@@ -565,7 +499,6 @@
         if (saveButton) {
             console.log('Setting up save button click handler');
 
-            // Add the click handler
             saveButton.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -579,15 +512,14 @@
 
     initProfilePictureUpload() {
         const profileAvatar = document.getElementById('profile-avatar-upload');
-        const fileInput = document.getElementById('profile-picture-input'); // Use the existing hidden input
+        const fileInput = document.getElementById('profile-picture-input');
 
         if (!profileAvatar || !fileInput) return;
 
         const handleUpload = () => {
-            fileInput.click(); // Trigger the hidden file input
+            fileInput.click();
         };
 
-        // Handle file selection
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -667,7 +599,6 @@
     }
 
     initFormEditing() {
-        // Make all form fields editable and add change detection
         const formInputs = document.querySelectorAll('.profile-form input, .profile-form select');
         const saveButton = document.querySelector('.btn-save-profile');
 
@@ -686,7 +617,6 @@
                 this.updateSaveButtonState(saveButton, hasChanges);
             });
 
-            // Add focus styles for better UX
             input.addEventListener('focus', () => {
                 input.parentElement.classList.add('focused');
             });
@@ -717,42 +647,36 @@
         button.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Saving...';
         button.disabled = true;
 
-        // Create FormData to handle both regular fields and file upload
         const formData = new FormData();
 
-        // Add fields that match UpdateUserProfileDto exactly
         formData.append('Username', document.getElementById('username')?.value || '');
         formData.append('FirstName', document.getElementById('firstName')?.value || '');
         formData.append('LastName', document.getElementById('lastName')?.value || '');
         formData.append('Phone', document.getElementById('phone')?.value || '');
-        formData.append('PhoneNumber', document.getElementById('phone')?.value || ''); // DTO has both Phone and PhoneNumber
+        formData.append('PhoneNumber', document.getElementById('phone')?.value || '');
         formData.append('Email', document.getElementById('email')?.value || '');
         formData.append('Location', document.getElementById('location')?.value || '');
         formData.append('Gender', document.getElementById('gender')?.value || '');
         formData.append('Birthday', document.getElementById('birthday')?.value || '');
-        formData.append('MarketingEmailsEnabled', 'false'); // Default value for required DTO field
-        formData.append('AvatarUrl', ''); // Default value
+        formData.append('MarketingEmailsEnabled', 'false');
+        formData.append('AvatarUrl', '');
 
-        // Add profile picture file if selected
         const fileInput = document.getElementById('profile-picture-input');
         if (fileInput && fileInput.files[0]) {
             formData.append('ProfilePicture', fileInput.files[0]);
             console.log('Profile picture file added to form data');
         }
 
-        // Add anti-forgery token
         const token = document.querySelector('input[name="__RequestVerificationToken"]');
         if (token) {
             formData.append('__RequestVerificationToken', token.value);
         }
 
-        // Log what we're sending
         console.log('Sending form data:');
         for (let pair of formData.entries()) {
             console.log(pair[0] + ': ' + pair[1]);
         }
 
-        // Submit to controller
         fetch('/Settings/UpdateProfile', {
             method: 'POST',
             body: formData
@@ -786,14 +710,12 @@
             phoneInput.addEventListener('input', (e) => {
                 let value = e.target.value.replace(/\D/g, '');
 
-                // Auto-add Philippines country code if needed
                 if (value.length > 0 && !value.startsWith('63')) {
                     if (value.startsWith('9')) {
                         value = '63' + value;
                     }
                 }
 
-                // Format as +63 XXX XXX XXXX
                 let formattedValue = '';
                 if (value.length > 0) {
                     if (value.startsWith('63')) {
@@ -817,10 +739,6 @@
         }
     }
 
-    // ==========================================
-    // PHONE VERIFICATION
-    // ==========================================
-
     initPhoneVerification() {
         const verifyPhoneBtn = document.getElementById('verify-phone-btn');
 
@@ -831,12 +749,9 @@
         }
     }
 
-    // ==========================================
     // FORM HANDLING
-    // ==========================================
-
     initFormHandling() {
-        console.log('🔄 Initializing form handling...');
+        console.log('Initializing form handling...');
 
         this.initToggleButtons();
         this.initFormValidation();
@@ -845,7 +760,6 @@
         this.initPrivacySettings();
         this.initLanguageSettings();
 
-        // Handle privacy form submission specifically
         const privacyForm = document.querySelector('#privacy form');
         if (privacyForm) {
             privacyForm.addEventListener('submit', (e) => {
@@ -896,7 +810,6 @@
                 input.addEventListener('input', () => this.clearFieldError(input));
             });
 
-            // Form submit handler
             form.addEventListener('submit', (e) => {
                 let isValid = true;
                 inputs.forEach(input => {
@@ -911,14 +824,12 @@
                     return;
                 }
 
-                // Show loading state
                 const submitBtn = form.querySelector('button[type="submit"]');
                 if (submitBtn) {
                     const originalText = submitBtn.innerHTML;
                     submitBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Saving...';
                     submitBtn.disabled = true;
 
-                    // Simulate save process
                     setTimeout(() => {
                         submitBtn.innerHTML = originalText;
                         submitBtn.disabled = false;
@@ -995,30 +906,292 @@
                 const enabled = switchEl.checked;
                 console.log(`Notification setting ${setting} changed to ${enabled}`);
 
-                // Show feedback
                 this.showNotification(`${setting} ${enabled ? 'enabled' : 'disabled'}`, 'info');
             });
         });
     }
 
+    // SECURITY FEATURES
     initSecurityFeatures() {
-        // Enable 2FA
-        const enable2faBtn = document.getElementById('enable-2fa');
-        if (enable2faBtn) {
-            enable2faBtn.addEventListener('click', () => {
-                const originalText = enable2faBtn.textContent;
-                enable2faBtn.textContent = 'Setting up...';
-                enable2faBtn.disabled = true;
+        console.log('Initializing security features...');
 
+        this.initSecurityPasswordChange();
+        this.initActiveSessionsManagement();
+        this.initLogoutAndDeleteAccount();
+
+        const securityTab = document.querySelector('[data-tab="security"]');
+        if (securityTab) {
+            securityTab.addEventListener('click', () => {
                 setTimeout(() => {
-                    enable2faBtn.textContent = 'Enabled ✓';
-                    enable2faBtn.classList.remove('btn-secondary');
-                    enable2faBtn.classList.add('btn-save');
-                    this.showNotification('Two-factor authentication enabled successfully!', 'success');
-                }, 2000);
+                    this.loadSecurityData();
+                }, 100);
             });
         }
 
+        if (document.querySelector('#security.active')) {
+            this.loadSecurityData();
+        }
+    }
+
+    initSecurityPasswordChange() {
+        const updateButton = document.querySelector('#security .btn-save');
+
+        if (!updateButton) {
+            console.warn('Security form elements not found');
+            return;
+        }
+
+        updateButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.handleSecurityUpdate();
+        });
+
+        const newPasswordInput = document.getElementById('newPassword');
+        const confirmPasswordInput = document.getElementById('confirmNewPassword');
+
+        if (newPasswordInput && confirmPasswordInput) {
+            const validatePasswords = () => {
+                if (newPasswordInput.value && confirmPasswordInput.value) {
+                    if (newPasswordInput.value !== confirmPasswordInput.value) {
+                        this.showFieldError(confirmPasswordInput, 'Passwords do not match');
+                    } else {
+                        this.clearFieldError(confirmPasswordInput);
+                    }
+                }
+            };
+
+            newPasswordInput.addEventListener('input', validatePasswords);
+            confirmPasswordInput.addEventListener('input', validatePasswords);
+        }
+    }
+
+    handleSecurityUpdate() {
+        const updateButton = document.querySelector('#security .btn-save');
+        if (!updateButton) return;
+
+        const originalText = updateButton.innerHTML;
+        updateButton.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Updating Password...';
+        updateButton.disabled = true;
+
+        const formData = new FormData();
+        formData.append('CurrentPassword', document.getElementById('currentPassword')?.value || '');
+        formData.append('NewPassword', document.getElementById('newPassword')?.value || '');
+        formData.append('ConfirmNewPassword', document.getElementById('confirmNewPassword')?.value || '');
+
+        const token = document.querySelector('#security input[name="__RequestVerificationToken"]');
+        if (token) {
+            formData.append('__RequestVerificationToken', token.value);
+        }
+
+        fetch('/Security/UpdateSecurity', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                updateButton.innerHTML = originalText;
+                updateButton.disabled = false;
+
+                if (data.success) {
+                    this.showNotification(data.message, 'success');
+                    document.getElementById('currentPassword').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmNewPassword').value = '';
+                } else {
+                    this.showNotification(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                updateButton.innerHTML = originalText;
+                updateButton.disabled = false;
+                console.error('Error updating security settings:', error);
+                this.showNotification('An error occurred while updating security settings.', 'error');
+            });
+    }
+
+    initActiveSessionsManagement() {
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.btn-danger-small')) {
+                e.preventDefault();
+                const button = e.target.closest('.btn-danger-small');
+                const sessionItem = button.closest('.session-item');
+                const sessionInfo = sessionItem?.querySelector('.session-info span')?.textContent;
+
+                if (confirm(`End session for ${sessionInfo}?`)) {
+                    this.handleEndSession(button, sessionItem);
+                }
+            }
+        });
+    }
+
+    handleEndSession(button, sessionItem) {
+        const originalContent = button.innerHTML;
+        button.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i>';
+        button.disabled = true;
+
+        const sessionId = button.dataset.sessionId;
+
+        if (!sessionId) {
+            this.showNotification('Unable to end session - session ID missing', 'error');
+            button.innerHTML = originalContent;
+            button.disabled = false;
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('sessionId', sessionId);
+
+        const token = document.querySelector('#security input[name="__RequestVerificationToken"]');
+        if (token) {
+            formData.append('__RequestVerificationToken', token.value);
+        }
+
+        fetch('/Security/EndSession', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    sessionItem.style.opacity = '0';
+                    setTimeout(() => {
+                        if (sessionItem.parentNode) {
+                            sessionItem.parentNode.removeChild(sessionItem);
+                        }
+                    }, 300);
+                    this.showNotification(data.message, 'success');
+                } else {
+                    button.innerHTML = originalContent;
+                    button.disabled = false;
+                    this.showNotification(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                button.innerHTML = originalContent;
+                button.disabled = false;
+                console.error('Error ending session:', error);
+                this.showNotification('An error occurred while ending the session.', 'error');
+            });
+    }
+
+    loadSecurityData() {
+        console.log('Loading security data...');
+
+        Promise.all([
+            this.loadActiveSessions(),
+            this.loadSecurityHistory()
+        ]).then(() => {
+            console.log('Security data loaded successfully');
+        }).catch(error => {
+            console.error('Error loading security data:', error);
+        });
+    }
+
+    loadActiveSessions() {
+        return fetch('/Security/GetActiveSessions')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.displayActiveSessions(data.sessions);
+                }
+            });
+    }
+
+    displayActiveSessions(sessions) {
+        let activeSessionsSection = null;
+        const sections = document.querySelectorAll('#security .security-section');
+        sections.forEach(section => {
+            const heading = section.querySelector('h4');
+            if (heading && heading.textContent.includes('Active Sessions')) {
+                activeSessionsSection = section;
+            }
+        });
+
+        if (!activeSessionsSection) return;
+
+        const existingItems = activeSessionsSection.querySelectorAll('.session-item');
+        existingItems.forEach(item => item.remove());
+
+        sessions.forEach(session => {
+            const sessionItem = document.createElement('div');
+            sessionItem.className = 'session-item';
+
+            const lastActivity = session.isCurrentSession ? 'Active now' : this.formatRelativeTime(session.lastActivity);
+
+            sessionItem.innerHTML = `
+                <div class="session-info">
+                    <span>${session.deviceInfo}</span>
+                    <small>${session.location} • ${lastActivity}</small>
+                </div>
+                ${session.isCurrentSession ?
+                    '<span class="session-status active">Current</span>' :
+                    `<button type="button" class="btn-danger-small" data-session-id="${session.sessionId}" aria-label="End session">
+                        <i class="bx bx-x" aria-hidden="true"></i>
+                        End Session
+                    </button>`
+                }
+            `;
+
+            activeSessionsSection.appendChild(sessionItem);
+        });
+    }
+
+    loadSecurityHistory() {
+        return fetch('/Security/GetSecurityHistory')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.displaySecurityHistory(data.events);
+                }
+            });
+    }
+
+    displaySecurityHistory(events) {
+        const historyContainer = document.querySelector('#security .security-section:last-child > div');
+        if (!historyContainer) return;
+
+        historyContainer.innerHTML = '';
+
+        events.forEach((event, index) => {
+            const eventItem = document.createElement('div');
+            eventItem.style.cssText = `
+                display: flex; 
+                align-items: center; 
+                gap: 16px; 
+                padding: 16px 0; 
+                ${index < events.length - 1 ? 'border-bottom: 1px solid var(--gray-200);' : ''}
+            `;
+
+            const iconClass = event.success ? 'bx bx-check' : 'bx bx-x';
+            const iconColor = event.success ? 'var(--success)' : 'var(--error)';
+            const eventTitle = event.success ? 'Successful login' : 'Failed login attempt';
+
+            eventItem.innerHTML = `
+                <div style="width: 40px; height: 40px; background-color: ${iconColor}; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
+                    <i class="${iconClass}" style="font-size: 20px;"></i>
+                </div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; color: var(--gray-800);">${eventTitle}</div>
+                    <small style="color: var(--gray-600);">${event.userAgent} • ${event.location} • ${this.formatRelativeTime(event.loginTime)}</small>
+                </div>
+            `;
+
+            historyContainer.appendChild(eventItem);
+        });
+    }
+
+    formatRelativeTime(timestamp) {
+        const now = new Date();
+        const time = new Date(timestamp);
+        const diffInSeconds = Math.floor((now - time) / 1000);
+
+        if (diffInSeconds < 60) return 'Just now';
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+        return `${Math.floor(diffInSeconds / 86400)} days ago`;
+    }
+
+    initLogoutAndDeleteAccount() {
         // Logout button
         const logoutBtn = document.getElementById('logout-btn');
         if (logoutBtn) {
@@ -1059,31 +1232,10 @@
                 }
             });
         }
-
-        // End session buttons
-        const endSessionBtns = document.querySelectorAll('.btn-danger-small');
-        endSessionBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const sessionInfo = btn.closest('.session-item').querySelector('.session-info span').textContent;
-                if (confirm(`End session for ${sessionInfo}?`)) {
-                    btn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i>';
-                    btn.disabled = true;
-
-                    setTimeout(() => {
-                        btn.closest('.session-item').remove();
-                        this.showNotification('Session ended successfully', 'success');
-                    }, 1000);
-                }
-            });
-        });
     }
 
-    // ==========================================
     // NOTIFICATIONS
-    // ==========================================
-
     initNotifications() {
-        // Auto-hide existing notifications after page load
         setTimeout(() => {
             const existingNotifications = document.querySelectorAll('.notification');
             existingNotifications.forEach(notification => {
@@ -1095,23 +1247,19 @@
     }
 
     showNotification(message, type = 'info') {
-        // Remove existing notification
         const existingNotification = document.querySelector('.notification');
         if (existingNotification) {
             existingNotification.remove();
         }
 
-        // Create new notification
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
         notification.textContent = message;
 
-        // Add click to dismiss
         notification.addEventListener('click', () => {
             notification.remove();
         });
 
-        // Position notification appropriately for mobile/desktop
         if (this.isMobile) {
             notification.style.top = '90px';
             notification.style.left = '16px';
@@ -1121,7 +1269,6 @@
 
         document.body.appendChild(notification);
 
-        // Auto-remove after 4 seconds
         setTimeout(() => {
             if (notification.parentNode) {
                 notification.style.opacity = '0';
@@ -1135,20 +1282,13 @@
         }, 4000);
     }
 
-    // ==========================================
-    // PRIVACY SETTINGS FUNCTIONALITY
-    // ==========================================
-
+    // PRIVACY SETTINGS
     initPrivacySettings() {
         console.log('Initializing privacy settings...');
 
-        // Initialize privacy toggle buttons specifically
         this.initPrivacyToggleButtons();
-
-        // Initialize privacy form submission
         this.initPrivacyFormSubmission();
 
-        // Load settings when privacy tab is clicked
         const privacyTab = document.querySelector('[data-tab="privacy"]');
         if (privacyTab) {
             privacyTab.addEventListener('click', () => {
@@ -1156,7 +1296,6 @@
             });
         }
 
-        // Load settings if privacy tab is already active
         if (document.querySelector('#privacy.active')) {
             this.loadPrivacySettings();
         }
@@ -1165,7 +1304,6 @@
     }
 
     initPrivacyToggleButtons() {
-        // Get privacy-specific toggle groups
         const privacyToggles = document.querySelectorAll('#privacy .toggle-buttons');
 
         privacyToggles.forEach(group => {
@@ -1174,24 +1312,20 @@
 
             buttons.forEach(btn => {
                 btn.addEventListener('click', () => {
-                    // Remove active from all buttons in this group
                     buttons.forEach(b => {
                         b.classList.remove('active');
                         b.setAttribute('aria-checked', 'false');
                     });
 
-                    // Add active to clicked button
                     btn.classList.add('active');
                     btn.setAttribute('aria-checked', 'true');
 
-                    // Update hidden input value
                     const value = btn.getAttribute('data-value');
                     if (hiddenInput && value) {
                         hiddenInput.value = value;
                         console.log(`Updated ${hiddenInput.name} to: ${value}`);
                     }
 
-                    // Show feedback notification
                     if (hiddenInput?.name) {
                         const settingName = this.getSettingDisplayName(hiddenInput.name);
                         this.showNotification(`${settingName} updated to ${value}`, 'info');
@@ -1202,11 +1336,10 @@
     }
 
     initPrivacyFormSubmission() {
-        // Handle the save button in privacy tab
-        const saveButton = document.querySelector('#privacy .btn-save');
+        const privacySaveButton = document.querySelector('#privacy .btn-save');
 
-        if (saveButton) {
-            saveButton.addEventListener('click', (e) => {
+        if (privacySaveButton) {
+            privacySaveButton.addEventListener('click', (e) => {
                 e.preventDefault();
                 this.handlePrivacySave();
             });
@@ -1214,14 +1347,13 @@
     }
 
     handlePrivacySave() {
-        const saveButton = document.querySelector('#privacy .btn-save');
-        if (!saveButton) return;
+        const privacySaveButton = document.querySelector('#privacy .btn-save');
+        if (!privacySaveButton) return;
 
-        const originalText = saveButton.innerHTML;
-        saveButton.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Saving Privacy Settings...';
-        saveButton.disabled = true;
+        const originalText = privacySaveButton.innerHTML;
+        privacySaveButton.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Saving Privacy Settings...';
+        privacySaveButton.disabled = true;
 
-        // Collect all privacy form data
         const formData = new FormData();
         const hiddenInputs = document.querySelectorAll('#privacy input[type="hidden"]');
 
@@ -1232,13 +1364,11 @@
             }
         });
 
-        // Add anti-forgery token
         const antiForgeryToken = document.querySelector('#privacy input[name="__RequestVerificationToken"]');
         if (antiForgeryToken) {
             formData.append('__RequestVerificationToken', antiForgeryToken.value);
         }
 
-        // Submit to your controller
         fetch('/PrivacySettings/UpdatePrivacy', {
             method: 'POST',
             body: formData
@@ -1250,14 +1380,14 @@
                 throw new Error('Network response was not ok');
             })
             .then(data => {
-                saveButton.innerHTML = originalText;
-                saveButton.disabled = false;
+                privacySaveButton.innerHTML = originalText;
+                privacySaveButton.disabled = false;
                 this.showNotification('Privacy settings saved successfully!', 'success');
                 console.log('Privacy settings saved successfully');
             })
             .catch(error => {
-                saveButton.innerHTML = originalText;
-                saveButton.disabled = false;
+                privacySaveButton.innerHTML = originalText;
+                privacySaveButton.disabled = false;
                 console.error('Error saving privacy settings:', error);
                 this.showNotification('Error saving privacy settings. Please try again.', 'error');
             });
@@ -1276,16 +1406,13 @@
             .then(data => {
                 console.log('Loaded privacy settings:', data);
 
-                // Map the response data to form fields
                 Object.keys(data).forEach(key => {
-                    // Convert API response keys to match your HTML input names
                     const inputName = this.mapApiKeyToInputName(key);
                     const input = document.querySelector(`#privacy input[name="${inputName}"]`);
 
                     if (input) {
                         input.value = data[key];
 
-                        // Update the toggle button display
                         const group = input.closest('.toggle-buttons');
                         if (group) {
                             const buttons = group.querySelectorAll('.toggle-btn');
@@ -1309,52 +1436,46 @@
             });
     }
 
+    // LANGUAGE SETTINGS
     initLanguageSettings() {
-    console.log('Initializing language & accessibility settings...');
+        console.log('Initializing language & accessibility settings...');
 
-    const languageSaveButton = document.querySelector('#language .btn-save');
-    if (languageSaveButton) {
-        languageSaveButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.handleLanguageSave();
-        });
-    }
-
-    // Always load settings from DB
-    this.loadLanguageSettings();
-    this.languageSettingsLoaded = true;
-    this.initAccessibilitySwitches();
-    
-    // Load translations immediately for current language
-    this.loadAndApplyCurrentLanguage();
-}
-
-async loadAndApplyCurrentLanguage() {
-    try {
-        // Get the user's saved language
-        const response = await fetch('/Settings/GetLanguageSettings');
-        const data = await response.json();
-        
-        if (data.success && data.data.language) {
-            // Apply the language immediately without saving
-            await this.applyLanguageImmediately(data.data.language);
-            console.log(`Applied saved language on page load: ${data.data.language}`);
+        const languageSaveButton = document.querySelector('#language .btn-save');
+        if (languageSaveButton) {
+            languageSaveButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleLanguageSave();
+            });
         }
-    } catch (error) {
-        console.error('Error loading current language:', error);
+
+        this.loadLanguageSettings();
+        this.languageSettingsLoaded = true;
+        this.initAccessibilitySwitches();
+        this.loadAndApplyCurrentLanguage();
     }
-}
 
-    // Handle language settings save
+    async loadAndApplyCurrentLanguage() {
+        try {
+            const response = await fetch('/Settings/GetLanguageSettings');
+            const data = await response.json();
+
+            if (data.success && data.data.language) {
+                await this.applyLanguageImmediately(data.data.language);
+                console.log(`Applied saved language on page load: ${data.data.language}`);
+            }
+        } catch (error) {
+            console.error('Error loading current language:', error);
+        }
+    }
+
     handleLanguageSave() {
-        const saveButton = document.querySelector('#language .btn-save');
-        if (!saveButton) return;
+        const languageSaveButton = document.querySelector('#language .btn-save');
+        if (!languageSaveButton) return;
 
-        const originalText = saveButton.innerHTML;
-        saveButton.innerHTML = '<i class="bx bx-loader-alt bx-spin" aria-hidden="true"></i> <span data-translate="saving">Saving...</span>';
-        saveButton.disabled = true;
+        const originalText = languageSaveButton.innerHTML;
+        languageSaveButton.innerHTML = '<i class="bx bx-loader-alt bx-spin" aria-hidden="true"></i> <span data-translate="saving">Saving...</span>';
+        languageSaveButton.disabled = true;
 
-        // Get form data
         const language = document.querySelector('select[name="Language"]')?.value;
         const timezone = document.querySelector('select[name="Timezone"]')?.value;
         const highContrast = document.querySelector('input[name="HighContrast"]')?.checked || false;
@@ -1376,23 +1497,20 @@ async loadAndApplyCurrentLanguage() {
             formData.append('__RequestVerificationToken', token);
         }
 
-        // Save to server
         fetch('/Settings/UpdateLanguage', {
             method: 'POST',
             body: formData
         })
             .then(response => response.json())
             .then(data => {
-                saveButton.innerHTML = originalText;
-                saveButton.disabled = false;
+                languageSaveButton.innerHTML = originalText;
+                languageSaveButton.disabled = false;
 
                 if (data.success) {
-                    // Apply changes immediately in settings page
                     this.applyLanguageChangesImmediately(language, timezone, {
                         highContrast, largeText, reduceMotion, screenReader
                     });
 
-                    // Refresh global accessibility for entire application
                     if (window.globalAccessibility) {
                         window.globalAccessibility.refresh();
                     }
@@ -1403,19 +1521,18 @@ async loadAndApplyCurrentLanguage() {
                 }
             })
             .catch(error => {
-                saveButton.innerHTML = originalText;
-                saveButton.disabled = false;
+                languageSaveButton.innerHTML = originalText;
+                languageSaveButton.disabled = false;
                 console.error('Error:', error);
                 this.showNotification(this.getTranslation('error_saving') || 'An error occurred while saving settings. Please try again.', 'error');
             });
     }
-    // Load current language settings
+
     loadLanguageSettings() {
         fetch('/Settings/GetLanguageSettings')
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Populate the form with current settings
                     const languageSelect = document.querySelector('select[name="Language"]');
                     const timezoneSelect = document.querySelector('select[name="Timezone"]');
                     const highContrastCheckbox = document.querySelector('input[name="HighContrast"]');
@@ -1423,7 +1540,6 @@ async loadAndApplyCurrentLanguage() {
                     const reduceMotionCheckbox = document.querySelector('input[name="ReduceMotion"]');
                     const screenReaderCheckbox = document.querySelector('input[name="ScreenReader"]');
 
-                    // CHANGE THESE LINES - use lowercase property names
                     if (languageSelect) languageSelect.value = data.data.language || 'en';
                     if (timezoneSelect) timezoneSelect.value = data.data.timezone || 'Asia/Manila';
                     if (highContrastCheckbox) highContrastCheckbox.checked = data.data.highContrast || false;
@@ -1431,7 +1547,6 @@ async loadAndApplyCurrentLanguage() {
                     if (reduceMotionCheckbox) reduceMotionCheckbox.checked = data.data.reduceMotion || false;
                     if (screenReaderCheckbox) screenReaderCheckbox.checked = data.data.screenReader || false;
 
-                    // Apply current accessibility settings to the page
                     this.applyAccessibilitySettings(
                         data.data.highContrast || false,
                         data.data.largeText || false,
@@ -1444,7 +1559,6 @@ async loadAndApplyCurrentLanguage() {
             });
     }
 
-    // Initialize accessibility switches with immediate feedback
     initAccessibilitySwitches() {
         const accessibilitySwitches = document.querySelectorAll('#language .switch input[type="checkbox"]');
 
@@ -1453,7 +1567,6 @@ async loadAndApplyCurrentLanguage() {
                 const setting = switchEl.name;
                 const enabled = switchEl.checked;
 
-                // Apply the setting immediately for better UX
                 switch (setting) {
                     case 'HighContrast':
                         this.toggleHighContrast(enabled);
@@ -1469,21 +1582,18 @@ async loadAndApplyCurrentLanguage() {
                         break;
                 }
 
-                // Show immediate feedback
                 const settingName = this.getAccessibilitySettingName(setting);
                 this.showNotification(`${settingName} ${enabled ? 'enabled' : 'disabled'}`, 'info');
             });
         });
     }
 
-    // Apply accessibility settings to the page
     applyAccessibilitySettings(highContrast, largeText, reduceMotion) {
         this.toggleHighContrast(highContrast);
         this.toggleLargeText(largeText);
         this.toggleReduceMotion(reduceMotion);
     }
 
-    // Individual accessibility setting toggles
     toggleHighContrast(enabled) {
         const body = document.body;
         if (enabled) {
@@ -1512,11 +1622,9 @@ async loadAndApplyCurrentLanguage() {
     }
 
     toggleScreenReaderMode(enabled) {
-        // Add screen reader optimizations
         const body = document.body;
         if (enabled) {
             body.classList.add('screen-reader-mode');
-            // Add aria-live regions, focus management, etc.
             this.enhanceScreenReaderSupport();
         } else {
             body.classList.remove('screen-reader-mode');
@@ -1524,7 +1632,6 @@ async loadAndApplyCurrentLanguage() {
     }
 
     enhanceScreenReaderSupport() {
-        // Add live region for announcements if it doesn't exist
         if (!document.getElementById('sr-live-region')) {
             const liveRegion = document.createElement('div');
             liveRegion.id = 'sr-live-region';
@@ -1539,7 +1646,6 @@ async loadAndApplyCurrentLanguage() {
         }
     }
 
-    // Helper method to get user-friendly setting names
     getAccessibilitySettingName(settingName) {
         const names = {
             'HighContrast': 'High Contrast Mode',
@@ -1551,7 +1657,6 @@ async loadAndApplyCurrentLanguage() {
     }
 
     mapApiKeyToInputName(apiKey) {
-        // Map API response keys to your HTML input names
         const keyMapping = {
             'profileVisibility': 'ProfileVisibility',
             'locationVisibility': 'LocationVisibility',
@@ -1592,12 +1697,8 @@ async loadAndApplyCurrentLanguage() {
         }, 5000);
     }
 
-    // ==========================================
     // MODAL HANDLING
-    // ==========================================
-
     initModalHandling() {
-        // Close modal on outside click
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('modal-overlay')) {
                 // Close any open modals
@@ -1605,14 +1706,9 @@ async loadAndApplyCurrentLanguage() {
         });
     }
 
-    // ==========================================
     // ACCESSIBILITY
-    // ==========================================
-
     initAccessibility() {
-        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            // Ctrl/Cmd + S to save
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
                 const activeForm = document.querySelector('.tab-content.active form');
@@ -1625,7 +1721,6 @@ async loadAndApplyCurrentLanguage() {
                 }
             }
 
-            // Escape to close notifications, modals, and mobile sidebar
             if (e.key === 'Escape') {
                 const notification = document.querySelector('.notification');
                 if (notification) {
