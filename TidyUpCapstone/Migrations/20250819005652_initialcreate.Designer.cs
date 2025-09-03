@@ -12,8 +12,8 @@ using TidyUpCapstone.Data;
 namespace TidyUpCapstone.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250807010745_AddIsDeletedToPost")]
-    partial class AddIsDeletedToPost
+    [Migration("20250819005652_initialcreate")]
+    partial class initialcreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

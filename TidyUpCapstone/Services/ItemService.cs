@@ -73,12 +73,25 @@ namespace TidyUpCapstone.Services
                 await _context.SaveChangesAsync();
 
                 // Start AI processing in background (temporary implementation)
-                _ = Task.Run(async () => await ProcessItemWithAIAsync(item.ItemId));
+               // _ = Task.Run(async () => await ProcessItemWithAIAsync(item.ItemId));
 
                 _logger.LogInformation("Item created successfully: {Title}, ID: {Id}, UserId: {UserId}",
                     item.ItemTitle, item.ItemId, item.UserId);
 
-                return await GetItemByIdAsync(item.ItemId) ?? item;
+                await _context.Entry(item)
+                    .Reference(i => i.User)
+                    .LoadAsync();
+                await _context.Entry(item)
+                    .Reference(i => i.Category)
+                    .LoadAsync();
+                await _context.Entry(item)
+                    .Reference(i => i.Condition)
+                    .LoadAsync();
+                await _context.Entry(item)
+                    .Reference(i => i.Location)
+                    .LoadAsync();
+
+                return item;
             }
             catch (Exception ex)
             {

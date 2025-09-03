@@ -1,167 +1,131 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using TidyUpCapstone.Data;
 using TidyUpCapstone.Models.DTOs.Items;
-using TidyUpCapstone.Models.ViewModels.Items;
 using TidyUpCapstone.Services.Interfaces;
+using System.Security.Claims;
 
 namespace TidyUpCapstone.Controllers
 {
-    [Authorize]
+    [Route("[controller]")]
     public class ItemController : Controller
     {
         private readonly IItemService _itemService;
-        private readonly ApplicationDbContext _context;
         private readonly ILogger<ItemController> _logger;
+        private readonly IFileService _fileService;
 
         public ItemController(
             IItemService itemService,
-            ApplicationDbContext context,
-            ILogger<ItemController> logger)
+            ILogger<ItemController> logger,
+            IFileService fileService)
         {
             _itemService = itemService;
-            _context = context;
             _logger = logger;
+            _fileService = fileService;
         }
 
-        // GET: Item/Index
-        [AllowAnonymous]
-        public async Task<IActionResult> Index(ItemSearchDto? searchCriteria = null)
-        {
-            try
-            {
-                searchCriteria ??= new ItemSearchDto();
-
-                var items = await _itemService.SearchItemsAsync(searchCriteria);
-                var categories = await GetCategoriesAsync();
-                var locations = await GetLocationsAsync();
-                var conditions = await GetConditionsAsync();
-
-                var itemDtos = items.Select(MapToItemDto).ToList();
-
-                var viewModel = new ItemListViewModel
-                {
-                    Items = itemDtos,
-                    SearchCriteria = searchCriteria,
-                    Categories = categories,
-                    Locations = locations,
-                    Conditions = conditions,
-                    TotalItems = itemDtos.Count,
-                    PageTitle = "Browse Items",
-                    ShowFilters = true
-                };
-
-                return View(viewModel);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading items index");
-                return View(new ItemListViewModel());
-            }
-        }
-
-        // GET: Item/Details/5
-        [AllowAnonymous]
-        public async Task<IActionResult> Details(int id)
-        {
-            try
-            {
-                var item = await _itemService.GetItemByIdAsync(id);
-                if (item == null)
-                {
-                    return NotFound();
-                }
-
-                // Increment view count
-                await _itemService.IncrementViewCountAsync(id);
-
-                var currentUserId = GetCurrentUserId();
-                var itemDto = MapToItemDto(item);
-
-                var relatedItems = await GetRelatedItemsAsync(item.CategoryId, id);
-                var sellerOtherItems = await GetSellerOtherItemsAsync(item.UserId, id);
-
-                var viewModel = new ItemDetailsViewModel
-                {
-                    Item = itemDto,
-                    RelatedItems = relatedItems.Take(6).ToList(),
-                    SellerOtherItems = sellerOtherItems.Take(4).ToList(),
-                    CanEdit = currentUserId == item.UserId,
-                    CanPurchase = currentUserId != item.UserId && currentUserId > 0,
-                    IsOwner = currentUserId == item.UserId,
-                    ShowContactSeller = currentUserId != item.UserId
-                };
-
-                return View(viewModel);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading item details for ID {ItemId}", id);
-                return NotFound();
-            }
-        }
-
-        // GET: Item/Create
-        public async Task<IActionResult> Create()
-        {
-            try
-            {
-                var categories = await GetCategoriesAsync();
-                var conditions = await GetConditionsAsync();
-                var locations = await GetLocationsAsync();
-
-                var viewModel = new CreateItemViewModel
-                {
-                    Categories = categories,
-                    Conditions = conditions,
-                    Locations = locations,
-                    ShowPriceGuidance = true,
-                    PricingTips = GetPricingTips()
-                };
-
-                return View(viewModel);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading create item page");
-                return RedirectToAction("Index");
-            }
-        }
-
-        // POST: Item/Create
-        [HttpPost]
+        [HttpPost("Create")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateItemDto dto)
+        public async Task<IActionResult> Create(IFormCollection form)
         {
             try
             {
-                if (!ModelState.IsValid)
+                _logger.LogInformation("=== CREATE ITEM REQUEST ===");
+
+                // Extract form values
+                var itemTitle = form["ItemTitle"].ToString()?.Trim();
+                var description = form["Description"].ToString()?.Trim();
+                var categoryId = int.TryParse(form["CategoryId"], out int catId) ? catId : 0;
+                var conditionId = int.TryParse(form["ConditionId"], out int condId) ? condId : 0;
+                var locationName = form["LocationName"].ToString()?.Trim();
+                var latitude = decimal.TryParse(form["Latitude"], out decimal lat) ? lat : (decimal?)null;
+                var longitude = decimal.TryParse(form["Longitude"], out decimal lng) ? lng : (decimal?)null;
+                var imageFile = form.Files.FirstOrDefault();
+
+                _logger.LogInformation("Form data - Title: {Title}, CategoryId: {CategoryId}, ConditionId: {ConditionId}, LocationName: {LocationName}",
+                    itemTitle, categoryId, conditionId, locationName);
+
+                // Basic validation
+                var validationErrors = new List<string>();
+
+                if (string.IsNullOrWhiteSpace(itemTitle)) validationErrors.Add("Item title is required");
+                if (string.IsNullOrWhiteSpace(description)) validationErrors.Add("Description is required");
+                if (categoryId <= 0) validationErrors.Add("Please select a valid category");
+                if (conditionId <= 0) validationErrors.Add("Please select a valid condition");
+                if (string.IsNullOrWhiteSpace(locationName)) validationErrors.Add("Location is required");
+                if (imageFile == null || imageFile.Length == 0) validationErrors.Add("Image is required");
+                if (!latitude.HasValue || !longitude.HasValue) validationErrors.Add("Location coordinates are required");
+
+                if (validationErrors.Any())
                 {
-                    return Json(new { success = false, message = "Please fill in all required fields correctly." });
+                    return Json(new { success = false, message = string.Join(", ", validationErrors) });
                 }
 
-                var userId = GetCurrentUserId();
-                if (userId <= 0)
+                // Get current user ID
+                int currentUserId = GetCurrentUserId();
+                if (currentUserId <= 0)
                 {
-                    return Json(new { success = false, message = "User authentication required." });
+                    return Json(new { success = false, message = "User authentication required" });
                 }
 
-                var item = await _itemService.CreateItemAsync(dto, userId);
+                // FIXED: Create DTO with LocationName, let the service handle location resolution
+                var createDto = new CreateItemDto
+                {
+                    ItemTitle = itemTitle,
+                    Description = description,
+                    CategoryId = categoryId,
+                    ConditionId = conditionId,
+                    LocationName = locationName, // FIXED: Set the LocationName in the DTO
+                    LocationId = 0, // The service will resolve this
+                    Latitude = latitude,
+                    Longitude = longitude,
+                    ImageFile = imageFile
+                };
 
-                _logger.LogInformation("Item created successfully by user {UserId}: {ItemTitle}", userId, item.ItemTitle);
+                // FIXED: Let the service handle location resolution internally
+                var createdItem = await _itemService.CreateItemAsync(createDto, currentUserId);
 
-                return Json(new { success = true, message = "Item posted successfully!", itemId = item.ItemId });
+                _logger.LogInformation("Item created successfully: {ItemId}", createdItem.ItemId);
+
+                // Return success response (rest of the method stays the same)
+                return Json(new
+                {
+                    success = true,
+                    message = "Item created successfully!",
+                    item = new
+                    {
+                        itemId = createdItem.ItemId,
+                        userId = createdItem.UserId,
+                        username = createdItem.User?.UserName ?? "Unknown",
+                        userAvatarUrl = "/assets/default-avatar.svg",
+                        categoryId = createdItem.CategoryId,
+                        categoryName = createdItem.Category?.Name ?? "Unknown",
+                        conditionId = createdItem.ConditionId,
+                        conditionName = createdItem.Condition?.Name ?? "Unknown",
+                        locationName = createdItem.Location?.Name ?? "Unknown",
+                        itemTitle = createdItem.ItemTitle,
+                        description = createdItem.Description,
+                        imageUrl = !string.IsNullOrEmpty(createdItem.ImageFileName)
+                            ? $"/ItemPosts/{createdItem.ImageFileName}"
+                            : "/assets/no-image-placeholder.svg",
+                        finalTokenPrice = createdItem.FinalTokenPrice,
+                        adjustedTokenPrice = createdItem.AdjustedTokenPrice,
+                        status = createdItem.Status.ToString(),
+                        statusDisplayName = createdItem.Status.ToString(),
+                        datePosted = createdItem.DatePosted,
+                        isExpired = createdItem.ExpiresAt.HasValue && createdItem.ExpiresAt.Value <= DateTime.UtcNow,
+                        isAiProcessed = createdItem.AiProcessingStatus == Models.Entities.Items.AiProcessingStatus.Completed,
+                        aiConfidenceLevel = createdItem.AiConfidenceLevel
+                    }
+                });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating item for user {UserId}", GetCurrentUserId());
-                return Json(new { success = false, message = ex.Message });
+                _logger.LogError(ex, "Error creating item");
+                return Json(new { success = false, message = "An error occurred while creating the item" });
             }
         }
 
-        // GET: Item/Edit/5
+        [HttpGet("Edit/{id}")]
         public async Task<IActionResult> Edit(int id)
         {
             try
@@ -172,316 +136,162 @@ namespace TidyUpCapstone.Controllers
                     return NotFound();
                 }
 
-                var userId = GetCurrentUserId();
-                if (item.UserId != userId)
+                var currentUserId = GetCurrentUserId();
+                if (item.UserId != currentUserId)
                 {
                     return Forbid();
                 }
 
-                // Return JSON for AJAX requests
-                if (Request.Headers["Accept"].ToString().Contains("application/json"))
+                return Json(new
                 {
-                    return Json(new
-                    {
-                        itemTitle = item.ItemTitle,
-                        description = item.Description,
-                        itemCategory = item.Category?.Name,
-                        itemCondition = item.Condition?.Name,
-                        itemLocation = item.Location?.Name,
-                        latitude = item.Latitude,
-                        longitude = item.Longitude,
-                        finalTokenPrice = item.FinalTokenPrice
-                    });
-                }
-
-                // Return view for normal requests
-                var categories = await GetCategoriesAsync();
-                var conditions = await GetConditionsAsync();
-                var locations = await GetLocationsAsync();
-
-                var updateDto = new UpdateItemDto
-                {
-                    ItemTitle = item.ItemTitle,
-                    Description = item.Description,
-                    CategoryId = item.CategoryId,
-                    ConditionId = item.ConditionId,
-                    LocationId = item.LocationId,
-                    FinalTokenPrice = item.FinalTokenPrice,
-                    Latitude = item.Latitude,
-                    Longitude = item.Longitude,
-                    ExpiresAt = item.ExpiresAt,
-                    Status = item.Status
-                };
-
-                var viewModel = new EditItemViewModel
-                {
-                    Item = updateDto,
-                    ItemId = id,
-                    Categories = categories,
-                    Conditions = conditions,
-                    Locations = locations,
-                    CurrentImageUrl = item.ImageFileName,
-                    IsActive = item.Status == Models.Entities.Items.ItemStatus.Available,
-                    ViewCount = item.ViewCount,
-                    DatePosted = item.DatePosted
-                };
-
-                return View(viewModel);
+                    itemTitle = item.ItemTitle,
+                    itemCategory = item.Category?.Name,
+                    itemCondition = item.Condition?.Name,
+                    itemLocation = item.Location?.Name,
+                    description = item.Description,
+                    latitude = item.Latitude,
+                    longitude = item.Longitude,
+                    imageUrl = !string.IsNullOrEmpty(item.ImageFileName)
+                        ? $"/ItemPosts/{item.ImageFileName}"
+                        : null
+                });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading edit page for item {ItemId}", id);
-                return NotFound();
+                _logger.LogError(ex, "Error loading item for edit: {ItemId}", id);
+                return Json(new { success = false, message = "Error loading item" });
             }
         }
 
-        // POST: Item/Edit/5
-        [HttpPost]
+        [HttpPost("Edit/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, UpdateItemDto dto)
+        public async Task<IActionResult> Edit(int id, IFormCollection form)
         {
             try
             {
-                if (!ModelState.IsValid)
+                var currentUserId = GetCurrentUserId();
+                if (currentUserId <= 0)
                 {
-                    return Json(new { success = false, message = "Please fill in all required fields correctly." });
+                    return Json(new { success = false, message = "User authentication required" });
                 }
 
-                var userId = GetCurrentUserId();
-                if (userId <= 0)
+                // Extract form values
+                var itemTitle = form["ItemTitle"].ToString()?.Trim();
+                var description = form["Description"].ToString()?.Trim();
+                var categoryId = int.TryParse(form["CategoryId"], out int catId) ? catId : 0;
+                var conditionId = int.TryParse(form["ConditionId"], out int condId) ? condId : 0;
+                var locationName = form["LocationName"].ToString()?.Trim();
+                var latitude = decimal.TryParse(form["Latitude"], out decimal lat) ? lat : (decimal?)null;
+                var longitude = decimal.TryParse(form["Longitude"], out decimal lng) ? lng : (decimal?)null;
+                var imageFile = form.Files.FirstOrDefault();
+                var removeImage = form["RemoveImage"].ToString() == "true";
+
+                // Basic validation
+                var validationErrors = new List<string>();
+
+                if (string.IsNullOrWhiteSpace(itemTitle)) validationErrors.Add("Item title is required");
+                if (string.IsNullOrWhiteSpace(description)) validationErrors.Add("Description is required");
+                if (categoryId <= 0) validationErrors.Add("Please select a valid category");
+                if (conditionId <= 0) validationErrors.Add("Please select a valid condition");
+                if (string.IsNullOrWhiteSpace(locationName)) validationErrors.Add("Location is required");
+
+                if (validationErrors.Any())
                 {
-                    return Json(new { success = false, message = "User authentication required." });
+                    return Json(new { success = false, message = string.Join(", ", validationErrors) });
                 }
 
-                // Create a temporary DTO with location name for the service
-                var serviceDto = new UpdateItemDto
+                // Create update DTO with proper structure to match your existing DTO
+                var updateDto = new UpdateItemDto
                 {
-                    ItemTitle = dto.ItemTitle,
-                    Description = dto.Description,
-                    CategoryId = dto.CategoryId,
-                    ConditionId = dto.ConditionId,
-                    LocationId = dto.LocationId,
-                    FinalTokenPrice = dto.FinalTokenPrice,
-                    Latitude = dto.Latitude,
-                    Longitude = dto.Longitude,
-                    ExpiresAt = dto.ExpiresAt,
-                    Status = dto.Status,
-                    LocationName = Request.Form["LocationName"].ToString()
+                    ItemTitle = itemTitle,
+                    Description = description,
+                    CategoryId = categoryId,
+                    ConditionId = conditionId,
+                    LocationName = locationName, // Your existing DTO expects this
+                    Latitude = latitude,
+                    Longitude = longitude,
+                    ImageFile = imageFile,
+                    Status = Models.Entities.Items.ItemStatus.Available
                 };
 
-                var updatedItem = await _itemService.UpdateItemAsync(id, serviceDto, userId);
+                var updatedItem = await _itemService.UpdateItemAsync(id, updateDto, currentUserId);
 
-                _logger.LogInformation("Item updated successfully: {ItemTitle} (ID: {ItemId})", updatedItem.ItemTitle, id);
-
-                return Json(new { success = true, message = "Item updated successfully!" });
+                return Json(new
+                {
+                    success = true,
+                    message = "Item updated successfully!",
+                    newImageUrl = !string.IsNullOrEmpty(updatedItem.ImageFileName)
+                        ? $"/ItemPosts/{updatedItem.ImageFileName}"
+                        : null,
+                    imageRemoved = removeImage
+                });
             }
             catch (UnauthorizedAccessException)
             {
-                return Json(new { success = false, message = "You don't have permission to edit this item." });
+                return Json(new { success = false, message = "You don't have permission to edit this item" });
+            }
+            catch (ArgumentException ex)
+            {
+                return Json(new { success = false, message = ex.Message });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating item {ItemId}", id);
-                return Json(new { success = false, message = ex.Message });
+                _logger.LogError(ex, "Error updating item: {ItemId}", id);
+                return Json(new { success = false, message = "An error occurred while updating the item" });
             }
         }
 
-        // POST: Item/Delete/5
-        [HttpPost]
+        [HttpPost("Delete/{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                var userId = GetCurrentUserId();
-                if (userId <= 0)
+                var currentUserId = GetCurrentUserId();
+                if (currentUserId <= 0)
                 {
-                    return Json(new { success = false, message = "User authentication required." });
+                    return Json(new { success = false, message = "User authentication required" });
                 }
 
-                var success = await _itemService.DeleteItemAsync(id, userId);
-                if (!success)
+                var success = await _itemService.DeleteItemAsync(id, currentUserId);
+                if (success)
                 {
-                    return Json(new { success = false, message = "Item not found." });
+                    return Json(new { success = true, message = "Item deleted successfully" });
                 }
-
-                _logger.LogInformation("Item deleted successfully: ID {ItemId} by user {UserId}", id, userId);
-
-                return Json(new { success = true, message = "Item deleted successfully!" });
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Json(new { success = false, message = "You don't have permission to delete this item." });
+                else
+                {
+                    return Json(new { success = false, message = "Item not found or you don't have permission to delete it" });
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting item {ItemId}", id);
-                return Json(new { success = false, message = "An error occurred while deleting the item." });
+                _logger.LogError(ex, "Error deleting item: {ItemId}", id);
+                return Json(new { success = false, message = "An error occurred while deleting the item" });
             }
         }
 
-        // GET: Item/MyItems
-        public async Task<IActionResult> MyItems()
-        {
-            try
-            {
-                var userId = GetCurrentUserId();
-                if (userId <= 0)
-                {
-                    return RedirectToAction("Login", "Account");
-                }
-
-                var items = await _itemService.GetItemsByUserIdAsync(userId);
-                var itemDtos = items.Select(MapToItemDto).ToList();
-
-                var viewModel = new ItemListViewModel
-                {
-                    Items = itemDtos,
-                    PageTitle = "My Items",
-                    ShowFilters = false
-                };
-
-                return View("Index", viewModel);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading user items for user {UserId}", GetCurrentUserId());
-                return View("Index", new ItemListViewModel());
-            }
-        }
-
-        #region Helper Methods
-
+        // Helper method to get current user ID
         private int GetCurrentUserId()
         {
-            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return int.TryParse(userIdString, out var userId) ? userId : 0;
-        }
-
-        private async Task<List<ItemCategoryDto>> GetCategoriesAsync()
-        {
-            return await _context.ItemCategories
-                .Where(c => c.IsActive)
-                .OrderBy(c => c.SortOrder)
-                .ThenBy(c => c.Name)
-                .Select(c => new ItemCategoryDto
-                {
-                    CategoryId = c.CategoryId,
-                    Name = c.Name,
-                    Description = c.Description,
-                    IsActive = c.IsActive,
-                    ItemCount = c.Items.Count(i => i.Status == Models.Entities.Items.ItemStatus.Available)
-                })
-                .ToListAsync();
-        }
-
-        private async Task<List<ItemConditionDto>> GetConditionsAsync()
-        {
-            return await _context.ItemConditions
-                .Where(c => c.IsActive)
-                .OrderBy(c => c.ConditionId)
-                .Select(c => new ItemConditionDto
-                {
-                    ConditionId = c.ConditionId,
-                    Name = c.Name,
-                    Description = c.Description,
-                    ConditionMultiplier = c.ConditionMultiplier,
-                    IsActive = c.IsActive
-                })
-                .ToListAsync();
-        }
-
-        private async Task<List<ItemLocationDto>> GetLocationsAsync()
-        {
-            return await _context.ItemLocations
-                .Where(l => l.IsActive)
-                .OrderBy(l => l.Name)
-                .Select(l => new ItemLocationDto
-                {
-                    LocationId = l.LocationId,
-                    Name = l.Name,
-                    Region = l.Region,
-                    IsActive = l.IsActive,
-                    ItemCount = l.Items.Count(i => i.Status == Models.Entities.Items.ItemStatus.Available)
-                })
-                .ToListAsync();
-        }
-
-        private async Task<List<ItemDto>> GetRelatedItemsAsync(int categoryId, int excludeItemId)
-        {
-            var items = await _context.Items
-                .Where(i => i.CategoryId == categoryId &&
-                           i.ItemId != excludeItemId &&
-                           i.Status == Models.Entities.Items.ItemStatus.Available)
-                .Include(i => i.User)
-                .Include(i => i.Category)
-                .Include(i => i.Condition)
-                .Include(i => i.Location)
-                .OrderByDescending(i => i.DatePosted)
-                .Take(6)
-                .ToListAsync();
-
-            return items.Select(MapToItemDto).ToList();
-        }
-
-        private async Task<List<ItemDto>> GetSellerOtherItemsAsync(int sellerId, int excludeItemId)
-        {
-            var items = await _context.Items
-                .Where(i => i.UserId == sellerId &&
-                           i.ItemId != excludeItemId &&
-                           i.Status == Models.Entities.Items.ItemStatus.Available)
-                .Include(i => i.User)
-                .Include(i => i.Category)
-                .Include(i => i.Condition)
-                .Include(i => i.Location)
-                .OrderByDescending(i => i.DatePosted)
-                .Take(4)
-                .ToListAsync();
-
-            return items.Select(MapToItemDto).ToList();
-        }
-
-        private ItemDto MapToItemDto(Models.Entities.Items.Item item)
-        {
-            return new ItemDto
+            // For authenticated users
+            if (User.Identity?.IsAuthenticated == true)
             {
-                ItemId = item.ItemId,
-                UserId = item.UserId,
-                Username = item.User?.UserName ?? "Unknown User",
-                //UserAvatarUrl = item.User?.ProfilePictureUrl ?? "/assets/person-image.svg",
-                CategoryId = item.CategoryId,
-                CategoryName = item.Category?.Name ?? "Unknown Category",
-                ConditionId = item.ConditionId,
-                ConditionName = item.Condition?.Name ?? "Unknown Condition",
-                LocationId = item.LocationId,
-                LocationName = item.Location?.Name ?? "Unknown Location",
-                ItemTitle = item.ItemTitle,
-                Description = item.Description,
-                Latitude = item.Latitude,
-                Longitude = item.Longitude,
-                FinalTokenPrice = item.FinalTokenPrice,
-                ImageFileName = item.ImageFileName,
-                Status = item.Status,
-                DatePosted = item.DatePosted,
-                ExpiresAt = item.ExpiresAt,
-                ViewCount = item.ViewCount,
-                IsAiProcessed = item.AiProcessingStatus == Models.Entities.Items.AiProcessingStatus.Completed,
-                AiConfidenceLevel = item.AiConfidenceLevel
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (int.TryParse(userIdClaim, out int userId))
+                {
+                    return userId;
+                }
+            }
+
+            // For test mode (development only)
+            var currentTestUser = HttpContext.Session.GetString("CurrentTestUser") ?? "Alice";
+            return currentTestUser switch
+            {
+                "Alice" => 1,
+                "Bob" => 2,
+                "Charlie" => 3,
+                _ => 1
             };
         }
-
-        private List<string> GetPricingTips()
-        {
-            return new List<string>
-            {
-                "Items in better condition receive higher pricing automatically",
-                "Electronics and furniture typically have higher base values",
-                "Clear, well-lit photos can improve AI price suggestions",
-                "Accurate category selection ensures proper pricing calculation",
-                "Location can affect final pricing due to demand variations"
-            };
-        }
-
-        #endregion
     }
 }

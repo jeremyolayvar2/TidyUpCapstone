@@ -1,3 +1,4 @@
+using TidyUpCapstone.Data;
 using TidyUpCapstone.Extensions;
 using TidyUpCapstone.Helpers;
 using TidyUpCapstone.Services;
@@ -37,6 +38,27 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddControllers();
 
 var app = builder.Build();
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+    try
+    {
+        // Ensure database is created
+        await context.Database.EnsureCreatedAsync();
+
+        // Run seeding
+        await DatabaseSeeder.SeedAsync(context);
+
+        app.Logger.LogInformation("Database seeding completed successfully");
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogError(ex, "Error occurred while seeding database");
+    }
+}
+
 
 // Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())

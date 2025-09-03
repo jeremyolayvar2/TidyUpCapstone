@@ -4,6 +4,7 @@
 
 <link href="https://cdn.jsdelivr.net/npm/iconsax@1.0.0-alpha2/dist/css/iconsax.css" rel="stylesheet">
 <link rel="stylesheet" href="~/css/instagram-animations.css" />
+<link rel="stylesheet" href="~/css/posting-styles.css" />
 
 @{
     ViewBag.HideNavigation = false;
@@ -113,6 +114,9 @@
 
 <!-- POST CONTAINER -->
 <div class="main-container-main">
+    <button class="floating-add-btn" id="openCreateModal" title="Post an Item">
+        <i class='bx bx-plus'></i>
+    </button>
     <div class="posts-container" id="postsContainer">
 
         <!-- Sample Community Posts -->
@@ -488,6 +492,7 @@
                     <label class="input-label" for="descriptionInput">Description</label>
                 </div>
 
+                <input type="hidden" id="LocationName" name="LocationName" />
                 <!-- Hidden Lat/Lng -->
                 <input type="hidden" name="Latitude" id="Latitude" />
                 <input type="hidden" name="Longitude" id="Longitude" />
@@ -682,7 +687,7 @@
                         <div class="comment-actions">
                             <button class="comment-action-btn" data-action="like" data-comment-id="3">
                                 <i class='bx bx-heart'></i>
-                                
+
                             </button>
                             <button class="comment-action-btn" data-action="reply" data-comment-id="3">
                                 <i class='bx  bx-message-bubble-reply'></i>
@@ -733,9 +738,25 @@
 <script src="~/js/createChatBubble.js"></script>
 
 <!-- Enhanced JavaScript for image preview and form validation -->
+<!-- Scripts -->
+<script src="~/js/toggleEditDelete.js"></script>
+<script src="~/js/afterTax.js"></script>
+<script src="~/js/openModal.js"></script>
+<script src="~/js/editingPost.js"></script>
+<script src="~/js/deletePost.js"></script>
+<script src="~/js/tokenModal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="~/js/messageScript.js"></script>
+<script src="~/js/createChatBubble.js"></script>
+
+<!-- NEW: Enhanced posting system scripts -->
+<script src="~/js/uiUpdateSystem.js"></script>
+<script src="~/js/filterTabSystem.js"></script>
+
+<!-- Enhanced JavaScript for image preview and form validation -->
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Image preview functionality
+        // Image preview functionality - Enhanced version
         const imageInput = document.getElementById('imageInput');
         const imagePreview = document.getElementById('imagePreview');
         const previewImg = document.getElementById('previewImg');
@@ -763,18 +784,18 @@
         if (titleInput) {
             titleInput.addEventListener('input', function() {
                 const remaining = 100 - this.value.length;
-                // You can add character count display here
+                // Character counter handled by openModal.js
             });
         }
 
         if (descriptionInput) {
             descriptionInput.addEventListener('input', function() {
                 const remaining = 1000 - this.value.length;
-                // You can add character count display here
+                // Character counter handled by openModal.js
             });
         }
 
-        // Form validation
+        // Form validation - Enhanced version
         function validateForm() {
             const title = titleInput?.value.trim();
             const description = descriptionInput?.value.trim();
@@ -790,6 +811,15 @@
             const submitBtn = document.getElementById('submitPost');
             if (submitBtn) {
                 submitBtn.disabled = !isValid;
+
+                // Add visual feedback classes
+                if (isValid) {
+                    submitBtn.classList.add('valid');
+                    submitBtn.classList.remove('invalid');
+                } else {
+                    submitBtn.classList.remove('valid');
+                    submitBtn.classList.add('invalid');
+                }
             }
 
             return isValid;
@@ -804,6 +834,9 @@
                 input.addEventListener('input', validateForm);
             }
         });
+
+        // Initial validation
+        validateForm();
     });
 
     function removeImage() {
@@ -822,6 +855,10 @@
 
     function closeCreateModal() {
         document.getElementById('createPostModal').style.display = 'none';
+        // Reset form handled by openModal.js
+        if (typeof resetCreateForm === 'function') {
+            resetCreateForm();
+        }
     }
 
     function closeEditModal() {
@@ -829,8 +866,154 @@
     }
 </script>
 
+<!-- Community Page Scripts -->
 <script src="~/js/CommunityPage.js?v=20241114g"></script>
 
+
+<!-- Google Places API Configuration -->
+<script>
+    function loadGoogleMapsAPI() {
+        console.log('Loading Google Maps API...');
+
+        const API_KEY = 'AIzaSyAajNvSCpxo_QwyPwsRmrmr2-MlApf6Qkw';
+
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=places&callback=initializeGooglePlaces&loading=async`;
+        script.async = true;
+        script.defer = true;
+
+        script.onerror = function(error) {
+            console.error('Failed to load Google Maps API:', error);
+            console.error('Check: API key, Places API enabled, billing enabled');
+            initializeManualLocationFallback();
+        };
+
+        script.onload = function() {
+            console.log('Google Maps script loaded successfully');
+        };
+
+        document.head.appendChild(script);
+    }
+
+    window.initializeGooglePlaces = function() {
+        console.log('Google Places API callback triggered');
+
+        if (typeof google === 'undefined' || !google.maps || !google.maps.places) {
+            console.error('Google Maps/Places API not properly initialized');
+            initializeManualLocationFallback();
+            return;
+        }
+
+        console.log('Initializing autocomplete...');
+        initializeAutocomplete();
+    };
+
+    function initializeAutocomplete() {
+        const locationInput = document.getElementById('locationInput');
+        const editLocationInput = document.getElementById('editLocationInput');
+
+        if (!locationInput) {
+            console.error('Location input not found');
+            return;
+        }
+
+        try {
+            // Create autocomplete for create modal
+            const autocomplete = new google.maps.places.Autocomplete(locationInput, {
+                types: ['geocode'],
+                componentRestrictions: { country: 'ph' },
+                fields: ['formatted_address', 'geometry', 'place_id']
+            });
+
+    autocomplete.addListener('place_changed', function() {
+        const place = autocomplete.getPlace();
+
+        if (!place.geometry) {
+            console.log('No geometry for selected place');
+            return;
+        }
+
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+
+        document.getElementById('Latitude').value = lat;
+        document.getElementById('Longitude').value = lng;
+
+        // 👇 Add this line
+        document.getElementById('LocationName').value = place.formatted_address;
+
+        console.log('Location selected:', { lat, lng, address: place.formatted_address });
+
+        if (typeof triggerFormValidation === 'function') {
+            triggerFormValidation();
+        }
+    });
+
+
+            // Initialize for edit modal
+            if (editLocationInput) {
+                const editAutocomplete = new google.maps.places.Autocomplete(editLocationInput, {
+                    types: ['geocode'],
+                    componentRestrictions: { country: 'ph' },
+                    fields: ['formatted_address', 'geometry', 'place_id']
+                });
+
+                editAutocomplete.addListener('place_changed', function() {
+                    const place = editAutocomplete.getPlace();
+                    if (place.geometry) {
+                        document.getElementById('editLatitude').value = place.geometry.location.lat();
+                        document.getElementById('editLongitude').value = place.geometry.location.lng();
+                    }
+                });
+            }
+
+            console.log('Autocomplete initialized successfully');
+
+        } catch (error) {
+            console.error('Error initializing autocomplete:', error);
+            initializeManualLocationFallback();
+        }
+    }
+
+    function initializeManualLocationFallback() {
+        console.log('Initializing manual location entry fallback');
+
+        const locationInput = document.getElementById('locationInput');
+        if (locationInput) {
+            locationInput.placeholder = 'Enter location manually (e.g., Manila, Philippines)';
+
+    locationInput.addEventListener('blur', function() {
+        const location = this.value.trim();
+        if (location && location.length > 3) {
+            document.getElementById('Latitude').value = '14.5995';
+            document.getElementById('Longitude').value = '120.9842';
+
+            // 👇 Add this line
+            document.getElementById('LocationName').value = location;
+
+            console.log('Manual location set:', location);
+
+            if (typeof triggerFormValidation === 'function') {
+                triggerFormValidation();
+            }
+        }
+    });
+
+        }
+    }
+
+    // Initialize when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+            if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+                console.log('Google API already loaded');
+                initializeAutocomplete();
+            } else {
+                loadGoogleMapsAPI();
+            }
+        }, 500);
+    });
+</script>
 
 
 <!-- TEST MODE: Enhanced User Switcher -->
