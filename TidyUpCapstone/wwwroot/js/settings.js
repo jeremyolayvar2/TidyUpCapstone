@@ -470,6 +470,13 @@
             currentTabName.textContent = this.tabNames[targetTab];
         }
 
+        // ADD THIS - Load profile data when switching to profile tab
+        if (targetTab === 'profile') {
+            setTimeout(() => {
+                this.loadProfileData();
+            }, 100);
+        }
+
         if (targetTab === 'language' && !this.languageSettingsLoaded) {
             setTimeout(() => {
                 this.loadLanguageSettings();
@@ -485,6 +492,9 @@
     initProfileFeatures() {
         console.log('Initializing profile features...');
 
+        // ADD THIS LINE - Load profile data when profile features initialize
+        this.loadProfileData();
+
         this.initProfilePictureUpload();
         this.initPasswordToggle();
         this.initConnectedAccounts();
@@ -492,6 +502,154 @@
         this.initPhoneFormatting();
         this.initFormEditing();
         this.initSaveButtonClick();
+    }
+
+    async loadProfileData() {
+        try {
+            console.log('Loading profile data from backend...');
+
+            const response = await fetch('/Settings/GetProfileData');
+            const data = await response.json();
+
+            if (data.success) {
+                const profile = data.profile;
+
+                // Populate profile header
+                const displayName = document.getElementById('profile-display-name');
+                const displayUsername = document.getElementById('profile-display-username');
+
+                if (displayName && profile.FirstName && profile.LastName) {
+                    displayName.textContent = `${profile.FirstName} ${profile.LastName}`;
+                }
+
+                if (displayUsername && profile.Username) {
+                    displayUsername.textContent = `@${profile.Username}`;
+                }
+
+                // Populate form fields - using the DTO property names
+                this.populateFormField('firstName', profile.FirstName);
+                this.populateFormField('lastName', profile.LastName);
+                this.populateFormField('email', profile.Email);
+                this.populateFormField('username', profile.Username);
+                this.populateFormField('phone', data.phoneNumber); // Get phone from separate field
+                this.populateFormField('location', profile.Location);
+                this.populateFormField('gender', profile.Gender);
+
+                // Handle birthday formatting for date input
+                if (profile.Birthday) {
+                    const birthday = new Date(profile.Birthday);
+                    const formattedDate = birthday.toISOString().split('T')[0];
+                    this.populateFormField('birthday', formattedDate);
+                }
+
+                // Handle profile picture
+                if (profile.ProfilePictureUrl || profile.AvatarUrl) {
+                    const profileAvatar = document.getElementById('profile-avatar-upload');
+                    if (profileAvatar) {
+                        const imageUrl = profile.ProfilePictureUrl || profile.AvatarUrl;
+                        profileAvatar.style.backgroundImage = `url(${imageUrl})`;
+                        profileAvatar.style.backgroundSize = 'cover';
+                        profileAvatar.style.backgroundPosition = 'center';
+                        profileAvatar.innerHTML = ''; // Remove the default icon
+                    }
+                }
+
+                console.log('Profile data loaded successfully:', profile);
+                return true;
+            } else {
+                console.error('Failed to load profile data:', data.message);
+                this.showNotification('Failed to load profile data', 'error');
+                return false;
+            }
+        } catch (error) {
+            console.error('Error loading profile data:', error);
+            this.showNotification('Error loading profile data', 'error');
+            return false;
+        }
+    }
+
+    populateFormField(fieldId, value) {
+        const field = document.getElementById(fieldId);
+        if (field && value !== null && value !== undefined && value !== '') {
+            field.value = value;
+
+            // For select elements, ensure the option exists
+            if (field.tagName === 'SELECT') {
+                const option = field.querySelector(`option[value="${value}"]`);
+                if (option) {
+                    field.value = value;
+                }
+            }
+        }
+    }
+
+
+    handleProfileSave(button) {
+        if (!button) return;
+
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Saving...';
+        button.disabled = true;
+
+        const formData = new FormData();
+
+        formData.append('Username', document.getElementById('username')?.value || '');
+        formData.append('FirstName', document.getElementById('firstName')?.value || '');
+        formData.append('LastName', document.getElementById('lastName')?.value || '');
+        formData.append('Phone', document.getElementById('phone')?.value || '');
+        formData.append('PhoneNumber', document.getElementById('phone')?.value || '');
+        formData.append('Email', document.getElementById('email')?.value || '');
+        formData.append('Location', document.getElementById('location')?.value || '');
+        formData.append('Gender', document.getElementById('gender')?.value || '');
+        formData.append('Birthday', document.getElementById('birthday')?.value || '');
+        formData.append('MarketingEmailsEnabled', 'false');
+        formData.append('AvatarUrl', '');
+
+        const fileInput = document.getElementById('profile-picture-input');
+        if (fileInput && fileInput.files[0]) {
+            formData.append('ProfilePicture', fileInput.files[0]);
+            console.log('Profile picture file added to form data');
+        }
+
+        const token = document.querySelector('input[name="__RequestVerificationToken"]');
+        if (token) {
+            formData.append('__RequestVerificationToken', token.value);
+        }
+
+        // ADD THIS DEBUG
+        console.log('About to fetch: /Settings/UpdateProfile');
+        console.log('Method: POST');
+        console.log('Sending form data:');
+        for (let pair of formData.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
+        }
+
+        fetch('/Settings/UpdateProfile', {  // Make sure this is the exact URL
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                console.log('Response status:', response.status);
+                button.innerHTML = originalText;
+                button.disabled = false;
+
+                if (response.status === 200 || response.status === 302) {
+                    this.showNotification('Profile updated successfully!', 'success');
+
+                    // Reload profile data to show updated values
+                    setTimeout(() => {
+                        this.loadProfileData();
+                    }, 1000);
+                } else {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+            })
+            .catch(error => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+                console.error('Error:', error);
+                this.showNotification('Error updating profile. Please try again.', 'error');
+            });
     }
 
     initSaveButtonClick() {
@@ -507,6 +665,62 @@
             });
         } else {
             console.warn('Save button not found');
+        }
+    }
+
+    initPhoneVerification() {
+        const verifyPhoneBtn = document.getElementById('verify-phone-btn');
+
+        if (verifyPhoneBtn) {
+            verifyPhoneBtn.addEventListener('click', () => {
+                this.handlePhoneVerification();
+            });
+        }
+    }
+
+    async handlePhoneVerification() {
+        const phoneInput = document.getElementById('phone');
+        const phoneNumber = phoneInput?.value?.trim();
+
+        if (!phoneNumber) {
+            this.showNotification('Please enter a phone number first', 'error');
+            return;
+        }
+
+        const verifyBtn = document.getElementById('verify-phone-btn');
+        const originalText = verifyBtn.innerHTML;
+        verifyBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Sending...';
+        verifyBtn.disabled = true;
+
+        try {
+            const formData = new FormData();
+            formData.append('phoneNumber', phoneNumber);
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]');
+            if (token) {
+                formData.append('__RequestVerificationToken', token.value);
+            }
+
+            const response = await fetch('/Settings/SendVerificationCode', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                this.showNotification(data.message, 'success');
+                // TODO: Show verification code input modal
+                console.log('Check console for verification code (development mode)');
+            } else {
+                this.showNotification(data.message, 'error');
+            }
+        } catch (error) {
+            console.error('Phone verification error:', error);
+            this.showNotification('Failed to send verification code', 'error');
+        } finally {
+            verifyBtn.innerHTML = originalText;
+            verifyBtn.disabled = false;
         }
     }
 
@@ -639,70 +853,6 @@
             button.style.transform = 'scale(1)';
         }
     }
-
-    handleProfileSave(button) {
-        if (!button) return;
-
-        const originalText = button.innerHTML;
-        button.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Saving...';
-        button.disabled = true;
-
-        const formData = new FormData();
-
-        formData.append('Username', document.getElementById('username')?.value || '');
-        formData.append('FirstName', document.getElementById('firstName')?.value || '');
-        formData.append('LastName', document.getElementById('lastName')?.value || '');
-        formData.append('Phone', document.getElementById('phone')?.value || '');
-        formData.append('PhoneNumber', document.getElementById('phone')?.value || '');
-        formData.append('Email', document.getElementById('email')?.value || '');
-        formData.append('Location', document.getElementById('location')?.value || '');
-        formData.append('Gender', document.getElementById('gender')?.value || '');
-        formData.append('Birthday', document.getElementById('birthday')?.value || '');
-        formData.append('MarketingEmailsEnabled', 'false');
-        formData.append('AvatarUrl', '');
-
-        const fileInput = document.getElementById('profile-picture-input');
-        if (fileInput && fileInput.files[0]) {
-            formData.append('ProfilePicture', fileInput.files[0]);
-            console.log('Profile picture file added to form data');
-        }
-
-        const token = document.querySelector('input[name="__RequestVerificationToken"]');
-        if (token) {
-            formData.append('__RequestVerificationToken', token.value);
-        }
-
-        console.log('Sending form data:');
-        for (let pair of formData.entries()) {
-            console.log(pair[0] + ': ' + pair[1]);
-        }
-
-        fetch('/Settings/UpdateProfile', {
-            method: 'POST',
-            body: formData
-        })
-            .then(response => {
-                console.log('Response status:', response.status);
-                button.innerHTML = originalText;
-                button.disabled = false;
-
-                if (response.status === 200 || response.status === 302) {
-                    this.showNotification('Profile updated successfully!', 'success');
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    throw new Error(`Server responded with status: ${response.status}`);
-                }
-            })
-            .catch(error => {
-                button.innerHTML = originalText;
-                button.disabled = false;
-                console.error('Error:', error);
-                this.showNotification('Error updating profile. Please try again.', 'error');
-            });
-    }
-
     initPhoneFormatting() {
         const phoneInput = document.getElementById('phone');
 
@@ -757,6 +907,7 @@
         this.initFormValidation();
         this.initNotificationSwitches();
         this.initSecurityFeatures();
+        this.initNotificationSettings();
         this.initPrivacySettings();
         this.initLanguageSettings();
 
@@ -1280,6 +1431,84 @@
                 }, 300);
             }
         }, 4000);
+    }
+
+    initNotificationSettings() {
+        console.log('Initializing notification settings...');
+
+        const notificationSaveButton = document.querySelector('#notifications .btn-save');
+        if (notificationSaveButton) {
+            notificationSaveButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleNotificationSave();
+            });
+        }
+
+        const notificationSwitches = document.querySelectorAll('#notifications .switch input[type="checkbox"]');
+        notificationSwitches.forEach(switchEl => {
+            switchEl.addEventListener('change', () => {
+                const settingName = this.getNotificationSettingName(switchEl.name);
+                this.showNotification(`${settingName} ${switchEl.checked ? 'enabled' : 'disabled'}`, 'info');
+            });
+        });
+    }
+
+    handleNotificationSave() {
+        const notificationSaveButton = document.querySelector('#notifications .btn-save');
+        if (!notificationSaveButton) return;
+
+        const originalText = notificationSaveButton.innerHTML;
+        notificationSaveButton.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Saving Notification Settings...';
+        notificationSaveButton.disabled = true;
+
+        const formData = new FormData();
+
+        const emailNewMessages = document.querySelector('input[name="EmailNewMessages"]')?.checked || false;
+        const emailItemUpdates = document.querySelector('input[name="EmailItemUpdates"]')?.checked || false;
+        const emailWeeklySummary = document.querySelector('input[name="EmailWeeklySummary"]')?.checked || false;
+        const desktopNotifications = document.querySelector('input[name="DesktopNotifications"]')?.checked || false;
+
+        formData.append('EmailNewMessages', emailNewMessages);
+        formData.append('EmailItemUpdates', emailItemUpdates);
+        formData.append('EmailWeeklySummary', emailWeeklySummary);
+        formData.append('DesktopNotifications', desktopNotifications);
+
+        const token = document.querySelector('input[name="__RequestVerificationToken"]');
+        if (token) {
+            formData.append('__RequestVerificationToken', token.value);
+        }
+
+        fetch('/NotificationSettings/UpdateNotifications', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                notificationSaveButton.innerHTML = originalText;
+                notificationSaveButton.disabled = false;
+
+                if (response.ok) {
+                    this.showNotification('Notification settings saved successfully!', 'success');
+                    console.log('Notification settings saved successfully');
+                } else {
+                    throw new Error('Save failed');
+                }
+            })
+            .catch(error => {
+                notificationSaveButton.innerHTML = originalText;
+                notificationSaveButton.disabled = false;
+                console.error('Error saving notification settings:', error);
+                this.showNotification('Error saving notification settings. Please try again.', 'error');
+            });
+    }
+
+    getNotificationSettingName(settingName) {
+        const names = {
+            'EmailNewMessages': 'Email notifications for new messages',
+            'EmailItemUpdates': 'Email notifications for item updates',
+            'EmailWeeklySummary': 'Weekly summary emails',
+            'DesktopNotifications': 'Desktop notifications'
+        };
+        return names[settingName] || settingName;
     }
 
     // PRIVACY SETTINGS

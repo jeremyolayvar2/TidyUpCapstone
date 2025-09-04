@@ -312,6 +312,13 @@ namespace TidyUpCapstone.Controllers
                     _context.UserPrivacySettings.RemoveRange(userPrivacySettings);
                     Console.WriteLine($"Removed {userPrivacySettings.Count()} privacy settings");
                 }
+                // Remove user's notification settings
+                var userNotificationSettings = _context.NotificationSettings.Where(ns => ns.UserId == userId);
+                if (userNotificationSettings.Any())
+                {
+                    _context.NotificationSettings.RemoveRange(userNotificationSettings);
+                    Console.WriteLine($"Removed {userNotificationSettings.Count()} notification settings");
+                }
 
                 // Save all changes
                 Console.WriteLine("Saving cleanup changes...");

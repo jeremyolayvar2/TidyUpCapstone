@@ -87,6 +87,9 @@ namespace TidyUpCapstone.Data
         public DbSet<UserPrivacySettings> UserPrivacySettings { get; set; }
 
         public DbSet<ContactMessage> ContactMessages { get; set; }
+
+        public DbSet<NotificationSettings> NotificationSettings { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -213,6 +216,9 @@ namespace TidyUpCapstone.Data
             builder.Entity<UserPrivacySettings>().ToTable("user_privacy_settings");
 
             builder.Entity<ContactMessage>().ToTable("contact_messages");
+
+            builder.Entity<NotificationSettings>().ToTable("notification_settings");
+
 
             // Configure JSON columns as nvarchar(max) for compatibility
             builder.Entity<Admin>()
@@ -509,7 +515,15 @@ namespace TidyUpCapstone.Data
                 .WithOne(u => u.PrivacySettings)
                 .HasForeignKey<UserPrivacySettings>(ups => ups.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<NotificationSettings>()
+    .HasOne(ns => ns.User)
+    .WithOne(u => u.NotificationSettings)
+    .HasForeignKey<NotificationSettings>(ns => ns.UserId)
+    .OnDelete(DeleteBehavior.Cascade);
         }
+
+
 
 
 
@@ -562,6 +576,11 @@ namespace TidyUpCapstone.Data
             builder.Entity<Notification>()
                 .HasIndex(n => new { n.UserId, n.IsRead })
                 .HasDatabaseName("idx_notification_user_read");
+
+            builder.Entity<NotificationSettings>()
+    .HasIndex(ns => ns.UserId)
+    .IsUnique()
+    .HasDatabaseName("idx_notification_settings_user");
         }
 
         private void ConfigureCheckConstraints(ModelBuilder builder)

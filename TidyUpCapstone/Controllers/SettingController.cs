@@ -9,21 +9,20 @@ using TidyUpCapstone.Models.Entities.User;
 using TidyUpCapstone.Models.ViewModels.Account;
 using TidyUpCapstone.Services;
 
-
 namespace TidyUpCapstone.Controllers
 {
     [Authorize]
     public class SettingsController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
-        private readonly IWebHostEnvironment _environment; 
+        private readonly IWebHostEnvironment _environment;
         private readonly ApplicationDbContext _context;
         private readonly ILanguageService _languageService;
 
         public SettingsController(UserManager<AppUser> userManager, IWebHostEnvironment environment, ApplicationDbContext context, ILanguageService languageService)
         {
             _userManager = userManager;
-            _environment = environment; // Added dependency injection
+            _environment = environment;
             _context = context;
             _languageService = languageService;
         }
@@ -34,7 +33,12 @@ namespace TidyUpCapstone.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return NotFound();
+                // If no authenticated user, try to get testuser for development
+                user = await _userManager.FindByEmailAsync("test@tidyup.com");
+                if (user == null)
+                {
+                    return RedirectToAction("TestLogin", "Auth");
+                }
             }
 
             var profileDto = new UserProfileDto
@@ -48,12 +52,18 @@ namespace TidyUpCapstone.Controllers
                 Birthday = user.Birthday,
                 Gender = user.Gender,
                 ProfilePictureUrl = user.ProfilePictureUrl,
+                AvatarUrl = user.ProfilePictureUrl, // Map to AvatarUrl as well
                 PhoneNumberConfirmed = user.PhoneNumberConfirmed,
                 EmailConfirmed = user.EmailConfirmed,
                 TokenBalance = user.TokenBalance,
                 DateCreated = user.DateCreated,
                 Status = Enum.Parse<UserStatus>(user.Status, true),
-                LastLogin = user.LastLogin
+                LastLogin = user.LastLogin,
+                IsVerified = user.EmailConfirmed && user.PhoneNumberConfirmed,
+                Role = UserRole.User, // Default to User role
+                TwoFactorEnabled = false, // Add when you implement 2FA
+                RegistrationMethod = RegistrationMethod.Email, // Default
+                MarketingEmailsEnabled = false // Default
             };
 
             var updateDto = new UpdateUserProfileDto
@@ -82,7 +92,7 @@ namespace TidyUpCapstone.Controllers
             return View(viewModel);
         }
 
-        // POST: Settings/UpdateProfile
+        // POST: Settings/UpdateProfile - Fixed to match business requirements
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateProfile(UpdateUserProfileDto model, IFormFile ProfilePicture)
@@ -118,8 +128,13 @@ namespace TidyUpCapstone.Controllers
                 var user = await _userManager.GetUserAsync(User);
                 if (user == null)
                 {
-                    Console.WriteLine("User not found");
-                    return NotFound();
+                    // Fallback to testuser for development
+                    user = await _userManager.FindByEmailAsync("test@tidyup.com");
+                    if (user == null)
+                    {
+                        Console.WriteLine("User not found");
+                        return NotFound();
+                    }
                 }
 
                 Console.WriteLine($"Found user: {user.UserName}");
@@ -188,10 +203,16 @@ namespace TidyUpCapstone.Controllers
                     }
                 }
 
-                // Update other user fields (only editable fields based on your requirements)
-                Console.WriteLine("Updating user fields...");
-                user.FirstName = model.FirstName;
-                user.LastName = model.LastName;
+                // FIXED: Only update EDITABLE fields based on business requirements
+                Console.WriteLine("Updating user fields (EDITABLE FIELDS ONLY)...");
+
+                // READONLY AFTER SIGNUP - DO NOT UPDATE:
+                // user.FirstName = model.FirstName;  // REMOVED
+                // user.LastName = model.LastName;    // REMOVED  
+                // user.Email = model.Email;          // REMOVED
+                // user.UserName = model.Username;    // REMOVED
+
+                // EDITABLE FIELDS - UPDATE ALLOWED:
                 user.PhoneNumber = model.Phone;
                 user.Location = model.Location;
                 user.Gender = model.Gender;
@@ -238,6 +259,63 @@ namespace TidyUpCapstone.Controllers
             }
         }
 
+        // GET: Get Profile Data for JS (NEW METHOD for your JS)
+        [HttpGet]
+        public async Task<IActionResult> GetProfileData()
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    // Fallback to testuser for development
+                    user = await _userManager.FindByEmailAsync("test@tidyup.com");
+                    if (user == null)
+                    {
+                        return Json(new { success = false, message = "User not found" });
+                    }
+                }
+
+                var profileData = new
+                {
+                    success = true,
+                    profile = new UserProfileDto
+                    {
+                        UserId = user.Id,
+                        Username = user.UserName ?? string.Empty,
+                        Email = user.Email ?? string.Empty,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Location = user.Location,
+                        Birthday = user.Birthday,
+                        Gender = user.Gender,
+                        ProfilePictureUrl = user.ProfilePictureUrl,
+                        AvatarUrl = user.ProfilePictureUrl,
+                        PhoneNumberConfirmed = user.PhoneNumberConfirmed,
+                        EmailConfirmed = user.EmailConfirmed,
+                        TokenBalance = user.TokenBalance,
+                        DateCreated = user.DateCreated,
+                        Status = Enum.Parse<UserStatus>(user.Status, true),
+                        LastLogin = user.LastLogin,
+                        IsVerified = user.EmailConfirmed && user.PhoneNumberConfirmed,
+                        Role = UserRole.User,
+                        TwoFactorEnabled = false,
+                        RegistrationMethod = RegistrationMethod.Email,
+                        MarketingEmailsEnabled = false
+                    },
+                    // Add phone separately since it's not in the DTO
+                    phoneNumber = user.PhoneNumber ?? string.Empty
+                };
+
+                return Json(profileData);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"GetProfileData Exception: {ex.Message}");
+                return Json(new { success = false, message = "Error loading profile data" });
+            }
+        }
+
         // POST: Settings/SendVerificationCode
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -251,7 +329,12 @@ namespace TidyUpCapstone.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return Json(new { success = false, message = "User not found." });
+                // Fallback to testuser for development
+                user = await _userManager.FindByEmailAsync("test@tidyup.com");
+                if (user == null)
+                {
+                    return Json(new { success = false, message = "User not found." });
+                }
             }
 
             // Generate 6-digit verification code
@@ -288,7 +371,12 @@ namespace TidyUpCapstone.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return Json(new { success = false, message = "User not found." });
+                // Fallback to testuser for development
+                user = await _userManager.FindByEmailAsync("test@tidyup.com");
+                if (user == null)
+                {
+                    return Json(new { success = false, message = "User not found." });
+                }
             }
 
             // Check if code matches and hasn't expired
@@ -337,7 +425,12 @@ namespace TidyUpCapstone.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return Json(new { success = false, message = "User not found." });
+                // Fallback to testuser for development
+                user = await _userManager.FindByEmailAsync("test@tidyup.com");
+                if (user == null)
+                {
+                    return Json(new { success = false, message = "User not found." });
+                }
             }
 
             var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
@@ -350,18 +443,22 @@ namespace TidyUpCapstone.Controllers
             var errors = string.Join(", ", result.Errors.Select(e => e.Description));
             return Json(new { success = false, message = errors });
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateLanguage(string Language, string Timezone, bool HighContrast = false, bool LargeText = false, bool ReduceMotion = false, bool ScreenReader = false)
         {
             try
             {
-                // Since you don't have authentication yet, get the first seeded user
                 var user = await _userManager.GetUserAsync(User);
-
                 if (user == null)
                 {
-                    return Json(new { success = false, message = "User not found." });
+                    // Fallback to testuser for development
+                    user = await _userManager.FindByEmailAsync("test@tidyup.com");
+                    if (user == null)
+                    {
+                        return Json(new { success = false, message = "User not found." });
+                    }
                 }
 
                 if (string.IsNullOrEmpty(Language) || string.IsNullOrEmpty(Timezone))
@@ -401,13 +498,16 @@ namespace TidyUpCapstone.Controllers
             try
             {
                 var user = await _userManager.GetUserAsync(User);
-
                 if (user == null)
                 {
-                    return Json(new { success = false, message = "User not found." });
+                    // Fallback to testuser for development
+                    user = await _userManager.FindByEmailAsync("test@tidyup.com");
+                    if (user == null)
+                    {
+                        return Json(new { success = false, message = "User not found." });
+                    }
                 }
 
-                // ADD THESE DEBUG LINES
                 Console.WriteLine($"=== DEBUG GetLanguageSettings ===");
                 Console.WriteLine($"User ID: {user.Id}");
                 Console.WriteLine($"Language: '{user.Language}'");
@@ -422,12 +522,12 @@ namespace TidyUpCapstone.Controllers
                     success = true,
                     data = new
                     {
-                        Language = user.Language,
-                        Timezone = user.Timezone,
-                        HighContrast = user.HighContrast,
-                        LargeText = user.LargeText,
-                        ReduceMotion = user.ReduceMotion,
-                        ScreenReader = user.ScreenReader
+                        language = user.Language,
+                        timezone = user.Timezone,
+                        highContrast = user.HighContrast,
+                        largeText = user.LargeText,
+                        reduceMotion = user.ReduceMotion,
+                        screenReader = user.ScreenReader
                     }
                 });
             }
@@ -452,6 +552,4 @@ namespace TidyUpCapstone.Controllers
             }
         }
     }
-
-
 }

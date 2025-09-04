@@ -89,6 +89,9 @@ namespace TidyUpCapstone.Models.Entities.User
         [ForeignKey("ManagedByAdminId")]
         public virtual AppUser? ManagedByAdmin { get; set; }
 
+        public virtual NotificationSettings? NotificationSettings { get; set; }
+
+
         public virtual ICollection<AppUser> ManagedUsers { get; set; } = new List<AppUser>();
 
         public virtual ICollection<Items.Item> Items { get; set; } = new List<Items.Item>();
