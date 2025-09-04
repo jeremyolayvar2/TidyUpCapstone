@@ -474,12 +474,20 @@
                     <div class="notification-item">
                         <div class="notification-info-child">
                             <span>Desktop Notifications</span>
-                            <small>Show desktop pop-ups for messages and quest updates (works on mobile browsers too)</small>
+                            <small id="desktop-notification-status">Show desktop pop-ups for messages and quest updates</small>
                         </div>
                         <label class="switch">
                             <input type="checkbox" name="DesktopNotifications" @(ViewBag.DesktopNotifications == true ? "checked" : "") aria-label="Desktop notifications">
                             <span class="slider"></span>
                         </label>
+                    </div>
+                    <div class="notification-item" id="test-notification-section" style="display: none;">
+                        <div class="notification-info-child">
+                            <small>Test your desktop notifications</small>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="test-notification-btn">
+                            <i class="bx bx-bell"></i> Test Notification
+                        </button>
                     </div>
                 </div>
 

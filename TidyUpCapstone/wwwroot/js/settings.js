@@ -1436,6 +1436,16 @@
     initNotificationSettings() {
         console.log('Initializing notification settings...');
 
+        // Check browser support and permission status
+        this.checkDesktopNotificationPermission();
+
+        // Initialize desktop notification toggle handler
+        this.initDesktopNotificationToggle();
+
+        // Initialize test notification button
+        this.initTestNotificationButton();
+
+        // Initialize save button (existing functionality)
         const notificationSaveButton = document.querySelector('#notifications .btn-save');
         if (notificationSaveButton) {
             notificationSaveButton.addEventListener('click', (e) => {
@@ -1444,6 +1454,7 @@
             });
         }
 
+        // Initialize switch change feedback (existing functionality)
         const notificationSwitches = document.querySelectorAll('#notifications .switch input[type="checkbox"]');
         notificationSwitches.forEach(switchEl => {
             switchEl.addEventListener('change', () => {
@@ -1509,6 +1520,175 @@
             'DesktopNotifications': 'Desktop notifications'
         };
         return names[settingName] || settingName;
+    }
+    checkDesktopNotificationPermission() {
+        if (!('Notification' in window)) {
+            const statusElement = document.getElementById('desktop-notification-status');
+            const desktopToggle = document.querySelector('input[name="DesktopNotifications"]');
+
+            if (statusElement) {
+                statusElement.textContent = 'Desktop notifications are not supported in this browser';
+                statusElement.style.color = '#dc3545';
+            }
+
+            if (desktopToggle) {
+                desktopToggle.disabled = true;
+            }
+            return;
+        }
+
+        this.updateNotificationStatus(Notification.permission);
+    }
+
+    updateNotificationStatus(permission) {
+        const statusElement = document.getElementById('desktop-notification-status');
+        if (!statusElement) return;
+
+        const statusMessages = {
+            'granted': 'Desktop notifications enabled ✓',
+            'denied': 'Notifications blocked. Click the lock icon in your address bar to enable.',
+            'default': 'Click to enable desktop notifications'
+        };
+
+        const statusColors = {
+            'granted': '#28a745',
+            'denied': '#dc3545',
+            'default': '#6c757d'
+        };
+
+        statusElement.textContent = statusMessages[permission] || statusMessages.default;
+        statusElement.style.color = statusColors[permission] || statusColors.default;
+
+        this.updateTestButtonVisibility();
+    }
+
+    initDesktopNotificationToggle() {
+        const desktopToggle = document.querySelector('input[name="DesktopNotifications"]');
+        if (!desktopToggle) return;
+
+        desktopToggle.addEventListener('change', () => {
+            if (desktopToggle.checked) {
+                this.requestNotificationPermission();
+            } else {
+                this.updateTestButtonVisibility();
+            }
+        });
+    }
+
+    requestNotificationPermission() {
+        if (!('Notification' in window)) {
+            this.showNotification('Desktop notifications are not supported in this browser', 'error');
+            return;
+        }
+
+        if (Notification.permission === 'default') {
+            Notification.requestPermission().then((permission) => {
+                this.updateNotificationStatus(permission);
+
+                if (permission === 'granted') {
+                    this.showWelcomeNotification();
+                } else if (permission === 'denied') {
+                    const toggle = document.querySelector('input[name="DesktopNotifications"]');
+                    if (toggle) toggle.checked = false;
+                    this.showNotification('Please enable notifications in your browser settings', 'error');
+                }
+            });
+        } else if (Notification.permission === 'denied') {
+            const toggle = document.querySelector('input[name="DesktopNotifications"]');
+            if (toggle) toggle.checked = false;
+            this.showNotification('Notifications are blocked. Please enable them in your browser settings.', 'error');
+        }
+    }
+
+    initTestNotificationButton() {
+        const testBtn = document.getElementById('test-notification-btn');
+        if (!testBtn) return;
+
+        testBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.showTestNotification();
+        });
+
+        this.updateTestButtonVisibility();
+    }
+
+    showTestNotification() {
+        if (Notification.permission === 'granted') {
+            const notification = new Notification('TidyUp Test Notification', {
+                body: 'Desktop notifications are working correctly!',
+                icon: '/favicon.ico',
+                tag: 'tidyup-test',
+                requireInteraction: false
+            });
+
+            notification.onclick = () => {
+                window.focus();
+                notification.close();
+            };
+
+            // Auto close after 5 seconds
+            setTimeout(() => {
+                notification.close();
+            }, 5000);
+
+            this.showNotification('Test notification sent!', 'success');
+        } else if (Notification.permission === 'denied') {
+            this.showNotification('Notifications are blocked. Please enable them in your browser settings.', 'error');
+        } else {
+            this.requestNotificationPermission();
+        }
+    }
+
+    showWelcomeNotification() {
+        const notification = new Notification('TidyUp Notifications Enabled', {
+            body: 'You\'ll now receive desktop notifications for important updates!',
+            icon: '/favicon.ico',
+            tag: 'tidyup-welcome'
+        });
+
+        notification.onclick = () => {
+            window.focus();
+            notification.close();
+        };
+
+        setTimeout(() => {
+            notification.close();
+        }, 4000);
+    }
+
+    updateTestButtonVisibility() {
+        const testSection = document.getElementById('test-notification-section');
+        const desktopToggle = document.querySelector('input[name="DesktopNotifications"]');
+
+        if (testSection && desktopToggle) {
+            if (desktopToggle.checked && Notification.permission === 'granted') {
+                testSection.style.display = 'flex';
+            } else {
+                testSection.style.display = 'none';
+            }
+        }
+    }
+
+    // Global function for other parts of your app to use
+    showAppNotification(title, body, tag = null) {
+        const desktopToggle = document.querySelector('input[name="DesktopNotifications"]');
+
+        if (Notification.permission === 'granted' && desktopToggle?.checked) {
+            const notification = new Notification(title, {
+                body: body,
+                icon: '/favicon.ico',
+                tag: tag || 'tidyup-' + Date.now()
+            });
+
+            notification.onclick = () => {
+                window.focus();
+                notification.close();
+            };
+
+            setTimeout(() => {
+                notification.close();
+            }, 5000);
+        }
     }
 
     // PRIVACY SETTINGS

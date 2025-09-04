@@ -68,3 +68,23 @@ body.screen-reader-mode {
     text-align: right !important;
     direction: rtl !important;
 }
+
+.btn-outline-primary {
+    border: 1px solid #4e73df;
+    color: #4e73df;
+    background: transparent;
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+    .btn-outline-primary:hover {
+        background: #4e73df;
+        color: white;
+    }
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.775rem;
+}
