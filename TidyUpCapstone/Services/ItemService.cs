@@ -3,6 +3,7 @@ using TidyUpCapstone.Data;
 using TidyUpCapstone.Models.DTOs.Items;
 using TidyUpCapstone.Models.Entities.Items;
 using TidyUpCapstone.Services.Interfaces;
+using TidyUpCapstone.Models.AI; // Add this for VisionAnalysisResult
 
 namespace TidyUpCapstone.Services
 {
@@ -11,17 +12,20 @@ namespace TidyUpCapstone.Services
         private readonly ApplicationDbContext _context;
         private readonly IPricingService _pricingService;
         private readonly IFileService _fileService;
+        private readonly IVisionService _visionService; // Add Vision service
         private readonly ILogger<ItemService> _logger;
 
         public ItemService(
             ApplicationDbContext context,
             IPricingService pricingService,
             IFileService fileService,
+            IVisionService visionService, // Add Vision service injection
             ILogger<ItemService> logger)
         {
             _context = context;
             _pricingService = pricingService;
             _fileService = fileService;
+            _visionService = visionService; // Initialize Vision service
             _logger = logger;
         }
 
@@ -29,6 +33,8 @@ namespace TidyUpCapstone.Services
         {
             try
             {
+                _logger.LogInformation("Creating item with Vision AI analysis for user {UserId}", userId);
+
                 // Validate user exists
                 var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
                 if (!userExists)
@@ -36,18 +42,51 @@ namespace TidyUpCapstone.Services
                     throw new ArgumentException($"User with ID {userId} not found");
                 }
 
+                // Step 1: Analyze image with Google Vision API
+                VisionAnalysisResult? visionResult = null;
+                if (dto.ImageFile != null && dto.ImageFile.Length > 0)
+                {
+                    try
+                    {
+                        visionResult = await _visionService.AnalyzeImageAsync(dto.ImageFile);
+                        _logger.LogInformation("Vision analysis completed. Suggested category: {CategoryId}, Confidence: {Confidence:P2}",
+                            visionResult.SuggestedCategoryId, visionResult.ConfidenceScore);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Vision analysis failed, continuing with user-provided category");
+                    }
+                }
+
+                // Step 2: Determine final category
+                int finalCategoryId = dto.CategoryId;
+                bool categoryOverridden = false;
+
+                // If vision suggests a different category with high confidence, log suggestion
+                if (visionResult?.Success == true &&
+                    visionResult.SuggestedCategoryId != dto.CategoryId &&
+                    visionResult.ConfidenceScore > 0.75m)
+                {
+                    _logger.LogInformation("Vision API suggests different category: {SuggestedId} vs user selected: {UserSelected}",
+                        visionResult.SuggestedCategoryId, dto.CategoryId);
+
+                    // For now, we'll use the user's selection but store the AI suggestion
+                    // You could implement a confirmation dialog in the frontend later
+                    categoryOverridden = true;
+                }
+
                 // Resolve or create location
                 var location = await ResolveOrCreateLocationAsync(dto.LocationName);
 
                 // Calculate pricing
-                var adjustedPrice = _pricingService.CalculateAdjustedPrice(dto.CategoryId, dto.ConditionId);
+                var adjustedPrice = _pricingService.CalculateAdjustedPrice(finalCategoryId, dto.ConditionId);
                 var finalPrice = dto.UserSetPrice ?? _pricingService.CalculateFinalPriceAfterTax(adjustedPrice);
 
                 // Create the item
                 var item = new Item
                 {
                     UserId = userId,
-                    CategoryId = dto.CategoryId,
+                    CategoryId = finalCategoryId,
                     ConditionId = dto.ConditionId,
                     LocationId = location.LocationId,
                     ItemTitle = dto.ItemTitle,
@@ -59,8 +98,14 @@ namespace TidyUpCapstone.Services
                     PriceOverriddenByUser = dto.UserSetPrice.HasValue,
                     Status = ItemStatus.Available,
                     DatePosted = DateTime.UtcNow,
-                    ExpiresAt = dto.ExpiresAt ?? DateTime.UtcNow.AddDays(30), // Default 30 days
-                    AiProcessingStatus = AiProcessingStatus.Pending
+                    ExpiresAt = dto.ExpiresAt ?? DateTime.UtcNow.AddDays(30),
+
+                    // AI-related properties
+                    AiProcessingStatus = visionResult?.Success == true ? AiProcessingStatus.Completed : AiProcessingStatus.Failed,
+                    AiProcessedAt = visionResult?.Success == true ? DateTime.UtcNow : null,
+                    AiDetectedCategory = visionResult?.Success == true ? GetCategoryName(visionResult.SuggestedCategoryId) : null,
+                    AiConfidenceLevel = visionResult?.ConfidenceScore,
+                    AiSuggestedPrice = null // You can implement price suggestion later
                 };
 
                 // Handle image upload
@@ -72,12 +117,16 @@ namespace TidyUpCapstone.Services
                 _context.Items.Add(item);
                 await _context.SaveChangesAsync();
 
-                // Start AI processing in background (temporary implementation)
-               // _ = Task.Run(async () => await ProcessItemWithAIAsync(item.ItemId));
+                // Step 3: Save detailed Vision analysis results for future reference
+                if (visionResult?.Success == true)
+                {
+                    await SaveVisionAnalysisAsync(item.ItemId, visionResult);
+                }
 
-                _logger.LogInformation("Item created successfully: {Title}, ID: {Id}, UserId: {UserId}",
+                _logger.LogInformation("Item created successfully with AI analysis: {Title}, ID: {Id}, UserId: {UserId}",
                     item.ItemTitle, item.ItemId, item.UserId);
 
+                // Load relationships for return
                 await _context.Entry(item)
                     .Reference(i => i.User)
                     .LoadAsync();
@@ -95,11 +144,195 @@ namespace TidyUpCapstone.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating item for user {UserId}", userId);
+                _logger.LogError(ex, "Error creating item with Vision AI analysis for user {UserId}", userId);
                 throw;
             }
         }
 
+        private async Task SaveVisionAnalysisAsync(int itemId, VisionAnalysisResult visionResult)
+        {
+            try
+            {
+                // Create a record to store the detailed Vision API results
+                var analysis = new Models.Entities.AI.AzureCvAnalysis // Use existing entity
+                {
+                    ItemId = itemId,
+                    AnalysisResult = System.Text.Json.JsonSerializer.Serialize(new
+                    {
+                        Labels = visionResult.Labels.Take(10).Select(l => new { l.Description, l.Score }),
+                        Objects = visionResult.Objects.Take(5).Select(o => new { o.Name, o.Score }),
+                        SuggestedCategoryId = visionResult.SuggestedCategoryId,
+                        ConfidenceScore = visionResult.ConfidenceScore
+                    }),
+                    ConfidenceScore = visionResult.ConfidenceScore, // FIXED: No cast needed - both are decimal
+                    ProcessedAt = visionResult.ProcessedAt,
+                    Status = "completed"
+                };
+
+                _context.AzureCvAnalyses.Add(analysis);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Vision analysis results saved for item {ItemId}", itemId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to save vision analysis results for item {ItemId}", itemId);
+                // Don't throw - this is not critical for item creation
+            }
+        }
+
+        private string GetCategoryName(int categoryId)
+        {
+            return categoryId switch
+            {
+                1 => "Books & Stationery",
+                2 => "Electronics & Gadgets",
+                3 => "Toys & Games",
+                4 => "Home & Kitchen",
+                5 => "Furniture",
+                6 => "Appliances",
+                7 => "Health & Beauty",
+                8 => "Crafts & DIY",
+                9 => "School & Office",
+                10 => "Sentimental Items",
+                11 => "Miscellaneous",
+                _ => "Unknown"
+            };
+        }
+
+        // Add method to get Vision analysis for an item
+        public async Task<VisionAnalysisResult?> GetVisionAnalysisAsync(int itemId)
+        {
+            try
+            {
+                var analysis = await _context.AzureCvAnalyses
+                    .Where(a => a.ItemId == itemId)
+                    .OrderByDescending(a => a.ProcessedAt)
+                    .FirstOrDefaultAsync();
+
+                if (analysis == null || string.IsNullOrEmpty(analysis.AnalysisResult))
+                    return null;
+
+                // Deserialize the stored analysis
+                var analysisData = System.Text.Json.JsonSerializer.Deserialize<dynamic>(analysis.AnalysisResult);
+
+                return new VisionAnalysisResult
+                {
+                    Success = analysis.Status == "completed",
+                    SuggestedCategoryId = analysisData?.SuggestedCategoryId ?? 11,
+                    ConfidenceScore = (decimal)(analysisData?.ConfidenceScore ?? 0),
+                    ProcessedAt = analysis.ProcessedAt
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving vision analysis for item {ItemId}", itemId);
+                return null;
+            }
+        }
+
+        // Add method to re-analyze an item's image
+        public async Task<VisionAnalysisResult?> ReanalyzeItemImageAsync(int itemId)
+        {
+            try
+            {
+                var item = await GetItemByIdAsync(itemId);
+                if (item == null || string.IsNullOrEmpty(item.ImageFileName))
+                    return null;
+
+                // Read the image file
+                var imagePath = Path.Combine("wwwroot", "ItemPosts", item.ImageFileName);
+                if (!File.Exists(imagePath))
+                    return null;
+
+                var imageBytes = await File.ReadAllBytesAsync(imagePath);
+                var result = await _visionService.AnalyzeImageAsync(imageBytes);
+
+                if (result.Success)
+                {
+                    // Update item with new analysis
+                    item.AiDetectedCategory = GetCategoryName(result.SuggestedCategoryId);
+                    item.AiConfidenceLevel = result.ConfidenceScore;
+                    item.AiProcessedAt = DateTime.UtcNow;
+                    item.AiProcessingStatus = AiProcessingStatus.Completed;
+
+                    await _context.SaveChangesAsync();
+
+                    // Save detailed results
+                    await SaveVisionAnalysisAsync(itemId, result);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error re-analyzing item {ItemId}", itemId);
+                return null;
+            }
+        }
+
+        // FIXED: Add the missing ProcessItemWithAIAsync method implementation
+        public async Task ProcessItemWithAIAsync(int itemId)
+        {
+            try
+            {
+                _logger.LogInformation("Processing item {ItemId} with AI", itemId);
+
+                var item = await GetItemByIdAsync(itemId);
+                if (item == null)
+                {
+                    _logger.LogWarning("Item {ItemId} not found for AI processing", itemId);
+                    return;
+                }
+
+                // Set processing status to pending
+                item.AiProcessingStatus = AiProcessingStatus.Processing;
+                await _context.SaveChangesAsync();
+
+                // Re-analyze the image if it exists
+                var analysisResult = await ReanalyzeItemImageAsync(itemId);
+
+                if (analysisResult?.Success == true)
+                {
+                    // Update item with AI results
+                    item.AiProcessingStatus = AiProcessingStatus.Completed;
+                    item.AiProcessedAt = DateTime.UtcNow;
+                    item.AiDetectedCategory = GetCategoryName(analysisResult.SuggestedCategoryId);
+                    item.AiConfidenceLevel = analysisResult.ConfidenceScore;
+
+                    _logger.LogInformation("AI processing completed for item {ItemId}", itemId);
+                }
+                else
+                {
+                    // Mark as failed
+                    item.AiProcessingStatus = AiProcessingStatus.Failed;
+                    _logger.LogWarning("AI processing failed for item {ItemId}", itemId);
+                }
+
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during AI processing for item {ItemId}", itemId);
+
+                // Mark as failed in database
+                try
+                {
+                    var item = await _context.Items.FindAsync(itemId);
+                    if (item != null)
+                    {
+                        item.AiProcessingStatus = AiProcessingStatus.Failed;
+                        await _context.SaveChangesAsync();
+                    }
+                }
+                catch (Exception dbEx)
+                {
+                    _logger.LogError(dbEx, "Failed to update AI processing status to failed for item {ItemId}", itemId);
+                }
+            }
+        }
+
+        // Rest of your existing methods remain the same...
         public async Task<Item?> GetItemByIdAsync(int itemId)
         {
             return await _context.Items
@@ -318,49 +551,9 @@ namespace TidyUpCapstone.Services
             }
         }
 
-        // Temporary AI implementation - to be replaced with actual Azure CV and TensorFlow
-        public async Task ProcessItemWithAIAsync(int itemId)
-        {
-            try
-            {
-                var item = await _context.Items.FindAsync(itemId);
-                if (item == null) return;
-
-                // Update status to processing
-                item.AiProcessingStatus = AiProcessingStatus.Processing;
-                await _context.SaveChangesAsync();
-
-                // Simulate AI processing delay
-                await Task.Delay(2000);
-
-                // Temporary AI suggestions (replace with actual AI logic)
-                item.AiDetectedCategory = await GetTemporaryAICategory(item.CategoryId);
-                item.AiConditionScore = await GetTemporaryConditionScore(item.ConditionId);
-                item.AiSuggestedPrice = await GetAISuggestedPriceAsync(item.CategoryId, item.ConditionId, item.ImageFileName);
-                item.AiConfidenceLevel = GetRandomConfidenceLevel();
-                item.AiProcessedAt = DateTime.UtcNow;
-                item.AiProcessingStatus = AiProcessingStatus.Completed;
-
-                await _context.SaveChangesAsync();
-
-                _logger.LogInformation("AI processing completed for item {ItemId}", itemId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "AI processing failed for item {ItemId}", itemId);
-
-                var item = await _context.Items.FindAsync(itemId);
-                if (item != null)
-                {
-                    item.AiProcessingStatus = AiProcessingStatus.Failed;
-                    await _context.SaveChangesAsync();
-                }
-            }
-        }
-
         public async Task<decimal> GetAISuggestedPriceAsync(int categoryId, int conditionId, string? imageUrl = null)
         {
-            // Temporary implementation - replace with actual AI price prediction
+            // This could be enhanced to use Vision API for price estimation
             await Task.Delay(100); // Simulate processing time
 
             var basePrice = _pricingService.CalculateAdjustedPrice(categoryId, conditionId);

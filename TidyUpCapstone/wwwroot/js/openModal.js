@@ -1,11 +1,293 @@
-﻿// FIXED openModal.js with proper debugging and image preview
+﻿// Fixed openModal.js - Works with div structure and includes AI integration
 
+// ============================================================================
+// AI CATEGORY SUGGESTION CLASS
+// ============================================================================
+class AICategorySuggestion {
+    constructor() {
+        this.isAnalyzing = false;
+        this.currentSuggestion = null;
+        this.initializeUI();
+    }
+
+    initializeUI() {
+        this.createSuggestionUI();
+    }
+
+    createSuggestionUI() {
+        const categoryInput = document.getElementById('categoryInput');
+        if (!categoryInput) return;
+
+        // Create AI suggestion container
+        const suggestionContainer = document.createElement('div');
+        suggestionContainer.id = 'aiSuggestionContainer';
+        suggestionContainer.className = 'ai-suggestion-container';
+        suggestionContainer.style.display = 'none';
+        suggestionContainer.innerHTML = `
+            <div class="ai-suggestion-content">
+                <div class="ai-suggestion-header">
+                    <span class="ai-icon">🤖</span>
+                    <span class="ai-text">AI Suggestion</span>
+                    <div class="ai-loader" id="aiLoader" style="display: none;">
+                        <div class="spinner"></div>
+                        <span>Analyzing...</span>
+                    </div>
+                </div>
+                <div class="ai-suggestion-body" id="aiSuggestionBody">
+                    <!-- Suggestion content will be inserted here -->
+                </div>
+            </div>
+        `;
+
+        // Insert after category input
+        categoryInput.parentNode.insertBefore(suggestionContainer, categoryInput.nextSibling);
+        this.addSuggestionStyles();
+    }
+
+    addSuggestionStyles() {
+        if (document.getElementById('aiSuggestionStyles')) return;
+
+        const style = document.createElement('style');
+        style.id = 'aiSuggestionStyles';
+        style.textContent = `
+            .ai-suggestion-container {
+                margin-top: 10px;
+                border: 2px solid #e3f2fd;
+                border-radius: 8px;
+                background: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
+                animation: slideDown 0.3s ease-out;
+            }
+            .ai-suggestion-content { padding: 12px; }
+            .ai-suggestion-header {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 8px;
+                font-weight: 600;
+                color: #1976d2;
+            }
+            .ai-loader {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-left: auto;
+            }
+            .spinner {
+                width: 16px;
+                height: 16px;
+                border: 2px solid #e3f2fd;
+                border-top: 2px solid #1976d2;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+            .suggestion-option {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 8px 12px;
+                margin: 4px 0;
+                background: white;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+            .suggestion-option:hover {
+                background: #f0f8ff;
+                border-color: #1976d2;
+                transform: translateY(-1px);
+            }
+            .confidence-badge {
+                background: #4caf50;
+                color: white;
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: 500;
+            }
+            .confidence-badge.medium { background: #ff9800; }
+            .confidence-badge.low { background: #757575; }
+            @keyframes slideDown {
+                from { opacity: 0; transform: translateY(-10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    async analyzeImageForCategory(imageFile) {
+        if (this.isAnalyzing) return;
+
+        console.log("🤖 AI analysis starting for:", imageFile.name);
+        this.isAnalyzing = true;
+        this.showAnalysisLoader(true);
+
+        try {
+            const formData = new FormData();
+            formData.append('imageFile', imageFile);
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            if (token) {
+                formData.append('__RequestVerificationToken', token);
+            }
+
+            const response = await fetch('/api/Vision/AnalyzeImage', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                this.currentSuggestion = result;
+                this.displaySuggestion(result);
+                this.showSuggestionContainer(true);
+            } else {
+                this.showFallbackMessage();
+            }
+
+        } catch (error) {
+            console.error("❌ AI Analysis error:", error);
+            this.showErrorMessage(error.message);
+        } finally {
+            this.isAnalyzing = false;
+            this.showAnalysisLoader(false);
+        }
+    }
+
+    displaySuggestion(result) {
+        const bodyElement = document.getElementById('aiSuggestionBody');
+        if (!bodyElement) return;
+
+        const confidenceLevel = this.getConfidenceLevel(result.confidenceScore);
+        const categoryName = result.categoryName || 'Unknown Category';
+
+        bodyElement.innerHTML = `
+            <div class="suggestion-option" onclick="window.aiSuggestion.applySuggestion(${result.suggestedCategoryId})">
+                <div>
+                    <strong>${categoryName}</strong>
+                    <div style="font-size: 12px; color: #666; margin-top: 2px;">
+                        Based on: ${result.topLabels?.slice(0, 2).map(l => l.description).join(', ') || 'Image analysis'}
+                    </div>
+                </div>
+                <span class="confidence-badge ${confidenceLevel.class}">
+                    ${Math.round(result.confidenceScore * 100)}%
+                </span>
+            </div>
+            <div style="margin-top: 8px; font-size: 12px; color: #666;">
+                Click to apply this suggestion
+            </div>
+        `;
+    }
+
+    applySuggestion(categoryId) {
+        const categorySelect = document.getElementById('categoryInput');
+        if (categorySelect) {
+            categorySelect.value = categoryId;
+
+            const changeEvent = new Event('change', { bubbles: true });
+            categorySelect.dispatchEvent(changeEvent);
+
+            categorySelect.style.borderColor = '#4caf50';
+            setTimeout(() => {
+                categorySelect.style.borderColor = '';
+            }, 2000);
+
+            // Update form validation
+            checkFormValidity();
+            updateCreateFinalPrice();
+        }
+    }
+
+    getConfidenceLevel(score) {
+        if (score >= 0.7) return { class: 'high', label: 'High' };
+        if (score >= 0.4) return { class: 'medium', label: 'Medium' };
+        return { class: 'low', label: 'Low' };
+    }
+
+    showAnalysisLoader(show) {
+        const loader = document.getElementById('aiLoader');
+        if (loader) {
+            loader.style.display = show ? 'flex' : 'none';
+        }
+        if (show) {
+            this.showSuggestionContainer(true);
+            const bodyElement = document.getElementById('aiSuggestionBody');
+            if (bodyElement) {
+                bodyElement.innerHTML = '<div style="color: #666; font-style: italic;">Analyzing image...</div>';
+            }
+        }
+    }
+
+    showSuggestionContainer(show) {
+        const container = document.getElementById('aiSuggestionContainer');
+        if (container) {
+            container.style.display = show ? 'block' : 'none';
+        }
+    }
+
+    showFallbackMessage() {
+        const bodyElement = document.getElementById('aiSuggestionBody');
+        if (bodyElement) {
+            bodyElement.innerHTML = `
+                <div style="color: #ff9800; font-style: italic;">
+                    AI analysis unavailable. Please select category manually.
+                </div>
+            `;
+        }
+        this.showSuggestionContainer(true);
+    }
+
+    showErrorMessage(error) {
+        const bodyElement = document.getElementById('aiSuggestionBody');
+        if (bodyElement) {
+            bodyElement.innerHTML = `
+                <div style="color: #f44336; font-style: italic;">
+                    Analysis failed. Please select category manually.
+                </div>
+            `;
+        }
+        this.showSuggestionContainer(true);
+    }
+
+    reset() {
+        this.currentSuggestion = null;
+        this.isAnalyzing = false;
+        this.showSuggestionContainer(false);
+        this.showAnalysisLoader(false);
+    }
+}
+
+// ============================================================================
+// GLOBAL VARIABLES
+// ============================================================================
+let aiSuggestion = null;
+
+// ============================================================================
+// MAIN INITIALIZATION
+// ============================================================================
 document.addEventListener("DOMContentLoaded", () => {
+    console.log("OpenModal.js loaded");
+
     const modal = document.getElementById("createPostModal");
 
-    // Updated selector to match your actual HTML structure
+    // Initialize AI suggestion system
+    if (!aiSuggestion) {
+        aiSuggestion = new AICategorySuggestion();
+        window.aiSuggestion = aiSuggestion; // Make it globally accessible
+    }
+
+    // Modal triggers - Updated selectors
     const triggers = document.querySelectorAll(
-        '#openCreateModal, .dock-item[data-label="Create"]'
+        '#openCreateModal, .floating-add-btn, .dock-item[data-label="Create"]'
     );
 
     triggers.forEach(trigger => {
@@ -13,6 +295,7 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             if (modal) {
                 modal.style.display = "flex";
+                console.log("Modal opened");
             } else {
                 console.error("Modal not found!");
             }
@@ -23,7 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("click", (e) => {
         if (e.target === modal) {
             modal.style.display = "none";
-            resetCreateForm();
+            resetForm();
         }
     });
 
@@ -32,7 +315,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (closeBtn) {
         closeBtn.addEventListener("click", () => {
             modal.style.display = "none";
-            resetCreateForm();
+            resetForm();
         });
     }
 
@@ -43,6 +326,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const titleInput = document.getElementById("titleInput");
     const locationInput = document.getElementById("locationInput");
     const imageInput = document.getElementById("imageInput");
+    const descriptionInput = document.getElementById("descriptionInput");
 
     // Add event listeners for price calculation
     if (categoryInput && conditionInput) {
@@ -50,794 +334,412 @@ document.addEventListener("DOMContentLoaded", () => {
         conditionInput.addEventListener("change", updateCreateFinalPrice);
     }
 
-    // Form validation setup
-    setupFormValidation();
+    // Image preview functionality
+    if (imageInput) {
+        imageInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file
+                if (!validateImageFile(file)) {
+                    imageInput.value = '';
+                    return;
+                }
 
-    // MAIN FORM SUBMISSION LOGIC
+                // Show preview
+                showImagePreview(file);
+
+                // Trigger AI analysis
+                if (aiSuggestion) {
+                    aiSuggestion.analyzeImageForCategory(file);
+                }
+
+                // Update form validation
+                checkFormValidity();
+            }
+        });
+    }
+
+    // Add event listeners to all required fields for validation
+    const requiredFields = [titleInput, descriptionInput, locationInput, imageInput, categoryInput, conditionInput];
+    requiredFields.forEach(field => {
+        if (field) {
+            field.addEventListener("change", checkFormValidity);
+            field.addEventListener("input", checkFormValidity);
+        }
+    });
+
+    // Form submission
     if (submitBtn) {
         submitBtn.addEventListener("click", handleFormSubmission);
     }
 
-    // FIXED: Initialize image preview properly
-    setupImagePreview();
+    // Initial form validation check
+    checkFormValidity();
 });
 
-// FIXED: Proper image preview setup
-function setupImagePreview() {
-    const imageInput = document.getElementById('imageInput');
-    const imagePreview = document.getElementById('imagePreview');
-    const previewImg = document.getElementById('previewImg');
-    const uploadLabel = document.querySelector('.upload-label');
-
-    console.log("Setting up image preview...");
-    console.log("Image input:", !!imageInput);
-    console.log("Image preview:", !!imagePreview);
-    console.log("Preview img:", !!previewImg);
-    console.log("Upload label:", !!uploadLabel);
-
-    if (imageInput && imagePreview && previewImg && uploadLabel) {
-        imageInput.addEventListener('change', function (e) {
-            const file = e.target.files[0];
-            console.log("File selected:", file?.name, file?.size, file?.type);
-
-            if (file) {
-                if (validateImageFile(file)) {
-                    handleImagePreview(file, imagePreview, previewImg, uploadLabel);
-                } else {
-                    // Reset input if invalid
-                    imageInput.value = '';
-                    triggerFormValidation();
-                }
-            } else {
-                resetUploadSection();
-            }
-        });
-
-        // Setup remove image button
-        setupRemoveImageButton();
-    } else {
-        console.error("Image preview elements not found!");
-        console.log("Looking for elements with IDs: imageInput, imagePreview, previewImg");
-        console.log("And class: upload-label");
-    }
-}
-
-function validateImageFile(file) {
-    console.log("Validating file:", file.name, file.type, file.size);
-
-    // Check file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-    if (!allowedTypes.includes(file.type)) {
-        showErrorMessage('Please upload a valid image file (JPEG, PNG, or GIF).');
-        return false;
-    }
-
-    // Check file size (10MB limit)
-    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
-    if (file.size > maxSize) {
-        showErrorMessage('Image file size must be less than 10MB.');
-        return false;
-    }
-
-    return true;
-}
-
-function handleImagePreview(file, imagePreview, previewImg, uploadLabel) {
-    console.log("Creating image preview for:", file.name);
-
+// ============================================================================
+// IMAGE PREVIEW FUNCTIONS
+// ============================================================================
+function showImagePreview(file) {
     const reader = new FileReader();
     reader.onload = function (e) {
-        console.log("Image loaded, setting preview");
-        previewImg.src = e.target.result;
-        imagePreview.style.display = 'block';
-        uploadLabel.style.display = 'none';
-        triggerFormValidation();
-    };
-    reader.onerror = function (e) {
-        console.error("Error reading file:", e);
-        showErrorMessage("Error reading image file");
+        // Try to find existing preview elements first
+        let previewImg = document.getElementById('previewImg');
+        let imagePreview = document.getElementById('imagePreview');
+        const uploadSection = document.querySelector('.upload-section label');
+
+        // If preview elements don't exist, create them
+        if (!previewImg || !imagePreview) {
+            const uploadSectionContainer = document.querySelector('.upload-section');
+            if (uploadSectionContainer) {
+                // Create preview container
+                imagePreview = document.createElement('div');
+                imagePreview.id = 'imagePreview';
+                imagePreview.className = 'image-preview';
+                imagePreview.style.cssText = `
+                    position: relative;
+                    margin-top: 10px;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    max-width: 100%;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                `;
+
+                // Create preview image
+                previewImg = document.createElement('img');
+                previewImg.id = 'previewImg';
+                previewImg.style.cssText = `
+                    width: 100%;
+                    height: auto;
+                    max-height: 300px;
+                    object-fit: cover;
+                    display: block;
+                `;
+
+                // Create remove button
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'remove-image';
+                removeBtn.onclick = removeImage;
+                removeBtn.style.cssText = `
+                    position: absolute;
+                    top: 8px;
+                    right: 8px;
+                    background: rgba(244, 67, 54, 0.9);
+                    color: white;
+                    border: none;
+                    border-radius: 50%;
+                    width: 32px;
+                    height: 32px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                `;
+                removeBtn.innerHTML = '<span class="material-symbols-outlined">close</span>';
+
+                imagePreview.appendChild(previewImg);
+                imagePreview.appendChild(removeBtn);
+                uploadSectionContainer.appendChild(imagePreview);
+            }
+        }
+
+        if (previewImg && imagePreview && uploadSection) {
+            previewImg.src = e.target.result;
+            imagePreview.style.display = 'block';
+            uploadSection.style.display = 'none';
+        }
     };
     reader.readAsDataURL(file);
-}
-
-function setupRemoveImageButton() {
-    document.addEventListener('click', function (e) {
-        if (e.target.closest('.remove-image')) {
-            console.log("Remove image clicked");
-            removeImage();
-        }
-    });
 }
 
 function removeImage() {
     const imageInput = document.getElementById('imageInput');
     const imagePreview = document.getElementById('imagePreview');
-    const uploadLabel = document.querySelector('.upload-label');
+    const uploadSection = document.querySelector('.upload-section label');
 
     if (imageInput) imageInput.value = '';
     if (imagePreview) imagePreview.style.display = 'none';
-    if (uploadLabel) uploadLabel.style.display = 'block';
+    if (uploadSection) uploadSection.style.display = 'block';
 
-    triggerFormValidation();
+    // Reset AI suggestions
+    if (aiSuggestion) {
+        aiSuggestion.reset();
+    }
+
+    checkFormValidity();
 }
 
-function resetUploadSection() {
-    const imagePreview = document.getElementById('imagePreview');
-    const uploadLabel = document.querySelector('.upload-label');
-
-    if (imagePreview) imagePreview.style.display = 'none';
-    if (uploadLabel) uploadLabel.style.display = 'block';
-}
-
-// COMPREHENSIVE DEBUG VERSION - Enhanced form submission handler
-async function handleFormSubmission(e) {
-    e.preventDefault();
-
-    // COMPREHENSIVE DEBUGGING
-    console.log("=== FORM SUBMISSION DEBUG START ===");
-
-    // Check all form inputs
-    const titleInput = document.getElementById("titleInput");
-    const categoryInput = document.getElementById("categoryInput");
-    const conditionInput = document.getElementById("conditionInput");
-    const descriptionInput = document.getElementById("descriptionInput");
-    const imageInput = document.getElementById("imageInput");
-    const locationInput = document.getElementById("locationInput");
-    const latitudeInput = document.getElementById("Latitude");
-    const longitudeInput = document.getElementById("Longitude");
-    const locationNameInput = document.getElementById("LocationName");
-
-    console.log("1. INPUT FIELD VALUES:");
-    console.log("   Title:", titleInput?.value);
-    console.log("   Category:", categoryInput?.value);
-    console.log("   Condition:", conditionInput?.value);
-    console.log("   Description:", descriptionInput?.value);
-    console.log("   Location Input:", locationInput?.value);
-    console.log("   LocationName Hidden:", locationNameInput?.value);
-    console.log("   Latitude:", latitudeInput?.value);
-    console.log("   Longitude:", longitudeInput?.value);
-    console.log("   Image files:", imageInput?.files?.length || 0);
-
-    // FORCED LOCATION FIX - If LocationName is empty but locationInput has value
-    if (locationInput?.value && !locationNameInput?.value) {
-        console.log("2. FIXING EMPTY LOCATIONNAME FIELD");
-        const manualLocation = locationInput.value.trim();
-        if (locationNameInput) {
-            locationNameInput.value = manualLocation;
-            console.log("   Set LocationName to:", manualLocation);
-        }
-
-        // Also set default coordinates if missing
-        if (!latitudeInput?.value || !longitudeInput?.value) {
-            if (latitudeInput) latitudeInput.value = "14.5995"; // Manila default
-            if (longitudeInput) longitudeInput.value = "120.9842";
-            console.log("   Set default Manila coordinates");
-        }
-    }
-
-    // Check which LocationName we're using
-    const locationName = locationNameInput?.value || locationInput?.value?.trim();
-    console.log("3. LOCATION RESOLUTION:");
-    console.log("   Final location name:", locationName);
-    console.log("   Length:", locationName?.length || 0);
-    console.log("   Is empty?", !locationName);
-
-    // Check all hidden inputs
-    console.log("4. ALL HIDDEN INPUTS:");
-    const allHiddenInputs = document.querySelectorAll('#createPostModal input[type="hidden"]');
-    allHiddenInputs.forEach(input => {
-        console.log(`   ${input.name || input.id}: "${input.value}"`);
-    });
-
-    // Validate form before submission
-    if (!validateFormBeforeSubmit()) {
-        console.log("❌ FORM VALIDATION FAILED");
-        return;
-    }
-
-    // Show loading state
-    const submitBtn = document.getElementById("submitPost");
-    const spinner = submitBtn.querySelector('.loading-spinner');
-    const btnText = submitBtn.querySelector('.btn-text');
-
-    submitBtn.disabled = true;
-    if (spinner) spinner.style.display = 'inline-block';
-    if (btnText) btnText.textContent = 'Posting...';
-
-    try {
-        // Prepare form data
-        const formData = new FormData();
-
-        // Get anti-forgery token
-        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
-        if (token) {
-            formData.append('__RequestVerificationToken', token);
-        }
-
-        // Append form fields
-        formData.append('ItemTitle', titleInput.value.trim());
-        formData.append('CategoryId', categoryInput.value);
-        formData.append('ConditionId', conditionInput.value);
-        formData.append('Description', descriptionInput.value.trim());
-        formData.append('LocationName', locationName); // Use resolved location name
-        formData.append('Latitude', latitudeInput.value);
-        formData.append('Longitude', longitudeInput.value);
-
-        if (imageInput.files[0]) {
-            formData.append('ImageFile', imageInput.files[0]);
-        }
-
-        console.log("5. FORMDATA BEING SENT:");
-        for (let [key, value] of formData.entries()) {
-            if (value instanceof File) {
-                console.log(`   ${key}: [File] ${value.name} (${value.size} bytes)`);
-            } else {
-                console.log(`   ${key}: "${value}"`);
-            }
-        }
-
-        // Submit to backend
-        console.log("6. SENDING REQUEST...");
-        const response = await fetch('/Item/Create', {
-            method: 'POST',
-            body: formData
-        });
-
-        console.log("7. RESPONSE STATUS:", response.status, response.statusText);
-
-        const result = await response.json();
-        console.log("8. RESPONSE DATA:", result);
-
-        if (result.success) {
-            console.log("✅ SUCCESS!");
-            showSuccessMessage('Item posted successfully!');
-            closeCreateModal();
-
-            // Add to UI immediately if we have the item data
-            if (result.item && window.uiUpdateSystem) {
-                window.uiUpdateSystem.addItemToUI(result.item);
-            } else {
-                // Fallback: reload page after a short delay
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
-            }
-
-        } else {
-            console.log("❌ SERVER ERROR:", result.message);
-            showErrorMessage(result.message || 'Failed to post item. Please try again.');
-        }
-
-    } catch (error) {
-        console.error('9. NETWORK ERROR:', error);
-        showErrorMessage('Network error. Please check your connection and try again.');
-    } finally {
-        // Reset button state
-        submitBtn.disabled = false;
-        if (spinner) spinner.style.display = 'none';
-        if (btnText) btnText.textContent = 'Post';
-    }
-
-    console.log("=== FORM SUBMISSION DEBUG END ===");
-}
-
-// Form validation before submission - UPDATED
-function validateFormBeforeSubmit() {
-    const titleInput = document.getElementById("titleInput");
-    const categoryInput = document.getElementById("categoryInput");
-    const conditionInput = document.getElementById("conditionInput");
-    const descriptionInput = document.getElementById("descriptionInput");
-    const imageInput = document.getElementById("imageInput");
-    const locationInput = document.getElementById("locationInput");
-    const latitudeInput = document.getElementById("Latitude");
-    const longitudeInput = document.getElementById("Longitude");
-    const locationNameInput = document.getElementById("LocationName");
-
-    // Check required fields
-    if (!titleInput?.value.trim()) {
-        showErrorMessage('Please enter an item title.');
-        titleInput?.focus();
+function validateImageFile(file) {
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+        alert('Image size must be less than 10MB');
         return false;
     }
 
-    if (!categoryInput?.value) {
-        showErrorMessage('Please select a category.');
-        categoryInput?.focus();
-        return false;
-    }
-
-    if (!conditionInput?.value) {
-        showErrorMessage('Please select a condition.');
-        conditionInput?.focus();
-        return false;
-    }
-
-    if (!descriptionInput?.value.trim()) {
-        showErrorMessage('Please enter a description.');
-        descriptionInput?.focus();
-        return false;
-    }
-
-    // FIXED: Check for location name from either field
-    const locationName = locationNameInput?.value || locationInput?.value?.trim();
-    if (!locationName) {
-        showErrorMessage('Please enter a location.');
-        locationInput?.focus();
-        return false;
-    }
-
-    if (!imageInput?.files?.length) {
-        showErrorMessage('Please upload an image.');
-        imageInput?.focus();
-        return false;
-    }
-
-    if (!latitudeInput?.value || !longitudeInput?.value) {
-        showErrorMessage('Please wait for location detection or select a valid location.');
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type.toLowerCase())) {
+        alert('Please select a valid image file (JPEG, PNG, or WebP)');
         return false;
     }
 
     return true;
 }
 
-function showSuccessMessage(message) {
-    if (typeof Swal !== 'undefined') {
-        Swal.fire({
-            icon: 'success',
-            title: 'Success!',
-            text: message,
-            background: '#F5F5F5',
-            color: '#252422',
-            confirmButtonColor: '#6B9080',
-            timer: 2000,
-            showConfirmButton: false
-        });
-    } else {
-        alert(message);
-    }
-}
+// ============================================================================
+// FORM VALIDATION
+// ============================================================================
+function checkFormValidity() {
+    const categoryInput = document.getElementById("categoryInput");
+    const conditionInput = document.getElementById("conditionInput");
+    const titleInput = document.getElementById("titleInput");
+    const descriptionInput = document.getElementById("descriptionInput");
+    const locationInput = document.getElementById("locationInput");
+    const imageInput = document.getElementById("imageInput");
+    const submitBtn = document.getElementById("submitPost");
 
-function showErrorMessage(message) {
-    if (typeof Swal !== 'undefined') {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: message,
-            background: '#F5F5F5',
-            color: '#252422',
-            confirmButtonColor: '#6B9080'
-        });
-    } else {
-        alert(message);
-    }
-}
+    const categoryId = categoryInput?.value;
+    const conditionId = conditionInput?.value;
+    const title = titleInput?.value?.trim();
+    const description = descriptionInput?.value?.trim();
+    const location = locationInput?.value?.trim();
+    const image = imageInput?.files?.length > 0;
 
-// Real-time form validation - UPDATED
-function setupFormValidation() {
-    const titleInput = document.getElementById('titleInput');
-    const descriptionInput = document.getElementById('descriptionInput');
-    const categoryInput = document.getElementById('categoryInput');
-    const conditionInput = document.getElementById('conditionInput');
-    const locationInput = document.getElementById('locationInput');
-    const imageInput = document.getElementById('imageInput');
+    const isValid = categoryId && conditionId && title && description && location && image;
 
-    // Add event listeners for real-time validation
-    const inputs = [titleInput, descriptionInput, categoryInput, conditionInput, locationInput, imageInput];
+    if (submitBtn) {
+        submitBtn.disabled = !isValid;
 
-    inputs.forEach(input => {
-        if (input) {
-            input.addEventListener('change', triggerFormValidation);
-            input.addEventListener('input', triggerFormValidation);
-        }
-    });
-
-    // Character counters
-    if (titleInput) {
-        addCharacterCounter(titleInput, 100);
-    }
-
-    if (descriptionInput) {
-        addCharacterCounter(descriptionInput, 1000);
-    }
-}
-
-function triggerFormValidation() {
-    const titleInput = document.getElementById('titleInput');
-    const descriptionInput = document.getElementById('descriptionInput');
-    const categoryInput = document.getElementById('categoryInput');
-    const conditionInput = document.getElementById('conditionInput');
-    const locationInput = document.getElementById('locationInput');
-    const imageInput = document.getElementById('imageInput');
-    const latitudeInput = document.getElementById('Latitude');
-    const longitudeInput = document.getElementById('Longitude');
-    const locationNameInput = document.getElementById('LocationName');
-    const submitBtn = document.getElementById('submitPost');
-
-    if (!submitBtn) return;
-
-    // Check all required fields
-    const title = titleInput?.value.trim();
-    const description = descriptionInput?.value.trim();
-    const category = categoryInput?.value;
-    const condition = conditionInput?.value;
-    const locationName = locationNameInput?.value || locationInput?.value?.trim(); // FIXED
-    const hasImage = imageInput?.files?.length > 0;
-    const hasCoordinates = latitudeInput?.value && longitudeInput?.value;
-
-    const isValid = title &&
-        description &&
-        category &&
-        condition &&
-        locationName && // FIXED: Use the combined location check
-        hasImage &&
-        hasCoordinates;
-
-    // Update submit button state
-    submitBtn.disabled = !isValid;
-
-    // Add visual feedback
-    if (isValid) {
-        submitBtn.classList.add('valid');
-        submitBtn.classList.remove('invalid');
-    } else {
-        submitBtn.classList.remove('valid');
-        submitBtn.classList.add('invalid');
-    }
-}
-
-// Character counter functionality
-function addCharacterCounter(input, maxLength) {
-    // Create counter element if it doesn't exist
-    let counter = input.parentNode.querySelector('.character-counter');
-    if (!counter) {
-        counter = document.createElement('div');
-        counter.className = 'character-counter';
-        counter.style.cssText = `
-            font-size: 12px;
-            color: var(--text-color);
-            text-align: right;
-            margin-top: 4px;
-            opacity: 0.7;
-        `;
-        input.parentNode.appendChild(counter);
-    }
-
-    // Update counter function
-    function updateCounter() {
-        const remaining = maxLength - input.value.length;
-        counter.textContent = `${input.value.length}/${maxLength}`;
-
-        if (remaining < 20) {
-            counter.style.color = '#e74c3c';
-        } else if (remaining < 50) {
-            counter.style.color = '#f39c12';
+        if (isValid) {
+            submitBtn.classList.add('valid');
+            submitBtn.classList.remove('invalid');
         } else {
-            counter.style.color = 'var(--text-color)';
+            submitBtn.classList.remove('valid');
+            submitBtn.classList.add('invalid');
         }
     }
-
-    // Initial update and event listener
-    updateCounter();
-    input.addEventListener('input', updateCounter);
 }
 
-// FIXED Google Places Autocomplete Implementation
-let selectedLat = null;
-let selectedLng = null;
+// ============================================================================
+// PRICE CALCULATION
+// ============================================================================
+async function updateCreateFinalPrice() {
+    const categorySelect = document.getElementById("categoryInput");
+    const conditionSelect = document.getElementById("conditionInput");
+    const finalPriceElement = document.getElementById("finalPrice");
 
-function initGoogleAutocomplete() {
-    console.log('Initializing Google Places Autocomplete...');
-
-    const input = document.getElementById("locationInput");
-    const editInput = document.getElementById("editLocationInput");
-
-    if (!input) {
-        console.log('Location input not found');
+    if (!categorySelect || !conditionSelect || !finalPriceElement) {
         return;
     }
 
-    // Enhanced API check with detailed logging
-    console.log('Checking Google API availability:');
-    console.log('- google object:', typeof google !== 'undefined');
-    console.log('- google.maps:', typeof google !== 'undefined' && !!google.maps);
-    console.log('- google.maps.places:', typeof google !== 'undefined' && !!google.maps && !!google.maps.places);
-    console.log('- Autocomplete:', typeof google !== 'undefined' && !!google.maps && !!google.maps.places && !!google.maps.places.Autocomplete);
+    const categoryId = parseInt(categorySelect.value);
+    const conditionId = parseInt(conditionSelect.value);
 
-    // Check if Google Maps API is loaded
-    if (typeof google === 'undefined' || !google.maps || !google.maps.places || !google.maps.places.Autocomplete) {
-        console.error('Google Maps Places API not properly loaded');
-        setupManualLocationEntry(input);
+    if (!categoryId || !conditionId || isNaN(categoryId) || isNaN(conditionId)) {
+        finalPriceElement.textContent = "0.00";
         return;
     }
 
     try {
-        // Initialize for create modal
-        initAutocompleteForInput(input, 'create');
+        finalPriceElement.textContent = "Calculating...";
 
-        // Initialize for edit modal if it exists
-        if (editInput) {
-            initAutocompleteForInput(editInput, 'edit');
+        const response = await fetch(`/api/Pricing/Calculate?categoryId=${categoryId}&conditionId=${conditionId}`);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        console.log('Google Places Autocomplete initialized successfully');
-    } catch (error) {
-        console.error('Error initializing autocomplete:', error);
-        setupManualLocationEntry(input);
-    }
-}
+        const result = await response.json();
 
-function initAutocompleteForInput(input, modalType) {
-    // Create autocomplete instance with proper options
-    const autocomplete = new google.maps.places.Autocomplete(input, {
-        types: ['establishment', 'geocode'], // Include both establishments and addresses
-        componentRestrictions: { country: 'ph' }, // Restrict to Philippines
-        fields: ['formatted_address', 'geometry', 'name', 'place_id'] // Specify required fields
-    });
-
-    // Add place changed listener
-    autocomplete.addListener("place_changed", () => {
-        const place = autocomplete.getPlace();
-        console.log('Place selected:', place);
-
-        if (!place || !place.geometry) {
-            console.log('No valid place selected');
-            clearCoordinates(modalType);
-            return;
-        }
-
-        const lat = place.geometry.location.lat();
-        const lng = place.geometry.location.lng();
-        const locationName = place.formatted_address || place.name || input.value;
-
-        console.log('Coordinates found:', { lat, lng, locationName });
-
-        // Update the appropriate fields based on modal type
-        updateLocationFields(locationName, lat, lng, modalType);
-    });
-
-    // Clear coordinates when user starts typing
-    input.addEventListener('input', function () {
-        clearCoordinates(modalType);
-    });
-}
-
-// FIXED: Update location fields properly
-function updateLocationFields(locationName, lat, lng, modalType = 'create') {
-    console.log(`Updating location fields for ${modalType}:`, { locationName, lat, lng });
-
-    if (modalType === 'edit') {
-        const latField = document.getElementById("editLatitude");
-        const lngField = document.getElementById("editLongitude");
-
-        if (latField) latField.value = lat;
-        if (lngField) lngField.value = lng;
-    } else {
-        const latField = document.getElementById("Latitude");
-        const lngField = document.getElementById("Longitude");
-        const locationNameField = document.getElementById("LocationName"); // FIXED: Set the hidden field
-
-        if (latField) latField.value = lat;
-        if (lngField) lngField.value = lng;
-        if (locationNameField) {
-            locationNameField.value = locationName; // FIXED: This is crucial!
-            console.log("Set LocationName hidden field to:", locationName);
+        if (result && typeof result.finalPrice === 'number') {
+            finalPriceElement.textContent = result.finalPrice.toFixed(2);
         } else {
-            console.error("LocationName hidden field not found!");
+            throw new Error("Invalid response format");
         }
-    }
 
-    // Trigger form validation
-    if (typeof triggerFormValidation === 'function') {
-        triggerFormValidation();
+    } catch (error) {
+        console.error("Price calculation failed:", error);
+        finalPriceElement.textContent = "0.00";
     }
 }
 
-function clearCoordinates(modalType = 'create') {
-    if (modalType === 'edit') {
-        const latField = document.getElementById("editLatitude");
-        const lngField = document.getElementById("editLongitude");
+// ============================================================================
+// FORM SUBMISSION
+// ============================================================================
+async function handleFormSubmission(e) {
+    e.preventDefault();
 
-        if (latField) latField.value = '';
-        if (lngField) lngField.value = '';
-    } else {
-        const latField = document.getElementById("Latitude");
-        const lngField = document.getElementById("Longitude");
-        const locationNameField = document.getElementById("LocationName"); // FIXED
-
-        if (latField) latField.value = '';
-        if (lngField) lngField.value = '';
-        if (locationNameField) locationNameField.value = ''; // FIXED: Clear hidden field too
-    }
-
-    if (typeof triggerFormValidation === 'function') {
-        triggerFormValidation();
-    }
-}
-
-// Fallback for manual entry - FIXED
-function setupManualLocationEntry(input) {
-    console.log('Setting up manual location entry fallback');
-
-    input.placeholder = "Enter location manually (e.g., Manila, Philippines)";
-
-    input.addEventListener('blur', async function () {
-        const locationName = this.value.trim();
-        if (locationName && locationName.length > 3) {
-            // Set default coordinates for Philippines if no geocoding
-            const defaultLat = 14.5995;  // Manila
-            const defaultLng = 120.9842;
-
-            updateLocationFields(locationName, defaultLat, defaultLng);
-            console.log('Manual location set with default coordinates');
-        }
-    });
-}
-
-// Enhanced error checking and debugging
-function debugGoogleMapsAPI() {
-    console.log('=== Google Maps API Debug Info ===');
-    console.log('Google object exists:', typeof google !== 'undefined');
-
-    if (typeof google !== 'undefined') {
-        console.log('Google Maps exists:', !!google.maps);
-        if (google.maps) {
-            console.log('Places library exists:', !!google.maps.places);
-            if (google.maps.places) {
-                console.log('Autocomplete exists:', !!google.maps.places.Autocomplete);
-                console.log('PlaceAutocompleteElement exists:', !!google.maps.places.PlaceAutocompleteElement);
-            }
-        }
-    }
-
+    const submitBtn = document.getElementById("submitPost");
+    const titleInput = document.getElementById("titleInput");
+    const categoryInput = document.getElementById("categoryInput");
+    const conditionInput = document.getElementById("conditionInput");
+    const descriptionInput = document.getElementById("descriptionInput");
+    const imageInput = document.getElementById("imageInput");
     const locationInput = document.getElementById("locationInput");
-    console.log('Location input exists:', !!locationInput);
-    console.log('==================================');
-}
+    const latitudeInput = document.getElementById("Latitude");
+    const longitudeInput = document.getElementById("Longitude");
 
-// Global callback for Google Places API (update this in your HTML)
-window.initializeGooglePlaces = function () {
-    console.log('Google Places API callback triggered');
-    debugGoogleMapsAPI();
+    // Validate required fields
+    if (!titleInput?.value?.trim() || !categoryInput?.value || !conditionInput?.value ||
+        !descriptionInput?.value?.trim() || !locationInput?.value?.trim() || !imageInput?.files?.length) {
 
-    // Small delay to ensure DOM is ready
-    setTimeout(() => {
-        initGoogleAutocomplete();
-    }, 100);
-};
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Information',
+                text: 'Please fill in all required fields.'
+            });
+        } else {
+            alert('Please fill in all required fields.');
+        }
+        return;
+    }
 
-// Clear coordinates when user types manually - FIXED
-document.addEventListener('DOMContentLoaded', function () {
-    const locationInput = document.getElementById('locationInput');
-    if (locationInput) {
-        locationInput.addEventListener('input', function () {
-            // Clear coordinates when user starts typing
-            const latField = document.getElementById("Latitude");
-            const lngField = document.getElementById("Longitude");
-            const locationNameField = document.getElementById("LocationName"); // FIXED
+    // Check location coordinates
+    const latitude = latitudeInput?.value || '14.5995';  // Default Manila
+    const longitude = longitudeInput?.value || '120.9842';
 
-            if (latField) latField.value = '';
-            if (lngField) lngField.value = '';
-            if (locationNameField) locationNameField.value = ''; // FIXED
+    try {
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Posting...";
 
-            if (typeof triggerFormValidation === 'function') {
-                triggerFormValidation();
-            }
+        const formData = new FormData();
+
+        // Add anti-forgery token
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+        if (token) {
+            formData.append('__RequestVerificationToken', token);
+        }
+
+        formData.append("ItemTitle", titleInput.value.trim());
+        formData.append("CategoryId", parseInt(categoryInput.value));
+        formData.append("ConditionId", parseInt(conditionInput.value));
+        formData.append("Description", descriptionInput.value.trim());
+        formData.append("Latitude", parseFloat(latitude));
+        formData.append("Longitude", parseFloat(longitude));
+        formData.append("LocationName", locationInput.value.trim());
+        formData.append("ImageFile", imageInput.files[0]);
+
+        const response = await fetch("/Item/Create", {
+            method: "POST",
+            body: formData
         });
-    }
-});
 
-// Modal control functions
-function closeCreateModal() {
-    const modal = document.getElementById('createPostModal');
-    if (modal) {
-        modal.style.display = 'none';
-        resetCreateForm();
+        if (response.ok) {
+            const result = await response.json();
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Posted Successfully!',
+                    text: 'Your item has been posted with AI analysis!',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } else {
+                alert('Posted successfully!');
+            }
+
+            // Close modal and reset
+            document.getElementById('createPostModal').style.display = 'none';
+            resetForm();
+
+            // Reload page to show new item
+            setTimeout(() => window.location.reload(), 1500);
+
+        } else {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Failed to post item');
+        }
+    } catch (err) {
+        console.error("Submission error:", err);
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Failed to Post',
+                text: err.message || 'Please try again.'
+            });
+        } else {
+            alert('Failed to post: ' + err.message);
+        }
+    } finally {
+        // Reset button state
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Post";
     }
 }
 
-// FIXED: Reset form properly
-function resetCreateForm() {
-    console.log('resetCreateForm function called');
-
-    // Reset all form inputs
-    const form = document.querySelector('#createPostModal .modal-content');
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+function resetForm() {
+    const form = document.getElementById('createPostModal');
     if (form) {
-        const inputs = form.querySelectorAll('input, textarea, select');
+        const inputs = form.querySelectorAll('input, select, textarea');
         inputs.forEach(input => {
             if (input.type === 'file') {
                 input.value = '';
+            } else if (input.tagName === 'SELECT') {
+                input.selectedIndex = 0;
             } else if (input.type !== 'hidden') {
                 input.value = '';
             }
         });
-
-        // FIXED: Also reset hidden fields
-        const latField = document.getElementById('Latitude');
-        const lngField = document.getElementById('Longitude');
-        const locationNameField = document.getElementById('LocationName');
-        if (latField) latField.value = '';
-        if (lngField) lngField.value = '';
-        if (locationNameField) locationNameField.value = ''; // FIXED
-
-        // Reset image upload section
-        resetUploadSection();
-
-        // Reset validation state
-        const submitBtn = document.getElementById('submitPost');
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.classList.remove('valid', 'invalid');
-        }
-
-        // Reset price display
-        const finalPriceElement = document.getElementById("finalPrice");
-        if (finalPriceElement) {
-            finalPriceElement.textContent = "0.00";
-        }
-
-        console.log('Form reset completed');
-    }
-}
-
-// DEBUG FUNCTIONS - Call these from browser console to debug
-function debugLocationDetection() {
-    console.log("=== LOCATION DETECTION DEBUG ===");
-
-    const locationInput = document.getElementById("locationInput");
-    const locationNameInput = document.getElementById("LocationName");
-    const latitudeInput = document.getElementById("Latitude");
-    const longitudeInput = document.getElementById("Longitude");
-
-    console.log("Current location input value:", locationInput?.value);
-    console.log("Current LocationName hidden field:", locationNameInput?.value);
-    console.log("Current latitude:", latitudeInput?.value);
-    console.log("Current longitude:", longitudeInput?.value);
-
-    console.log("Google Places API available?", typeof google !== 'undefined' && !!google.maps?.places);
-
-    if (locationInput) {
-        // Test manual location setting
-        console.log("Testing manual location setting...");
-        updateLocationFields("Test Location Manila, Philippines", 14.5995, 120.9842);
-
-        setTimeout(() => {
-            console.log("After manual setting:");
-            console.log("LocationName hidden field:", locationNameInput?.value);
-            console.log("Latitude:", latitudeInput?.value);
-            console.log("Longitude:", longitudeInput?.value);
-        }, 100);
     }
 
-    console.log("=== END LOCATION DEBUG ===");
-}
+    // Reset image preview
+    removeImage();
 
-function debugImagePreview() {
-    console.log("=== IMAGE PREVIEW DEBUG ===");
-
-    const imageInput = document.getElementById('imageInput');
-    const imagePreview = document.getElementById('imagePreview');
-    const previewImg = document.getElementById('previewImg');
-    const uploadLabel = document.querySelector('.upload-label');
-
-    console.log("Image input element:", !!imageInput);
-    console.log("Image preview element:", !!imagePreview);
-    console.log("Preview img element:", !!previewImg);
-    console.log("Upload label element:", !!uploadLabel);
-
-    if (imageInput) {
-        console.log("Files selected:", imageInput.files.length);
-        if (imageInput.files.length > 0) {
-            console.log("File details:", {
-                name: imageInput.files[0].name,
-                size: imageInput.files[0].size,
-                type: imageInput.files[0].type
-            });
-        }
+    // Reset AI suggestions
+    if (aiSuggestion) {
+        aiSuggestion.reset();
     }
 
-    console.log("=== END IMAGE DEBUG ===");
+    // Reset price display
+    const finalPriceElement = document.getElementById("finalPrice");
+    if (finalPriceElement) {
+        finalPriceElement.textContent = "0.00";
+    }
+
+    // Reset form validation
+    checkFormValidity();
 }
 
-// Make debug functions available globally
-window.debugLocationDetection = debugLocationDetection;
-window.debugImagePreview = debugImagePreview;
+// ============================================================================
+// GOOGLE PLACES INTEGRATION
+// ============================================================================
+document.addEventListener("DOMContentLoaded", function () {
+    if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+        initGoogleAutocomplete();
+    }
+});
+
+function initGoogleAutocomplete() {
+    const input = document.getElementById("locationInput");
+    if (!input) return;
+
+    const autocomplete = new google.maps.places.Autocomplete(input, {
+        types: ['geocode'],
+        componentRestrictions: { country: 'ph' }
+    });
+
+    autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace();
+        if (place.geometry && place.geometry.location) {
+            const latField = document.getElementById("Latitude");
+            const lngField = document.getElementById("Longitude");
+
+            if (latField) latField.value = place.geometry.location.lat();
+            if (lngField) lngField.value = place.geometry.location.lng();
+        }
+    });
+}
+
+// ============================================================================
+// GLOBAL FUNCTIONS
+// ============================================================================
+window.removeImage = removeImage;
+window.aiSuggestion = aiSuggestion;

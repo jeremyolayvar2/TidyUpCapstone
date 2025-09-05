@@ -317,29 +317,7 @@
                             }
                         </div>
 
-                        <!-- Add interaction buttons for item posts -->
-                        <div class="post-interactions" style="border-top: 1px solid rgba(107, 144, 128, 0.1); padding-top: 15px; margin-top: 15px;">
-                            <div class="interaction-stats">
-                                <span class="likes-count">0 likes</span>
-                                <span class="comments-count">0 comments</span>
-                            </div>
 
-                            <div class="interaction-buttons">
-                                <button class="interaction-btn like-btn" data-post-id="@item.ItemId">
-                                    <i class='bx bx-heart'></i>
-                                    Like
-                                </button>
-                                <button class="interaction-btn comment-btn" data-post-id="@item.ItemId">
-                                    <i class='bx bx-message-circle'></i>
-                                    Comments
-                                    <span class="comment-count">0</span>
-                                </button>
-                                <button class="interaction-btn share-btn" data-post-id="@item.ItemId">
-                                    <i class='bx bx-share'></i>
-                                    Share
-                                </button>
-                            </div>
-                        </div>
                     </div>
                 </div>
             }
@@ -440,10 +418,12 @@
         <div class="modal-content-child1">
             <div class="upload-section">
                 <label for="imageInput" class="upload-label">
-                    <img src="~/assets/upload-image-input.svg" alt="Upload" class="upload-image-btn" name="ImageFile">
+                    <img src="~/assets/upload-image-input.svg" alt="Upload" class="upload-image-btn">
                     <span class="upload-text">Click to upload image</span>
                 </label>
                 <input type="file" id="imageInput" name="ImageFile" accept="image/*" required>
+
+                <!-- ADD THIS IMAGE PREVIEW CONTAINER -->
                 <div class="image-preview" id="imagePreview" style="display: none;">
                     <img id="previewImg" src="" alt="Preview" />
                     <button type="button" class="remove-image" onclick="removeImage()">

@@ -21,5 +21,8 @@ namespace TidyUpCapstone.Services.Interfaces
         // Future AI integration methods (temporary implementation)
         Task ProcessItemWithAIAsync(int itemId);
         Task<decimal> GetAISuggestedPriceAsync(int categoryId, int conditionId, string? imageUrl = null);
+
+        Task<VisionAnalysisResult?> GetVisionAnalysisAsync(int itemId);
+        Task<VisionAnalysisResult?> ReanalyzeItemImageAsync(int itemId);
     }
 }

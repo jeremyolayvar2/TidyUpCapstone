@@ -3,6 +3,7 @@ using TidyUpCapstone.Extensions;
 using TidyUpCapstone.Helpers;
 using TidyUpCapstone.Services;
 using TidyUpCapstone.Services.Interfaces;
+using TidyUpCapstone.Models.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,22 @@ builder.Services.AddSession(options =>
 // Add MVC and API controllers
 builder.Services.AddControllersWithViews();
 builder.Services.AddControllers();
+
+builder.Services.Configure<GoogleCloudSetting>(
+    builder.Configuration.GetSection("GoogleCloud"));
+
+builder.Services.Configure<VisionSettings>(
+    builder.Configuration.GetSection("VisionSettings"));
+
+// Set Google Cloud credentials environment variable
+var googleCloudSettings = builder.Configuration.GetSection("GoogleCloud").Get<GoogleCloudSetting>();
+if (!string.IsNullOrEmpty(googleCloudSettings?.CredentialsPath))
+{
+    Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", googleCloudSettings.CredentialsPath);
+}
+
+// Register Vision service
+builder.Services.AddScoped<IVisionService, VisionService>();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
