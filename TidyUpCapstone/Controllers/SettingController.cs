@@ -66,17 +66,13 @@ namespace TidyUpCapstone.Controllers
                 MarketingEmailsEnabled = false // Default
             };
 
+            // FIXED: Only include properties that exist in UpdateUserProfileDto
             var updateDto = new UpdateUserProfileDto
             {
-                Username = user.UserName ?? string.Empty,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
                 Phone = user.PhoneNumber,
-                Email = user.Email ?? string.Empty,
                 Location = user.Location,
                 Gender = user.Gender,
                 Birthday = user.Birthday,
-                PhoneNumber = user.PhoneNumber,
                 AvatarUrl = user.ProfilePictureUrl
             };
 
@@ -92,174 +88,171 @@ namespace TidyUpCapstone.Controllers
             return View(viewModel);
         }
 
-        // POST: Settings/UpdateProfile - Fixed to match business requirements
+        // POST: Settings/UpdateProfile - CLEAN VERSION
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateProfile(UpdateUserProfileDto model, IFormFile ProfilePicture)
         {
             try
             {
-                Console.WriteLine("=== UpdateProfile Debug ===");
-                Console.WriteLine($"Username: '{model.Username}' (Length: {model.Username?.Length})");
-                Console.WriteLine($"FirstName: '{model.FirstName}'");
-                Console.WriteLine($"LastName: '{model.LastName}'");
-                Console.WriteLine($"Phone: '{model.Phone}'");
-                Console.WriteLine($"Email: '{model.Email}'");
-                Console.WriteLine($"Location: '{model.Location}'");
-                Console.WriteLine($"Gender: '{model.Gender}'");
-                Console.WriteLine($"Birthday: '{model.Birthday}'");
+                Console.WriteLine("=== ENHANCED DEBUG ===");
+                Console.WriteLine($"Request received at: {DateTime.Now}");
+                Console.WriteLine($"Model is null: {model == null}");
+
+                if (model != null)
+                {
+                    Console.WriteLine($"Phone: '{model.Phone}' (null: {model.Phone == null})");
+                    Console.WriteLine($"Location: '{model.Location}' (null: {model.Location == null})");
+                    Console.WriteLine($"Gender: '{model.Gender}' (null: {model.Gender == null})");
+                    Console.WriteLine($"Birthday: '{model.Birthday}' (null: {model.Birthday == null})");
+                    Console.WriteLine($"MarketingEmailsEnabled: {model.MarketingEmailsEnabled}");
+                    Console.WriteLine($"AvatarUrl: '{model.AvatarUrl}' (null: {model.AvatarUrl == null})");
+                }
+
                 Console.WriteLine($"ProfilePicture: {(ProfilePicture != null ? ProfilePicture.FileName : "null")}");
-                Console.WriteLine($"ModelState.IsValid: {ModelState.IsValid}");
 
                 if (!ModelState.IsValid)
                 {
-                    Console.WriteLine("=== Validation Errors ===");
-                    foreach (var error in ModelState)
+                    Console.WriteLine("=== DETAILED Validation Errors ===");
+                    foreach (var kvp in ModelState)
                     {
-                        foreach (var err in error.Value.Errors)
+                        Console.WriteLine($"Key: '{kvp.Key}', HasErrors: {kvp.Value.Errors.Count > 0}");
+                        foreach (var error in kvp.Value.Errors)
                         {
-                            Console.WriteLine($"Field '{error.Key}': {err.ErrorMessage}");
+                            Console.WriteLine($"  Error: {error.ErrorMessage}");
                         }
                     }
-                    TempData["ErrorMessage"] = "Please check your input and try again.";
-                    return RedirectToAction("Index");
                 }
 
                 var user = await _userManager.GetUserAsync(User);
                 if (user == null)
                 {
-                    // Fallback to testuser for development
                     user = await _userManager.FindByEmailAsync("test@tidyup.com");
                     if (user == null)
                     {
-                        Console.WriteLine("User not found");
-                        return NotFound();
+                        Console.WriteLine("❌ No user found at all");
+                        return Json(new { success = false, message = "User not found" });
                     }
                 }
 
-                Console.WriteLine($"Found user: {user.UserName}");
+                Console.WriteLine($"✅ Found user: {user.UserName} (ID: {user.Id})");
 
-                // Handle profile picture upload
+                // HANDLE PROFILE PICTURE UPLOAD
                 if (ProfilePicture != null && ProfilePicture.Length > 0)
                 {
-                    Console.WriteLine("Processing profile picture upload...");
+                    Console.WriteLine("=== Profile Picture Upload Debug ===");
+                    Console.WriteLine($"File name: {ProfilePicture.FileName}");
+                    Console.WriteLine($"File size: {ProfilePicture.Length} bytes");
+                    Console.WriteLine($"Content type: {ProfilePicture.ContentType}");
 
                     // Validate file type
                     var allowedTypes = new[] { "image/jpeg", "image/jpg", "image/png", "image/gif" };
                     if (!allowedTypes.Contains(ProfilePicture.ContentType.ToLower()))
                     {
-                        Console.WriteLine($"Invalid file type: {ProfilePicture.ContentType}");
-                        TempData["ErrorMessage"] = "Please upload a valid image file (JPEG, PNG, or GIF).";
-                        return RedirectToAction("Index");
+                        Console.WriteLine($"❌ Invalid file type: {ProfilePicture.ContentType}");
+                        return Json(new { success = false, message = "Please upload a valid image file (JPEG, PNG, or GIF)." });
                     }
 
                     // Validate file size (5MB limit)
                     if (ProfilePicture.Length > 5 * 1024 * 1024)
                     {
-                        Console.WriteLine($"File too large: {ProfilePicture.Length} bytes");
-                        TempData["ErrorMessage"] = "File size must be less than 5MB.";
-                        return RedirectToAction("Index");
+                        Console.WriteLine($"❌ File too large: {ProfilePicture.Length} bytes");
+                        return Json(new { success = false, message = "File size must be less than 5MB." });
                     }
 
                     try
                     {
-                        // Create uploads directory if it doesn't exist
                         var uploadsDir = Path.Combine(_environment.WebRootPath, "uploads", "profile-pictures");
-                        Directory.CreateDirectory(uploadsDir);
-                        Console.WriteLine($"Upload directory: {uploadsDir}");
+                        Console.WriteLine($"Upload directory path: {uploadsDir}");
+                        Console.WriteLine($"Directory exists: {Directory.Exists(uploadsDir)}");
+
+                        if (!Directory.Exists(uploadsDir))
+                        {
+                            Directory.CreateDirectory(uploadsDir);
+                            Console.WriteLine($"✅ Created directory: {uploadsDir}");
+                        }
 
                         // Delete old profile picture if it exists
                         if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
                         {
                             var oldImagePath = Path.Combine(_environment.WebRootPath, user.ProfilePictureUrl.TrimStart('/'));
+                            Console.WriteLine($"Attempting to delete old image: {oldImagePath}");
                             if (System.IO.File.Exists(oldImagePath))
                             {
                                 System.IO.File.Delete(oldImagePath);
-                                Console.WriteLine($"Deleted old image: {oldImagePath}");
+                                Console.WriteLine($"✅ Deleted old image successfully");
                             }
                         }
 
-                        // Generate unique filename
                         var fileName = $"{user.Id}_{Guid.NewGuid()}{Path.GetExtension(ProfilePicture.FileName)}";
                         var filePath = Path.Combine(uploadsDir, fileName);
-                        Console.WriteLine($"Saving to: {filePath}");
+                        Console.WriteLine($"Full file path: {filePath}");
 
-                        // Save the file
                         using (var stream = new FileStream(filePath, FileMode.Create))
                         {
                             await ProfilePicture.CopyToAsync(stream);
                         }
 
-                        // Update user's profile picture URL
+                        Console.WriteLine($"✅ File saved successfully to: {filePath}");
+                        Console.WriteLine($"File exists after save: {System.IO.File.Exists(filePath)}");
+
+                        if (System.IO.File.Exists(filePath))
+                        {
+                            var fileInfo = new FileInfo(filePath);
+                            Console.WriteLine($"Saved file size: {fileInfo.Length} bytes");
+                        }
+
                         user.ProfilePictureUrl = $"/uploads/profile-pictures/{fileName}";
-                        Console.WriteLine($"Updated ProfilePictureUrl: {user.ProfilePictureUrl}");
+                        Console.WriteLine($"✅ Updated ProfilePictureUrl: {user.ProfilePictureUrl}");
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Profile picture upload error: {ex.Message}");
+                        Console.WriteLine($"❌ File upload error: {ex.Message}");
                         Console.WriteLine($"Stack trace: {ex.StackTrace}");
-                        TempData["ErrorMessage"] = "Failed to upload profile picture. Please try again.";
-                        return RedirectToAction("Index");
+                        return Json(new { success = false, message = "Failed to upload profile picture. Please try again." });
                     }
                 }
 
-                // FIXED: Only update EDITABLE fields based on business requirements
-                Console.WriteLine("Updating user fields (EDITABLE FIELDS ONLY)...");
+                // UPDATE USER FIELDS
+                Console.WriteLine("=== BEFORE UPDATE VALUES ===");
+                Console.WriteLine($"Original - Phone: '{user.PhoneNumber}', Location: '{user.Location}', Gender: '{user.Gender}', Birthday: '{user.Birthday}'");
 
-                // READONLY AFTER SIGNUP - DO NOT UPDATE:
-                // user.FirstName = model.FirstName;  // REMOVED
-                // user.LastName = model.LastName;    // REMOVED  
-                // user.Email = model.Email;          // REMOVED
-                // user.UserName = model.Username;    // REMOVED
+                user.PhoneNumber = model?.Phone;
+                user.Location = model?.Location;
+                user.Gender = model?.Gender;
+                user.Birthday = model?.Birthday;
 
-                // EDITABLE FIELDS - UPDATE ALLOWED:
-                user.PhoneNumber = model.Phone;
-                user.Location = model.Location;
-                user.Gender = model.Gender;
-                user.Birthday = model.Birthday;
-
-                // Handle profile picture URL if provided (for cases without file upload)
-                if (!string.IsNullOrEmpty(model.AvatarUrl) && ProfilePicture == null)
-                {
-                    user.ProfilePictureUrl = model.AvatarUrl;
-                    Console.WriteLine($"Updated ProfilePictureUrl from AvatarUrl: {user.ProfilePictureUrl}");
-                }
+                Console.WriteLine("=== AFTER SETTING VALUES ===");
+                Console.WriteLine($"Updated - Phone: '{user.PhoneNumber}', Location: '{user.Location}', Gender: '{user.Gender}', Birthday: '{user.Birthday}'");
 
                 Console.WriteLine("Calling _userManager.UpdateAsync...");
                 var result = await _userManager.UpdateAsync(user);
 
                 if (result.Succeeded)
                 {
-                    Console.WriteLine("User update succeeded");
-                    TempData["SuccessMessage"] = "Profile updated successfully!";
+                    Console.WriteLine("✅ User update succeeded");
+                    return Json(new { success = true, message = "Profile updated successfully!" });
                 }
                 else
                 {
-                    Console.WriteLine("User update failed:");
+                    Console.WriteLine("❌ User update failed:");
                     foreach (var error in result.Errors)
                     {
-                        Console.WriteLine($"  - {error.Description}");
+                        Console.WriteLine($"  - Code: {error.Code}, Description: {error.Description}");
                     }
-                    TempData["ErrorMessage"] = "Failed to update profile. Please try again.";
-                    foreach (var error in result.Errors)
-                    {
-                        ModelState.AddModelError(string.Empty, error.Description);
-                    }
+                    return Json(new { success = false, message = $"Update failed: {string.Join(", ", result.Errors.Select(e => e.Description))}" });
                 }
-
-                Console.WriteLine("Redirecting to Index");
-                return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"UpdateProfile Exception: {ex.Message}");
+                Console.WriteLine($"❌ CRITICAL EXCEPTION in UpdateProfile:");
+                Console.WriteLine($"Message: {ex.Message}");
                 Console.WriteLine($"Stack Trace: {ex.StackTrace}");
-                TempData["ErrorMessage"] = "An error occurred while updating your profile.";
-                return RedirectToAction("Index");
+                return Json(new { success = false, message = $"Server error: {ex.Message}" });
             }
         }
 
-        // GET: Get Profile Data for JS (NEW METHOD for your JS)
+        // GET: Get Profile Data for JS
         [HttpGet]
         public async Task<IActionResult> GetProfileData()
         {
@@ -268,13 +261,23 @@ namespace TidyUpCapstone.Controllers
                 var user = await _userManager.GetUserAsync(User);
                 if (user == null)
                 {
-                    // Fallback to testuser for development
                     user = await _userManager.FindByEmailAsync("test@tidyup.com");
                     if (user == null)
                     {
                         return Json(new { success = false, message = "User not found" });
                     }
                 }
+
+                // ADD THIS DEBUG LOGGING
+                Console.WriteLine("=== GetProfileData Debug ===");
+                Console.WriteLine($"User ID: {user.Id}");
+                Console.WriteLine($"Raw Database Values:");
+                Console.WriteLine($"  PhoneNumber: '{user.PhoneNumber}'");
+                Console.WriteLine($"  Location: '{user.Location}'");
+                Console.WriteLine($"  Gender: '{user.Gender}'");
+                Console.WriteLine($"  Birthday: '{user.Birthday}'");
+                Console.WriteLine($"  FirstName: '{user.FirstName}'");
+                Console.WriteLine($"  LastName: '{user.LastName}'");
 
                 var profileData = new
                 {
@@ -303,9 +306,15 @@ namespace TidyUpCapstone.Controllers
                         RegistrationMethod = RegistrationMethod.Email,
                         MarketingEmailsEnabled = false
                     },
-                    // Add phone separately since it's not in the DTO
                     phoneNumber = user.PhoneNumber ?? string.Empty
                 };
+
+                Console.WriteLine("=== JSON Response Debug ===");
+                Console.WriteLine($"profile.Location: '{profileData.profile.Location}'");
+                Console.WriteLine($"profile.Gender: '{profileData.profile.Gender}'");
+                Console.WriteLine($"profile.Birthday: '{profileData.profile.Birthday}'");
+                Console.WriteLine($"phoneNumber: '{profileData.phoneNumber}'");
+
 
                 return Json(profileData);
             }
@@ -329,7 +338,6 @@ namespace TidyUpCapstone.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                // Fallback to testuser for development
                 user = await _userManager.FindByEmailAsync("test@tidyup.com");
                 if (user == null)
                 {
@@ -337,10 +345,8 @@ namespace TidyUpCapstone.Controllers
                 }
             }
 
-            // Generate 6-digit verification code
             var verificationCode = GenerateVerificationCode();
 
-            // Store code and expiry (5 minutes from now)
             user.VerificationCode = verificationCode;
             user.VerificationCodeExpiry = DateTime.UtcNow.AddMinutes(5);
             user.PhoneNumber = phoneNumber;
@@ -349,9 +355,7 @@ namespace TidyUpCapstone.Controllers
 
             if (result.Succeeded)
             {
-                // TODO: Replace with actual SMS service - for now just log to console
                 Console.WriteLine($"SMS Verification Code for {phoneNumber}: {verificationCode}");
-
                 return Json(new { success = true, message = "Verification code sent successfully!" });
             }
 
@@ -371,7 +375,6 @@ namespace TidyUpCapstone.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                // Fallback to testuser for development
                 user = await _userManager.FindByEmailAsync("test@tidyup.com");
                 if (user == null)
                 {
@@ -379,7 +382,6 @@ namespace TidyUpCapstone.Controllers
                 }
             }
 
-            // Check if code matches and hasn't expired
             if (user.VerificationCode != code)
             {
                 return Json(new { success = false, message = "Invalid verification code." });
@@ -390,7 +392,6 @@ namespace TidyUpCapstone.Controllers
                 return Json(new { success = false, message = "Verification code has expired." });
             }
 
-            // Mark phone as verified and clear verification code
             user.PhoneNumberConfirmed = true;
             user.VerificationCode = null;
             user.VerificationCodeExpiry = null;
@@ -405,7 +406,6 @@ namespace TidyUpCapstone.Controllers
             return Json(new { success = false, message = "Failed to verify phone number." });
         }
 
-        // Helper method to generate 6-digit verification code
         private string GenerateVerificationCode()
         {
             var random = new Random();
@@ -425,7 +425,6 @@ namespace TidyUpCapstone.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                // Fallback to testuser for development
                 user = await _userManager.FindByEmailAsync("test@tidyup.com");
                 if (user == null)
                 {
@@ -453,7 +452,6 @@ namespace TidyUpCapstone.Controllers
                 var user = await _userManager.GetUserAsync(User);
                 if (user == null)
                 {
-                    // Fallback to testuser for development
                     user = await _userManager.FindByEmailAsync("test@tidyup.com");
                     if (user == null)
                     {
@@ -491,7 +489,6 @@ namespace TidyUpCapstone.Controllers
             }
         }
 
-        // GET: Get current language and accessibility settings
         [HttpGet]
         public async Task<IActionResult> GetLanguageSettings()
         {
@@ -500,7 +497,6 @@ namespace TidyUpCapstone.Controllers
                 var user = await _userManager.GetUserAsync(User);
                 if (user == null)
                 {
-                    // Fallback to testuser for development
                     user = await _userManager.FindByEmailAsync("test@tidyup.com");
                     if (user == null)
                     {

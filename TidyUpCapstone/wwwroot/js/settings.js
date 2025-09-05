@@ -514,43 +514,57 @@
             if (data.success) {
                 const profile = data.profile;
 
+                console.log('=== Detailed Profile Data ===');
+                console.log('Location:', profile.Location);
+                console.log('Gender:', profile.Gender);
+                console.log('Birthday:', profile.Birthday);
+                console.log('FirstName:', profile.FirstName);
+                console.log('LastName:', profile.LastName);
+                console.log('Email:', profile.Email);
+                console.log('Username:', profile.Username);
+                console.log('Full profile object:', profile);
+                console.log('Raw phoneNumber:', data.phoneNumber);
+
                 // Populate profile header
                 const displayName = document.getElementById('profile-display-name');
                 const displayUsername = document.getElementById('profile-display-username');
 
-                if (displayName && profile.FirstName && profile.LastName) {
-                    displayName.textContent = `${profile.FirstName} ${profile.LastName}`;
+                if (displayName && profile.firstName && profile.lastName) {
+                    displayName.textContent = `${profile.firstName} ${profile.lastName}`;
                 }
 
-                if (displayUsername && profile.Username) {
-                    displayUsername.textContent = `@${profile.Username}`;
+                if (displayUsername && profile.username) {
+                    displayUsername.textContent = `@${profile.username}`;
                 }
 
-                // Populate form fields - using the DTO property names
-                this.populateFormField('firstName', profile.FirstName);
-                this.populateFormField('lastName', profile.LastName);
-                this.populateFormField('email', profile.Email);
-                this.populateFormField('username', profile.Username);
-                this.populateFormField('phone', data.phoneNumber); // Get phone from separate field
-                this.populateFormField('location', profile.Location);
-                this.populateFormField('gender', profile.Gender);
+                // ENHANCED field population with debugging
+                console.log('=== Populating Form Fields ===');
+                this.populateFormFieldDebug('firstName', profile.firstName);
+                this.populateFormFieldDebug('lastName', profile.lastName);
+                this.populateFormFieldDebug('email', profile.email);
+                this.populateFormFieldDebug('username', profile.username);
+                this.populateFormFieldDebug('phone', data.phoneNumber);
+                this.populateFormFieldDebug('location', profile.location);
+                this.populateFormFieldDebug('gender', profile.gender);
 
                 // Handle birthday formatting for date input
-                if (profile.Birthday) {
-                    const birthday = new Date(profile.Birthday);
+                if (profile.birthday) {
+                    const birthday = new Date(profile.birthday);
                     const formattedDate = birthday.toISOString().split('T')[0];
-                    this.populateFormField('birthday', formattedDate);
+                    this.populateFormFieldDebug('birthday', formattedDate);
                 }
 
                 // Handle profile picture
-                if (profile.ProfilePictureUrl || profile.AvatarUrl) {
+                if (profile.profilePictureUrl || profile.avatarUrl) {
                     const profileAvatar = document.getElementById('profile-avatar-upload');
                     if (profileAvatar) {
-                        const imageUrl = profile.ProfilePictureUrl || profile.AvatarUrl;
-                        profileAvatar.style.backgroundImage = `url(${imageUrl})`;
+                        const imageUrl = profile.profilePictureUrl || profile.avatarUrl;
+                        console.log('Setting profile image URL:', imageUrl);
+                        const cacheBustUrl = `${imageUrl}?t=${Date.now()}`;
+                        profileAvatar.style.backgroundImage = `url(${cacheBustUrl})`;
                         profileAvatar.style.backgroundSize = 'cover';
                         profileAvatar.style.backgroundPosition = 'center';
-                        profileAvatar.innerHTML = ''; // Remove the default icon
+                        profileAvatar.innerHTML = '';
                     }
                 }
 
@@ -568,18 +582,37 @@
         }
     }
 
-    populateFormField(fieldId, value) {
+    // Add this new debug method
+    populateFormFieldDebug(fieldId, value) {
+        console.log(`Trying to populate field '${fieldId}' with value: '${value}'`);
+
         const field = document.getElementById(fieldId);
-        if (field && value !== null && value !== undefined && value !== '') {
+        if (!field) {
+            console.error(`❌ Field with ID '${fieldId}' NOT FOUND in DOM`);
+            return;
+        }
+
+        console.log(`✅ Found field '${fieldId}':`, field);
+
+        if (value !== null && value !== undefined && value !== '') {
             field.value = value;
+            console.log(`✅ Set field '${fieldId}' to: '${field.value}'`);
 
             // For select elements, ensure the option exists
             if (field.tagName === 'SELECT') {
                 const option = field.querySelector(`option[value="${value}"]`);
                 if (option) {
                     field.value = value;
+                    console.log(`✅ Select field '${fieldId}' set to: '${value}'`);
+                } else {
+                    console.error(`❌ Option '${value}' not found for select field '${fieldId}'`);
+                    // List available options
+                    const options = Array.from(field.options).map(opt => opt.value);
+                    console.log(`Available options:`, options);
                 }
             }
+        } else {
+            console.log(`⚠️ Skipping field '${fieldId}' - empty value`);
         }
     }
 
@@ -593,38 +626,33 @@
 
         const formData = new FormData();
 
-        formData.append('Username', document.getElementById('username')?.value || '');
-        formData.append('FirstName', document.getElementById('firstName')?.value || '');
-        formData.append('LastName', document.getElementById('lastName')?.value || '');
+        // FIXED: Only send editable fields that the controller actually processes
         formData.append('Phone', document.getElementById('phone')?.value || '');
-        formData.append('PhoneNumber', document.getElementById('phone')?.value || '');
-        formData.append('Email', document.getElementById('email')?.value || '');
         formData.append('Location', document.getElementById('location')?.value || '');
         formData.append('Gender', document.getElementById('gender')?.value || '');
         formData.append('Birthday', document.getElementById('birthday')?.value || '');
         formData.append('MarketingEmailsEnabled', 'false');
-        formData.append('AvatarUrl', '');
 
+        // Handle profile picture upload
         const fileInput = document.getElementById('profile-picture-input');
         if (fileInput && fileInput.files[0]) {
             formData.append('ProfilePicture', fileInput.files[0]);
             console.log('Profile picture file added to form data');
         }
 
+        // Add antiforgery token
         const token = document.querySelector('input[name="__RequestVerificationToken"]');
         if (token) {
             formData.append('__RequestVerificationToken', token.value);
         }
 
-        // ADD THIS DEBUG
-        console.log('About to fetch: /Settings/UpdateProfile');
-        console.log('Method: POST');
+        // Debug logging
         console.log('Sending form data:');
         for (let pair of formData.entries()) {
             console.log(pair[0] + ': ' + pair[1]);
         }
 
-        fetch('/Settings/UpdateProfile', {  // Make sure this is the exact URL
+        fetch('/Settings/UpdateProfile', {
             method: 'POST',
             body: formData
         })
