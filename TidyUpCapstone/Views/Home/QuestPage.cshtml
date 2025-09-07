@@ -1,9 +1,9 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model TidyUpCapstone.Models.ViewModels.Gamification.GamificationDashboardViewModel
+@using TidyUpCapstone.Models.Entities.Gamification
+
 @{
-    ViewData["Title"] = "Daily Quests";
-    ViewData["PageType"] = "quest"; // This integrates with your layout system
+    ViewData["Title"] = "Quest Dashboard";
+    ViewData["PageType"] = "quest";
 }
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,106 +12,336 @@
 <link rel="stylesheet" href="~/css/QuestPage.css" asp-append-version="true" />
 
 <script>
-    // Add page-specific class to body - this works with your layout system
     document.addEventListener('DOMContentLoaded', function() {
         document.body.classList.add('quest-page');
     });
 </script>
 
-<!-- Quest Page Content - No main-content wrapper since it's in _Layout.cshtml -->
 <div class="quest-page-container">
     <!-- Header Section -->
     <div class="quest-header">
-        <h1 class="quest-title righteous-font">DAILY QUESTS</h1>
+        @if (ViewBag.DebugInfo != null)
+        {
+            <div style="background: yellow; padding: 10px; margin: 10px;">
+                Debug: @ViewBag.DebugInfo
+            </div>
+        }
+
+        <!-- Debug Info Section -->
+        <div style="background: yellow; padding: 10px; margin: 10px;">
+            <strong>Debug Info:</strong><br>
+            Total Active Quests: @Model.ActiveQuests.Count<br>
+            Daily Quests: @Model.ActiveQuests.Count(q => q.QuestType == QuestType.Daily)<br>
+            Weekly Quests: @Model.ActiveQuests.Count(q => q.QuestType == QuestType.Weekly)<br>
+            Special Quests: @Model.ActiveQuests.Count(q => q.QuestType == QuestType.Special)<br>
+
+            Quest Details:
+            @foreach (var quest in Model.ActiveQuests)
+            {
+                <div>- @quest.QuestTitle (Type: @quest.QuestType, Progress: @quest.CurrentProgress/@quest.TargetValue)</div>
+            }
+        </div>
+
+        @if (ViewBag.ShowDebug == true)
+        {
+            <div class="debug-panel">
+                <strong>Stats Debug:</strong><br>
+                Level: @Model.LevelProgress.CurrentLevel (@Model.LevelProgress.CurrentLevelName)<br>
+                Current XP: @Model.LevelProgress.CurrentXp / Next Level XP: @(Model.LevelProgress.CurrentXp + Model.LevelProgress.XpToNextLevel)<br>
+                XP Progress: @Model.LevelProgress.XpProgress%<br>
+                Total Tokens: @Model.Stats.TokenBalance<br>   <!-- ✅ fixed -->
+                Active Quests: @Model.ActiveQuests.Count<br>
+                Achievements: @Model.Stats.AchievementsEarned/@Model.Stats.TotalAchievements<br>
+            </div>
+        }
+
+
+        <h1 class="quest-title righteous-font">QUEST DASHBOARD</h1>
+        <div class="quest-header-stats">
+            <div class="header-stat">
+                <span class="stat-value">@(Model?.Stats?.TotalQuestsCompleted ?? 0)</span>
+                <span class="stat-label">Completed</span>
+            </div>
+            <div class="header-stat">
+                <span class="stat-value">@((Model?.Stats?.TokenBalance?? 0).ToString("N0"))</span>
+                <span class="stat-label">Tokens</span>
+            </div>
+            <div class="header-stat">
+                <span class="stat-value">@(Model?.Stats?.ActiveStreaksCount ?? 0)</span>
+                <span class="stat-label">Streaks</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Level Progress Section -->
+    @if (Model?.LevelProgress != null)
+    {
+        <div class="level-progress-section">
+            <div class="level-card">
+                <div class="level-info">
+                    <div class="level-display">
+                        <span class="level-number">@Model.LevelProgress.CurrentLevel</span>
+                        <span class="level-name">@(Model.LevelProgress.CurrentLevelName ?? "Beginner")</span>
+                    </div>
+                    <div class="xp-display">
+                        <span class="current-xp">@Model.LevelProgress.CurrentXp XP</span>
+                        <span class="xp-separator">/</span>
+                        <span class="next-level-xp">@(Model.LevelProgress.CurrentXp + Model.LevelProgress.XpToNextLevel) XP</span>
+                    </div>
+                </div>
+                <div class="level-progress-bar">
+                    <div class="level-progress-fill" style="width: @(Model.LevelProgress.XpProgress)%"></div>
+                    <div class="level-progress-text">@(Model.LevelProgress.XpProgress)% to @(Model.LevelProgress.NextLevelName ?? "Next Level")</div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Daily Check-in Section -->
+    <div class="daily-checkin-section">
+        <div class="checkin-card">
+            <div class="checkin-info">
+                <h3 class="righteous-font">Daily Check-in</h3>
+                <div id="streakDisplay">
+                    <span id="streakCount">0</span> day streak
+                </div>
+                <div id="nextCheckInTimer" class="check-in-timer" style="display: none;">
+                    Next check-in in: <span id="timerDisplay">--:--:--</span>
+                </div>
+            </div>
+            <button id="checkInBtn" class="claim-button">
+                Check In
+            </button>
+        </div>
     </div>
 
     <!-- Main Content Area -->
     <div class="quest-content-wrapper">
-        <!-- Quest Illustration - Hidden on mobile, shown on desktop -->
+        <!-- Quest Illustration -->
         <div class="quest-illustration-container">
             <img src="~/assets/quest_image1.png" alt="Quest Illustration" class="quest-illustration" />
         </div>
 
         <!-- Quest Cards Container -->
         <div class="quest-cards-container">
-            <!-- Quest Card 1 -->
-            <div class="quest-card">
-                <div class="quest-card-content">
-                    <div class="quest-info">
-                        <div class="quest-timer">24 HOURS REMAINING</div>
-                        <h3 class="quest-name righteous-font">Declutter Dash</h3>
-                        <p class="quest-description">Upload 3 items today</p>
-                    </div>
-                    <div class="quest-reward">
-                        <span class="reward-points">+15</span>
-                        <button class="claim-button claim-disabled">
-                            Claim
-                        </button>
-                    </div>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 60%"></div>
-                </div>
+
+            <!-- Daily Quests -->
+            <div class="quest-section">
+                <h2 class="quest-section-title righteous-font">Daily Quests</h2>
+                @if (Model.ActiveQuests.Any(q => q.QuestType == QuestType.Daily))
+                {
+                    @foreach (var quest in Model.ActiveQuests.Where(q => q.QuestType == QuestType.Daily))
+                    {
+                        <div class="quest-card" data-quest-id="@quest.QuestId" data-quest-type="@((int)quest.QuestType)">
+                            <div class="quest-card-content">
+                                <div class="quest-info">
+                                    <div class="quest-timer">
+                                        @{
+                                            var remaining = quest.EndDate.HasValue
+                                            ? TimeSpan.FromTicks(Math.Max(0, quest.EndDate.Value.Ticks - DateTime.UtcNow.Ticks))
+                                            : TimeSpan.Zero;
+                                        }
+                                        <span class="quest-timer">
+                                            @remaining.Hours h @remaining.Minutes m REMAINING
+                                        </span>
+                                    </div>
+                                    <h3 class="quest-name righteous-font">@quest.QuestTitle</h3>
+                                    <p class="quest-description">@quest.QuestObjective</p>
+                                    <div class="quest-progress-details">
+                                        <span class="progress-text">Progress: @quest.CurrentProgress / @quest.TargetValue</span>
+                                        <span class="progress-percentage">(@quest.ProgressPercentage%)</span>
+                                    </div>
+                                    <div class="quest-difficulty">
+                                        <span class="difficulty-badge difficulty-@quest.Difficulty.ToString().ToLower()">
+                                            @quest.Difficulty
+                                        </span>
+                                        <span class="quest-type-badge type-@quest.QuestType.ToString().ToLower()">
+                                            @quest.QuestType
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="quest-reward">
+                                    <div class="reward-details">
+                                        <span class="reward-tokens">@quest.TokenReward T</span>
+                                        <span class="reward-xp">@quest.XpReward XP</span>
+                                    </div>
+                                    @if (quest.IsCompleted && !quest.IsClaimed)
+                                    {
+                                        <button class="claim-button claim-active claim-reward-btn" data-quest-id="@quest.QuestId">
+                                            Claim
+                                        </button>
+                                    }
+                                    else if (quest.IsClaimed)
+                                    {
+                                        <button class="claim-button claim-completed">
+                                            Claimed
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button class="claim-button claim-disabled">
+                                            @quest.CurrentProgress/@quest.TargetValue
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: @quest.ProgressPercentage%"></div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="no-quests-message">No active daily quests</p>
+                }
             </div>
 
-            <!-- Quest Card 2 -->
-            <div class="quest-card">
-                <div class="quest-card-content">
-                    <div class="quest-info">
-                        <div class="quest-timer">21 HOURS REMAINING</div>
-                        <h3 class="quest-name righteous-font">Declutter Dash</h3>
-                        <p class="quest-description">Upload 3 items today</p>
-                    </div>
-                    <div class="quest-reward">
-                        <span class="reward-points">+15</span>
-                        <button class="claim-button claim-active">
-                            Claim
-                        </button>
-                    </div>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 100%"></div>
-                </div>
+            <!-- Weekly Quests -->
+            <div id="weekly-quests" class="quest-section">
+                <h2 class="quest-section-title righteous-font">Weekly Quests</h2>
+                @if (Model.ActiveQuests.Any(q => q.QuestType == QuestType.Weekly))
+                {
+                    @foreach (var quest in Model.ActiveQuests.Where(q => q.QuestType == QuestType.Weekly))
+                    {
+                        <div class="quest-card weekly-quest" data-quest-id="@quest.QuestId" data-quest-type="@((int)quest.QuestType)">
+                            <div class="quest-card-content">
+                                <div class="quest-info">
+                                    <div class="quest-timer">
+                                        @{
+                                            var weeklyRemaining = quest.EndDate.HasValue
+                                            ? TimeSpan.FromTicks(Math.Max(0, quest.EndDate.Value.Ticks - DateTime.UtcNow.Ticks))
+                                            : TimeSpan.Zero;
+                                        }
+                                        <span class="quest-timer">
+                                            @weeklyRemaining.Days d @weeklyRemaining.Hours h REMAINING
+                                        </span>
+                                    </div>
+                                    <h3 class="quest-name righteous-font">@quest.QuestTitle</h3>
+                                    <p class="quest-description">@quest.QuestObjective</p>
+                                    <div class="quest-progress-details">
+                                        <span class="progress-text">Progress: @quest.CurrentProgress / @quest.TargetValue</span>
+                                        <span class="progress-percentage">(@quest.ProgressPercentage%)</span>
+                                    </div>
+                                    <div class="quest-difficulty">
+                                        <span class="difficulty-badge difficulty-@quest.Difficulty.ToString().ToLower()">
+                                            @quest.Difficulty
+                                        </span>
+                                        <span class="quest-type-badge type-@quest.QuestType.ToString().ToLower()">
+                                            WEEKLY
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="quest-reward">
+                                    <div class="reward-details">
+                                        <span class="reward-tokens">@quest.TokenReward T</span>
+                                        <span class="reward-xp">@quest.XpReward XP</span>
+                                    </div>
+                                    @if (quest.IsCompleted && !quest.IsClaimed)
+                                    {
+                                        <button class="claim-button claim-active claim-reward-btn" data-quest-id="@quest.QuestId">
+                                            Claim
+                                        </button>
+                                    }
+                                    else if (quest.IsClaimed)
+                                    {
+                                        <button class="claim-button claim-completed">
+                                            Claimed
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button class="claim-button claim-disabled">
+                                            @quest.CurrentProgress/@quest.TargetValue
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: @quest.ProgressPercentage%"></div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="no-quests-message">No active weekly quests</p>
+                    <button onclick="generateWeeklyQuest()" style="padding: 10px; margin: 10px;">Generate Weekly Quest</button>
+                }
             </div>
 
-            <!-- Quest Card 3 -->
-            <div class="quest-card">
-                <div class="quest-card-content">
-                    <div class="quest-info">
-                        <div class="quest-timer">21 HOURS REMAINING</div>
-                        <h3 class="quest-name righteous-font">Declutter Dash</h3>
-                        <p class="quest-description">Upload 3 items today</p>
-                    </div>
-                    <div class="quest-reward">
-                        <span class="reward-points">+15</span>
-                        <button class="claim-button claim-active">
-                            Claim
-                        </button>
-                    </div>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 100%"></div>
-                </div>
+            <!-- Special Quests -->
+            <div id="special-quests" class="quest-section">
+                <h2 class="quest-section-title righteous-font">Special Quests</h2>
+                @if (Model.ActiveQuests.Any(q => q.QuestType == QuestType.Special))
+                {
+                    @foreach (var quest in Model.ActiveQuests.Where(q => q.QuestType == QuestType.Special))
+                    {
+                        <div class="quest-card special-quest" data-quest-id="@quest.QuestId" data-quest-type="@((int)quest.QuestType)">
+                            <div class="quest-card-content">
+                                <div class="quest-info">
+                                    <h3 class="quest-name righteous-font">@quest.QuestTitle</h3>
+                                    <p class="quest-description">@quest.QuestObjective</p>
+                                    <div class="quest-progress-details">
+                                        <span class="progress-text">Progress: @quest.CurrentProgress / @quest.TargetValue</span>
+                                        <span class="progress-percentage">(@quest.ProgressPercentage%)</span>
+                                    </div>
+                                    <div class="quest-difficulty">
+                                        <span class="difficulty-badge difficulty-@quest.Difficulty.ToString().ToLower()">
+                                            @quest.Difficulty
+                                        </span>
+                                        <span class="quest-type-badge type-special">
+                                            SPECIAL
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="quest-reward">
+                                    <div class="reward-details">
+                                        <span class="reward-tokens">@quest.TokenReward T</span>
+                                        <span class="reward-xp">@quest.XpReward XP</span>
+                                    </div>
+                                    @if (quest.IsCompleted && !quest.IsClaimed)
+                                    {
+                                        <button class="claim-button claim-active claim-reward-btn" data-quest-id="@quest.QuestId">
+                                            Claim
+                                        </button>
+                                    }
+                                    else if (quest.IsClaimed)
+                                    {
+                                        <button class="claim-button claim-completed">
+                                            Claimed
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button class="claim-button claim-disabled">
+                                            @quest.CurrentProgress/@quest.TargetValue
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: @quest.ProgressPercentage%"></div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="no-quests-message">No active special quests</p>
+                    <button onclick="createSpecialQuest()" style="padding: 10px; margin: 10px;">Create Special Quest</button>
+                }
             </div>
 
-            <!-- Quest Card 4 -->
-            <div class="quest-card">
-                <div class="quest-card-content">
-                    <div class="quest-info">
-                        <div class="quest-timer">21 HOURS REMAINING</div>
-                        <h3 class="quest-name righteous-font">Declutter Dash</h3>
-                        <p class="quest-description">Upload 3 items today</p>
+            <!-- Browse Available Quests Button -->
+            <div class="browse-quests-card">
+                <a href="@Url.Action("Available", "Quest")" class="browse-quests-link">
+                    <div class="browse-content">
+                        <h3 class="righteous-font">Browse More Quests</h3>
+                        <p>Discover weekly and special quests</p>
                     </div>
-                    <div class="quest-reward">
-                        <span class="reward-points">+15</span>
-                        <button class="claim-button claim-active">
-                            Claim
-                        </button>
-                    </div>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 100%"></div>
-                </div>
+                    <div class="browse-arrow">→</div>
+                </a>
             </div>
         </div>
     </div>
@@ -128,49 +358,476 @@
 
             <!-- Achievement Title -->
             <div class="achievement-title-section">
-                <h3 class="achievement-badge righteous-font">Fresh Starter</h3>
-                <div class="achievement-subtitle">Every journey begins with a single item!</div>
+                @if (Model.RecentAchievements.Any())
+                {
+                    var latestAchievement = Model.RecentAchievements.First();
+                    <h3 class="achievement-badge righteous-font">@latestAchievement.Name</h3>
+                    <div class="achievement-subtitle">@latestAchievement.Description</div>
+                }
+                else
+                {
+                    <h3 class="achievement-badge righteous-font">Getting Started</h3>
+                    <div class="achievement-subtitle">Complete your first quest to earn achievements!</div>
+                }
             </div>
 
             <!-- Main Achievement -->
             <div class="achievement-main-section">
                 <div class="achievement-text-card">
-                    <p>You've let go of your first item - small steps, big change.</p>
+                    @if (Model.RecentAchievements.Any())
+                    {
+                        <p>Latest achievement unlocked! Keep up the great work.</p>
+                    }
+                    else
+                    {
+                        <p>Start your decluttering journey and unlock your first achievement.</p>
+                    }
                 </div>
                 <div class="achievement-icon-wrapper">
-                    <img src="~/items/first_uploaded.png" alt="First Upload Achievement" />
+                    <img src="~/items/first_uploaded.png" alt="Achievement Icon" />
                 </div>
-                <div class="streak-card">
-                    <h3 class="streak-title righteous-font">7-Day Log in Streak</h3>
-                    <p class="streak-description">You've shown up for 7 days straight! Consistency is key. +10 tokens</p>
-                </div>
+                @if (Model.ActiveStreaks.Any())
+                {
+                    var longestStreak = Model.ActiveStreaks.OrderByDescending(s => s.CurrentStreak).First();
+                    <div class="streak-card">
+                        <h3 class="streak-title righteous-font">@longestStreak.StreakName</h3>
+                        <p class="streak-description">@longestStreak.CurrentStreak @longestStreak.StreakUnit streak! Keep it up!</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="streak-card">
+                        <h3 class="streak-title righteous-font">Start Your Streak</h3>
+                        <p class="streak-description">Check in daily to build your streak!</p>
+                    </div>
+                }
             </div>
 
             <!-- Stats Section -->
             <div class="achievement-stats-section">
                 <div class="token-stats-card">
-                    <div class="token-number">50</div>
+                    <div class="token-number">@((Model?.Stats?.TokenBalance?? 0).ToString("N0"))</div>
                     <div class="token-label">Tokens Collected</div>
                 </div>
                 <div class="items-stats">
-                    <div class="items-text">Uploaded 5 Unique Items</div>
+                    <div class="items-text">@(Model?.Stats?.AchievementsEarned ?? 0)/@(Model?.Stats?.TotalAchievements ?? 0) Achievements</div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Flowing Menu Integration -->
-    <div class="quest-flowing-menu">
-        <div class="flowing-menu-container">
-            <nav class="flowing-nav" id="flowing-menu">
-                <!-- Menu items will be populated by JavaScript -->
-            </nav>
+            <!-- Quick Links -->
+            <div class="achievement-links">
+                <a href="@Url.Action("ViewAllAchievements", "Quest")" class="achievement-link">
+                    <span>View All Achievements</span>
+                    <span>→</span>
+                </a>
+                <a href="@Url.Action("ViewAllStreaks", "Quest")" class="achievement-link">
+                    <span>View Streaks</span>
+                    <span>→</span>
+                </a>
+            </div>
         </div>
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Load check-in status and start timer
+        loadCheckInStatus();
+
+        // Debug button for testing
+        if(window.location.search.includes('debug=true')) {
+            addDebugButtons();
+        }
+
+        // Daily check-in handler
+        $('#checkInBtn').click(function() {
+            var btn = $(this);
+            if(btn.prop('disabled')) return;
+
+            btn.prop('disabled', true).html('Checking in...');
+
+            $.post('/Quest/CheckIn')
+                .done(function(response) {
+                    if (response && response.success) {
+                        showNotification('success', response.message || 'Successfully checked in!');
+                        $('#streakCount').text(response.streak || 0);
+                        btn.removeClass('claim-button').addClass('claim-completed')
+                            .html('✓ Checked In').prop('disabled', true);
+
+                        // Hide timer and show next check-in countdown
+                        $('#nextCheckInTimer').hide();
+
+                        // Show token/XP notification
+                        if (response.tokensEarned) {
+                            setTimeout(() => {
+                                showNotification('success', `+${response.tokensEarned} tokens, +${response.xpEarned || 0} XP!`);
+                            }, 1000);
+                        }
+
+                        // Reload to show updated stats and start timer
+                        setTimeout(() => location.reload(), 2500);
+                    } else {
+                        showNotification('warning', response.message || 'Check-in failed');
+                        btn.prop('disabled', false).html('Check In');
+                    }
+                })
+                .fail(function(xhr, status, error) {
+                    console.error('Check-in error:', error);
+                    showNotification('error', 'An error occurred during check-in.');
+                    btn.prop('disabled', false).html('Check In');
+                });
+        });
+
+        // Claim reward handlers
+        $(document).on('click', '.claim-reward-btn', function() {
+            var questId = $(this).data('quest-id');
+            var btn = $(this);
+
+            if(!questId || btn.prop('disabled')) return;
+
+            btn.prop('disabled', true).html('Claiming...');
+
+            $.post('/Quest/ClaimReward', { questId: questId })
+                .done(function(response) {
+                    if (response && response.success) {
+                        showNotification('success', response.message || 'Reward claimed successfully!');
+                        btn.removeClass('claim-active').addClass('claim-completed')
+                            .html('✓ Claimed').prop('disabled', true);
+
+                        // Update the progress bar to 100%
+                        var questCard = btn.closest('.quest-card');
+                        questCard.find('.progress-fill').css('width', '100%');
+
+                        // Reload page to update stats
+                        setTimeout(() => location.reload(), 2000);
+                    } else {
+                        showNotification('error', response.message || 'Failed to claim reward');
+                        btn.prop('disabled', false).html('Claim');
+                    }
+                })
+                .fail(function(xhr, status, error) {
+                    console.error('Claim error:', error);
+                    showNotification('error', 'An error occurred while claiming the reward.');
+                    btn.prop('disabled', false).html('Claim');
+                });
+        });
+    });
+
+    let checkInTimer;
+
+    function loadCheckInStatus() {
+        $.get('/Quest/CheckInStatus')
+            .done(function(data) {
+                if(data) {
+                    $('#streakCount').text(data.streak || 0);
+                    if (data.hasCheckedIn) {
+                        $('#checkInBtn').removeClass('claim-button').addClass('claim-completed')
+                            .html('✓ Checked In').prop('disabled', true);
+
+                        // Show timer for next check-in
+                        if (data.timeUntilNextCheckIn && data.timeUntilNextCheckIn.totalSeconds > 0) {
+                            showNextCheckInTimer(data.timeUntilNextCheckIn.totalSeconds);
+                        }
+                    } else {
+                        $('#checkInBtn').removeClass('claim-completed').addClass('claim-button')
+                            .html('Check In').prop('disabled', false);
+                        $('#nextCheckInTimer').hide();
+                    }
+                }
+            })
+            .fail(function(xhr, status, error) {
+                console.log('Failed to load check-in status:', error);
+            });
+    }
+
+    function showNextCheckInTimer(totalSeconds) {
+        if (totalSeconds <= 0) {
+            $('#nextCheckInTimer').hide();
+            return;
+        }
+
+        $('#nextCheckInTimer').show();
+
+        // Clear existing timer
+        if (checkInTimer) {
+            clearInterval(checkInTimer);
+        }
+
+        let remainingSeconds = totalSeconds;
+
+        function updateTimer() {
+            if (remainingSeconds <= 0) {
+                clearInterval(checkInTimer);
+                $('#nextCheckInTimer').hide();
+                showNotification('info', 'New check-in available!');
+                // Refresh to allow new check-in
+                setTimeout(() => location.reload(), 1000);
+                return;
+            }
+
+            const hours = Math.floor(remainingSeconds / 3600);
+            const minutes = Math.floor((remainingSeconds % 3600) / 60);
+            const seconds = remainingSeconds % 60;
+
+            const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            $('#timerDisplay').text(timeString);
+
+            remainingSeconds--;
+        }
+
+        // Update immediately and then every second
+        updateTimer();
+        checkInTimer = setInterval(updateTimer, 1000);
+    }
+
+    function showNotification(type, message) {
+        // Remove existing notifications
+        $('.quest-notification').remove();
+
+        var notification = $('<div class="quest-notification ' + type + '">' + message + '</div>');
+        $('body').append(notification);
+
+        setTimeout(function() {
+            notification.addClass('show');
+        }, 100);
+
+        setTimeout(function() {
+            notification.removeClass('show');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
+    function addDebugButtons() {
+        // Only add if debug panel doesn't exist
+        if($('#debugPanel').length > 0) return;
+
+        var debugPanel = $(`
+            <div id="debugPanel" style="position: fixed; top: 10px; right: 10px; background: #000; color: #fff; padding: 10px; border-radius: 5px; z-index: 9999;">
+                <h4>Debug Panel</h4>
+                <button id="debugGenerateQuests" style="margin: 5px;">Generate Quests</button>
+                <button id="debugCompleteQuest" style="margin: 5px;">Complete First Quest</button>
+                <button id="debugWeeklyQuest" style="margin: 5px;">Force Weekly Quest</button>
+                <button id="debugTestCheckIn" style="margin: 5px;">Test Check-in</button>
+                <button id="closeDebug" style="margin: 5px; background: #dc3545;">Close</button>
+            </div>
+        `);
+        $('body').append(debugPanel);
+
+        $('#debugGenerateQuests').click(function() {
+            $.post('/Quest/DebugGenerateQuests')
+                .done(response => {
+                    showNotification('success', response.message || 'Quests generated');
+                    setTimeout(() => location.reload(), 1500);
+                })
+                .fail(() => showNotification('error', 'Failed to generate quests'));
+        });
+
+        $('#debugCompleteQuest').click(function() {
+            var firstQuestId = $('.quest-card').first().data('quest-id');
+            if(firstQuestId) {
+                $.post('/Quest/DebugCompleteQuest', { questId: firstQuestId })
+                    .done(response => {
+                        showNotification('success', response.message || 'Quest completed');
+                        setTimeout(() => location.reload(), 1500);
+                    })
+                    .fail(() => showNotification('error', 'Failed to complete quest'));
+            } else {
+                showNotification('warning', 'No quests available to complete');
+            }
+        });
+
+        $('#debugWeeklyQuest').click(function() {
+            $.post('/Quest/DebugWeeklyQuestGeneration')
+                .done(response => {
+                    showNotification('success', response.message || 'Weekly quest generated');
+                    setTimeout(() => location.reload(), 1500);
+                })
+                .fail(() => showNotification('error', 'Failed to generate weekly quest'));
+        });
+
+        $('#debugTestCheckIn').click(function() {
+            $('#checkInBtn').click();
+        });
+
+        $('#closeDebug').click(function() {
+            $('#debugPanel').remove();
+        });
+    }
+
+    function generateWeeklyQuest() {
+        $.post('/Quest/DebugWeeklyQuestGeneration')
+            .done(function(response) {
+                showNotification('success', response.message || 'Weekly quest generated');
+                setTimeout(() => location.reload(), 1500);
+            })
+            .fail(() => showNotification('error', 'Failed to generate weekly quest'));
+    }
+
+    function createSpecialQuest() {
+        showNotification('info', 'Special quest creation coming soon!');
+    }
+
+    // Global quest model for debugging
+    @if (Model != null)
+    {
+            <text>
+            window.questModel = @Html.Raw(Json.Serialize(Model));
+            console.log("QuestModel loaded:", window.questModel);
+            </text>
+    }
+
+    // Clean up timer when page unloads
+    $(window).on('beforeunload', function() {
+        if (checkInTimer) {
+            clearInterval(checkInTimer);
+        }
+    });
+</script>
+
 <script src="~/js/QuestPage.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script src="~/js/questPageFlowMenu.js"></script>
-<!-- Quest-specific functionality -->
 <script src="~/js/questInteractions.js" asp-append-version="true"></script>
+
+<style>
+    .level-progress-section {
+        margin: 20px 0;
+        padding: 0 20px;
+    }
+
+    .level-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        padding: 20px;
+        color: white;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .level-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .level-display {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+    }
+
+    .level-number {
+        font-size: 2.5em;
+        font-weight: bold;
+        color: #FFD700;
+    }
+
+    .level-name {
+        font-size: 1.2em;
+        font-weight: 600;
+    }
+
+    .xp-display {
+        font-size: 1.1em;
+        color: #E8E8E8;
+    }
+
+    .level-progress-bar {
+        position: relative;
+        background: rgba(255,255,255,0.2);
+        border-radius: 10px;
+        height: 12px;
+        overflow: hidden;
+    }
+
+    .level-progress-fill {
+        background: linear-gradient(90deg, #FFD700, #FFA500);
+        height: 100%;
+        border-radius: 10px;
+        transition: width 0.5s ease;
+    }
+
+    .level-progress-text {
+        position: absolute;
+        top: -25px;
+        right: 0;
+        font-size: 0.9em;
+        color: #E8E8E8;
+    }
+
+    .quest-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        z-index: 10000;
+        transform: translateX(400px);
+        transition: transform 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+        .quest-notification.show {
+            transform: translateX(0);
+        }
+
+        .quest-notification.success {
+            background: linear-gradient(135deg, #00C851, #007E33);
+        }
+
+        .quest-notification.warning {
+            background: linear-gradient(135deg, #ffbb33, #FF8800);
+        }
+
+        .quest-notification.error {
+            background: linear-gradient(135deg, #ff4444, #CC0000);
+        }
+
+    .claim-completed {
+        background: linear-gradient(135deg, #00C851, #007E33) !important;
+        cursor: default;
+    }
+
+    .quest-progress-details {
+        margin: 8px 0;
+        font-size: 0.9em;
+        color: #666;
+    }
+
+    .weekly-quest {
+        border-left: 4px solid #764ba2;
+    }
+
+    .special-quest {
+        border-left: 4px solid #FFD700;
+    }
+
+
+    .check-in-timer {
+        margin-top: 8px;
+        font-size: 0.9em;
+        color: rgba(255, 255, 255, 0.8);
+        background: rgba(255, 255, 255, 0.1);
+        padding: 5px 10px;
+        border-radius: 12px;
+        display: inline-block;
+    }
+
+    #timerDisplay {
+        font-weight: bold;
+        color: #FFD700;
+        font-family: monospace;
+        font-size: 1.1em;
+    }
+
+    .checkin-card.checked-in {
+        background: linear-gradient(135deg, #6c757d, #5a6268);
+    }
+
+        .checkin-card.checked-in .check-in-timer {
+            background: rgba(255, 215, 0, 0.2);
+        }
+</style>

@@ -1,0 +1,60 @@
+﻿@model TidyUpCapstone.Models.DTOs.Gamification.QuestDto
+
+<div class="quest-card" data-quest-id="@Model.QuestId" data-quest-type="@((int)Model.QuestType)">
+    <div class="quest-card-content">
+        <div class="quest-info">
+            <div class="quest-timer">
+                @{
+                    var remaining = Model.EndDate.HasValue
+                    ? TimeSpan.FromTicks(Math.Max(0, Model.EndDate.Value.Ticks - DateTime.UtcNow.Ticks))
+                    : TimeSpan.Zero;
+                }
+                <span class="quest-timer">
+                    @remaining.Hours h @remaining.Minutes m REMAINING
+                </span>
+            </div>
+            <h3 class="quest-name righteous-font">@Model.QuestTitle</h3>
+            <p class="quest-description">@Model.QuestObjective</p>
+            <!-- Add this after the quest-description -->
+            <div class="quest-progress-details">
+                <span class="progress-text">Progress: @Model.CurrentProgress / @Model.TargetValue</span>
+                <span class="progress-percentage">(@Model.ProgressPercentage%)</span>
+            </div>
+            <div class="quest-difficulty">
+                <span class="difficulty-badge difficulty-@Model.Difficulty.ToString().ToLower()">
+                    @Model.Difficulty
+                </span>
+                <span class="quest-type-badge type-@Model.QuestType.ToString().ToLower()">
+                    @Model.QuestType
+                </span>
+            </div>
+        </div>
+        <div class="quest-reward">
+            <div class="reward-details">
+                <span class="reward-tokens">@Model.TokenReward T</span>
+                <span class="reward-xp">@Model.XpReward XP</span>
+            </div>
+            @if (Model.IsCompleted && !Model.IsClaimed)
+            {
+                <button class="claim-button claim-active claim-reward-btn" data-quest-id="@Model.QuestId">
+                    Claim
+                </button>
+            }
+            else if (Model.IsClaimed)
+            {
+                <button class="claim-button claim-completed">
+                    Claimed
+                </button>
+            }
+            else
+            {
+                <button class="claim-button claim-disabled">
+                    @Model.CurrentProgress/@Model.TargetValue
+                </button>
+            }
+        </div>
+    </div>
+    <div class="progress-bar">
+        <div class="progress-fill" style="width: @Model.ProgressPercentage%"></div>
+    </div>
+</div>

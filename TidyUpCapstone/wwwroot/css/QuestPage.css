@@ -900,3 +900,265 @@ body.quest-page {
     /* Keep current colors since quest page uses custom theme */
     /* This section can be customized if dark mode is needed */
 }
+
+/* Additional styles for dynamic quest system */
+.quest-header-stats {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1rem;
+    justify-content: center;
+}
+
+.header-stat {
+    text-align: center;
+}
+
+.stat-value {
+    display: block;
+    font-family: 'Righteous', cursive;
+    font-size: 1.5rem;
+    color: #4F46E5;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #6B7280;
+}
+
+.daily-checkin-section {
+    margin: 2rem 0;
+    display: flex;
+    justify-content: center;
+}
+
+.checkin-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 1.5rem;
+    border-radius: 12px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.difficulty-badge, .quest-type-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+.difficulty-easy {
+    background: #10B981;
+    color: white;
+}
+
+.difficulty-medium {
+    background: #F59E0B;
+    color: white;
+}
+
+.difficulty-hard {
+    background: #EF4444;
+    color: white;
+}
+
+.type-daily {
+    background: #3B82F6;
+    color: white;
+}
+
+.type-weekly {
+    background: #8B5CF6;
+    color: white;
+}
+
+.type-special {
+    background: #EC4899;
+    color: white;
+}
+
+.reward-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.reward-tokens {
+    color: #F59E0B;
+    font-weight: 600;
+}
+
+.reward-xp {
+    color: #3B82F6;
+    font-weight: 600;
+}
+
+.claim-completed {
+    background: #10B981;
+    color: white;
+    cursor: default;
+}
+
+.no-quests-message {
+    text-align: center;
+    padding: 3rem;
+    color: #6B7280;
+}
+
+.browse-quests-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.browse-quests-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    color: white;
+    text-decoration: none;
+    transition: transform 0.2s;
+}
+
+    .browse-quests-link:hover {
+        transform: translateY(-2px);
+        color: white;
+    }
+
+.browse-arrow {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.achievement-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.achievement-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: #F3F4F6;
+    border-radius: 8px;
+    color: #374151;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+    .achievement-link:hover {
+        background: #E5E7EB;
+        color: #374151;
+    }
+.level-progress-section {
+    margin: 20px 0;
+    padding: 0 20px;
+}
+
+.level-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    padding: 20px;
+    color: white;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.level-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.level-display {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.level-number {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #FFD700;
+}
+
+.level-name {
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+.xp-display {
+    font-size: 1.1em;
+    color: #E8E8E8;
+}
+
+.level-progress-bar {
+    position: relative;
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    height: 12px;
+    overflow: hidden;
+}
+
+.level-progress-fill {
+    background: linear-gradient(90deg, #FFD700, #FFA500);
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease;
+}
+
+.level-progress-text {
+    position: absolute;
+    top: -25px;
+    right: 0;
+    font-size: 0.9em;
+    color: #E8E8E8;
+}
+
+.quest-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    z-index: 10000;
+    transform: translateX(400px);
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+    .quest-notification.show {
+        transform: translateX(0);
+    }
+
+    .quest-notification.success {
+        background: linear-gradient(135deg, #00C851, #007E33);
+    }
+
+    .quest-notification.warning {
+        background: linear-gradient(135deg, #ffbb33, #FF8800);
+    }
+
+    .quest-notification.error {
+        background: linear-gradient(135deg, #ff4444, #CC0000);
+    }
+
+/* Update existing claim button styles */
+.claim-completed {
+    background: linear-gradient(135deg, #00C851, #007E33) !important;
+    cursor: default;
+}
+
+    .claim-completed:hover {
+        background: linear-gradient(135deg, #00C851, #007E33) !important;
+    }

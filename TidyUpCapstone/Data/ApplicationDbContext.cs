@@ -68,6 +68,10 @@ namespace TidyUpCapstone.Data
         public DbSet<UserLevel> UserLevels { get; set; }
         public DbSet<Leaderboard> Leaderboards { get; set; }
         public DbSet<LeaderboardEntry> LeaderboardEntries { get; set; }
+        // Add these DbSets to your ApplicationDbContext
+        public DbSet<UserStats> UserStats { get; set; }
+        public DbSet<CheckIn> CheckIns { get; set; }
+
 
         // Notification entities
         public DbSet<NotificationType> NotificationTypes { get; set; }

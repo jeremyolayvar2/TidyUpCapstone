@@ -26,6 +26,12 @@ namespace TidyUpCapstone.Models.Entities.Gamification
 
         public DateTime? CompletedAt { get; set; }
 
+        // Add this property to your existing UserQuest class
+        [Required]
+        public QuestStatus Status { get; set; } = QuestStatus.Active;
+
+        public DateTime? ExpiresAt { get; set; }
+
         // Navigation properties
         [ForeignKey("UserId")]
         public virtual AppUser User { get; set; } = null!;

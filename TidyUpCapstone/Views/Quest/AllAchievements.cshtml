@@ -1,0 +1,411 @@
+﻿@model TidyUpCapstone.Models.ViewModels.Gamification.GamificationDashboardViewModel
+@using TidyUpCapstone.Models.Entities.Gamification
+
+@{
+    ViewData["Title"] = "All Achievements";
+    ViewData["PageType"] = "achievements";
+}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Righteous&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    body.achievements-page {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    .achievements-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+
+    .achievements-header {
+        text-align: center;
+        margin-bottom: 40px;
+        color: white;
+    }
+
+    .achievements-title {
+        font-family: 'Righteous', cursive;
+        font-size: 3.5em;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .achievements-subtitle {
+        font-size: 1.2em;
+        margin-bottom: 20px;
+        opacity: 0.9;
+    }
+
+    .achievements-progress {
+        background: rgba(255,255,255,0.2);
+        border-radius: 25px;
+        padding: 15px 30px;
+        display: inline-block;
+        backdrop-filter: blur(10px);
+    }
+
+    .progress-text {
+        font-size: 1.3em;
+        font-weight: 600;
+    }
+
+    .achievements-filter {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        padding: 12px 24px;
+        background: rgba(255,255,255,0.2);
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 25px;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(255,255,255,0.3);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+        }
+
+    .achievements-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+
+    .achievement-card {
+        background: rgba(255,255,255,0.95);
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .achievement-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .achievement-card.earned {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: white;
+        }
+
+        .achievement-card.locked {
+            background: rgba(255,255,255,0.7);
+            color: #666;
+        }
+
+    .achievement-rarity-stripe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+    }
+
+    .rarity-bronze {
+        background: linear-gradient(90deg, #CD7F32, #B8860B);
+    }
+
+    .rarity-silver {
+        background: linear-gradient(90deg, #C0C0C0, #A8A8A8);
+    }
+
+    .rarity-gold {
+        background: linear-gradient(90deg, #FFD700, #FFA500);
+    }
+
+    .rarity-platinum {
+        background: linear-gradient(90deg, #E5E4E2, #B8B8B8);
+    }
+
+    .achievement-icon {
+        font-size: 3em;
+        text-align: center;
+        margin-bottom: 15px;
+        filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
+    }
+
+    .achievement-title {
+        font-family: 'Righteous', cursive;
+        font-size: 1.4em;
+        margin-bottom: 8px;
+        text-align: center;
+    }
+
+    .achievement-description {
+        font-size: 0.95em;
+        text-align: center;
+        margin-bottom: 15px;
+        line-height: 1.4;
+    }
+
+    .achievement-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .achievement-category {
+        padding: 4px 12px;
+        background: rgba(0,0,0,0.1);
+        border-radius: 15px;
+        font-size: 0.8em;
+        font-weight: 600;
+    }
+
+    .achievement-rewards {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 15px;
+    }
+
+    .reward-badge {
+        padding: 6px 12px;
+        border-radius: 15px;
+        font-size: 0.85em;
+        font-weight: 600;
+    }
+
+    .token-reward {
+        background: linear-gradient(135deg, #4CAF50, #2E7D32);
+        color: white;
+    }
+
+    .xp-reward {
+        background: linear-gradient(135deg, #2196F3, #1565C0);
+        color: white;
+    }
+
+    .achievement-progress {
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .progress-bar-mini {
+        width: 100%;
+        height: 8px;
+        background: rgba(0,0,0,0.1);
+        border-radius: 4px;
+        overflow: hidden;
+        margin: 8px 0;
+    }
+
+    .progress-fill-mini {
+        height: 100%;
+        background: linear-gradient(90deg, #4CAF50, #2E7D32);
+        border-radius: 4px;
+        transition: width 0.5s ease;
+    }
+
+    .earned-date {
+        font-size: 0.8em;
+        opacity: 0.8;
+        text-align: center;
+        margin-top: 5px;
+    }
+
+    .back-button {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background: rgba(255,255,255,0.2);
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 50px;
+        padding: 12px 20px;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+
+        .back-button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateX(-3px);
+            color: white;
+            text-decoration: none;
+        }
+
+    .category-decluttering {
+        border-left: 5px solid #4CAF50;
+    }
+
+    .category-community {
+        border-left: 5px solid #2196F3;
+    }
+
+    .category-trading {
+        border-left: 5px solid #FF9800;
+    }
+
+    .category-special {
+        border-left: 5px solid #9C27B0;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.classList.add('achievements-page');
+    });
+</script>
+
+<a href="/Home/QuestPage" class="back-button">← Back to Quests</a>
+
+<div class="achievements-container">
+    <div class="achievements-header">
+        <h1 class="achievements-title">ACHIEVEMENTS</h1>
+        <p class="achievements-subtitle">Track your progress and unlock rewards</p>
+        <div class="achievements-progress">
+            <span class="progress-text">@Model.Stats.AchievementsEarned / @Model.Stats.TotalAchievements Unlocked</span>
+        </div>
+    </div>
+
+    <div class="achievements-filter">
+        <a href="#" class="filter-btn active" data-category="all">All</a>
+        <a href="#" class="filter-btn" data-category="decluttering">Decluttering</a>
+        <a href="#" class="filter-btn" data-category="community">Community</a>
+        <a href="#" class="filter-btn" data-category="trading">Trading</a>
+        <a href="#" class="filter-btn" data-category="special">Special</a>
+    </div>
+
+    <div class="achievements-grid">
+        @foreach (var achievement in Model.AllAchievements.OrderBy(a => a.IsEarned ? 0 : 1).ThenBy(a => a.Category))
+        {
+            <div class="achievement-card @(achievement.IsEarned ? "earned" : "locked") category-@achievement.Category.ToString().ToLower()" data-category="@achievement.Category.ToString().ToLower()">
+                <div class="achievement-rarity-stripe rarity-@achievement.Rarity.ToString().ToLower()"></div>
+
+                <div class="achievement-icon">
+                    @if (achievement.IsEarned)
+                    {
+                        switch (achievement.Category)
+                        {
+                            case AchievementCategory.Decluttering:
+                                <span>🏠</span>
+                                break;
+                            case AchievementCategory.Community:
+                                <span>👥</span>
+                                break;
+                            case AchievementCategory.Trading:
+                                <span>💰</span>
+                                break;
+                            case AchievementCategory.Special:
+                                <span>⭐</span>
+                                break;
+                            default:
+                                <span>🏆</span>
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        <span style="filter: grayscale(100%);">🔒</span>
+                    }
+                </div>
+
+                <h3 class="achievement-title">@achievement.Name</h3>
+                <p class="achievement-description">@achievement.Description</p>
+
+                <div class="achievement-meta">
+                    <span class="achievement-category">@achievement.Category</span>
+                    <span class="achievement-category rarity-@achievement.Rarity.ToString().ToLower()">@achievement.Rarity</span>
+                </div>
+
+                <div class="achievement-rewards">
+                    @if (achievement.TokenReward > 0)
+                    {
+                        <span class="reward-badge token-reward">@achievement.TokenReward T</span>
+                    }
+                    @if (achievement.XpReward > 0)
+                    {
+                        <span class="reward-badge xp-reward">@achievement.XpReward XP</span>
+                    }
+                </div>
+
+                @if (achievement.IsEarned)
+                {
+                    <div class="earned-date">
+                        Earned: @achievement.EarnedDate?.ToString("MMM dd, yyyy")
+                    </div>
+                }
+                else
+                {
+                    <div class="achievement-progress">
+                        <div class="progress-bar-mini">
+                            <div class="progress-fill-mini" style="width: @achievement.ProgressPercentage%"></div>
+                        </div>
+                        <span>@achievement.Progress / @achievement.CriteriaValue</span>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Filter functionality
+        $('.filter-btn').click(function(e) {
+            e.preventDefault();
+
+            $('.filter-btn').removeClass('active');
+            $(this).addClass('active');
+
+            const category = $(this).data('category');
+
+            if(category === 'all') {
+                $('.achievement-card').show();
+            } else {
+                $('.achievement-card').hide();
+                $(`.achievement-card[data-category="${category}"]`).show();
+            }
+        });
+
+        // Add animations
+        $('.achievement-card').each(function(index) {
+            $(this).css('animation-delay', (index * 0.1) + 's');
+        });
+    });
+</script>
+
+<style>
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .achievement-card {
+        animation: fadeInUp 0.6s ease forwards;
+    }
+</style>
