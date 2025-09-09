@@ -1,0 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root {
+    --background: #F5F5F5;
+    --primary-color: #6B9080;
+    --secondary-color: #A4C3B2;
+    --accent-color: #EAF4F4;
+    --text-color: #000000;
+    --hover-effect: rgba(217, 217, 217, 0.6);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Montserrat", sans-serif;
+}
