@@ -66,17 +66,22 @@
                 </select>
                 <select id="categoryFilter" class="filter-select">
                     <option value="">All Categories</option>
-                    <option value="electronics">Electronics</option>
+                    <option value="books_stationary">Books & Stationery</option>
+                    <option value="clothing_accessories">Clothing & Accessories</option>
+                    <option value="electronics_gadgets">Electronics & Gadgets</option>
+                    <option value="toys_games">Toys & Games</option>
+                    <option value="home_kitchen">Home & Kitchen</option>
                     <option value="furniture">Furniture</option>
-                    <option value="clothing">Clothing</option>
-                    <option value="books">Books</option>
-                    <option value="others">Others</option>
+                    <option value="appliances">Appliances</option>
+                    <option value="health_beauty">Health & Beauty</option>
+                    <option value="crafts_diy">Crafts & DIY</option>
+                    <option value="school_office">School & Office</option>
+                    <option value="sentimental_items">Sentimental Items</option>
                 </select>
                 <select id="sortFilter" class="filter-select">
-                    <option value="newest">Newest First</option>
-                    <option value="oldest">Oldest First</option>
-                    <option value="price-high">Price: High to Low</option>
-                    <option value="price-low">Price: Low to High</option>
+                    <option value="new">New</option>
+                    <option value="good">Good</option>
+                    <option value="fair">Fair</option>
                 </select>
             </div>
         </div>
@@ -87,7 +92,7 @@
         <!-- Sample Claimed Item Cards -->
         <div class="item-card" data-status="pending" data-category="electronics">
             <div class="item-image">
-                <img src="~/assets/sample-laptop.jpg" alt="MacBook Pro" loading="lazy">
+                <img src="~/assets/image-uploaded.jpg" alt="MacBook Pro" loading="lazy">
                 <div class="status-badge status-pending">
                     <i class="fas fa-clock"></i>
                     Pending
@@ -96,7 +101,7 @@
             <div class="item-content">
                 <div class="item-header">
                     <h3 class="item-title">MacBook Pro 13" M2</h3>
-                    <div class="item-price">₱45,000</div>
+                    <div class="item-price">200</div>
                 </div>
                 <div class="item-details">
                     <p class="item-description">Like new condition, includes original charger and box</p>
@@ -130,7 +135,7 @@
 
         <div class="item-card" data-status="in-progress" data-category="furniture">
             <div class="item-image">
-                <img src="~/assets/sample-chair.jpg" alt="Office Chair" loading="lazy">
+                <img src="~/assets/image-uploaded.jpg" alt="Office Chair" loading="lazy">
                 <div class="status-badge status-in-progress">
                     <i class="fas fa-sync-alt"></i>
                     In Progress
@@ -139,7 +144,7 @@
             <div class="item-content">
                 <div class="item-header">
                     <h3 class="item-title">Ergonomic Office Chair</h3>
-                    <div class="item-price">₱8,500</div>
+                    <div class="item-price">500</div>
                 </div>
                 <div class="item-details">
                     <p class="item-description">Herman Miller Aeron chair, excellent condition</p>
@@ -173,7 +178,7 @@
 
         <div class="item-card" data-status="completed" data-category="electronics">
             <div class="item-image">
-                <img src="~/assets/sample-phone.jpg" alt="iPhone 14" loading="lazy">
+                <img src="~/assets/image-uploaded.jpg" alt="iPhone 14" loading="lazy">
                 <div class="status-badge status-completed">
                     <i class="fas fa-check"></i>
                     Completed
@@ -182,7 +187,7 @@
             <div class="item-content">
                 <div class="item-header">
                     <h3 class="item-title">iPhone 14 Pro Max</h3>
-                    <div class="item-price">₱55,000</div>
+                    <div class="item-price">1000</div>
                 </div>
                 <div class="item-details">
                     <p class="item-description">256GB, Space Black, excellent condition</p>
@@ -216,7 +221,7 @@
 
         <div class="item-card" data-status="pending" data-category="books">
             <div class="item-image">
-                <img src="~/assets/sample-books.jpg" alt="Programming Books" loading="lazy">
+                <img src="~/assets/image-uploaded.jpg" alt="Programming Books" loading="lazy">
                 <div class="status-badge status-pending">
                     <i class="fas fa-clock"></i>
                     Pending
@@ -225,7 +230,7 @@
             <div class="item-content">
                 <div class="item-header">
                     <h3 class="item-title">Programming Books Set</h3>
-                    <div class="item-price">₱2,500</div>
+                    <div class="item-price">300</div>
                 </div>
                 <div class="item-details">
                     <p class="item-description">5 programming books including Clean Code, Design Patterns</p>
@@ -259,7 +264,7 @@
 
         <div class="item-card" data-status="completed" data-category="clothing">
             <div class="item-image">
-                <img src="~/assets/sample-jacket.jpg" alt="Winter Jacket" loading="lazy">
+                <img src="~/assets/image-uploaded.jpg" alt="Winter Jacket" loading="lazy">
                 <div class="status-badge status-completed">
                     <i class="fas fa-check"></i>
                     Completed
@@ -268,7 +273,7 @@
             <div class="item-content">
                 <div class="item-header">
                     <h3 class="item-title">Winter Jacket - North Face</h3>
-                    <div class="item-price">₱4,200</div>
+                    <div class="item-price">200</div>
                 </div>
                 <div class="item-details">
                     <p class="item-description">Size M, barely used, perfect for cold weather</p>
@@ -302,7 +307,7 @@
 
         <div class="item-card" data-status="cancelled" data-category="electronics">
             <div class="item-image">
-                <img src="~/assets/sample-headphones.jpg" alt="Wireless Headphones" loading="lazy">
+                <img src="~/assets/image-uploaded.jpg" alt="Wireless Headphones" loading="lazy">
                 <div class="status-badge status-cancelled">
                     <i class="fas fa-ban"></i>
                     Cancelled
@@ -311,7 +316,7 @@
             <div class="item-content">
                 <div class="item-header">
                     <h3 class="item-title">Sony WH-1000XM4 Headphones</h3>
-                    <div class="item-price">₱15,000</div>
+                    <div class="item-price">600</div>
                 </div>
                 <div class="item-details">
                     <p class="item-description">Noise-cancelling wireless headphones, black</p>

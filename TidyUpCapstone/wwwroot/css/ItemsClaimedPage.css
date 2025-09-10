@@ -8,10 +8,10 @@
     --accent-color: #EAF4F4;
     --text-color: #000000;
     --hover-effect: rgba(217, 217, 217, 0.6);
-    --success-color: #10b981;
+    --success-color: #5b8e7d;
     --warning-color: #f59e0b;
-    --danger-color: #ef4444;
-    --info-color: #3b82f6;
+    --danger-color: #bc4b51;
+    --info-color: #EAF4F4;
     --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     --card-shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
     --border-radius: 12px;
@@ -107,10 +107,11 @@
 
 /* Filter Section */
 .filter-section {
-    background: white;
+    background: var(--background);
     border-radius: var(--border-radius);
-    padding: 1.5rem;
-    margin-bottom: 2rem;
+    border: 2px solid var(--primary-color);
+    padding: 0.5rem;
+    margin-bottom: 1rem;
     box-shadow: var(--card-shadow);
 }
 
@@ -179,7 +180,7 @@
 .items-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 1.5rem;
+    gap: 0.5rem;
     margin-bottom: 2rem;
 }
 
@@ -187,6 +188,7 @@
 .item-card {
     background: white;
     border-radius: var(--border-radius);
+    border: 2px solid var(--primary-color); 
     overflow: hidden;
     box-shadow: var(--card-shadow);
     transition: var(--transition);
@@ -196,7 +198,7 @@
 }
 
     .item-card:hover {
-        transform: translateY(-5px);
+        
         box-shadow: var(--card-shadow-hover);
     }
 
@@ -230,25 +232,26 @@
     gap: 0.5rem;
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: var(--card-shadow) !important;
 }
 
 .status-pending {
-    background: rgba(245, 158, 11, 0.9);
+    background: #f4a259;
     color: #92400e;
 }
 
 .status-in-progress {
-    background: rgba(59, 130, 246, 0.9);
-    color: white;
+    background: #f4e285;
+    color: #92400e;
 }
 
 .status-completed {
-    background: rgba(16, 185, 129, 0.9);
+    background: #5b8e7d;
     color: white;
 }
 
 .status-cancelled {
-    background: rgba(239, 68, 68, 0.9);
+    background: #bc4b51;
     color: white;
 }
 
@@ -269,15 +272,16 @@
 
 .item-title {
     font-size: 1.25rem;
-    font-weight: 600;
+    font-family: "Righteous", sans-serif;
     color: var(--text-color);
     margin: 0;
     line-height: 1.3;
 }
 
 .item-price {
+    font-family: "Righteous", sans-serif;
     font-size: 1.25rem;
-    font-weight: 700;
+
     color: var(--primary-color);
     white-space: nowrap;
 }
@@ -299,6 +303,7 @@
 
 .item-meta {
     display: flex;
+    justify-content: flex-end;
     flex-wrap: wrap;
     gap: 1rem;
 }
@@ -397,7 +402,7 @@
 .empty-state {
     text-align: center;
     padding: 4rem 2rem;
-    background: white;
+    background: var(--background);
     border-radius: var(--border-radius);
     box-shadow: var(--card-shadow);
 }
@@ -636,6 +641,13 @@
 }
 
 @media (max-width: 768px) {
+
+    .items-claimed-container {
+        width: 100vw;
+        margin-left: 0 !important;
+        margin-bottom: 50px !important;
+    }
+
     .items-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
