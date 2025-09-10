@@ -1,4 +1,5 @@
-﻿// MessagePage.js - Enhanced with SignalR real-time functionality and Fixed Report Modal
+﻿
+// MessagePage.js - Enhanced with SignalR real-time functionality and Fixed Report Modal
 
 let currentUser = null;
 let otherUser = null;
@@ -537,9 +538,11 @@ function initializeReportModal() {
         console.log('Removed existing modal');
     }
 
-    // Create modal container - ATTACH TO BODY, NOT INSIDE PAGE CONTENT
+    // Create modal container - ATTACH DIRECTLY TO BODY
     const modalContainer = document.createElement('div');
     modalContainer.id = 'reportModal';
+
+    // Set initial styles to ensure it's hidden but properly positioned
     modalContainer.style.cssText = `
         position: fixed;
         top: 0;
@@ -555,6 +558,7 @@ function initializeReportModal() {
         padding: 1rem;
         box-sizing: border-box;
         pointer-events: auto;
+        font-family: 'Montserrat', sans-serif;
     `;
 
     // Create modal content with proper styling
@@ -853,20 +857,17 @@ function initializeReportModal() {
         </div>
     `;
 
-    // CRITICAL FIX: Add modal DIRECTLY to document.body, not to the page content
-    // This ensures it's not affected by the overflow: hidden rules
+    // CRITICAL: Append directly to document.body, NOT to any container
     document.body.appendChild(modalContainer);
 
     // Get modal reference
     reportModal = modalContainer;
 
-    // Setup event listeners immediately
+    // Setup event listeners
     setupReportModalEventListeners();
 
-    console.log('Report modal created successfully');
-    console.log('Modal exists:', !!document.getElementById('reportModal'));
-    console.log('Radio buttons found:', modalContainer.querySelectorAll('input[type="radio"]').length);
-    console.log('Form exists:', !!modalContainer.querySelector('#reportForm'));
+    console.log('Report modal created and appended to body');
+    console.log('Modal exists in DOM:', !!document.getElementById('reportModal'));
 }
 
 // Setup all event listeners for the modal
@@ -997,110 +998,194 @@ function setupReportModalEventListeners() {
     console.log('Event listeners set up successfully');
 }
 
-// Show report modal function
 function showReportModal(messageId) {
     console.log('Showing report modal for message:', messageId);
 
-    // Ensure modal exists - if not, create it
-    if (!reportModal || !document.getElementById('reportModal')) {
-        console.log('Modal not found, initializing...');
-        initializeReportModal();
-
-        // Wait a bit to ensure DOM is ready
-        setTimeout(() => {
-            showReportModal(messageId);
-        }, 50);
-        return;
-    }
+    // Remove any existing modals
+    document.querySelectorAll('[id*="reportModal"], [id*="Modal"]').forEach(el => el.remove());
 
     currentReportMessageId = messageId;
 
-    // Reset form
-    const reportForm = reportModal.querySelector('#reportForm');
-    const reportDescription = reportModal.querySelector('#reportDescription');
-    const charCount = reportModal.querySelector('#charCount');
+    // Use insertAdjacentHTML with div-based structure (no form)
+    document.body.insertAdjacentHTML('beforeend', `
+        <div id="reportModal" style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: rgba(0, 0, 0, 0.5) !important; z-index: 2147483647 !important; display: flex !important; align-items: center !important; justify-content: center !important; font-family: 'Montserrat', sans-serif !important; padding: 1rem !important; box-sizing: border-box !important;">
+            <div style="background: white; border-radius: 8px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); width: 100%; max-width: 450px; max-height: 80vh; overflow-y: auto; position: relative;">
+                <div style="padding: 24px;">
+                    <!-- Header -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; border-bottom: 1px solid #e5e7eb; padding-bottom: 16px;">
+                        <h3 style="font-size: 18px; font-weight: 600; color: #111827; display: flex; align-items: center; margin: 0; font-family: inherit;">
+                            <span style="color: #ef4444; margin-right: 8px; font-size: 20px;">🚩</span>
+                            Report Message
+                        </h3>
+                        <button type="button" onclick="hideReportModal()" style="color: #9ca3af; background: none; border: none; font-size: 24px; font-weight: bold; padding: 4px; cursor: pointer; line-height: 1; border-radius: 4px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
+                    
+                    <!-- Content (No Form) -->
+                    <div id="reportContent">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 12px; font-family: inherit;">
+                                Reason for reporting:
+                            </label>
+                            
+                            <div id="reasonOptions" style="display: flex; flex-direction: column; gap: 8px;">
+                                <div class="radio-option" data-value="Spam" style="display: flex; align-items: center; padding: 12px; border: 2px solid #e5e7eb; border-radius: 6px; cursor: pointer; transition: all 0.2s; font-family: inherit;" onclick="selectReportReason(this)">
+                                    <div class="radio-indicator" style="width: 16px; height: 16px; border: 2px solid #d1d5db; border-radius: 50%; margin-right: 12px; display: flex; align-items: center; justify-content: center;">
+                                        <div class="radio-dot" style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%; display: none;"></div>
+                                    </div>
+                                    <span style="font-size: 14px; font-weight: 500; color: #374151;">Spam</span>
+                                </div>
+                                
+                                <div class="radio-option" data-value="Inappropriate" style="display: flex; align-items: center; padding: 12px; border: 2px solid #e5e7eb; border-radius: 6px; cursor: pointer; transition: all 0.2s; font-family: inherit;" onclick="selectReportReason(this)">
+                                    <div class="radio-indicator" style="width: 16px; height: 16px; border: 2px solid #d1d5db; border-radius: 50%; margin-right: 12px; display: flex; align-items: center; justify-content: center;">
+                                        <div class="radio-dot" style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%; display: none;"></div>
+                                    </div>
+                                    <span style="font-size: 14px; font-weight: 500; color: #374151;">Inappropriate Content</span>
+                                </div>
+                                
+                                <div class="radio-option" data-value="Scam" style="display: flex; align-items: center; padding: 12px; border: 2px solid #e5e7eb; border-radius: 6px; cursor: pointer; transition: all 0.2s; font-family: inherit;" onclick="selectReportReason(this)">
+                                    <div class="radio-indicator" style="width: 16px; height: 16px; border: 2px solid #d1d5db; border-radius: 50%; margin-right: 12px; display: flex; align-items: center; justify-content: center;">
+                                        <div class="radio-dot" style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%; display: none;"></div>
+                                    </div>
+                                    <span style="font-size: 14px; font-weight: 500; color: #374151;">Scam/Fraud</span>
+                                </div>
+                                
+                                <div class="radio-option" data-value="Harassment" style="display: flex; align-items: center; padding: 12px; border: 2px solid #e5e7eb; border-radius: 6px; cursor: pointer; transition: all 0.2s; font-family: inherit;" onclick="selectReportReason(this)">
+                                    <div class="radio-indicator" style="width: 16px; height: 16px; border: 2px solid #d1d5db; border-radius: 50%; margin-right: 12px; display: flex; align-items: center; justify-content: center;">
+                                        <div class="radio-dot" style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%; display: none;"></div>
+                                    </div>
+                                    <span style="font-size: 14px; font-weight: 500; color: #374151;">Harassment</span>
+                                </div>
+                                
+                                <div class="radio-option" data-value="FakeListing" style="display: flex; align-items: center; padding: 12px; border: 2px solid #e5e7eb; border-radius: 6px; cursor: pointer; transition: all 0.2s; font-family: inherit;" onclick="selectReportReason(this)">
+                                    <div class="radio-indicator" style="width: 16px; height: 16px; border: 2px solid #d1d5db; border-radius: 50%; margin-right: 12px; display: flex; align-items: center; justify-content: center;">
+                                        <div class="radio-dot" style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%; display: none;"></div>
+                                    </div>
+                                    <span style="font-size: 14px; font-weight: 500; color: #374151;">Fake Listing</span>
+                                </div>
+                                
+                                <div class="radio-option" data-value="Other" style="display: flex; align-items: center; padding: 12px; border: 2px solid #e5e7eb; border-radius: 6px; cursor: pointer; transition: all 0.2s; font-family: inherit;" onclick="selectReportReason(this)">
+                                    <div class="radio-indicator" style="width: 16px; height: 16px; border: 2px solid #d1d5db; border-radius: 50%; margin-right: 12px; display: flex; align-items: center; justify-content: center;">
+                                        <div class="radio-dot" style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%; display: none;"></div>
+                                    </div>
+                                    <span style="font-size: 14px; font-weight: 500; color: #374151;">Other</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 24px;">
+                            <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 8px; font-family: inherit;">
+                                Additional details (optional):
+                            </label>
+                            <textarea id="reportDescription" rows="3" placeholder="Please provide more details about why you're reporting this message..." maxlength="500" style="width: 100%; padding: 12px; border: 2px solid #d1d5db; border-radius: 6px; resize: vertical; font-family: inherit; font-size: 14px; min-height: 80px; box-sizing: border-box; outline: none;" oninput="updateCharCount()"></textarea>
+                            <div id="charCount" style="font-size: 12px; color: #6b7280; margin-top: 4px; text-align: right;">0/500 characters</div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #e5e7eb; padding-top: 16px;">
+                            <button type="button" onclick="hideReportModal()" style="padding: 10px 20px; color: #374151; border: 2px solid #d1d5db; border-radius: 6px; background: white; cursor: pointer; font-size: 14px; font-weight: 500; font-family: inherit; transition: all 0.2s;">
+                                Cancel
+                            </button>
+                            <button type="button" onclick="submitReport()" id="reportSubmitBtn" style="padding: 10px 20px; background: #ef4444; color: white; border: 2px solid #ef4444; border-radius: 6px; cursor: pointer; display: flex; align-items: center; font-size: 14px; font-weight: 500; font-family: inherit; transition: all 0.2s;">
+                                <span style="margin-right: 8px;">🚩</span>
+                                Report Message
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `);
 
-    if (reportForm) {
-        reportForm.reset();
-    }
-
-    if (reportDescription) {
-        reportDescription.value = '';
-    }
-
-    if (charCount) {
-        charCount.textContent = '0/500 characters';
-        charCount.style.color = '#6b7280';
-    }
-
-    // Remove any previous selected styling
-    const radioOptions = reportModal.querySelectorAll('.radio-option');
-    radioOptions.forEach(label => {
-        label.style.backgroundColor = 'white';
-        label.style.borderColor = '#e5e7eb';
-    });
-
-    // CRITICAL FIX: Override overflow restrictions temporarily
-    const originalBodyStyle = document.body.style.overflow;
-    const originalDocumentStyle = document.documentElement.style.overflow;
-
-    // Force body and html to allow overflow
-    document.body.style.overflow = 'auto';
-    document.documentElement.style.overflow = 'auto';
-
-    // Add modal-open class to body for additional CSS targeting
-    document.body.classList.add('modal-open', 'report-modal-open');
-
-    // Show modal with proper display
-    reportModal.style.display = 'flex';
-    reportModal.style.visibility = 'visible';
-    reportModal.style.opacity = '1';
-
-    // Focus management
-    setTimeout(() => {
-        const firstRadio = reportModal.querySelector('input[type="radio"]');
-        if (firstRadio) {
-            firstRadio.focus();
-        }
-    }, 100);
-
-    console.log('Modal should now be visible');
-    console.log('Modal display style:', reportModal.style.display);
-    console.log('Modal visibility:', reportModal.style.visibility);
-    console.log('Modal in DOM:', document.contains(reportModal));
-
-    // Store original styles for restoration
-    reportModal._originalBodyOverflow = originalBodyStyle;
-    reportModal._originalDocumentOverflow = originalDocumentStyle;
+    console.log('Div-based modal created');
 }
 
-// Hide report modal function
-function hideReportModal() {
-    console.log('Hiding report modal');
+// Add these helper functions after the showReportModal function
+let selectedReason = null;
 
-    if (reportModal) {
-        // Hide modal
-        reportModal.style.display = 'none';
-        reportModal.style.visibility = 'hidden';
-        reportModal.style.opacity = '0';
+function selectReportReason(element) {
+    // Remove selection from all options
+    document.querySelectorAll('.radio-option').forEach(option => {
+        option.style.backgroundColor = 'white';
+        option.style.borderColor = '#e5e7eb';
+        option.querySelector('.radio-dot').style.display = 'none';
+    });
 
-        // Restore original overflow styles
-        if (reportModal._originalBodyOverflow !== undefined) {
-            document.body.style.overflow = reportModal._originalBodyOverflow;
-        } else {
-            document.body.style.overflow = '';
-        }
+    // Select current option
+    element.style.backgroundColor = '#fef2f2';
+    element.style.borderColor = '#ef4444';
+    element.querySelector('.radio-dot').style.display = 'block';
 
-        if (reportModal._originalDocumentOverflow !== undefined) {
-            document.documentElement.style.overflow = reportModal._originalDocumentOverflow;
-        } else {
-            document.documentElement.style.overflow = '';
-        }
+    selectedReason = element.getAttribute('data-value');
+}
 
-        // Remove modal classes
-        document.body.classList.remove('modal-open', 'report-modal-open');
+function updateCharCount() {
+    const textarea = document.getElementById('reportDescription');
+    const charCount = document.getElementById('charCount');
+    const count = textarea.value.length;
+    charCount.textContent = `${count}/500 characters`;
+    charCount.style.color = count > 450 ? '#ef4444' : '#6b7280';
+}
+
+function submitReport() {
+    if (!selectedReason) {
+        alert('Please select a reason for reporting');
+        return;
     }
 
+    const description = document.getElementById('reportDescription').value.trim();
+
+    // Debug the actual values
+    console.log('=== DEBUG REPORT SUBMISSION ===');
+    console.log('currentReportMessageId:', currentReportMessageId);
+    console.log('selectedReason:', selectedReason);
+    console.log('description:', description);
+    console.log('messageId (parsed):', parseInt(currentReportMessageId));
+    console.log('typeof messageId:', typeof parseInt(currentReportMessageId));
+
+    const reportData = {
+        messageId: parseInt(currentReportMessageId),
+        reason: selectedReason,
+        description: description
+    };
+    console.log('Final report data:', JSON.stringify(reportData));
+
+    const submitBtn = document.getElementById('reportSubmitBtn');
+    const originalHTML = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span style="margin-right: 8px;">⏳</span> Submitting...';
+
+    // Rest of your fetch code stays the same...
+    fetch('/Chat/ReportMessage', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+        },
+        body: JSON.stringify(reportData)  // Use the debug data
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                alert('Message reported successfully. Thank you for helping keep our community safe.');
+                hideReportModal();
+                markMessageAsReported(currentReportMessageId);
+            } else {
+                alert('Error reporting message: ' + (result.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error reporting message:', error);
+            alert('Error reporting message. Please check your connection and try again.');
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalHTML;
+        });
+}
+// Update your hideReportModal function to reset selectedReason
+function hideReportModal() {
+    console.log('Hiding report modal');
+    document.getElementById('reportModal')?.remove();
+    selectedReason = null;
     currentReportMessageId = null;
     console.log('Modal hidden');
 }
@@ -1379,4 +1464,4 @@ window.MessagePage = {
     switchTestUser,
     joinChat,
     leaveChat
-};
+}; 

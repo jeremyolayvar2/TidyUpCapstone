@@ -719,3 +719,123 @@ body.message-page.report-modal-open {
     #reportModal[style*="display: flex"] {
         display: flex !important;
     }
+
+/* ========================================
+   MODAL OVERRIDE - ADD TO END OF MessagePage.css
+   ======================================== */
+
+/* CRITICAL OVERRIDE: Force modal visibility over all layout constraints */
+#reportModal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 2147483647 !important;
+    pointer-events: auto !important;
+    box-sizing: border-box !important;
+}
+
+    /* When modal is explicitly shown */
+    #reportModal[style*="display: flex"] {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+/* Override ALL overflow restrictions when modal is open */
+body.modal-open,
+body.modal-open *,
+body.report-modal-open,
+body.report-modal-open *,
+body.message-page.modal-open,
+body.message-page.modal-open *,
+body.message-page.report-modal-open,
+body.message-page.report-modal-open *,
+body.message-page.modal-open .layout-wrapper,
+body.message-page.modal-open .main-content,
+body.message-page.modal-open .main-content main,
+body.message-page.modal-open .chat-section,
+body.message-page.report-modal-open .layout-wrapper,
+body.message-page.report-modal-open .main-content,
+body.message-page.report-modal-open .main-content main,
+body.message-page.report-modal-open .chat-section {
+    overflow: visible !important;
+}
+
+/* Specifically target message page classes that might interfere */
+body.message-page.modal-open {
+    height: auto !important;
+}
+
+    body.message-page.modal-open .main-content {
+        height: auto !important;
+    }
+
+        body.message-page.modal-open .main-content main {
+            height: auto !important;
+        }
+
+/* Ensure modal content is always accessible */
+#reportModal > div {
+    position: relative !important;
+    z-index: 2147483647 !important;
+    max-width: 90vw !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    margin: auto !important;
+    pointer-events: auto !important;
+    box-sizing: border-box !important;
+}
+
+/* Ensure all interactive elements work */
+#reportModal input,
+#reportModal textarea,
+#reportModal button,
+#reportModal label,
+#reportModal form {
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 2147483647 !important;
+    box-sizing: border-box !important;
+}
+
+/* Mobile-specific overrides */
+@media (max-width: 768px) {
+    /* Force override mobile layout constraints */
+    body.message-page.modal-open {
+        overflow: visible !important;
+        height: auto !important;
+    }
+
+        body.message-page.modal-open .layout-wrapper {
+            overflow: visible !important;
+            height: auto !important;
+        }
+
+        body.message-page.modal-open .main-content {
+            overflow: visible !important;
+            height: auto !important;
+            margin-left: 0 !important;
+            padding-bottom: 0 !important;
+            width: 100vw !important;
+        }
+
+            body.message-page.modal-open .main-content main {
+                overflow: visible !important;
+                height: auto !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+        body.message-page.modal-open .chat-section {
+            overflow: visible !important;
+        }
+
+    /* Modal sizing for mobile */
+    #reportModal > div {
+        margin: 1rem !important;
+        max-width: calc(100vw - 2rem) !important;
+        max-height: calc(100vh - 2rem) !important;
+    }
+}

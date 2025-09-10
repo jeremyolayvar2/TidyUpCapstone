@@ -162,6 +162,7 @@ namespace TidyUp.Controllers
         }
 
         [HttpPost]
+        [HttpPost]
         public async Task<IActionResult> ReportMessage([FromBody] ReportMessageRequest request)
         {
             try
@@ -190,14 +191,20 @@ namespace TidyUp.Controllers
                 if (existingReport != null)
                     return Json(new { success = false, message = "You have already reported this message" });
 
+                // PARSE THE ENUM SAFELY
+                if (!Enum.TryParse<ReportReason>(request.Reason, true, out var parsedReason))
+                {
+                    return Json(new { success = false, message = "Invalid report reason" });
+                }
+
                 var report = new UserReport
                 {
                     ReporterId = currentUserId,
                     ReportedUserId = message.SenderId,
                     ReportedEntityType = ReportedEntityType.Chat,
                     ReportedEntityId = request.MessageId,
-                    Reason = request.Reason,
-                    Description = request.Description,
+                    Reason = parsedReason, // Use parsed enum
+                    Description = request.Description ?? string.Empty,
                     DateSubmitted = DateTime.UtcNow,
                     ReportStatus = ReportStatus.Pending,
                     Priority = ReportPriority.Medium
@@ -205,15 +212,6 @@ namespace TidyUp.Controllers
 
                 _context.UserReports.Add(report);
                 await _context.SaveChangesAsync();
-
-                // Optionally notify admins via SignalR about new report
-                await _hubContext.Clients.Group("Admins").SendAsync("NewReport", new
-                {
-                    reportId = report.ReportId,
-                    messageId = request.MessageId,
-                    reason = request.Reason.ToString(),
-                    reportedBy = currentUser.UserName
-                });
 
                 return Json(new { success = true, message = "Message reported successfully" });
             }
@@ -355,7 +353,7 @@ namespace TidyUp.Controllers
     public class ReportMessageRequest
     {
         public int MessageId { get; set; }
-        public ReportReason Reason { get; set; }
+        public string Reason { get; set; } = string.Empty;
         public string? Description { get; set; }
     }
 
