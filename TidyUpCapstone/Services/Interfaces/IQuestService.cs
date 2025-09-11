@@ -17,7 +17,7 @@ namespace TidyUpCapstone.Services.Interfaces
         // Quest Generation
         Task GenerateDailyQuestsAsync();
         Task GenerateWeeklyQuestsAsync();
-        Task<Quest> CreateSpecialQuestAsync(Quest quest);
+        Task GenerateSpecialQuestAsync();
         Task<bool> CheckAndExpireQuestsAsync();
 
         // User Progress
@@ -34,5 +34,10 @@ namespace TidyUpCapstone.Services.Interfaces
         Task<bool> UpdateQuestAsync(Quest quest);
         Task<bool> DeleteQuestAsync(int questId);
         Task<bool> ToggleQuestActiveStatusAsync(int questId);
+
+        Task<bool> TriggerQuestProgressByActionAsync(int userId, string actionType, int value = 1, object? actionData = null);
+        Task<bool> ValidateQuestCompletionAsync(int userId, int questId, string actionType, object? actionData = null);
+
+        Task<bool> CompleteQuestWithAchievementCheckAsync(int userId, int questId);
     }
 }

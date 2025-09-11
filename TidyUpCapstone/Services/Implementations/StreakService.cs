@@ -11,18 +11,22 @@ namespace TidyUpCapstone.Services.Implementations
     {
         private readonly ApplicationDbContext _context;
         private readonly IAchievementService _achievementService;
+        private readonly IUserStatisticsService _userStatisticsService;
         private readonly ILogger<StreakService> _logger;
 
         public StreakService(
             ApplicationDbContext context,
             IAchievementService achievementService,
+            IUserStatisticsService userStatisticsService,
             ILogger<StreakService> logger)
         {
             _context = context;
             _achievementService = achievementService;
+            _userStatisticsService = userStatisticsService;
             _logger = logger;
         }
 
+        // CORRECTED: Use centralized statistics service
         public async Task<bool> CheckInUserAsync(int userId)
         {
             try
@@ -54,28 +58,32 @@ namespace TidyUpCapstone.Services.Implementations
 
                 dailyCheckInStreak.LastActivityDate = DateTime.UtcNow;
 
-                // Award base check-in reward
-                var user = await _context.Users.FindAsync(userId);
-                if (user != null)
+                // Calculate rewards
+                var baseReward = dailyCheckInStreak.StreakType?.BaseRewards ?? 2.00m;
+                var xpReward = CalculateCheckInXpReward(dailyCheckInStreak.CurrentStreak);
+
+                // CORRECTED: Use centralized statistics service for both tokens and XP
+                var success = await _userStatisticsService.AwardTokensAndXpAsync(
+                    userId,
+                    baseReward,
+                    xpReward,
+                    $"Daily check-in streak day {dailyCheckInStreak.CurrentStreak}");
+
+                if (success)
                 {
-                    var baseReward = dailyCheckInStreak.StreakType?.BaseRewards ?? 2.00m;
-                    user.TokenBalance += baseReward;
-                    _logger.LogInformation($"Awarded {baseReward} tokens to user {userId} for check-in");
+                    // Check for milestone rewards
+                    await CheckAndAwardMilestoneRewardsAsync(userId, dailyCheckInStreak.StreakTypeId);
+
+                    await _context.SaveChangesAsync();
+
+                    // Check achievements
+                    await _achievementService.CheckAndUnlockAchievementsAsync(userId, "check_in", 1);
+
+                    _logger.LogInformation($"User {userId} checked in successfully. Current streak: {dailyCheckInStreak.CurrentStreak}");
+                    return true;
                 }
 
-                // Check for milestone rewards
-                await CheckAndAwardMilestoneRewardsAsync(userId, dailyCheckInStreak.StreakTypeId);
-
-                // Update user XP (add 5 XP for daily check-in)
-                await UpdateUserXpAsync(userId, 5);
-
-                await _context.SaveChangesAsync();
-
-                // Check achievements
-                await _achievementService.CheckAndUnlockAchievementsAsync(userId, "check_in", 1);
-
-                _logger.LogInformation($"User {userId} checked in successfully. Current streak: {dailyCheckInStreak.CurrentStreak}");
-                return true;
+                return false;
             }
             catch (Exception ex)
             {
@@ -84,63 +92,11 @@ namespace TidyUpCapstone.Services.Implementations
             }
         }
 
-        private async Task CheckForLevelUpAsync(UserLevel userLevel)
+        private int CalculateCheckInXpReward(int streakDay)
         {
-            var nextLevel = await _context.Levels
-                .Where(l => l.LevelNumber > userLevel.CurrentLevel.LevelNumber)
-                .OrderBy(l => l.LevelNumber)
-                .FirstOrDefaultAsync();
-
-            if (nextLevel != null && userLevel.CurrentXp >= nextLevel.XpRequired)
-            {
-                userLevel.CurrentLevelId = nextLevel.LevelId;
-                userLevel.LevelUpDate = DateTime.UtcNow;
-                userLevel.TotalLevelUps++;
-
-                var nextNextLevel = await _context.Levels
-                    .Where(l => l.LevelNumber > nextLevel.LevelNumber)
-                    .OrderBy(l => l.LevelNumber)
-                    .FirstOrDefaultAsync();
-
-                userLevel.XpToNextLevel = nextNextLevel != null ?
-                    nextNextLevel.XpRequired - userLevel.CurrentXp : 0;
-
-                // Award level up achievements
-                await _achievementService.CheckAndUnlockAchievementsAsync(userLevel.UserId, "level_up", 1);
-
-                _logger.LogInformation($"User {userLevel.UserId} leveled up to level {nextLevel.LevelNumber}");
-            }
-        }
-
-
-        private async Task UpdateUserXpAsync(int userId, int xpAmount)
-        {
-            var userLevel = await _context.UserLevels
-                .Include(ul => ul.CurrentLevel)
-                .FirstOrDefaultAsync(ul => ul.UserId == userId);
-
-            if (userLevel != null)
-            {
-                userLevel.CurrentXp += xpAmount;
-                userLevel.TotalXp += xpAmount;
-                await CheckForLevelUpAsync(userLevel);
-            }
-            else
-            {
-                var initialLevel = await _context.Levels.FirstOrDefaultAsync(l => l.LevelNumber == 1);
-                if (initialLevel != null)
-                {
-                    var newUserLevel = new UserLevel
-                    {
-                        UserId = userId,
-                        CurrentLevelId = initialLevel.LevelId,
-                        CurrentXp = xpAmount,
-                        TotalXp = xpAmount,
-                        XpToNextLevel = Math.Max(0, initialLevel.XpToNext - xpAmount)
-                    };
-                    _context.UserLevels.Add(newUserLevel);
-                }
-            }
+            int baseXp = 10; // Base XP for checking in
+            int streakBonus = Math.Min(streakDay * 2, 50); // Max 50 bonus XP
+            return baseXp + streakBonus;
         }
 
         public async Task<bool> HasCheckedInTodayAsync(int userId)
@@ -312,6 +268,7 @@ namespace TidyUpCapstone.Services.Implementations
             }
         }
 
+        // CORRECTED: Use centralized statistics service for milestone rewards
         public async Task<List<string>> CheckAndAwardMilestoneRewardsAsync(int userId, int streakTypeId)
         {
             var rewards = new List<string>();
@@ -327,13 +284,15 @@ namespace TidyUpCapstone.Services.Implementations
                 var milestoneInterval = userStreak.StreakType.MilestoneInterval;
                 if (userStreak.CurrentStreak % milestoneInterval == 0 && userStreak.CurrentStreak > 0)
                 {
-                    // Award milestone reward
-                    var user = await _context.Users.FindAsync(userId);
-                    if (user != null)
-                    {
-                        var rewardAmount = userStreak.StreakType.MilestoneRewards;
-                        user.TokenBalance += rewardAmount;
+                    // CORRECTED: Use centralized statistics service
+                    var rewardAmount = userStreak.StreakType.MilestoneRewards;
+                    var success = await _userStatisticsService.AwardTokensAsync(
+                        userId,
+                        rewardAmount,
+                        $"Milestone reward: {userStreak.CurrentStreak}-{userStreak.StreakType.StreakUnit} streak");
 
+                    if (success)
+                    {
                         userStreak.TotalMilestonesReached++;
                         userStreak.LastMilestoneDate = DateTime.UtcNow;
 

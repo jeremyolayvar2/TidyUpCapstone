@@ -12,13 +12,12 @@ namespace TidyUpCapstone.Services.Background
         private readonly Timer _dailyTimer;
         private readonly Timer _weeklyTimer;
         private readonly Timer _maintenanceTimer;
-        
+        private readonly Timer _specialQuestTimer;
 
         public QuestBackgroundService(IServiceProvider serviceProvider, ILogger<QuestBackgroundService> logger)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
-            
 
             // Schedule daily quest generation at midnight
             var now = DateTime.UtcNow;
@@ -35,6 +34,10 @@ namespace TidyUpCapstone.Services.Background
 
             // Schedule maintenance tasks every hour
             _maintenanceTimer = new Timer(RunMaintenanceTasks, null, TimeSpan.Zero, TimeSpan.FromHours(1));
+
+            // Generate special quests bi-weekly (every 15 days) instead of monthly
+            var timeUntilNextSpecial = TimeSpan.FromDays(15);
+            _specialQuestTimer = new Timer(GenerateSpecialQuests, null, timeUntilNextSpecial, TimeSpan.FromDays(15));
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -186,6 +189,23 @@ namespace TidyUpCapstone.Services.Background
             }
         }
 
+
+        private async void GenerateSpecialQuests(object? state)
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var questService = scope.ServiceProvider.GetRequiredService<IQuestService>();
+
+            try
+            {
+                await questService.GenerateSpecialQuestAsync();
+                _logger.LogInformation("Special quest generation completed");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating special quest");
+            }
+        }
+
         private async void RunMaintenanceTasks(object? state)
         {
             using var scope = _serviceProvider.CreateScope();
@@ -222,6 +242,7 @@ namespace TidyUpCapstone.Services.Background
             _dailyTimer?.Dispose();
             _weeklyTimer?.Dispose();
             _maintenanceTimer?.Dispose();
+            _specialQuestTimer?.Dispose();
             base.Dispose();
         }
     }

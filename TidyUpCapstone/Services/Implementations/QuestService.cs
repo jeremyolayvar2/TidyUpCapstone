@@ -3,6 +3,7 @@ using TidyUpCapstone.Data;
 using TidyUpCapstone.Models.DTOs.Gamification;
 using TidyUpCapstone.Models.Entities.Gamification;
 using TidyUpCapstone.Services.Interfaces;
+using TidyUpCapstone.Services.Data;
 
 namespace TidyUpCapstone.Services.Implementations
 {
@@ -10,16 +11,23 @@ namespace TidyUpCapstone.Services.Implementations
     {
         private readonly ApplicationDbContext _context;
         private readonly IAchievementService _achievementService;
+        private readonly IUserStatisticsService _userStatisticsService;
         private readonly ILogger<QuestService> _logger;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly Random _random = new();
 
         public QuestService(
             ApplicationDbContext context,
             IAchievementService achievementService,
-            ILogger<QuestService> logger)
+            IUserStatisticsService userStatisticsService,
+            ILogger<QuestService> logger,
+            IServiceProvider serviceProvider)
         {
             _context = context;
             _achievementService = achievementService;
+            _userStatisticsService = userStatisticsService;
             _logger = logger;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<List<QuestDto>> GetActiveQuestsForUserAsync(int userId)
@@ -42,29 +50,25 @@ namespace TidyUpCapstone.Services.Implementations
                     Difficulty = uq.Quest.Difficulty,
                     TargetValue = uq.Quest.TargetValue,
                     IsActive = uq.Quest.IsActive,
-
-                    // ✅ Use quest start/end dates, not userquest.createdAt
                     StartDate = uq.Quest.StartDate,
                     EndDate = uq.Quest.EndDate,
-
-                    // ✅ UserQuest-specific info
                     IsCompleted = uq.IsCompleted,
                     CurrentProgress = uq.CurrentProgress,
                     IsClaimed = uq.DateClaimed != null,
                     CompletedAt = uq.CompletedAt,
-
-                    // ✅ Derived
                     ProgressPercentage = uq.Quest.TargetValue > 0
-                        ? (uq.CurrentProgress * 100 / uq.Quest.TargetValue)
-                        : 0,
-                    IsAvailable = true,
-                    StatusMessage = GetQuestStatusMessage(uq)
+                    ? (uq.CurrentProgress * 100 / uq.Quest.TargetValue)
+                    : 0,
+                                IsAvailable = true,
+                                // ✅ ADD THIS - Can't call method in LINQ, so inline the logic
+                                StatusMessage = uq.IsCompleted
+                    ? (uq.DateClaimed != null ? "Completed & Rewards Claimed" : "Completed - Ready to Claim")
+                    : (uq.CurrentProgress == 0 ? "Not Started" : "In Progress")
                 })
                 .ToListAsync();
 
             return userQuests;
         }
-
 
         public async Task<List<QuestDto>> GetCompletedQuestsForUserAsync(int userId)
         {
@@ -103,19 +107,16 @@ namespace TidyUpCapstone.Services.Implementations
         {
             try
             {
-                // Check if user already has this quest
                 var existingUserQuest = await _context.UserQuests
                     .FirstOrDefaultAsync(uq => uq.UserId == userId && uq.QuestId == questId);
 
                 if (existingUserQuest != null)
-                    return false; // Already started
+                    return false;
 
-                // Check if quest exists and is active
                 var quest = await _context.Quests.FindAsync(questId);
                 if (quest == null || !quest.IsActive)
                     return false;
 
-                // Create new user quest
                 var userQuest = new UserQuest
                 {
                     UserId = userId,
@@ -148,14 +149,11 @@ namespace TidyUpCapstone.Services.Implementations
                 if (userQuest == null)
                     return false;
 
-                // Update progress
                 userQuest.CurrentProgress += progressIncrement;
 
-                // Ensure progress doesn't exceed target
                 if (userQuest.CurrentProgress > userQuest.Quest.TargetValue)
                     userQuest.CurrentProgress = userQuest.Quest.TargetValue;
 
-                // Create progress tracking record
                 var progressRecord = new QuestProgress
                 {
                     UserQuestId = userQuest.UserQuestId,
@@ -164,18 +162,54 @@ namespace TidyUpCapstone.Services.Implementations
                     ActionType = actionType,
                     ActionTimestamp = DateTime.UtcNow
                 };
-
                 _context.QuestProgresses.Add(progressRecord);
 
-                // Check if quest is completed
+                // Auto-complete quest if target reached
                 if (userQuest.CurrentProgress >= userQuest.Quest.TargetValue)
                 {
-                    await CompleteQuestAsync(userId, questId);
+                    userQuest.IsCompleted = true;
+                    userQuest.CompletedAt = DateTime.UtcNow;
+                    userQuest.Status = QuestStatus.Completed;
+                    userQuest.DateClaimed = DateTime.UtcNow; // Auto-claim on completion
+
+                    _logger.LogInformation($"Quest auto-completed: User {userId}, Quest {questId} - {userQuest.Quest.QuestTitle}");
+
+                    // Award tokens and XP immediately upon completion
+                    await _userStatisticsService.AwardTokensAndXpAsync(
+                        userId,
+                        userQuest.Quest.TokenReward,
+                        userQuest.Quest.XpReward,
+                        $"Quest completed: {userQuest.Quest.QuestTitle}");
                 }
 
+                // Save changes FIRST
                 await _context.SaveChangesAsync();
 
-                // Check for achievements related to quest progress
+                // THEN trigger achievement checks (after database is updated)
+                if (userQuest.CurrentProgress >= userQuest.Quest.TargetValue)
+                {
+                    // ✅ UPDATE ACHIEVEMENT PROGRESS FIRST
+                    var questAchievements = await _context.UserAchievements
+                        .Include(ua => ua.Achievement)
+                        .Where(ua => ua.UserId == userId && ua.Achievement.CriteriaType == "total_quests_completed")
+                        .ToListAsync();
+
+                    var newQuestCount = await _context.UserQuests.CountAsync(uq => uq.UserId == userId && uq.IsCompleted);
+
+                    foreach (var questAchievement in questAchievements)
+                    {
+                        questAchievement.Progress = newQuestCount;
+                    }
+
+                    await _context.SaveChangesAsync(); // Save progress updates
+
+                    // ✅ THEN CHECK ACHIEVEMENTS
+                    await _achievementService.CheckAndUnlockAchievementsAsync(userId, "quest_completed", 1);
+                    await _achievementService.CheckAndUnlockAchievementsAsync(userId, "total_quests_completed", 1);
+                    await _achievementService.CheckAndUnlockAchievementsAsync(userId, "tokens_earned", (int)userQuest.Quest.TokenReward);
+                    await TriggerQuestCompletionAchievementsAsync(userId, userQuest.Quest);
+                }
+
                 await _achievementService.CheckAndUnlockAchievementsAsync(userId, "quest_progress", progressIncrement);
 
                 return true;
@@ -185,6 +219,84 @@ namespace TidyUpCapstone.Services.Implementations
                 _logger.LogError(ex, $"Error updating quest progress for user {userId}, quest {questId}");
                 return false;
             }
+        }
+
+        public async Task<bool> TriggerQuestProgressByActionAsync(int userId, string actionType, int value = 1, object? actionData = null)
+        {
+            try
+            {
+                var activeQuests = await _context.UserQuests
+                    .Include(uq => uq.Quest)
+                    .Where(uq => uq.UserId == userId &&
+                                !uq.IsCompleted &&
+                                uq.Quest.IsActive &&
+                                (uq.Quest.EndDate == null || uq.Quest.EndDate > DateTime.UtcNow))
+                    .ToListAsync();
+
+                bool anyProgressMade = false;
+
+                foreach (var userQuest in activeQuests)
+                {
+                    bool shouldProgress = ShouldQuestProgressForAction(userQuest.Quest, actionType);
+
+                    if (shouldProgress)
+                    {
+                        await UpdateQuestProgressAsync(userId, userQuest.QuestId, value, actionType);
+                        anyProgressMade = true;
+
+                        _logger.LogInformation($"Quest progress triggered: User {userId}, Action {actionType}, Quest {userQuest.Quest.QuestTitle}");
+                    }
+                }
+
+                return anyProgressMade;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error triggering quest progress for user {userId}, action {actionType}");
+                return false;
+            }
+        }
+
+        // In QuestService.cs - Replace the incomplete method
+        private static bool ShouldQuestProgressForAction(Quest quest, string actionType)
+        {
+            var objective = quest.QuestObjective?.ToLower() ?? "";
+            var title = quest.QuestTitle?.ToLower() ?? "";
+            var description = quest.QuestDescription?.ToLower() ?? "";
+
+            return actionType.ToLower() switch
+            {
+                "check_in" => objective.Contains("check") || objective.Contains("intention") ||
+                             title.Contains("mindfulness") || title.Contains("morning") ||
+                             objective.Contains("daily"),
+
+                "item_listed" => objective.Contains("list") || objective.Contains("declutter") ||
+                                objective.Contains("item") || title.Contains("declutter") ||
+                                objective.Contains("clothing") || objective.Contains("books") ||
+                                objective.Contains("kitchen") || objective.Contains("bathroom") ||
+                                objective.Contains("garage") || objective.Contains("miscellaneous"),
+
+                "post_created" => objective.Contains("share") || objective.Contains("post") ||
+                                 title.Contains("share") || title.Contains("tip") ||
+                                 objective.Contains("community") || objective.Contains("wisdom") ||
+                                 objective.Contains("inspiration"),
+
+                "comment_created" => objective.Contains("help") || objective.Contains("support") ||
+                                    objective.Contains("comment") || title.Contains("helper") ||
+                                    objective.Contains("encouraging") || objective.Contains("community"),
+
+                "reaction_created" => objective.Contains("react") || objective.Contains("positive") ||
+                                     title.Contains("support") || title.Contains("cheerleader") ||
+                                     objective.Contains("positively"),
+
+                "category_completed" => objective.Contains("category") || title.Contains("master") ||
+                                       title.Contains("transformation") || objective.Contains("complete"),
+
+                "quest_completed" => quest.QuestType == QuestType.Special ||
+                                    objective.Contains("milestone") || title.Contains("mastery"),
+
+                _ => false
+            };
         }
 
         public async Task<bool> CompleteQuestAsync(int userId, int questId)
@@ -200,14 +312,11 @@ namespace TidyUpCapstone.Services.Implementations
 
                 userQuest.IsCompleted = true;
                 userQuest.CompletedAt = DateTime.UtcNow;
-                userQuest.CurrentProgress = userQuest.Quest.TargetValue; // Ensure progress is at target
+                userQuest.CurrentProgress = userQuest.Quest.TargetValue;
 
                 await _context.SaveChangesAsync();
 
-                // Check for achievements related to quest completion
-                var questType = userQuest.Quest.QuestType.ToString().ToLower();
-                await _achievementService.CheckAndUnlockAchievementsAsync(userId, $"{questType}_quest_completed", 1);
-                await _achievementService.CheckAndUnlockAchievementsAsync(userId, "total_quests_completed", 1);
+                await TriggerQuestCompletionAchievementsAsync(userId, userQuest.Quest);
 
                 _logger.LogInformation($"User {userId} completed quest {questId}");
                 return true;
@@ -225,30 +334,32 @@ namespace TidyUpCapstone.Services.Implementations
             {
                 var userQuest = await _context.UserQuests
                     .Include(uq => uq.Quest)
-                    .Include(uq => uq.User)
                     .FirstOrDefaultAsync(uq => uq.UserId == userId && uq.QuestId == questId &&
-                                            uq.IsCompleted && uq.DateClaimed == null);
+                                              uq.IsCompleted && uq.DateClaimed == null);
 
                 if (userQuest == null)
                     return false;
 
-                // Award tokens
-                userQuest.User.TokenBalance += userQuest.Quest.TokenReward;
+                // Use centralized statistics service
+                var success = await _userStatisticsService.AwardTokensAndXpAsync(
+                    userId,
+                    userQuest.Quest.TokenReward,
+                    userQuest.Quest.XpReward,
+                    $"Quest completed: {userQuest.Quest.QuestTitle}");
 
-                // Award XP (this would typically update user level/XP in a separate service)
-                await UpdateUserXpAsync(userId, userQuest.Quest.XpReward);
+                if (success)
+                {
+                    userQuest.DateClaimed = DateTime.UtcNow;
+                    await _context.SaveChangesAsync();
 
-                // Mark as claimed
-                userQuest.DateClaimed = DateTime.UtcNow;
+                    await _achievementService.CheckAndUnlockAchievementsAsync(userId, "rewards_claimed", 1);
+                    await _achievementService.CheckAndUnlockAchievementsAsync(userId, "tokens_earned", (int)userQuest.Quest.TokenReward);
 
-                await _context.SaveChangesAsync();
+                    _logger.LogInformation($"User {userId} claimed reward for quest {questId}: {userQuest.Quest.TokenReward} tokens, {userQuest.Quest.XpReward} XP");
+                    return true;
+                }
 
-                // Check for achievements related to reward claiming
-                await _achievementService.CheckAndUnlockAchievementsAsync(userId, "rewards_claimed", 1);
-                await _achievementService.CheckAndUnlockAchievementsAsync(userId, "tokens_earned", (int)userQuest.Quest.TokenReward);
-
-                _logger.LogInformation($"User {userId} claimed reward for quest {questId}: {userQuest.Quest.TokenReward} tokens, {userQuest.Quest.XpReward} XP");
-                return true;
+                return false;
             }
             catch (Exception ex)
             {
@@ -257,11 +368,13 @@ namespace TidyUpCapstone.Services.Implementations
             }
         }
 
-        // ---------------- DAILY QUESTS ----------------
         public async Task GenerateDailyQuestsAsync()
         {
             try
             {
+                var today = DateTime.UtcNow.Date;
+                var tomorrow = today.AddDays(1);
+
                 // Remove expired daily quests
                 var expiredDailyQuests = await _context.Quests
                     .Where(q => q.QuestType == QuestType.Daily &&
@@ -273,98 +386,47 @@ namespace TidyUpCapstone.Services.Implementations
                     quest.IsActive = false;
                 }
 
-                var today = DateTime.UtcNow.Date;
-                var tomorrow = today.AddDays(1);
+                // Check if daily quests already exist for today
+                var existingDailyQuests = await _context.Quests
+                    .Where(q => q.QuestType == QuestType.Daily &&
+                               q.StartDate.HasValue &&
+                               q.StartDate.Value.Date == today &&
+                               q.IsActive)
+                    .CountAsync();
 
-                var dailyQuestTemplates = new List<Quest>
+                if (existingDailyQuests >= 3)
                 {
-                    new Quest
-                    {
-                        QuestTitle = "Daily Declutterer",
-                        QuestType = QuestType.Daily,
-                        QuestDescription = "List items for decluttering today",
-                        QuestObjective = "List 3 items for decluttering",
-                        TokenReward = 5.00m,
-                        XpReward = 10,
-                        Difficulty = QuestDifficulty.Easy,
-                        TargetValue = 3,
-                        IsActive = true,
-                        StartDate = today,
-                        EndDate = tomorrow
-                    },
-                    new Quest
-                    {
-                        QuestTitle = "Community Helper",
-                        QuestType = QuestType.Daily,
-                        QuestDescription = "Help other users in the community",
-                        QuestObjective = "Make 2 helpful comments on posts",
-                        TokenReward = 7.50m,
-                        XpReward = 15,
-                        Difficulty = QuestDifficulty.Easy,
-                        TargetValue = 2,
-                        IsActive = true,
-                        StartDate = today,
-                        EndDate = tomorrow
-                    },
-                    new Quest
-                    {
-                        QuestTitle = "Marketplace Explorer",
-                        QuestType = QuestType.Daily,
-                        QuestDescription = "Browse and engage with marketplace listings",
-                        QuestObjective = "View 10 marketplace listings",
-                        TokenReward = 3.00m,
-                        XpReward = 8,
-                        Difficulty = QuestDifficulty.Easy,
-                        TargetValue = 10,
-                        IsActive = true,
-                        StartDate = today,
-                        EndDate = tomorrow
-                    }
-                };
-
-                // Only add quests that don't already exist for today
-                foreach (var template in dailyQuestTemplates)
-                {
-                    var exists = await _context.Quests
-                        .AnyAsync(q => q.QuestTitle == template.QuestTitle &&
-                                     q.QuestType == QuestType.Daily &&
-                                     q.StartDate.HasValue && q.StartDate.Value.Date == today);
-
-                    if (!exists)
-                    {
-                        _context.Quests.Add(template);
-                    }
+                    _logger.LogInformation("Daily quests already exist for today");
+                    return;
                 }
 
-                await _context.SaveChangesAsync();
+                // Use KonMari quest templates
+                var dailyTemplates = KonMariQuestTemplates.GetDailyQuestTemplates();
+                var selectedTemplates = SelectDiverseQuestTemplates(dailyTemplates, 3);
 
-                // Assign quests to all users
-                var users = await _context.Users.ToListAsync();
-                var todayQuestIds = dailyQuestTemplates.Select(q => q.QuestId).ToList();
-
-                foreach (var user in users)
+                var questsToAdd = selectedTemplates.Select(template => new Quest
                 {
-                    foreach (var questId in todayQuestIds)
-                    {
-                        bool alreadyAssigned = await _context.UserQuests
-                            .AnyAsync(uq => uq.UserId == user.Id && uq.QuestId == questId);
+                    QuestTitle = template.QuestTitle,
+                    QuestType = QuestType.Daily,
+                    QuestDescription = template.QuestDescription,
+                    QuestObjective = template.QuestObjective,
+                    TokenReward = template.TokenReward,
+                    XpReward = template.XpReward,
+                    Difficulty = template.Difficulty,
+                    TargetValue = template.TargetValue,
+                    IsActive = true,
+                    StartDate = today,
+                    EndDate = tomorrow,
+                    CreatedAt = DateTime.UtcNow
+                }).ToList();
 
-                        if (!alreadyAssigned)
-                        {
-                            _context.UserQuests.Add(new UserQuest
-                            {
-                                UserId = user.Id,
-                                QuestId = questId,
-                                CurrentProgress = 0,
-                                StartedAt = DateTime.UtcNow
-                            });
-                        }
-                    }
-                }
-
+                _context.Quests.AddRange(questsToAdd);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Daily quests generated and assigned successfully");
+                // Assign to all users
+                await AssignQuestsToAllUsersAsync(questsToAdd);
+
+                _logger.LogInformation($"Generated {questsToAdd.Count} KonMari daily quests for {today:yyyy-MM-dd}");
             }
             catch (Exception ex)
             {
@@ -372,77 +434,52 @@ namespace TidyUpCapstone.Services.Implementations
             }
         }
 
-        // ---------------- WEEKLY QUESTS ----------------
         public async Task GenerateWeeklyQuestsAsync()
         {
             try
             {
-                var startOfWeek = DateTime.UtcNow.Date.AddDays(-(int)DateTime.UtcNow.DayOfWeek);
+                var startOfWeek = GetStartOfWeek(DateTime.UtcNow);
                 var endOfWeek = startOfWeek.AddDays(7);
 
                 var existingWeeklyQuests = await _context.Quests
                     .Where(q => q.QuestType == QuestType.Weekly &&
                                 q.StartDate >= startOfWeek && q.StartDate < endOfWeek &&
                                 q.IsActive)
-                    .ToListAsync();
+                    .CountAsync();
 
-                if (existingWeeklyQuests.Any())
+                if (existingWeeklyQuests >= 2)
                 {
                     _logger.LogInformation("Weekly quests already exist for this week");
                     return;
                 }
 
-                var weeklyQuestTemplates = new List<Quest>
-        {
-            new Quest
-            {
-                QuestTitle = "Weekly Warrior",
-                QuestType = QuestType.Weekly,
-                QuestDescription = "Complete multiple transactions this week",
-                QuestObjective = "Complete 5 successful transactions",
-                TokenReward = 25.00m,
-                XpReward = 50,
-                Difficulty = QuestDifficulty.Medium,
-                TargetValue = 5,
-                IsActive = true,
-                StartDate = startOfWeek,
-                EndDate = endOfWeek,
-                CreatedAt = DateTime.UtcNow
-            }
-            // Add other weekly quests...
-        };
+                // Use KonMari quest templates
+                var weeklyTemplates = KonMariQuestTemplates.GetWeeklyQuestTemplates();
+                var selectedTemplates = SelectDiverseQuestTemplates(weeklyTemplates, 2);
 
-                _context.Quests.AddRange(weeklyQuestTemplates);
+                var questsToAdd = selectedTemplates.Select(template => new Quest
+                {
+                    QuestTitle = template.QuestTitle,
+                    QuestType = QuestType.Weekly,
+                    QuestDescription = template.QuestDescription,
+                    QuestObjective = template.QuestObjective,
+                    TokenReward = template.TokenReward,
+                    XpReward = template.XpReward,
+                    Difficulty = template.Difficulty,
+                    TargetValue = template.TargetValue,
+                    IsActive = true,
+                    StartDate = startOfWeek,
+                    EndDate = endOfWeek,
+                    CreatedAt = DateTime.UtcNow
+                }).ToList();
+
+                _context.Quests.AddRange(questsToAdd);
                 await _context.SaveChangesAsync();
-
-                // Get fresh quest IDs after saving
-                var savedQuestIds = weeklyQuestTemplates.Select(q => q.QuestId).ToList();
 
                 // Assign to all users
-                var allUsers = await _context.Users.ToListAsync();
-                foreach (var questId in savedQuestIds)
-                {
-                    foreach (var user in allUsers)
-                    {
-                        var existingAssignment = await _context.UserQuests
-                            .AnyAsync(uq => uq.UserId == user.Id && uq.QuestId == questId);
+                await AssignQuestsToAllUsersAsync(questsToAdd);
 
-                        if (!existingAssignment)
-                        {
-                            _context.UserQuests.Add(new UserQuest
-                            {
-                                UserId = user.Id,
-                                QuestId = questId,
-                                CurrentProgress = 0,
-                                IsCompleted = false,
-                                StartedAt = DateTime.UtcNow
-                            });
-                        }
-                    }
-                }
-
-                await _context.SaveChangesAsync();
-                _logger.LogInformation($"Generated and assigned {weeklyQuestTemplates.Count} weekly quests");
+                _logger.LogInformation($"Generated {questsToAdd.Count} KonMari weekly quests for week of {startOfWeek:yyyy-MM-dd}");
             }
             catch (Exception ex)
             {
@@ -450,33 +487,134 @@ namespace TidyUpCapstone.Services.Implementations
             }
         }
 
-        // ---------------- SPECIAL QUESTS ----------------
-        public async Task<Quest> CreateSpecialQuestAsync(Quest quest)
+        public async Task GenerateSpecialQuestAsync()
         {
-            quest.QuestType = QuestType.Special;
-            quest.StartDate = DateTime.UtcNow;
-
-            _context.Quests.Add(quest);
-            await _context.SaveChangesAsync();
-
-            // Assign to all users
-            var users = await _context.Users.ToListAsync();
-            foreach (var user in users)
+            try
             {
-                _context.UserQuests.Add(new UserQuest
-                {
-                    UserId = user.Id,
-                    QuestId = quest.QuestId,
-                    CurrentProgress = 0,
-                    StartedAt = DateTime.UtcNow
-                });
-            }
-            await _context.SaveChangesAsync();
+                // Check if there are already active special quests
+                var activeSpecialQuests = await _context.Quests
+                    .Where(q => q.QuestType == QuestType.Special && q.IsActive)
+                    .CountAsync();
 
-            _logger.LogInformation($"Special quest created and assigned: {quest.QuestTitle}");
-            return quest;
+                // Limit to 1 active special quest at a time
+                if (activeSpecialQuests >= 1)
+                {
+                    _logger.LogInformation("Special quest already exists");
+                    return;
+                }
+
+                // Get available special quest templates
+                var specialTemplates = KonMariQuestTemplates.GetSpecialQuestTemplates();
+
+                // Filter out templates that already have active quests
+                var availableTemplates = new List<QuestTemplate>();
+
+                foreach (var template in specialTemplates)
+                {
+                    var existingQuest = await _context.Quests
+                        .Where(q => q.QuestTitle == template.QuestTitle &&
+                                   q.IsActive &&
+                                   q.QuestType == QuestType.Special)
+                        .FirstOrDefaultAsync();
+
+                    if (existingQuest == null)
+                    {
+                        availableTemplates.Add(template);
+                    }
+                }
+
+                if (!availableTemplates.Any())
+                {
+                    _logger.LogInformation("No available special quest templates");
+                    return;
+                }
+
+                // Check User 1's eligibility for special quests
+                var userId = 1; // Since we're using User 1
+                var completedQuests = await _context.UserQuests
+                    .Where(uq => uq.UserId == userId && uq.IsCompleted)
+                    .CountAsync();
+
+                // Select appropriate template based on user progress
+                QuestTemplate selectedTemplate = null;
+
+                if (completedQuests >= 20) // High-level users
+                {
+                    selectedTemplate = availableTemplates
+                        .Where(t => t.Difficulty == QuestDifficulty.Hard)
+                        .OrderBy(r => Guid.NewGuid())
+                        .FirstOrDefault();
+                }
+                else if (completedQuests >= 10) // Mid-level users  
+                {
+                    selectedTemplate = availableTemplates
+                        .Where(t => t.Difficulty == QuestDifficulty.Medium)
+                        .OrderBy(r => Guid.NewGuid())
+                        .FirstOrDefault();
+                }
+                else if (completedQuests >= 3) // Entry-level users
+                {
+                    selectedTemplate = availableTemplates
+                        .Where(t => t.Difficulty == QuestDifficulty.Easy)
+                        .OrderBy(r => Guid.NewGuid())
+                        .FirstOrDefault();
+                }
+
+                // If no suitable template found, pick any available easy one
+                if (selectedTemplate == null)
+                {
+                    selectedTemplate = availableTemplates
+                        .Where(t => t.Difficulty == QuestDifficulty.Easy)
+                        .FirstOrDefault();
+                }
+
+                if (selectedTemplate == null)
+                {
+                    _logger.LogInformation("No suitable special quest template for user progress level");
+                    return;
+                }
+
+                // Create quest from template
+                var specialQuest = new Quest
+                {
+                    QuestTitle = selectedTemplate.QuestTitle,
+                    QuestDescription = selectedTemplate.QuestDescription,
+                    QuestObjective = selectedTemplate.QuestObjective,
+                    QuestType = QuestType.Special,
+                    Difficulty = selectedTemplate.Difficulty,
+                    TargetValue = selectedTemplate.TargetValue,
+                    TokenReward = selectedTemplate.TokenReward,
+                    XpReward = selectedTemplate.XpReward,
+                    IsActive = true,
+                    StartDate = DateTime.UtcNow,
+                    EndDate = DateTime.UtcNow.AddDays(GetSpecialQuestDurationDays(selectedTemplate.Difficulty)),
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.Quests.Add(specialQuest);
+                await _context.SaveChangesAsync();
+
+                // Assign to users using the new assignment logic
+                await AssignQuestsToAllUsersAsync(new List<Quest> { specialQuest });
+
+                _logger.LogInformation($"Generated special quest for users with {completedQuests}+ completed quests: {specialQuest.QuestTitle}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating special quest");
+            }
         }
 
+        private static int GetSpecialQuestDurationDays(QuestDifficulty difficulty)
+        {
+            return difficulty switch
+            {
+                QuestDifficulty.Easy => 21,    // 3 weeks
+                QuestDifficulty.Medium => 35,  // 5 weeks  
+                QuestDifficulty.Hard => 60,    // 2 months
+                _ => 30                         // Default 1 month
+            };
+        }
 
         public async Task<bool> CheckAndExpireQuestsAsync()
         {
@@ -544,7 +682,6 @@ namespace TidyUpCapstone.Services.Implementations
             return availableQuests;
         }
 
-        // Additional implementation methods...
         public async Task<QuestDto?> GetQuestByIdAsync(int questId, int userId)
         {
             var userQuest = await _context.UserQuests
@@ -553,7 +690,6 @@ namespace TidyUpCapstone.Services.Implementations
 
             if (userQuest == null)
             {
-                // Check if quest exists but user hasn't started it
                 var quest = await _context.Quests.FindAsync(questId);
                 if (quest != null)
                 {
@@ -600,8 +736,10 @@ namespace TidyUpCapstone.Services.Implementations
                 CurrentProgress = userQuest.CurrentProgress,
                 IsClaimed = userQuest.DateClaimed != null,
                 CompletedAt = userQuest.CompletedAt,
-                ProgressPercentage = userQuest.Quest.TargetValue > 0 ? (userQuest.CurrentProgress * 100 / userQuest.Quest.TargetValue) : 0,
-                IsAvailable = !userQuest.IsCompleted,
+                ProgressPercentage = userQuest.Quest.TargetValue > 0 ?
+                (userQuest.CurrentProgress * 100 / userQuest.Quest.TargetValue) : 0,
+                        IsAvailable = !userQuest.IsCompleted,
+                // ✅ UPDATE THIS LINE
                 StatusMessage = GetQuestStatusMessage(userQuest)
             };
         }
@@ -746,79 +884,472 @@ namespace TidyUpCapstone.Services.Implementations
             }
         }
 
-        // Private helper methods
-        private static string GetQuestStatusMessage(UserQuest userQuest)
+        public async Task<bool> ValidateQuestCompletionAsync(int userId, int questId, string actionType, object? actionData = null)
+        {
+            try
+            {
+                var userQuest = await _context.UserQuests
+                    .Include(uq => uq.Quest)
+                    .FirstOrDefaultAsync(uq => uq.UserId == userId && uq.QuestId == questId);
+
+                if (userQuest == null || userQuest.IsCompleted)
+                    return false;
+
+                var quest = userQuest.Quest;
+                bool isValid = false;
+
+                // Validate based on quest type and action
+                switch (actionType.ToLower())
+                {
+                    case "item_listed":
+                        isValid = ValidateItemListingAction(quest, actionData);
+                        break;
+                    case "post_created":
+                        isValid = ValidatePostCreationAction(quest, actionData);
+                        break;
+                    case "comment_created":
+                        isValid = ValidateCommentAction(quest, actionData);
+                        break;
+                    case "check_in":
+                        isValid = ValidateCheckInAction(quest);
+                        break;
+                    default:
+                        isValid = true; // Default validation for other actions
+                        break;
+                }
+
+                if (isValid)
+                {
+                    await UpdateQuestProgressAsync(userId, questId, 1, actionType);
+                    _logger.LogInformation($"Quest validation passed: User {userId}, Quest {questId}, Action {actionType}");
+                    return true;
+                }
+                else
+                {
+                    _logger.LogInformation($"Quest validation failed: User {userId}, Quest {questId}, Action {actionType}");
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error validating quest completion for user {userId}, quest {questId}");
+                return false;
+            }
+        }
+
+        // CORRECTED: Use centralized statistics service
+        public async Task<bool> CompleteQuestWithAchievementCheckAsync(int userId, int questId)
+        {
+            try
+            {
+                var userQuest = await _context.UserQuests
+                    .Include(uq => uq.Quest)
+                    .FirstOrDefaultAsync(uq => uq.UserId == userId &&
+                                              uq.QuestId == questId &&
+                                              !uq.IsCompleted);
+
+                if (userQuest == null)
+                    return false;
+
+                // Mark quest as completed
+                userQuest.IsCompleted = true;
+                userQuest.CompletedAt = DateTime.UtcNow;
+                userQuest.Status = QuestStatus.Completed;
+
+                // Use centralized statistics service
+                var success = await _userStatisticsService.AwardTokensAndXpAsync(
+                    userId,
+                    userQuest.Quest.TokenReward,
+                    userQuest.Quest.XpReward,
+                    $"Quest completion: {userQuest.Quest.QuestTitle}");
+
+                if (success)
+                {
+                    await _context.SaveChangesAsync();
+
+                    // Trigger comprehensive achievement checks
+                    await TriggerQuestCompletionAchievementsAsync(userId, userQuest.Quest);
+
+                    _logger.LogInformation($"Quest completed with achievement check: User {userId}, Quest {questId}");
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error completing quest with achievement check for user {userId}, quest {questId}");
+                return false;
+            }
+        }
+
+        // Helper methods
+        private List<QuestTemplate> SelectDiverseQuestTemplates(List<QuestTemplate> templates, int count)
+        {
+            var categorizedTemplates = templates.GroupBy(q => q.Category).ToList();
+            var selectedTemplates = new List<QuestTemplate>();
+
+            foreach (var categoryGroup in categorizedTemplates.OrderBy(x => _random.Next()))
+            {
+                if (selectedTemplates.Count >= count) break;
+
+                var questsInCategory = categoryGroup.ToList();
+                var randomQuest = questsInCategory[_random.Next(questsInCategory.Count)];
+                selectedTemplates.Add(randomQuest);
+            }
+
+            while (selectedTemplates.Count < count && selectedTemplates.Count < templates.Count)
+            {
+                var remainingTemplates = templates.Except(selectedTemplates).ToList();
+                if (!remainingTemplates.Any()) break;
+
+                var randomQuest = remainingTemplates[_random.Next(remainingTemplates.Count)];
+                selectedTemplates.Add(randomQuest);
+            }
+
+            return selectedTemplates;
+        }
+
+        private async Task AssignQuestsToAllUsersAsync(List<Quest> quests)
+        {
+            var allUsers = await _context.Users.ToListAsync();
+
+            foreach (var quest in quests)
+            {
+                foreach (var user in allUsers)
+                {
+                    var existingActiveQuests = await _context.UserQuests
+                        .Include(uq => uq.Quest)
+                        .Where(uq => uq.UserId == user.Id &&
+                                   !uq.IsCompleted &&
+                                   uq.Quest.IsActive &&
+                                   (uq.Quest.EndDate == null || uq.Quest.EndDate > DateTime.UtcNow))
+                        .ToListAsync();
+
+                    var dailyCount = existingActiveQuests.Count(uq => uq.Quest.QuestType == QuestType.Daily);
+                    var weeklyCount = existingActiveQuests.Count(uq => uq.Quest.QuestType == QuestType.Weekly);
+                    var specialCount = existingActiveQuests.Count(uq => uq.Quest.QuestType == QuestType.Special);
+
+                    bool shouldAssign = quest.QuestType switch
+                    {
+                        QuestType.Daily => dailyCount < 3,
+                        QuestType.Weekly => weeklyCount < 2,
+                        QuestType.Special => specialCount < 1,
+                        _ => false
+                    };
+
+                    if (!shouldAssign)
+                    {
+                        continue;
+                    }
+
+                    var existingAssignment = await _context.UserQuests
+                        .AnyAsync(uq => uq.UserId == user.Id && uq.QuestId == quest.QuestId);
+
+                    if (!existingAssignment)
+                    {
+                        _context.UserQuests.Add(new UserQuest
+                        {
+                            UserId = user.Id,
+                            QuestId = quest.QuestId,
+                            CurrentProgress = 0,
+                            IsCompleted = false,
+                            StartedAt = DateTime.UtcNow,
+                            Status = QuestStatus.Active
+                        });
+                    }
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            _logger.LogInformation($"Assigned quests with limits: 3 daily, 2 weekly, 1 special per user");
+        }
+
+        private DateTime GetStartOfWeek(DateTime date)
+        {
+            var diff = (7 + (date.DayOfWeek - DayOfWeek.Monday)) % 7;
+            return date.AddDays(-diff).Date;
+        }
+
+        // Find and replace the GetQuestStatusMessage method in QuestService.cs
+        private string GetQuestStatusMessage(UserQuest userQuest)
         {
             if (userQuest.IsCompleted)
             {
-                return userQuest.DateClaimed != null ? "Reward Claimed" : "Ready to Claim";
+                if (userQuest.DateClaimed != null)
+                {
+                    return "Completed & Rewards Claimed";
+                }
+                else
+                {
+                    return "Completed - Ready to Claim";
+                }
             }
 
-            if (userQuest.Quest.EndDate.HasValue && userQuest.Quest.EndDate.Value < DateTime.UtcNow)
+            if (userQuest.CurrentProgress == 0)
             {
-                return "Expired";
+                return "Not Started";
             }
 
-            var progress = userQuest.Quest.TargetValue > 0 ? (userQuest.CurrentProgress * 100 / userQuest.Quest.TargetValue) : 0;
+            var progress = userQuest.Quest.TargetValue > 0
+                ? (userQuest.CurrentProgress * 100 / userQuest.Quest.TargetValue)
+                : 0;
             return $"In Progress ({progress}%)";
         }
 
-        private async Task UpdateUserXpAsync(int userId, int xpAmount)
+        private static bool ValidateItemListingAction(Quest quest, object? actionData)
         {
-            var userLevel = await _context.UserLevels
-                .Include(ul => ul.CurrentLevel)
-                .FirstOrDefaultAsync(ul => ul.UserId == userId);
+            var objective = quest.QuestObjective?.ToLower() ?? "";
+            var title = quest.QuestTitle?.ToLower() ?? "";
 
-            if (userLevel != null)
+            if (objective.Contains("clothing") || title.Contains("clothing"))
             {
-                userLevel.CurrentXp += xpAmount;
-                userLevel.TotalXp += xpAmount;
-
-                // Check for level up logic here
-                await CheckForLevelUpAsync(userLevel);
+                return true;
             }
-            else
+
+            if (objective.Contains("book") || title.Contains("book"))
             {
-                // Create initial user level if it doesn't exist
-                var initialLevel = await _context.Levels.FirstOrDefaultAsync(l => l.LevelNumber == 1);
-                if (initialLevel != null)
+                return true;
+            }
+
+            if (objective.Contains("kitchen") || title.Contains("kitchen"))
+            {
+                return true;
+            }
+
+            if (objective.Contains("list") || objective.Contains("item") || objective.Contains("declutter"))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool ValidatePostCreationAction(Quest quest, object? actionData)
+        {
+            var objective = quest.QuestObjective?.ToLower() ?? "";
+            var title = quest.QuestTitle?.ToLower() ?? "";
+
+            if (objective.Contains("tip") || title.Contains("tip"))
+            {
+                return true;
+            }
+
+            if (objective.Contains("achievement") || title.Contains("achievement"))
+            {
+                return true;
+            }
+
+            if (objective.Contains("post") || objective.Contains("share") || objective.Contains("community"))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool ValidateCommentAction(Quest quest, object? actionData)
+        {
+            var objective = quest.QuestObjective?.ToLower() ?? "";
+
+            if (objective.Contains("helpful") || objective.Contains("support"))
+            {
+                return true;
+            }
+
+            if (objective.Contains("encouraging") || objective.Contains("positive"))
+            {
+                return true;
+            }
+
+            if (objective.Contains("comment") || objective.Contains("help"))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool ValidateCheckInAction(Quest quest)
+        {
+            var objective = quest.QuestObjective?.ToLower() ?? "";
+            var title = quest.QuestTitle?.ToLower() ?? "";
+
+            if (objective.Contains("early") || title.Contains("early"))
+            {
+                var currentHour = DateTime.UtcNow.Hour;
+                return currentHour < 6;
+            }
+
+            if (objective.Contains("late") || title.Contains("late"))
+            {
+                var currentHour = DateTime.UtcNow.Hour;
+                return currentHour > 23;
+            }
+
+            if (objective.Contains("check") || title.Contains("daily"))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        // Add this method to QuestService.cs
+        private async Task TriggerQuestCompletionAchievementsAsync(int userId, Quest quest)
+        {
+            try
+            {
+                // Quest completion achievements
+                await _achievementService.CheckAndUnlockAchievementsAsync(userId, "quest_completed", 1);
+                await _achievementService.CheckAndUnlockAchievementsAsync(userId, "daily_quest_completed",
+                    quest.QuestType == QuestType.Daily ? 1 : 0);
+                await _achievementService.CheckAndUnlockAchievementsAsync(userId, "weekly_quest_completed",
+                    quest.QuestType == QuestType.Weekly ? 1 : 0);
+                await _achievementService.CheckAndUnlockAchievementsAsync(userId, "special_quest_completed",
+                    quest.QuestType == QuestType.Special ? 1 : 0);
+
+                // Category-specific achievements based on quest objective
+                var objective = quest.QuestObjective?.ToLower() ?? "";
+                if (objective.Contains("clothing") || objective.Contains("wardrobe"))
+                    await _achievementService.CheckAndUnlockAchievementsAsync(userId, "clothing_category_progress", 1);
+                if (objective.Contains("book") || objective.Contains("reading"))
+                    await _achievementService.CheckAndUnlockAchievementsAsync(userId, "books_category_progress", 1);
+                if (objective.Contains("kitchen") || objective.Contains("cooking"))
+                    await _achievementService.CheckAndUnlockAchievementsAsync(userId, "kitchen_category_progress", 1);
+
+                // Difficulty-based achievements
+                switch (quest.Difficulty)
                 {
-                    var newUserLevel = new UserLevel
-                    {
-                        UserId = userId,
-                        CurrentLevelId = initialLevel.LevelId,
-                        CurrentXp = xpAmount,
-                        TotalXp = xpAmount,
-                        XpToNextLevel = initialLevel.XpToNext - xpAmount
-                    };
-                    _context.UserLevels.Add(newUserLevel);
+                    case QuestDifficulty.Easy:
+                        await _achievementService.CheckAndUnlockAchievementsAsync(userId, "easy_quest_completed", 1);
+                        break;
+                    case QuestDifficulty.Medium:
+                        await _achievementService.CheckAndUnlockAchievementsAsync(userId, "medium_quest_completed", 1);
+                        break;
+                    case QuestDifficulty.Hard:
+                        await _achievementService.CheckAndUnlockAchievementsAsync(userId, "hard_quest_completed", 1);
+                        break;
                 }
+
+                _logger.LogInformation($"Triggered quest completion achievements for user {userId}, quest: {quest.QuestTitle}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error triggering quest completion achievements for user {userId}");
             }
         }
 
-        private async Task CheckForLevelUpAsync(UserLevel userLevel)
+        private List<string> GetCategoryAchievementsFromQuest(Quest quest)
         {
-            var nextLevel = await _context.Levels
-                .Where(l => l.LevelNumber > userLevel.CurrentLevel.LevelNumber)
-                .OrderBy(l => l.LevelNumber)
-                .FirstOrDefaultAsync();
+            var achievements = new List<string>();
+            var objective = quest.QuestObjective?.ToLower() ?? "";
+            var title = quest.QuestTitle?.ToLower() ?? "";
+            var description = quest.QuestDescription?.ToLower() ?? "";
 
-            if (nextLevel != null && userLevel.CurrentXp >= nextLevel.XpRequired)
+            var content = $"{objective} {title} {description}";
+
+            var categoryMappings = new Dictionary<string, string>
             {
-                userLevel.CurrentLevelId = nextLevel.LevelId;
-                userLevel.LevelUpDate = DateTime.UtcNow;
-                userLevel.TotalLevelUps++;
+                { "books", "books_stationery" },
+                { "stationery", "books_stationery" },
+                { "clothing", "clothing_accessories" },
+                { "accessories", "clothing_accessories" },
+                { "electronics", "electronics_gadgets" },
+                { "gadgets", "electronics_gadgets" },
+                { "toys", "toys_games" },
+                { "games", "toys_games" },
+                { "home", "home_kitchen" },
+                { "kitchen", "home_kitchen" },
+                { "furniture", "furniture" },
+                { "appliances", "appliances" },
+                { "health", "health_beauty" },
+                { "beauty", "health_beauty" },
+                { "crafts", "crafts_diy" },
+                { "diy", "crafts_diy" },
+                { "school", "school_office" },
+                { "office", "school_office" },
+                { "sentimental", "sentimental" },
+                { "memory", "sentimental" }
+            };
 
-                var nextNextLevel = await _context.Levels
-                    .Where(l => l.LevelNumber > nextLevel.LevelNumber)
-                    .OrderBy(l => l.LevelNumber)
-                    .FirstOrDefaultAsync();
+            foreach (var mapping in categoryMappings)
+            {
+                if (content.Contains(mapping.Key))
+                {
+                    achievements.Add($"items_listed_{mapping.Value}");
+                    achievements.Add($"category_progress_{mapping.Value}");
+                }
+            }
 
-                userLevel.XpToNextLevel = nextNextLevel != null ?
-                    nextNextLevel.XpRequired - userLevel.CurrentXp : 0;
+            return achievements;
+        }
 
-                // Award level up achievements
-                await _achievementService.CheckAndUnlockAchievementsAsync(userLevel.UserId, "level_up", 1);
+        private List<string> GetMethodologyAchievementsFromQuest(Quest quest)
+        {
+            var achievements = new List<string>();
+            var content = $"{quest.QuestObjective} {quest.QuestTitle} {quest.QuestDescription}".ToLower();
+
+            if (content.Contains("joy") || content.Contains("spark"))
+                achievements.Add("joy_mentions");
+
+            if (content.Contains("grateful") || content.Contains("thankful"))
+                achievements.Add("gratitude_expressions");
+
+            if (content.Contains("community") || content.Contains("share") || content.Contains("post"))
+                achievements.Add("community_engagement_total");
+
+            if (content.Contains("mindful") || content.Contains("thoughtful"))
+                achievements.Add("mindful_pacing");
+
+            if (content.Contains("transformation") || content.Contains("before") || content.Contains("after"))
+                achievements.Add("transformation_posts");
+
+            return achievements;
+        }
+
+        private async Task CheckCategoryMasteryAchievementsAsync(int userId, Quest completedQuest)
+        {
+            try
+            {
+                var categories = new[]
+                {
+                    "books_stationery", "clothing_accessories", "electronics_gadgets",
+                    "toys_games", "home_kitchen", "furniture", "appliances",
+                    "health_beauty", "crafts_diy", "school_office", "sentimental"
+                };
+
+                foreach (var category in categories)
+                {
+                    await _achievementService.CheckAndUnlockAchievementsAsync(userId, $"category_mastery_{category}", 1);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error checking category mastery achievements for user {userId}");
+            }
+        }
+
+        private async Task CheckProgressiveAchievementsAsync(int userId)
+        {
+            try
+            {
+                var progressiveTypes = new[]
+                {
+                    "total_items_listed",
+                    "categories_mastered",
+                    "community_engagement_total",
+                    "daily_activity_streak"
+                };
+
+                foreach (var type in progressiveTypes)
+                {
+                    await _achievementService.CheckAndUnlockAchievementsAsync(userId, type, 1);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error checking progressive achievements for user {userId}");
             }
         }
     }

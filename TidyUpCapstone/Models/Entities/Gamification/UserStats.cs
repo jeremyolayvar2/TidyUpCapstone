@@ -13,16 +13,27 @@ namespace TidyUpCapstone.Models.Entities.Gamification
         public int UserId { get; set; }
 
         public int CurrentLevel { get; set; } = 1;
+
         public int CurrentXp { get; set; } = 0;
 
         [Column(TypeName = "decimal(10,2)")]
         public decimal TotalTokens { get; set; } = 0;
 
         public int CurrentStreak { get; set; } = 0;
+
         public int LongestStreak { get; set; } = 0;
+
         public DateTime? LastCheckIn { get; set; }
 
         [ForeignKey("UserId")]
         public virtual AppUser User { get; set; } = null!;
+
+        // ADD THIS COMPUTED PROPERTY
+        [NotMapped]
+        public decimal TokenBalance
+        {
+            get => TotalTokens;
+            set => TotalTokens = value;
+        }
     }
 }

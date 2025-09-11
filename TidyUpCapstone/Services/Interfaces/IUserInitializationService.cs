@@ -6,5 +6,6 @@ namespace TidyUpCapstone.Services.Interfaces
     {
         Task InitializeUserAsync(int userId);
         Task<bool> IsUserInitializedAsync(int userId);
+
     }
 }

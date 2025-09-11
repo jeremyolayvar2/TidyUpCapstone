@@ -33,5 +33,19 @@ namespace TidyUpCapstone.Services.Interfaces
         Task<bool> UpdateAchievementAsync(Achievement achievement);
         Task<bool> DeleteAchievementAsync(int achievementId);
         Task<bool> ToggleAchievementActiveStatusAsync(int achievementId);
+
+
+        // Add these to your existing interface
+        Task SeedKonMariAchievementsAsync();
+        Task<bool> AreKonMariAchievementsSeededAsync();
+        Task<List<AchievementDto>> GetCategoryMasteryAchievementsAsync(int userId);
+        Task<List<AchievementDto>> GetProgressiveAchievementsAsync(int userId, string criteriaType);
+
+
+        // Add these to existing interface
+        Task SeedUserAchievementsAsync(int userId);
+        Task SeedAllUsersAchievementsAsync();
+
+
     }
 }
