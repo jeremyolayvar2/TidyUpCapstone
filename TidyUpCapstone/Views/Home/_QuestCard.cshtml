@@ -1,60 +1,171 @@
 ﻿@model TidyUpCapstone.Models.DTOs.Gamification.QuestDto
 
-<div class="quest-card" data-quest-id="@Model.QuestId" data-quest-type="@((int)Model.QuestType)">
-    <div class="quest-card-content">
-        <div class="quest-info">
-            <div class="quest-timer">
-                @{
-                    var remaining = Model.EndDate.HasValue
-                    ? TimeSpan.FromTicks(Math.Max(0, Model.EndDate.Value.Ticks - DateTime.UtcNow.Ticks))
-                    : TimeSpan.Zero;
-                }
-                <span class="quest-timer">
-                    @remaining.Hours h @remaining.Minutes m REMAINING
-                </span>
+
+<link rel="stylesheet" href="~/css/_QuestCard.css" asp-append-version="true" />
+
+
+<div class="quest-card group glass-card rounded-3xl p-6 hover:scale-105 hover:-translate-y-2 hover:rotate-1 transition-all duration-500 border-2 @(Model.Difficulty.ToString().ToLower() switch {
+    "easy" => "border-green-400",
+    "medium" => "border-yellow-400",
+    "hard" => "border-red-400",
+    _ => "border-gray-400"
+}) overflow-hidden relative" data-quest-id="@Model.QuestId" data-quest-type="@((int)Model.QuestType)">
+    
+    <!-- Background Decoration -->
+    <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-white/10 to-white/5 rounded-full transform translate-x-8 -translate-y-8"></div>
+    
+    <!-- Quest Timer -->
+    <div class="relative mb-4">
+        @{
+            var remaining = Model.EndDate.HasValue
+            ? TimeSpan.FromTicks(Math.Max(0, Model.EndDate.Value.Ticks - DateTime.UtcNow.Ticks))
+            : TimeSpan.Zero;
+        }
+        <div class="inline-flex items-center gap-2 px-3 py-1 glass-button border border-orange-400/30 rounded-full text-orange-200 text-sm font-semibold backdrop-blur-sm">
+            <i class='bx bx-time'></i>
+            <span>@remaining.Hours h @remaining.Minutes m remaining</span>
+        </div>
+    </div>
+
+    <!-- Quest Content -->
+    <div class="relative space-y-4">
+        <!-- Quest Title -->
+        <h3 class="font-['Righteous'] text-xl lg:text-2xl text-white group-hover:text-yellow-200 transition-colors duration-300">
+            @Model.QuestTitle
+        </h3>
+
+        <!-- Quest Description -->
+        <p class="text-white/80 text-sm leading-relaxed">
+            @Model.QuestObjective
+        </p>
+
+        <!-- Progress Details -->
+        <div class="flex items-center justify-between text-sm">
+            <span class="text-white/70">Progress</span>
+            <div class="flex items-center gap-2">
+                <span class="font-semibold text-white">@Model.CurrentProgress / @Model.TargetValue</span>
+                <span class="text-[#6b9080] font-semibold">(@Model.ProgressPercentage%)</span>
             </div>
-            <h3 class="quest-name righteous-font">@Model.QuestTitle</h3>
-            <p class="quest-description">@Model.QuestObjective</p>
-            <!-- Add this after the quest-description -->
-            <div class="quest-progress-details">
-                <span class="progress-text">Progress: @Model.CurrentProgress / @Model.TargetValue</span>
-                <span class="progress-percentage">(@Model.ProgressPercentage%)</span>
-            </div>
-            <div class="quest-difficulty">
-                <span class="difficulty-badge difficulty-@Model.Difficulty.ToString().ToLower()">
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full bg-white/20 rounded-full h-3 overflow-hidden backdrop-blur-sm">
+            <div class="bg-gradient-to-r from-[#6b9080] to-[#588157] h-full transition-all duration-1000 rounded-full group-hover:shadow-lg" 
+                 style="width: @Model.ProgressPercentage%"></div>
+        </div>
+
+        <!-- Quest Meta (Badges and Rewards) -->
+        <div class="flex items-center justify-between pt-2">
+            <!-- Badges -->
+            <div class="flex items-center gap-2">
+                <span class="px-3 py-1 glass-button text-@(Model.Difficulty.ToString().ToLower() switch {
+                    "easy" => "green-200",
+                    "medium" => "yellow-200", 
+                    "hard" => "red-200",
+                    _ => "white"
+                }) text-xs font-semibold rounded-full border border-@(Model.Difficulty.ToString().ToLower() switch {
+                    "easy" => "green-400/30",
+                    "medium" => "yellow-400/30", 
+                    "hard" => "red-400/30",
+                    _ => "gray-400/30"
+                }) backdrop-blur-sm">
                     @Model.Difficulty
                 </span>
-                <span class="quest-type-badge type-@Model.QuestType.ToString().ToLower()">
+                <span class="px-3 py-1 glass-button text-@(Model.QuestType.ToString().ToLower() switch {
+                    "daily" => "blue-200",
+                    "weekly" => "purple-200",
+                    "special" => "pink-200",
+                    _ => "white"
+                }) text-xs font-semibold rounded-full border border-@(Model.QuestType.ToString().ToLower() switch {
+                    "daily" => "blue-400/30",
+                    "weekly" => "purple-400/30",
+                    "special" => "pink-400/30",
+                    _ => "gray-400/30"
+                }) backdrop-blur-sm">
                     @Model.QuestType
                 </span>
             </div>
-        </div>
-        <div class="quest-reward">
-            <div class="reward-details">
-                <span class="reward-tokens">@Model.TokenReward T</span>
-                <span class="reward-xp">@Model.XpReward XP</span>
+
+            <!-- Rewards -->
+            <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-yellow-500/80 to-amber-600/80 text-white rounded-full text-sm font-semibold shadow-sm backdrop-blur-sm">
+                    <i class='bx bx-coin text-yellow-200'></i>
+                    @Model.TokenReward T
+                </div>
+                <div class="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-blue-500/80 to-indigo-600/80 text-white rounded-full text-sm font-semibold shadow-sm backdrop-blur-sm">
+                    <i class='bx bx-trending-up'></i>
+                    @Model.XpReward XP
+                </div>
             </div>
+        </div>
+
+        <!-- Action Button -->
+        <div class="pt-4">
             @if (Model.IsCompleted && !Model.IsClaimed)
             {
-                <button class="claim-button claim-active claim-reward-btn" data-quest-id="@Model.QuestId">
-                    Claim
+                <button class="claim-button w-full flex items-center justify-center gap-2 glass-button border-2 border-[#6b9080] text-white font-semibold py-3 px-6 rounded-2xl hover:scale-105 hover:shadow-lg transition-all duration-300 claim-reward-btn backdrop-blur-sm" data-quest-id="@Model.QuestId">
+                    <i class='bx bx-gift'></i>
+                    Claim Reward
                 </button>
             }
             else if (Model.IsClaimed)
             {
-                <button class="claim-button claim-completed">
+                <button class="w-full flex items-center justify-center gap-2 glass-button border-2 border-green-400 text-green-200 font-semibold py-3 px-6 rounded-2xl cursor-default shadow-sm backdrop-blur-sm" disabled>
+                    <i class='bx bx-check-circle'></i>
                     Claimed
                 </button>
             }
             else
             {
-                <button class="claim-button claim-disabled">
-                    @Model.CurrentProgress/@Model.TargetValue
+                <button class="w-full flex items-center justify-center gap-2 glass-button border-2 border-gray-400/30 text-white/70 font-semibold py-3 px-6 rounded-2xl cursor-default backdrop-blur-sm" disabled>
+                    <i class='bx bx-time-five'></i>
+                    @Model.CurrentProgress/@Model.TargetValue In Progress
                 </button>
             }
         </div>
     </div>
-    <div class="progress-bar">
-        <div class="progress-fill" style="width: @Model.ProgressPercentage%"></div>
-    </div>
+
+    <!-- Floating Decoration -->
+    <div class="absolute bottom-4 right-4 w-3 h-3 bg-white/20 rounded-full group-hover:bg-white/40 transition-colors duration-300"></div>
 </div>
+
+<style>
+    /* Glass Effects for Quest Card */
+    .quest-card.glass-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    }
+
+    .quest-card.glass-card:hover {
+        background: rgba(255, 255, 255, 0.15);
+        box-shadow: 
+            0 16px 48px rgba(0, 0, 0, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+    }
+
+    .quest-card .glass-button {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .quest-card .glass-button:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Backdrop blur support */
+    @@supports not (backdrop-filter: blur(10px)) {
+        .quest-card.glass-card,
+        .quest-card .glass-button {
+            background: rgba(255, 255, 255, 0.25);
+        }
+    }
+</style>

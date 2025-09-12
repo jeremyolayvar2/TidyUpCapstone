@@ -9,263 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-<style>
-    body.achievements-page {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        font-family: 'Montserrat', sans-serif;
-    }
-
-    .achievements-container {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 40px 20px;
-    }
-
-    .achievements-header {
-        text-align: center;
-        margin-bottom: 40px;
-        color: white;
-    }
-
-    .achievements-title {
-        font-family: 'Righteous', cursive;
-        font-size: 3.5em;
-        margin-bottom: 10px;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    }
-
-    .achievements-subtitle {
-        font-size: 1.2em;
-        margin-bottom: 20px;
-        opacity: 0.9;
-    }
-
-    .achievements-progress {
-        background: rgba(255,255,255,0.2);
-        border-radius: 25px;
-        padding: 15px 30px;
-        display: inline-block;
-        backdrop-filter: blur(10px);
-    }
-
-    .progress-text {
-        font-size: 1.3em;
-        font-weight: 600;
-    }
-
-    .achievements-filter {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        margin-bottom: 40px;
-        flex-wrap: wrap;
-    }
-
-    .filter-btn {
-        padding: 12px 24px;
-        background: rgba(255,255,255,0.2);
-        border: 2px solid rgba(255,255,255,0.3);
-        border-radius: 25px;
-        color: white;
-        text-decoration: none;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        backdrop-filter: blur(10px);
-    }
-
-        .filter-btn:hover, .filter-btn.active {
-            background: rgba(255,255,255,0.3);
-            border-color: rgba(255,255,255,0.5);
-            transform: translateY(-2px);
-            color: white;
-            text-decoration: none;
-        }
-
-    .achievements-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 25px;
-        margin-bottom: 40px;
-    }
-
-    .achievement-card {
-        background: rgba(255,255,255,0.95);
-        border-radius: 20px;
-        padding: 25px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-
-        .achievement-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-        }
-
-        .achievement-card.earned {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            color: white;
-        }
-
-        .achievement-card.locked {
-            background: rgba(255,255,255,0.7);
-            color: #666;
-        }
-
-    .achievement-rarity-stripe {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 5px;
-    }
-
-    .rarity-bronze {
-        background: linear-gradient(90deg, #CD7F32, #B8860B);
-    }
-
-    .rarity-silver {
-        background: linear-gradient(90deg, #C0C0C0, #A8A8A8);
-    }
-
-    .rarity-gold {
-        background: linear-gradient(90deg, #FFD700, #FFA500);
-    }
-
-    .rarity-platinum {
-        background: linear-gradient(90deg, #E5E4E2, #B8B8B8);
-    }
-
-    .achievement-icon {
-        font-size: 3em;
-        text-align: center;
-        margin-bottom: 15px;
-        filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
-    }
-
-    .achievement-title {
-        font-family: 'Righteous', cursive;
-        font-size: 1.4em;
-        margin-bottom: 8px;
-        text-align: center;
-    }
-
-    .achievement-description {
-        font-size: 0.95em;
-        text-align: center;
-        margin-bottom: 15px;
-        line-height: 1.4;
-    }
-
-    .achievement-meta {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-    }
-
-    .achievement-category {
-        padding: 4px 12px;
-        background: rgba(0,0,0,0.1);
-        border-radius: 15px;
-        font-size: 0.8em;
-        font-weight: 600;
-    }
-
-    .achievement-rewards {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-        margin-bottom: 15px;
-    }
-
-    .reward-badge {
-        padding: 6px 12px;
-        border-radius: 15px;
-        font-size: 0.85em;
-        font-weight: 600;
-    }
-
-    .token-reward {
-        background: linear-gradient(135deg, #4CAF50, #2E7D32);
-        color: white;
-    }
-
-    .xp-reward {
-        background: linear-gradient(135deg, #2196F3, #1565C0);
-        color: white;
-    }
-
-    .achievement-progress {
-        text-align: center;
-        margin-top: 10px;
-    }
-
-    .progress-bar-mini {
-        width: 100%;
-        height: 8px;
-        background: rgba(0,0,0,0.1);
-        border-radius: 4px;
-        overflow: hidden;
-        margin: 8px 0;
-    }
-
-    .progress-fill-mini {
-        height: 100%;
-        background: linear-gradient(90deg, #4CAF50, #2E7D32);
-        border-radius: 4px;
-        transition: width 0.5s ease;
-    }
-
-    .earned-date {
-        font-size: 0.8em;
-        opacity: 0.8;
-        text-align: center;
-        margin-top: 5px;
-    }
-
-    .back-button {
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        background: rgba(255,255,255,0.2);
-        border: 2px solid rgba(255,255,255,0.3);
-        border-radius: 50px;
-        padding: 12px 20px;
-        color: white;
-        text-decoration: none;
-        font-weight: 600;
-        backdrop-filter: blur(10px);
-        transition: all 0.3s ease;
-        z-index: 1000;
-    }
-
-        .back-button:hover {
-            background: rgba(255,255,255,0.3);
-            transform: translateX(-3px);
-            color: white;
-            text-decoration: none;
-        }
-
-    .category-decluttering {
-        border-left: 5px solid #4CAF50;
-    }
-
-    .category-community {
-        border-left: 5px solid #2196F3;
-    }
-
-    .category-trading {
-        border-left: 5px solid #FF9800;
-    }
-
-    .category-special {
-        border-left: 5px solid #9C27B0;
-    }
-</style>
+<link rel="stylesheet" href="~/css/AllAchievements.css" asp-append-version="true" />
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -273,139 +17,358 @@
     });
 </script>
 
-<a href="/Home/QuestPage" class="back-button">← Back to Quests</a>
+<div class="min-h-screen bg-gradient-to-br from-[#344e41] via-[#588157] to-[#6b9080] font-['Montserrat']">
+    <!-- Back Button - Moved to right side -->
+    <div class="fixed top-4 right-4 z-50">
+        <a href="/Home/QuestPage" class="inline-flex items-center gap-2 glass-button rounded-full px-6 py-3 text-white font-semibold hover:scale-105 transition-all duration-300">
+            <span>Back to Quests</span>
+            <i class='bx bx-arrow-back text-lg rotate-180'></i>
+        </a>
+    </div>
 
-<div class="achievements-container">
-    <div class="achievements-header">
-        <h1 class="achievements-title">ACHIEVEMENTS</h1>
-        <p class="achievements-subtitle">Track your progress and unlock rewards</p>
-        <div class="achievements-progress">
-            <span class="progress-text">@Model.Stats.AchievementsEarned / @Model.Stats.TotalAchievements Unlocked</span>
+    <!-- Header Section -->
+    <div class="container mx-auto px-4 pt-20 pb-12">
+        <div class="text-center mb-12">
+            <h1 class="font-['Righteous'] text-5xl md:text-7xl lg:text-8xl text-white mb-4 transform -rotate-2 drop-shadow-lg">
+                ACHIEVEMENTS
+            </h1>
+            <p class="text-white/90 text-xl md:text-2xl mb-6 max-w-2xl mx-auto">
+                Track your progress and unlock rewards as you declutter your space
+            </p>
+            
+            <!-- Progress Stats -->
+            <div class="inline-flex items-center glass-card rounded-2xl px-8 py-4">
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2">
+                        <i class='bx bx-trophy text-yellow-300 text-2xl'></i>
+                        <span class="text-white font-bold text-lg">
+                            @Model.Stats.AchievementsEarned
+                        </span>
+                        <span class="text-white/80">of</span>
+                        <span class="text-white font-bold text-lg">
+                            @Model.Stats.TotalAchievements
+                        </span>
+                        <span class="text-white/80">Unlocked</span>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div class="achievements-filter">
-        <a href="#" class="filter-btn active" data-category="all">All</a>
-        <a href="#" class="filter-btn" data-category="decluttering">Decluttering</a>
-        <a href="#" class="filter-btn" data-category="community">Community</a>
-        <a href="#" class="filter-btn" data-category="trading">Trading</a>
-        <a href="#" class="filter-btn" data-category="special">Special</a>
-    </div>
+        <!-- Filter Buttons -->
+        <div class="flex flex-wrap justify-center gap-3 mb-12">
+            <button class="filter-btn active glass-button border-2 border-white/50 rounded-2xl px-6 py-3 text-white font-semibold hover:scale-105 transition-all duration-300" data-category="all">
+                <i class='bx bx-grid-alt mr-2'></i>All
+            </button>
+            <button class="filter-btn glass-button border-2 border-white/30 rounded-2xl px-6 py-3 text-white font-semibold hover:scale-105 transition-all duration-300" data-category="decluttering">
+                <i class='bx bx-home mr-2'></i>Decluttering
+            </button>
+            <button class="filter-btn glass-button border-2 border-white/30 rounded-2xl px-6 py-3 text-white font-semibold hover:scale-105 transition-all duration-300" data-category="community">
+                <i class='bx bx-group mr-2'></i>Community
+            </button>
+            <button class="filter-btn glass-button border-2 border-white/30 rounded-2xl px-6 py-3 text-white font-semibold hover:scale-105 transition-all duration-300" data-category="trading">
+                <i class='bx bx-dollar-circle mr-2'></i>Trading
+            </button>
+            <button class="filter-btn glass-button border-2 border-white/30 rounded-2xl px-6 py-3 text-white font-semibold hover:scale-105 transition-all duration-300" data-category="special">
+                <i class='bx bx-star mr-2'></i>Special
+            </button>
+        </div>
 
-    <div class="achievements-grid">
-        @foreach (var achievement in Model.AllAchievements.OrderBy(a => a.IsEarned ? 0 : 1).ThenBy(a => a.Category))
-        {
-            <div class="achievement-card @(achievement.IsEarned ? "earned" : "locked") category-@achievement.Category.ToString().ToLower()" data-category="@achievement.Category.ToString().ToLower()">
-                <div class="achievement-rarity-stripe rarity-@achievement.Rarity.ToString().ToLower()"></div>
+        <!-- Achievements Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 mb-12">
+            @foreach (var achievement in Model.AllAchievements.OrderBy(a => a.IsEarned ? 0 : 1).ThenBy(a => a.Category))
+            {
+                <div class="achievement-card group @(achievement.IsEarned ? "earned" : "locked") relative glass-card rounded-3xl p-6 hover:scale-105 hover:-translate-y-2 transition-all duration-500 overflow-hidden border-2 @(achievement.Rarity.ToString().ToLower() switch {
+                    "bronze" => "border-amber-400",
+                    "silver" => "border-gray-400",
+                    "gold" => "border-yellow-400",
+                    "platinum" => "border-indigo-400",
+                    _ => "border-gray-400"
+                })" data-category="@achievement.Category.ToString().ToLower()">
 
-                <div class="achievement-icon">
+                    <!-- Achievement Icon -->
+                    <div class="text-center mb-6">
+                        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full @(achievement.IsEarned ? "bg-gradient-to-br from-yellow-400 to-yellow-600" : "bg-gray-200/50") mb-4 group-hover:scale-110 transition-transform duration-300">
+                            @if (achievement.IsEarned)
+                            {
+                                switch (achievement.Category)
+                                {
+                                    case AchievementCategory.Decluttering:
+                                        <i class='bx bx-home text-3xl text-white'></i>
+                                        break;
+                                    case AchievementCategory.Community:
+                                        <i class='bx bx-group text-3xl text-white'></i>
+                                        break;
+                                    case AchievementCategory.Trading:
+                                        <i class='bx bx-dollar-circle text-3xl text-white'></i>
+                                        break;
+                                    case AchievementCategory.Special:
+                                        <i class='bx bx-star text-3xl text-white'></i>
+                                        break;
+                                    default:
+                                        <i class='bx bx-trophy text-3xl text-white'></i>
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                <i class='bx bx-lock text-3xl text-gray-500'></i>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Achievement Content -->
+                    <div class="text-center @(achievement.IsEarned ? "text-white" : "text-white/70")">
+                        <h3 class="font-['Righteous'] text-xl mb-3 group-hover:text-yellow-200 transition-colors duration-300">
+                            @achievement.Name
+                        </h3>
+                        <p class="text-sm leading-relaxed mb-4 opacity-90">
+                            @achievement.Description
+                        </p>
+                    </div>
+
+                    <!-- Category & Rarity Tags -->
+                    <div class="flex items-center justify-between mb-4 gap-2">
+                        <span class="px-3 py-1 bg-white/20 text-white text-xs font-semibold rounded-full backdrop-blur-sm border border-@(achievement.Category.ToString().ToLower() switch {
+                            "decluttering" => "green-400",
+                            "community" => "blue-400", 
+                            "trading" => "orange-400",
+                            "special" => "purple-400",
+                            _ => "gray-400"
+                        })">
+                            @achievement.Category
+                        </span>
+                        <span class="px-3 py-1 bg-white/20 text-@(achievement.Rarity.ToString().ToLower() switch {
+                            "bronze" => "amber-200",
+                            "silver" => "gray-200", 
+                            "gold" => "yellow-200",
+                            "platinum" => "indigo-200",
+                            _ => "gray-200"
+                        }) text-xs font-semibold rounded-full backdrop-blur-sm">
+                            @achievement.Rarity
+                        </span>
+                    </div>
+
+                    <!-- Rewards -->
+                    <div class="flex justify-center gap-3 mb-4">
+                        @if (achievement.TokenReward > 0)
+                        {
+                            <div class="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-green-500/80 to-emerald-600/80 text-white rounded-full text-sm font-semibold backdrop-blur-sm">
+                                <i class='bx bx-coin text-yellow-300'></i>
+                                @achievement.TokenReward T
+                            </div>
+                        }
+                        @if (achievement.XpReward > 0)
+                        {
+                            <div class="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-blue-500/80 to-indigo-600/80 text-white rounded-full text-sm font-semibold backdrop-blur-sm">
+                                <i class='bx bx-trending-up'></i>
+                                @achievement.XpReward XP
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Earned Date or Progress -->
                     @if (achievement.IsEarned)
                     {
-                        switch (achievement.Category)
-                        {
-                            case AchievementCategory.Decluttering:
-                                <span>🏠</span>
-                                break;
-                            case AchievementCategory.Community:
-                                <span>👥</span>
-                                break;
-                            case AchievementCategory.Trading:
-                                <span>💰</span>
-                                break;
-                            case AchievementCategory.Special:
-                                <span>⭐</span>
-                                break;
-                            default:
-                                <span>🏆</span>
-                                break;
-                        }
+                        <div class="text-center text-xs text-green-200 bg-green-500/20 backdrop-blur-sm rounded-lg py-2 border border-green-400/30">
+                            <i class='bx bx-check-circle text-green-300 mr-1'></i>
+                            Earned: @achievement.EarnedDate?.ToString("MMM dd, yyyy")
+                        </div>
                     }
                     else
                     {
-                        <span style="filter: grayscale(100%);">🔒</span>
-                    }
-                </div>
-
-                <h3 class="achievement-title">@achievement.Name</h3>
-                <p class="achievement-description">@achievement.Description</p>
-
-                <div class="achievement-meta">
-                    <span class="achievement-category">@achievement.Category</span>
-                    <span class="achievement-category rarity-@achievement.Rarity.ToString().ToLower()">@achievement.Rarity</span>
-                </div>
-
-                <div class="achievement-rewards">
-                    @if (achievement.TokenReward > 0)
-                    {
-                        <span class="reward-badge token-reward">@achievement.TokenReward T</span>
-                    }
-                    @if (achievement.XpReward > 0)
-                    {
-                        <span class="reward-badge xp-reward">@achievement.XpReward XP</span>
-                    }
-                </div>
-
-                @if (achievement.IsEarned)
-                {
-                    <div class="earned-date">
-                        Earned: @achievement.EarnedDate?.ToString("MMM dd, yyyy")
-                    </div>
-                }
-                else
-                {
-                    <div class="achievement-progress">
-                        <div class="progress-bar-mini">
-                            <div class="progress-fill-mini" style="width: @achievement.ProgressPercentage%"></div>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-white/70">Progress</span>
+                                <span class="font-semibold text-white">@achievement.Progress / @achievement.CriteriaValue</span>
+                            </div>
+                            <div class="w-full bg-white/20 rounded-full h-2 overflow-hidden backdrop-blur-sm">
+                                <div class="bg-gradient-to-r from-[#6b9080] to-[#588157] h-full transition-all duration-1000 rounded-full" style="width: @achievement.ProgressPercentage%"></div>
+                            </div>
+                            <div class="text-center text-xs text-white/60">
+                                @achievement.ProgressPercentage% Complete
+                            </div>
                         </div>
-                        <span>@achievement.Progress / @achievement.CriteriaValue</span>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Achievement Tips Section -->
+        <div class="glass-card rounded-3xl p-8 border border-white/20 mb-8">
+            <h3 class="font-['Righteous'] text-2xl text-white text-center mb-8">
+                How to Unlock Achievements
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="text-center text-white">
+                    <div class="w-16 h-16 glass-card rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 border border-green-400/30">
+                        <i class='bx bx-home text-3xl text-green-300'></i>
                     </div>
-                }
+                    <h4 class="font-semibold mb-2">Declutter Items</h4>
+                    <p class="text-sm text-white/80">List items for donation or trade to unlock decluttering achievements</p>
+                </div>
+                <div class="text-center text-white">
+                    <div class="w-16 h-16 glass-card rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 border border-blue-400/30">
+                        <i class='bx bx-group text-3xl text-blue-300'></i>
+                    </div>
+                    <h4 class="font-semibold mb-2">Join Community</h4>
+                    <p class="text-sm text-white/80">Participate in discussions and help others to earn community badges</p>
+                </div>
+                <div class="text-center text-white">
+                    <div class="w-16 h-16 glass-card rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 border border-orange-400/30">
+                        <i class='bx bx-dollar-circle text-3xl text-orange-300'></i>
+                    </div>
+                    <h4 class="font-semibold mb-2">Complete Trades</h4>
+                    <p class="text-sm text-white/80">Successfully trade items with other users for trading achievements</p>
+                </div>
+                <div class="text-center text-white">
+                    <div class="w-16 h-16 glass-card rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 border border-purple-400/30">
+                        <i class='bx bx-star text-3xl text-purple-300'></i>
+                    </div>
+                    <h4 class="font-semibold mb-2">Special Events</h4>
+                    <p class="text-sm text-white/80">Participate in seasonal events and challenges for rare achievements</p>
+                </div>
             </div>
-        }
+        </div>
     </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
-        // Filter functionality
+        // Filter functionality with enhanced animations
         $('.filter-btn').click(function(e) {
             e.preventDefault();
 
-            $('.filter-btn').removeClass('active');
-            $(this).addClass('active');
+            // Update active state
+            $('.filter-btn').removeClass('active border-white/50').addClass('border-white/30');
+            $(this).addClass('active border-white/50').removeClass('border-white/30');
 
             const category = $(this).data('category');
 
-            if(category === 'all') {
-                $('.achievement-card').show();
-            } else {
-                $('.achievement-card').hide();
-                $(`.achievement-card[data-category="${category}"]`).show();
-            }
+            // Animate out all cards
+            $('.achievement-card').addClass('opacity-0 scale-95 translate-y-4');
+
+            setTimeout(() => {
+                if(category === 'all') {
+                    $('.achievement-card').removeClass('hidden');
+                } else {
+                    $('.achievement-card').addClass('hidden');
+                    $(`.achievement-card[data-category="${category}"]`).removeClass('hidden');
+                }
+
+                // Animate in visible cards with stagger
+                $('.achievement-card:not(.hidden)').each(function(index) {
+                    const card = $(this);
+                    setTimeout(() => {
+                        card.removeClass('opacity-0 scale-95 translate-y-4');
+                    }, index * 100);
+                });
+            }, 300);
         });
 
-        // Add animations
+        // Initial staggered animation
         $('.achievement-card').each(function(index) {
-            $(this).css('animation-delay', (index * 0.1) + 's');
+            $(this).css({
+                'animation-delay': (index * 0.1) + 's',
+                'animation': 'fadeInScale 0.6s ease forwards'
+            });
+        });
+
+        // Hover effects for earned achievements
+        $('.achievement-card.earned').hover(
+            function() {
+                $(this).find('.group-hover\\:scale-110').addClass('scale-110');
+            },
+            function() {
+                $(this).find('.group-hover\\:scale-110').removeClass('scale-110');
+            }
+        );
+
+        // Progress bar animation on scroll
+        const observerOptions = {
+            threshold: 0.5,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const progressObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const progressBar = entry.target.querySelector('[style*="width"]');
+                    if (progressBar) {
+                        setTimeout(() => {
+                            progressBar.style.transition = 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                        }, 200);
+                    }
+                }
+            });
+        }, observerOptions);
+
+        $('.achievement-card:not(.earned)').each(function() {
+            progressObserver.observe(this);
         });
     });
 </script>
 
 <style>
-    @@keyframes fadeInUp {
+    @@keyframes fadeInScale {
         from {
             opacity: 0;
-            transform: translateY(30px);
+            transform: translateY(20px) scale(0.95);
         }
-
         to {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
         }
     }
 
     .achievement-card {
-        animation: fadeInUp 0.6s ease forwards;
+        animation-fill-mode: both;
+    }
+
+    .filter-btn.active {
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+
+    /* Glass Effects */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    }
+
+    .glass-card:hover {
+        background: rgba(255, 255, 255, 0.15);
+        box-shadow: 
+            0 16px 48px rgba(0, 0, 0, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+    }
+
+    .glass-button {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .glass-button:hover {
+        background: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Custom scrollbar for mobile */
+    .achievement-card::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Backdrop blur support */
+    @@supports not (backdrop-filter: blur(10px)) {
+        .glass-card, .glass-button {
+            background: rgba(255, 255, 255, 0.25);
+        }
     }
 </style>

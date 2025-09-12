@@ -17,106 +17,32 @@
     });
 </script>
 
-<div class="quest-page-container">
+<div class="quest-dashboard">
     <!-- Header Section -->
-    <div class="quest-header">
-        @if (ViewBag.DebugInfo != null)
-        {
-            <div style="background: yellow; padding: 10px; margin: 10px;">
-                Debug: @ViewBag.DebugInfo
-            </div>
-        }
-        <!-- Debug Info Section -->
-        <div style="background: yellow; padding: 10px; margin: 10px;">
-            <strong>Debug Info:</strong><br>
-            Total Active Quests: @Model.ActiveQuests.Count<br>
-            Daily Quests: @Model.ActiveQuests.Count(q => q.QuestType == QuestType.Daily)<br>
-            Weekly Quests: @Model.ActiveQuests.Count(q => q.QuestType == QuestType.Weekly)<br>
-            Special Quests: @Model.ActiveQuests.Count(q => q.QuestType == QuestType.Special)<br>
-
-            Quest Details:
-            @foreach (var quest in Model.ActiveQuests)
-            {
-                <div>- @quest.QuestTitle (Type: @quest.QuestType, Progress: @quest.CurrentProgress/@quest.TargetValue)</div>
-            }
-
-            <!-- Achievement Integration Test Section -->
-            <!-- Achievement Integration Test Section -->
-            <div style="margin-top: 15px; padding: 15px; border: 2px solid #007bff; background: #f8f9fa; border-radius: 6px;">
-                <h4 style="margin: 0 0 15px 0;">🎯 Achievement Integration Test</h4>
-
-                <!-- Action Buttons -->
-                <button id="testIntegration" class="btn btn-primary" style="margin: 5px; padding: 8px 12px;">Test Quest-Achievement Integration</button>
-                <button id="testRealProgress" class="btn btn-success" style="margin: 5px; padding: 8px 12px;">Test Real Achievement Progress</button>
-                <button id="testItemSeeding" class="btn btn-warning" style="margin: 5px; padding: 8px 12px;">Seed Items & Test Achievements</button>
-                <button id="checkDatabase" class="btn btn-info" style="margin: 5px; padding: 8px 12px;">Check Database Setup</button>
-                <button id="seedItemData" class="btn btn-secondary" style="margin: 5px; padding: 8px 12px;">Seed Item Data</button>
-                <button id="testManualUnlock" class="btn btn-danger" style="margin: 5px; padding: 8px 12px;">Force Unlock Achievements</button>
-                <button id="directUnlock" class="btn btn-danger" style="margin: 5px; padding: 8px 12px;">Direct Unlock Test Achievement</button>
-                <button id="unlockMultiple" class="btn btn-warning" style="margin: 5px; padding: 8px 12px;">Unlock Multiple Based on Data</button>
-                <button id="verifyBalances" class="btn btn-info" style="margin: 5px; padding: 8px 12px;">Verify User Balances</button>
-                <button id="debugAchievements" class="btn btn-info" style="margin: 5px; padding: 8px 12px;">Debug Achievement System</button>
-                <button onclick="$.post('/Quest/DebugQuestAchievement').done(r => console.log(r))">Debug Quest Achievement</button>
-                <button onclick="$.post('/Quest/AddFirstQuestAchievement').done(r => console.log(r))">|Add First Quest Achievement|</button>
-                <button onclick="$.post('/Quest/DebugUserAchievementSetup').done(r => console.log(r))">|Debug User Achievement Setup|</button>
-                <button onclick="$.post('/Quest/CreateUserAchievementRecords').done(r => console.log(r))">|Create User Achievement Records</button>
-
-                <!-- Reset Functions (in same section) -->
-                <h5 style="margin: 20px 0 10px 0; color: #721c24; border-top: 2px solid #dc3545; padding-top: 10px;">Reset Functions</h5>
-                <button id="resetUser" class="btn btn-danger" style="margin: 5px; padding: 8px 12px;">Reset Current User</button>
-                <button id="resetAll" class="btn btn-dark" style="margin: 5px; padding: 8px 12px;">Reset All Test Data</button>
-               
-                <button onclick="$.post('/Quest/DiagnoseTableState').done(r => console.log(r))">|Diagnose Tables|</button>
-                <button onclick="$.post('/Quest/ResetSpecificUser', {userId: 1}).done(r => location.reload())">|Reset Test User|</button>
-                <button onclick="if(confirm('DANGER: Reset ALL data?')) $.post('/Quest/SafeResetAllGamificationTables').done(r => location.reload())">|RESET ALL|</button>
-
-
-                <!-- Add to your existing debug section -->
-                <h5 style="margin: 20px 0 10px 0;">Quest Progress Testing</h5>
-                <button id="simulateCheckIn" class="btn btn-success" style="margin: 5px;">Simulate Check-In</button>
-                <button id="simulateItemListing" class="btn btn-primary" style="margin: 5px;">Simulate Item Listing</button>
-                <button id="simulatePostCreation" class="btn btn-info" style="margin: 5px;">Simulate Post Creation</button>
-                <button id="simulateCommentCreation" class="btn btn-warning" style="margin: 5px;">Simulate Comment Creation</button>
-                <!-- Results -->
-                <div id="testResults" style="margin-top: 15px; padding: 10px; border: 1px solid #ccc; background: #fff; border-radius: 5px;"></div>
-            </div>
-        </div>
-
-        @if (ViewBag.ShowDebug == true)
-        {
-            <div class="debug-panel">
-                <strong>Stats Debug:</strong><br>
-                Level: @Model.LevelProgress.CurrentLevel (@Model.LevelProgress.CurrentLevelName)<br>
-                Current XP: @Model.LevelProgress.CurrentXp / Next Level XP: @(Model.LevelProgress.CurrentXp + Model.LevelProgress.XpToNextLevel)<br>
-                XP Progress: @Model.LevelProgress.XpProgress%<br>
-                Total Tokens: @Model.Stats.TokenBalance<br>
-                Active Quests: @Model.ActiveQuests.Count<br>
-                Achievements: @Model.Stats.AchievementsEarned/@Model.Stats.TotalAchievements<br>
-            </div>
-        }
-
+    <header class="quest-header">
         <h1 class="quest-title righteous-font">QUEST DASHBOARD</h1>
-        <div class="quest-header-stats">
-            <div class="header-stat">
+        <div class="header-stats">
+            <div class="stat-item">
                 <span class="stat-value">@(Model?.Stats?.TotalQuestsCompleted ?? 0)</span>
                 <span class="stat-label">Completed</span>
             </div>
-            <div class="header-stat">
+            <div class="stat-item">
                 <span class="stat-value">@((Model?.Stats?.TokenBalance ?? 0).ToString("N0"))</span>
                 <span class="stat-label">Tokens</span>
             </div>
-            <div class="header-stat">
+            <div class="stat-item">
                 <span class="stat-value">@(Model?.Stats?.ActiveStreaksCount ?? 0)</span>
                 <span class="stat-label">Streaks</span>
             </div>
         </div>
-    </div>
+    </header>
 
-    <!-- Level Progress Section -->
-    @if (Model?.LevelProgress != null)
-    {
-        <div class="level-progress-section">
-            <div class="level-card">
+    <!-- Bento Grid Layout -->
+    <div class="bento-grid">
+        <!-- Level Progress Card -->
+        @if (Model?.LevelProgress != null)
+        {
+            <div class="bento-card level-card">
                 <div class="level-info">
                     <div class="level-display">
                         <span class="level-number">@Model.LevelProgress.CurrentLevel</span>
@@ -133,1236 +59,335 @@
                     <div class="level-progress-text">@(Model.LevelProgress.XpProgress)% to @(Model.LevelProgress.NextLevelName ?? "Next Level")</div>
                 </div>
             </div>
-        </div>
-    }
+        }
 
-    <!-- Daily Check-in Section -->
-    <div class="daily-checkin-section">
-        <div class="checkin-card">
-            <div class="checkin-info">
-                <h3 class="righteous-font">Daily Check-in</h3>
-                <div id="streakDisplay">
-                    <span id="streakCount">0</span> day streak
+        <!-- Daily Check-in Card -->
+        <div class="bento-card checkin-card">
+            <div class="checkin-content">
+                <div class="checkin-header">
+                    <h3 class="righteous-font">Daily Check-in</h3>
+                    <div class="streak-display">
+                        <span id="streakCount">0</span> day streak
+                    </div>
                 </div>
                 <div id="nextCheckInTimer" class="check-in-timer" style="display: none;">
                     Next check-in in: <span id="timerDisplay">--:--:--</span>
                 </div>
+                <button id="checkInBtn" class="checkin-button">
+                    Check In
+                </button>
             </div>
-            <button id="checkInBtn" class="claim-button">
-                Check In
-            </button>
-        </div>
-    </div>
-
-    <!-- Main Content Area -->
-    <div class="quest-content-wrapper">
-        <!-- Quest Illustration -->
-        <div class="quest-illustration-container">
-            <img src="~/assets/quest_image1.png" alt="Quest Illustration" class="quest-illustration" />
         </div>
 
-        <!-- Quest Cards Container -->
-        <div class="quest-cards-container">
-
-            <!-- Daily Quests -->
-            <div class="quest-section">
-                <h2 class="quest-section-title righteous-font">Daily Quests</h2>
+        <!-- Daily Quests Section -->
+        <div class="bento-card quests-card daily-quests">
+            <div class="quests-header">
+                <h2 class="righteous-font">Daily Quests</h2>
+                <span class="quest-count">@Model.ActiveQuests.Count(q => q.QuestType == QuestType.Daily)</span>
+            </div>
+            <div class="quests-container">
                 @if (Model.ActiveQuests.Any(q => q.QuestType == QuestType.Daily))
                 {
                     @foreach (var quest in Model.ActiveQuests.Where(q => q.QuestType == QuestType.Daily))
                     {
-                        <div class="quest-card" data-quest-id="@quest.QuestId" data-quest-type="@((int)quest.QuestType)">
-                            <div class="quest-card-content">
-                                <div class="quest-info">
-                                    <div class="quest-timer">
-                                        @{
-                                            var remaining = quest.EndDate.HasValue
-                                            ? TimeSpan.FromTicks(Math.Max(0, quest.EndDate.Value.Ticks - DateTime.UtcNow.Ticks))
-                                            : TimeSpan.Zero;
-                                        }
-                                        <span class="quest-timer">
-                                            @remaining.Hours h @remaining.Minutes m REMAINING
-                                        </span>
-                                    </div>
-                                    <h3 class="quest-name righteous-font">@quest.QuestTitle</h3>
-                                    <p class="quest-description">@quest.QuestObjective</p>
-                                    <div class="quest-progress-details">
-                                        <span class="progress-text">Progress: @quest.CurrentProgress / @quest.TargetValue</span>
-                                        <span class="progress-percentage">(@quest.ProgressPercentage%)</span>
-                                    </div>
-                                    <div class="quest-difficulty">
+                        <div class="quest-item" data-quest-id="@quest.QuestId" data-quest-type="@((int)quest.QuestType)">
+                            <div class="quest-content">
+                                <div class="quest-timer">
+                                    @{
+                                        var remaining = quest.EndDate.HasValue
+                                        ? TimeSpan.FromTicks(Math.Max(0, quest.EndDate.Value.Ticks - DateTime.UtcNow.Ticks))
+                                        : TimeSpan.Zero;
+                                    }
+                                    @remaining.Hours h @remaining.Minutes m remaining
+                                </div>
+                                <h4 class="quest-name">@quest.QuestTitle</h4>
+                                <p class="quest-description">@quest.QuestObjective</p>
+                                <div class="quest-meta">
+                                    <div class="quest-badges">
                                         <span class="difficulty-badge difficulty-@quest.Difficulty.ToString().ToLower()">
                                             @quest.Difficulty
                                         </span>
-                                        <span class="quest-type-badge type-@quest.QuestType.ToString().ToLower()">
-                                            @quest.QuestType
-                                        </span>
+                                        <span class="type-badge type-daily">Daily</span>
                                     </div>
-                                </div>
-                                <div class="quest-reward">
-                                    <div class="reward-details">
+                                    <div class="quest-rewards">
                                         <span class="reward-tokens">@quest.TokenReward T</span>
                                         <span class="reward-xp">@quest.XpReward XP</span>
                                     </div>
-                                    @if (quest.IsCompleted && !quest.IsClaimed)
-                                    {
-                                        <button class="claim-button claim-active claim-reward-btn" data-quest-id="@quest.QuestId">
-                                            Claim
-                                        </button>
-                                    }
-                                    else if (quest.IsClaimed)
-                                    {
-                                        <button class="claim-button claim-completed">
-                                            Claimed
-                                        </button>
-                                    }
-                                    else
-                                    {
-                                        <button class="claim-button claim-disabled" onclick="testQuestProgress('item_listed')">
-                                            Test Progress
-                                        </button>
-                                    }
                                 </div>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: @quest.ProgressPercentage%"></div>
+                                <div class="quest-progress">
+                                    <div class="progress-info">
+                                        <span>@quest.CurrentProgress / @quest.TargetValue</span>
+                                        <span>@quest.ProgressPercentage%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: @quest.ProgressPercentage%"></div>
+                                    </div>
+                                </div>
+                                @if (quest.IsCompleted && !quest.IsClaimed)
+                                {
+                                    <button class="claim-button active claim-reward-btn" data-quest-id="@quest.QuestId">
+                                        Claim Reward
+                                    </button>
+                                }
+                                else if (quest.IsClaimed)
+                                {
+                                    <button class="claim-button completed" disabled>
+                                        Claimed
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="claim-button disabled" disabled>
+                                        In Progress
+                                    </button>
+                                }
                             </div>
                         </div>
                     }
                 }
                 else
                 {
-                    <p class="no-quests-message">No active daily quests</p>
-                    <button onclick="$.post('/Quest/DebugGenerateQuests').done(() => location.reload())" style="padding: 10px; margin: 10px;">Generate Daily Quests</button>
+                    <div class="no-quests">
+                        <p>No active daily quests</p>
+                        <button class="generate-quest-btn" onclick="generateDailyQuests()">Generate Daily Quests</button>
+                    </div>
                 }
             </div>
+        </div>
 
-            <!-- Weekly Quests -->
-            <div id="weekly-quests" class="quest-section">
-                <h2 class="quest-section-title righteous-font">Weekly Quests</h2>
+        <!-- Weekly Quests Section -->
+        <div class="bento-card quests-card weekly-quests">
+            <div class="quests-header">
+                <h2 class="righteous-font">Weekly Quests</h2>
+                <span class="quest-count">@Model.ActiveQuests.Count(q => q.QuestType == QuestType.Weekly)</span>
+            </div>
+            <div class="quests-container">
                 @if (Model.ActiveQuests.Any(q => q.QuestType == QuestType.Weekly))
                 {
                     @foreach (var quest in Model.ActiveQuests.Where(q => q.QuestType == QuestType.Weekly))
                     {
-                        <div class="quest-card weekly-quest" data-quest-id="@quest.QuestId" data-quest-type="@((int)quest.QuestType)">
-                            <div class="quest-card-content">
-                                <div class="quest-info">
-                                    <div class="quest-timer">
-                                        @{
-                                            var weeklyRemaining = quest.EndDate.HasValue
-                                            ? TimeSpan.FromTicks(Math.Max(0, quest.EndDate.Value.Ticks - DateTime.UtcNow.Ticks))
-                                            : TimeSpan.Zero;
-                                        }
-                                        <span class="quest-timer">
-                                            @weeklyRemaining.Days d @weeklyRemaining.Hours h REMAINING
-                                        </span>
-                                    </div>
-                                    <h3 class="quest-name righteous-font">@quest.QuestTitle</h3>
-                                    <p class="quest-description">@quest.QuestObjective</p>
-                                    <div class="quest-progress-details">
-                                        <span class="progress-text">Progress: @quest.CurrentProgress / @quest.TargetValue</span>
-                                        <span class="progress-percentage">(@quest.ProgressPercentage%)</span>
-                                    </div>
-                                    <div class="quest-difficulty">
+                        <div class="quest-item" data-quest-id="@quest.QuestId" data-quest-type="@((int)quest.QuestType)">
+                            <div class="quest-content">
+                                <div class="quest-timer">
+                                    @{
+                                        var weeklyRemaining = quest.EndDate.HasValue
+                                        ? TimeSpan.FromTicks(Math.Max(0, quest.EndDate.Value.Ticks - DateTime.UtcNow.Ticks))
+                                        : TimeSpan.Zero;
+                                    }
+                                    @weeklyRemaining.Days d @weeklyRemaining.Hours h remaining
+                                </div>
+                                <h4 class="quest-name">@quest.QuestTitle</h4>
+                                <p class="quest-description">@quest.QuestObjective</p>
+                                <div class="quest-meta">
+                                    <div class="quest-badges">
                                         <span class="difficulty-badge difficulty-@quest.Difficulty.ToString().ToLower()">
                                             @quest.Difficulty
                                         </span>
-                                        <span class="quest-type-badge type-@quest.QuestType.ToString().ToLower()">
-                                            WEEKLY
-                                        </span>
+                                        <span class="type-badge type-weekly">Weekly</span>
                                     </div>
-                                </div>
-                                <div class="quest-reward">
-                                    <div class="reward-details">
+                                    <div class="quest-rewards">
                                         <span class="reward-tokens">@quest.TokenReward T</span>
                                         <span class="reward-xp">@quest.XpReward XP</span>
                                     </div>
-                                    @if (quest.IsCompleted && !quest.IsClaimed)
-                                    {
-                                        <button class="claim-button claim-active claim-reward-btn" data-quest-id="@quest.QuestId">
-                                            Claim
-                                        </button>
-                                    }
-                                    else if (quest.IsClaimed)
-                                    {
-                                        <button class="claim-button claim-completed">
-                                            Claimed
-                                        </button>
-                                    }
-                                    else
-                                    {
-                                        <button class="claim-button claim-disabled" onclick="testQuestProgress('post_created')">
-                                            Test Progress
-                                        </button>
-                                    }
                                 </div>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: @quest.ProgressPercentage%"></div>
+                                <div class="quest-progress">
+                                    <div class="progress-info">
+                                        <span>@quest.CurrentProgress / @quest.TargetValue</span>
+                                        <span>@quest.ProgressPercentage%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: @quest.ProgressPercentage%"></div>
+                                    </div>
+                                </div>
+                                @if (quest.IsCompleted && !quest.IsClaimed)
+                                {
+                                    <button class="claim-button active claim-reward-btn" data-quest-id="@quest.QuestId">
+                                        Claim Reward
+                                    </button>
+                                }
+                                else if (quest.IsClaimed)
+                                {
+                                    <button class="claim-button completed" disabled>
+                                        Claimed
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="claim-button disabled" disabled>
+                                        In Progress
+                                    </button>
+                                }
                             </div>
                         </div>
                     }
                 }
                 else
                 {
-                    <p class="no-quests-message">No active weekly quests</p>
-                    <button onclick="generateWeeklyQuest()" style="padding: 10px; margin: 10px;">Generate Weekly Quest</button>
+                    <div class="no-quests">
+                        <p>No active weekly quests</p>
+                        <button class="generate-quest-btn" onclick="generateWeeklyQuest()">Generate Weekly Quest</button>
+                    </div>
                 }
             </div>
+        </div>
 
-            <!-- Special Quests -->
-            <div id="special-quests" class="quest-section">
-                <h2 class="quest-section-title righteous-font">Special Quests</h2>
+        <!-- Special Quests Section -->
+        <div class="bento-card quests-card special-quests">
+            <div class="quests-header">
+                <h2 class="righteous-font">Special Quests</h2>
+                <span class="quest-count">@Model.ActiveQuests.Count(q => q.QuestType == QuestType.Special)</span>
+            </div>
+            <div class="quests-container">
                 @if (Model.ActiveQuests.Any(q => q.QuestType == QuestType.Special))
                 {
                     @foreach (var quest in Model.ActiveQuests.Where(q => q.QuestType == QuestType.Special))
                     {
-                        <div class="quest-card special-quest" data-quest-id="@quest.QuestId" data-quest-type="@((int)quest.QuestType)">
-                            <div class="quest-card-content">
-                                <div class="quest-info">
-                                    <h3 class="quest-name righteous-font">@quest.QuestTitle</h3>
-                                    <p class="quest-description">@quest.QuestObjective</p>
-                                    <div class="quest-progress-details">
-                                        <span class="progress-text">Progress: @quest.CurrentProgress / @quest.TargetValue</span>
-                                        <span class="progress-percentage">(@quest.ProgressPercentage%)</span>
-                                    </div>
-                                    <div class="quest-difficulty">
+                        <div class="quest-item" data-quest-id="@quest.QuestId" data-quest-type="@((int)quest.QuestType)">
+                            <div class="quest-content">
+                                <h4 class="quest-name">@quest.QuestTitle</h4>
+                                <p class="quest-description">@quest.QuestObjective</p>
+                                <div class="quest-meta">
+                                    <div class="quest-badges">
                                         <span class="difficulty-badge difficulty-@quest.Difficulty.ToString().ToLower()">
                                             @quest.Difficulty
                                         </span>
-                                        <span class="quest-type-badge type-special">
-                                            SPECIAL
-                                        </span>
+                                        <span class="type-badge type-special">Special</span>
                                     </div>
-                                </div>
-                                <div class="quest-reward">
-                                    <div class="reward-details">
+                                    <div class="quest-rewards">
                                         <span class="reward-tokens">@quest.TokenReward T</span>
                                         <span class="reward-xp">@quest.XpReward XP</span>
                                     </div>
-                                    @if (quest.IsCompleted && !quest.IsClaimed)
-                                    {
-                                        <button class="claim-button claim-active claim-reward-btn" data-quest-id="@quest.QuestId">
-                                            Claim
-                                        </button>
-                                    }
-                                    else if (quest.IsClaimed)
-                                    {
-                                        <button class="claim-button claim-completed">
-                                            Claimed
-                                        </button>
-                                    }
-                                    else
-                                    {
-                                        <button class="claim-button claim-disabled" onclick="testQuestProgress('comment_created')">
-                                            Test Progress
-                                        </button>
-                                    }
                                 </div>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: @quest.ProgressPercentage%"></div>
+                                <div class="quest-progress">
+                                    <div class="progress-info">
+                                        <span>@quest.CurrentProgress / @quest.TargetValue</span>
+                                        <span>@quest.ProgressPercentage%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: @quest.ProgressPercentage%"></div>
+                                    </div>
+                                </div>
+                                @if (quest.IsCompleted && !quest.IsClaimed)
+                                {
+                                    <button class="claim-button active claim-reward-btn" data-quest-id="@quest.QuestId">
+                                        Claim Reward
+                                    </button>
+                                }
+                                else if (quest.IsClaimed)
+                                {
+                                    <button class="claim-button completed" disabled>
+                                        Claimed
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="claim-button disabled" disabled>
+                                        In Progress
+                                    </button>
+                                }
                             </div>
                         </div>
                     }
                 }
                 else
                 {
-                    <p class="no-quests-message">No active special quests</p>
-                    <button onclick="$.post('/Quest/DebugGenerateSpecialQuest').done(() => location.reload())" style="padding: 10px; margin: 10px;">Generate Special Quest</button>
-                }
-            </div>
-
-            <!-- Browse Available Quests Button -->
-            <div class="browse-quests-card">
-                <a href="@Url.Action("Available", "Quest")" class="browse-quests-link">
-                    <div class="browse-content">
-                        <h3 class="righteous-font">Browse More Quests</h3>
-                        <p>Discover weekly and special quests</p>
+                    <div class="no-quests">
+                        <p>No active special quests</p>
+                        <button class="generate-quest-btn" onclick="generateSpecialQuest()">Generate Special Quest</button>
                     </div>
-                    <div class="browse-arrow">→</div>
-                </a>
+                }
             </div>
         </div>
-    </div>
 
-    <!-- Achievements Section -->
-    <div class="achievements-section">
-        <div class="achievement-container">
-            <!-- Profile Avatar -->
-            <div class="profile-avatar-section">
-                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
-                     alt="Profile"
-                     class="profile-avatar">
-            </div>
+        <!-- Achievement Card -->
+        <div class="bento-card achievement-card">
+            <div class="achievement-content">
+                <div class="profile-section">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
+                         alt="Profile"
+                         class="profile-avatar">
+                    <div class="achievement-info">
+                        @if (Model.RecentAchievements.Any())
+                        {
+                            var latestAchievement = Model.RecentAchievements.First();
+                            <h3 class="achievement-title righteous-font">@latestAchievement.Name</h3>
+                            <p class="achievement-subtitle">@latestAchievement.Description</p>
+                        }
+                        else
+                        {
+                            <h3 class="achievement-title righteous-font">Getting Started</h3>
+                            <p class="achievement-subtitle">Complete your first quest to earn achievements!</p>
+                        }
+                    </div>
+                </div>
 
-            <!-- Achievement Title -->
-            <div class="achievement-title-section">
-                @if (Model.RecentAchievements.Any())
-                {
-                    var latestAchievement = Model.RecentAchievements.First();
-                    <h3 class="achievement-badge righteous-font">@latestAchievement.Name</h3>
-                    <div class="achievement-subtitle">@latestAchievement.Description</div>
-                }
-                else
-                {
-                    <h3 class="achievement-badge righteous-font">Getting Started</h3>
-                    <div class="achievement-subtitle">Complete your first quest to earn achievements!</div>
-                }
-            </div>
+                <div class="achievement-icon">
+                    <img src="~/items/first_uploaded.png" alt="Achievement Icon" />
+                </div>
 
-            <!-- Main Achievement -->
-            <div class="achievement-main-section">
-                <div class="achievement-text-card">
-                    @if (Model.RecentAchievements.Any())
+                <div class="streak-info">
+                    @if (Model.ActiveStreaks.Any())
                     {
-                        <p>Latest achievement unlocked! Keep up the great work.</p>
+                        var longestStreak = Model.ActiveStreaks.OrderByDescending(s => s.CurrentStreak).First();
+                        <h4 class="streak-title righteous-font">@longestStreak.StreakName</h4>
+                        <p class="streak-description">@longestStreak.CurrentStreak @longestStreak.StreakUnit streak!</p>
                     }
                     else
                     {
-                        <p>Start your decluttering journey and unlock your first achievement.</p>
+                        <h4 class="streak-title righteous-font">Start Your Streak</h4>
+                        <p class="streak-description">Check in daily to build your streak!</p>
                     }
                 </div>
-                <div class="achievement-icon-wrapper">
-                    <img src="~/items/first_uploaded.png" alt="Achievement Icon" />
-                </div>
-                @if (Model.ActiveStreaks.Any())
-                {
-                    var longestStreak = Model.ActiveStreaks.OrderByDescending(s => s.CurrentStreak).First();
-                    <div class="streak-card">
-                        <h3 class="streak-title righteous-font">@longestStreak.StreakName</h3>
-                        <p class="streak-description">@longestStreak.CurrentStreak @longestStreak.StreakUnit streak! Keep it up!</p>
-                    </div>
-                }
-                else
-                {
-                    <div class="streak-card">
-                        <h3 class="streak-title righteous-font">Start Your Streak</h3>
-                        <p class="streak-description">Check in daily to build your streak!</p>
-                    </div>
-                }
-            </div>
 
-            <!-- Stats Section -->
-            <div class="achievement-stats-section">
-                <div class="token-stats-card">
-                    <div class="token-number">@((Model?.Stats?.TokenBalance ?? 0).ToString("N0"))</div>
-                    <div class="token-label">Tokens Collected</div>
+                <div class="achievement-stats">
+                    <div class="stat-item">
+                        <span class="stat-value">@((Model?.Stats?.TokenBalance ?? 0).ToString("N0"))</span>
+                        <span class="stat-label">Tokens</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">@(Model?.Stats?.AchievementsEarned ?? 0)/@(Model?.Stats?.TotalAchievements ?? 0)</span>
+                        <span class="stat-label">Achievements</span>
+                    </div>
                 </div>
-                <div class="items-stats">
-                    <div class="items-text">@(Model?.Stats?.AchievementsEarned ?? 0)/@(Model?.Stats?.TotalAchievements ?? 0) Achievements</div>
-                </div>
-            </div>
 
-            <!-- Quick Links -->
-            <div class="achievement-links">
-                <a href="@Url.Action("ViewAllAchievements", "Quest")" class="achievement-link">
-                    <span>View All Achievements</span>
-                    <span>→</span>
-                </a>
-                <a href="@Url.Action("ViewAllStreaks", "Quest")" class="achievement-link">
-                    <span>View Streaks</span>
-                    <span>→</span>
-                </a>
+                <div class="achievement-links">
+                    <a href="@Url.Action("ViewAllAchievements", "Quest")" class="achievement-link">
+                        <span>View All Achievements</span>
+                        <span>→</span>
+                    </a>
+                    <a href="@Url.Action("ViewAllStreaks", "Quest")" class="achievement-link">
+                        <span>View Streaks</span>
+                        <span>→</span>
+                    </a>
+                </div>
             </div>
+        </div>
+
+        <!-- Browse More Quests Card -->
+        <div class="bento-card browse-card">
+            <a href="@Url.Action("Available", "Quest")" class="browse-link">
+                <div class="browse-content">
+                    <div class="browse-icon">
+                        <i class='bx bx-search-alt-2 bx-lg'></i>
+                    </div>
+                    <h3 class="righteous-font">Browse More Quests</h3>
+                    <p>Discover weekly and special quests</p>
+                    <div class="browse-arrow">
+                        <i class='bx bx-right-arrow-alt bx-md'></i>
+                    </div>
+                </div>
+            </a>
         </div>
     </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $(document).ready(function() {
-        // Load check-in status and start timer
-        loadCheckInStatus();
-
-        // Debug button for testing
-        if(window.location.search.includes('debug=true')) {
-            addDebugButtons();
-        }
-
-        // Daily check-in handler
-        $('#checkInBtn').click(function() {
-            var btn = $(this);
-            if(btn.prop('disabled')) return;
-
-            btn.prop('disabled', true).html('Checking in...');
-
-            $.post('/Quest/CheckIn')
-                .done(function(response) {
-                    if (response && response.success) {
-                        showNotification('success', response.message || 'Successfully checked in!');
-                        $('#streakCount').text(response.streak || 0);
-                        btn.removeClass('claim-button').addClass('claim-completed')
-                            .html('✓ Checked In').prop('disabled', true);
-
-                        // Hide timer and show next check-in countdown
-                        $('#nextCheckInTimer').hide();
-
-                        // Show token/XP notification
-                        if (response.tokensEarned) {
-                            setTimeout(() => {
-                                showNotification('success', `+${response.tokensEarned} tokens, +${response.xpEarned || 0} XP!`);
-                            }, 1000);
-                        }
-
-                        // Reload to show updated stats and start timer
-                        setTimeout(() => location.reload(), 2500);
-                    } else {
-                        showNotification('warning', response.message || 'Check-in failed');
-                        btn.prop('disabled', false).html('Check In');
-                    }
-                })
-                .fail(function(xhr, status, error) {
-                    console.error('Check-in error:', error);
-                    showNotification('error', 'An error occurred during check-in.');
-                    btn.prop('disabled', false).html('Check In');
-                });
-        });
-
-        // Claim reward handlers
-        $(document).on('click', '.claim-reward-btn', function() {
-            var questId = $(this).data('quest-id');
-            var btn = $(this);
-
-            if(!questId || btn.prop('disabled')) return;
-
-            btn.prop('disabled', true).html('Claiming...');
-
-            $.post('/Quest/ClaimReward', { questId: questId })
-                .done(function(response) {
-                    if (response && response.success) {
-                        showNotification('success', response.message || 'Reward claimed successfully!');
-                        btn.removeClass('claim-active').addClass('claim-completed')
-                            .html('✓ Claimed').prop('disabled', true);
-
-                        // Update the progress bar to 100%
-                        var questCard = btn.closest('.quest-card');
-                        questCard.find('.progress-fill').css('width', '100%');
-
-                        // Reload page to update stats
-                        setTimeout(() => location.reload(), 2000);
-                    } else {
-                        showNotification('error', response.message || 'Failed to claim reward');
-                        btn.prop('disabled', false).html('Claim');
-                    }
-                })
-                .fail(function(xhr, status, error) {
-                    console.error('Claim error:', error);
-                    showNotification('error', 'An error occurred while claiming the reward.');
-                    btn.prop('disabled', false).html('Claim');
-                });
-        });
-    });
-
-    let checkInTimer;
-
-    function loadCheckInStatus() {
-        $.get('/Quest/CheckInStatus')
-            .done(function(data) {
-                if(data) {
-                    $('#streakCount').text(data.streak || 0);
-                    if (data.hasCheckedIn) {
-                        $('#checkInBtn').removeClass('claim-button').addClass('claim-completed')
-                            .html('✓ Checked In').prop('disabled', true);
-
-                        // Show timer for next check-in
-                        if (data.timeUntilNextCheckIn && data.timeUntilNextCheckIn.totalSeconds > 0) {
-                            showNextCheckInTimer(data.timeUntilNextCheckIn.totalSeconds);
-                        }
-                    } else {
-                        $('#checkInBtn').removeClass('claim-completed').addClass('claim-button')
-                            .html('Check In').prop('disabled', false);
-                        $('#nextCheckInTimer').hide();
-                    }
-                }
-            })
-            .fail(function(xhr, status, error) {
-                console.log('Failed to load check-in status:', error);
-            });
-    }
-
-    function showNextCheckInTimer(totalSeconds) {
-        if (totalSeconds <= 0) {
-            $('#nextCheckInTimer').hide();
-            return;
-        }
-
-        $('#nextCheckInTimer').show();
-
-        // Clear existing timer
-        if (checkInTimer) {
-            clearInterval(checkInTimer);
-        }
-
-        let remainingSeconds = totalSeconds;
-
-        function updateTimer() {
-            if (remainingSeconds <= 0) {
-                clearInterval(checkInTimer);
-                $('#nextCheckInTimer').hide();
-                showNotification('info', 'New check-in available!');
-                // Refresh to allow new check-in
-                setTimeout(() => location.reload(), 1000);
-                return;
-            }
-
-            const hours = Math.floor(remainingSeconds / 3600);
-            const minutes = Math.floor((remainingSeconds % 3600) / 60);
-            const seconds = remainingSeconds % 60;
-
-            const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            $('#timerDisplay').text(timeString);
-
-            remainingSeconds--;
-        }
-
-        // Update immediately and then every second
-        updateTimer();
-        checkInTimer = setInterval(updateTimer, 1000);
-    }
-
-    function showNotification(type, message) {
-        // Remove existing notifications
-        $('.quest-notification').remove();
-
-        var notification = $('<div class="quest-notification ' + type + '">' + message + '</div>');
-        $('body').append(notification);
-
-        setTimeout(function() {
-            notification.addClass('show');
-        }, 100);
-
-        setTimeout(function() {
-            notification.removeClass('show');
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
-    }
-
-    // Enhanced Debug Panel with Step 7 features
-    function addDebugButtons() {
-        // Only add if debug panel doesn't exist
-        if($('#debugPanel').length > 0) return;
-
-        var debugPanel = $(`
-            <div id="debugPanel" style="position: fixed; top: 10px; right: 10px; background: #000; color: #fff; padding: 10px; border-radius: 5px; z-index: 9999; max-width: 200px;">
-                <h4>Debug Panel</h4>
-                <button id="debugGenerateQuests" style="margin: 2px; width: 100%; font-size: 12px;">Generate Quests</button>
-                <button id="debugCompleteQuest" style="margin: 2px; width: 100%; font-size: 12px;">Complete First Quest</button>
-                <button id="debugWeeklyQuest" style="margin: 2px; width: 100%; font-size: 12px;">Force Weekly Quest</button>
-                <button id="debugTestCheckIn" style="margin: 2px; width: 100%; font-size: 12px;">Test Check-in</button>
-                <button id="debugTestTriggers" style="margin: 2px; width: 100%; font-size: 12px; background: #007bff;">Test Quest Triggers</button>
-                <button id="debugReconcileStats" style="margin: 2px; width: 100%; font-size: 12px; background: #28a745;">Fix Stats</button>
-                <button id="debugSystemHealth" style="margin: 2px; width: 100%; font-size: 12px; background: #17a2b8;">System Health</button>
-                <button id="closeDebug" style="margin: 2px; width: 100%; font-size: 12px; background: #dc3545;">Close</button>
-            </div>
-        `);
-        $('body').append(debugPanel);
-
-        // Existing handlers
-        $('#debugGenerateQuests').click(function() {
-            $.post('/Quest/DebugGenerateQuests')
-                .done(response => {
-                    showNotification('success', response.message || 'Quests generated');
-                    setTimeout(() => location.reload(), 1500);
-                })
-                .fail(() => showNotification('error', 'Failed to generate quests'));
-        });
-
-        $('#debugCompleteQuest').click(function() {
-            var firstQuestId = $('.quest-card').first().data('quest-id');
-            if(firstQuestId) {
-                $.post('/Quest/DebugCompleteQuest', { questId: firstQuestId })
-                    .done(response => {
-                        showNotification('success', response.message || 'Quest completed');
-                        setTimeout(() => location.reload(), 1500);
-                    })
-                    .fail(() => showNotification('error', 'Failed to complete quest'));
-            } else {
-                showNotification('warning', 'No quests available to complete');
-            }
-        });
-
-        $('#debugWeeklyQuest').click(function() {
-            $.post('/Quest/DebugWeeklyQuestGeneration')
-                .done(response => {
-                    showNotification('success', response.message || 'Weekly quest generated');
-                    setTimeout(() => location.reload(), 1500);
-                })
-                .fail(() => showNotification('error', 'Failed to generate weekly quest'));
-        });
-
-        $('#debugTestCheckIn').click(function() {
-            $('#checkInBtn').click();
-        });
-
-        // NEW: Step 7 handlers
-        $('#debugTestTriggers').click(function() {
-            $.post('/Quest/TestQuestTriggers')
-                .done(response => {
-                    console.log('Quest triggers test:', response);
-                    showNotification('success', 'Quest triggers tested - check console for details');
-                    if (response.results) {
-                        response.results.forEach(result => {
-                            console.log(`${result.actionType}: ${result.message}`);
-                        });
-                    }
-                })
-                .fail(() => showNotification('error', 'Failed to test quest triggers'));
-        });
-
-        $('#debugReconcileStats').click(function() {
-            $.post('/Quest/ReconcileUserStats')
-                .done(response => {
-                    console.log('Stats reconciliation:', response);
-                    if (response.changes) {
-                        let changesMsg = [];
-                        if (response.changes.tokens.changed) changesMsg.push(`Tokens: ${response.changes.tokens.old} → ${response.changes.tokens.new}`);
-                        if (response.changes.streak.changed) changesMsg.push(`Streak: ${response.changes.streak.old} → ${response.changes.streak.new}`);
-                        if (response.changes.xp.changed) changesMsg.push(`XP: ${response.changes.xp.old} → ${response.changes.xp.new}`);
-
-                        if (changesMsg.length > 0) {
-                            showNotification('success', 'Stats fixed: ' + changesMsg.join(', '));
-                        } else {
-                            showNotification('success', 'Stats were already correct');
-                        }
-                    } else {
-                        showNotification('success', 'User statistics reconciled');
-                    }
-                    setTimeout(() => location.reload(), 2000);
-                })
-                .fail(() => showNotification('error', 'Failed to reconcile stats'));
-        });
-
-        $('#debugSystemHealth').click(function() {
-            $.get('/Quest/GetSystemHealth')
-                .done(response => {
-                    console.log('System health:', response);
-                    if (response.health) {
-                        const h = response.health;
-                        const msg = `Quests: ${h.questSystem.userActiveQuests}/${h.questSystem.totalActiveQuests} | Level: ${h.userProgress.level} | Tokens: ${h.userProgress.tokens} | Streak: ${h.userProgress.streak}`;
-                        showNotification('success', 'Health: ' + msg);
-
-                        // Check for issues
-                        if (!h.dataConsistency.userTokensMatch) {
-                            showNotification('warning', 'Token balance mismatch detected!');
-                        }
-                    } else {
-                        showNotification('success', 'System health checked - see console');
-                    }
-                })
-                .fail(() => showNotification('error', 'Failed to check system health'));
-        });
-
-        $('#closeDebug').click(function() {
-            $('#debugPanel').remove();
-        });
-    }
-
-    // Test quest progress functions
-    function testQuestProgress(actionType) {
-        $.post('/Quest/TriggerQuestProgress', { actionType: actionType })
-            .done(response => {
-                console.log(`${actionType} progress test:`, response);
-                showNotification(response.success ? 'success' : 'warning', response.message);
-                if (response.success) {
-                    setTimeout(() => location.reload(), 1500);
-                }
-            })
-            .fail(() => showNotification('error', `Failed to test ${actionType} progress`));
-    }
-
-    function generateWeeklyQuest() {
-        $.post('/Quest/DebugWeeklyQuestGeneration')
-            .done(function(response) {
-                showNotification('success', response.message || 'Weekly quest generated');
-                setTimeout(() => location.reload(), 1500);
-            })
-            .fail(() => showNotification('error', 'Failed to generate weekly quest'));
-    }
-
-    // Global quest model for debugging
-    @if (Model != null)
-    {
-                <text>
-                window.questModel = @Html.Raw(Json.Serialize(Model));
-                console.log("QuestModel loaded:", window.questModel);
-                </text>
-    }
-
-    // Clean up timer when page unloads
-    $(window).on('beforeunload', function() {
-        if (checkInTimer) {
-            clearInterval(checkInTimer);
-        }
-    });
-
-        // Add this after the existing debug handlers in the main script block
-    $('#testIntegration').click(function() {
-        $(this).prop('disabled', true).text('Testing...');
-
-        $.post('/Quest/TestQuestAchievementIntegration')
-            .done(function(response) {
-                if (response.success) {
-                    var resultHtml = '<div style="background: #d4edda; border: 1px solid #c3e6cb; padding: 10px; border-radius: 5px; margin-top: 10px;"><strong>✅ Test Results:</strong><ul style="margin: 5px 0;">';
-                    response.results.forEach(function(result) {
-                        resultHtml += '<li style="margin: 2px 0;">' + result + '</li>';
-                    });
-                    resultHtml += '</ul></div>';
-                    $('#testResults').html(resultHtml);
-                    showNotification('success', 'Achievement integration test completed successfully!');
-                } else {
-                    $('#testResults').html('<div style="background: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; margin-top: 10px;">❌ Test failed: ' + response.message + '</div>');
-                    showNotification('error', 'Achievement integration test failed');
-                }
-            })
-            .fail(function() {
-                $('#testResults').html('<div style="background: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; margin-top: 10px;">❌ Test request failed - check console</div>');
-                showNotification('error', 'Test request failed');
-            })
-            .always(function() {
-                $('#testIntegration').prop('disabled', false).text('Test Quest-Achievement Integration');
-            });
-    });
-        // Add this after the existing test integration handler
-    $('#testRealProgress').click(function() {
-        $(this).prop('disabled', true).text('Testing Real Progress...');
-
-        $.post('/Quest/TestRealAchievementProgress')
-            .done(function(response) {
-                if (response.success) {
-                    var resultHtml = '<div style="background: #d1ecf1; border: 1px solid #b6d4db; padding: 10px; border-radius: 5px; margin-top: 10px;"><strong>🏆 Real Progress Test:</strong><ul style="margin: 5px 0;">';
-                    response.results.forEach(function(result) {
-                        resultHtml += '<li style="margin: 2px 0;">' + result + '</li>';
-                    });
-
-                    if (response.unlockedCount > 0) {
-                        resultHtml += '</ul><div style="background: #d4edda; padding: 8px; margin-top: 8px; border-radius: 3px;"><strong>🎉 New Achievements Unlocked:</strong><ul>';
-                        response.unlockedAchievements.forEach(function(achievement) {
-                            resultHtml += '<li>' + achievement + '</li>';
-                        });
-                        resultHtml += '</ul></div>';
-                    } else {
-                        resultHtml += '</ul><div style="background: #fff3cd; padding: 8px; margin-top: 8px; border-radius: 3px;">💡 <strong>Tip:</strong> Complete more quests or list more items to unlock achievements!</div>';
-                    }
-
-                    resultHtml += '</div>';
-                    $('#testResults').html(resultHtml);
-
-                    if (response.unlockedCount > 0) {
-                        showNotification('success', `Unlocked ${response.unlockedCount} new achievements!`);
-                        // Reload to show updated achievements
-                        setTimeout(() => location.reload(), 3000);
-                    } else {
-                        showNotification('info', 'No new achievements unlocked - keep progressing!');
-                    }
-                } else {
-                    $('#testResults').html('<div style="background: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; margin-top: 10px;">❌ Real progress test failed: ' + response.message + '</div>');
-                    showNotification('error', 'Real progress test failed');
-                }
-            })
-            .fail(function() {
-                $('#testResults').html('<div style="background: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; margin-top: 10px;">❌ Test request failed</div>');
-                showNotification('error', 'Test request failed');
-            })
-            .always(function() {
-                $('#testRealProgress').prop('disabled', false).text('Test Real Achievement Progress');
-            });
-    });
-
-        // Add this after your existing test handlers
-    $('#testItemSeeding').click(function() {
-        $(this).prop('disabled', true).text('Seeding Items & Testing...');
-
-        $.post('/Quest/SeedTestItemsAndCheckAchievements')
-            .done(function(response) {
-                if (response.success) {
-                    var resultHtml = '<div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 5px; margin-top: 10px;"><strong>🎯 Item Seeding Test:</strong><ul style="margin: 5px 0;">';
-                    response.results.forEach(function(result) {
-                        resultHtml += '<li style="margin: 2px 0;">' + result + '</li>';
-                    });
-                    resultHtml += '</ul>';
-
-                    if (response.unlockedAchievements && response.unlockedAchievements.length > 0) {
-                        resultHtml += '<div style="background: #d4edda; padding: 8px; margin-top: 8px; border-radius: 3px;"><strong>🏆 Achievements Unlocked:</strong><ul>';
-                        response.unlockedAchievements.forEach(function(achievement) {
-                            resultHtml += '<li><strong>' + achievement.name + '</strong>: ' + achievement.description + ' (' + achievement.reward + ')</li>';
-                        });
-                        resultHtml += '</ul></div>';
-                    }
-
-                    if (response.categoriesTested && response.categoriesTested.length > 0) {
-                        resultHtml += '<div style="background: #e2e3e5; padding: 8px; margin-top: 8px; border-radius: 3px;"><strong>📦 Categories Tested:</strong> ' + response.categoriesTested.join(', ') + '</div>';
-                    }
-
-                    resultHtml += '</div>';
-                    $('#testResults').html(resultHtml);
-
-                    if (response.unlockedAchievements && response.unlockedAchievements.length > 0) {
-                        showNotification('success', `Created ${response.itemsCreated} items and unlocked ${response.unlockedAchievements.length} achievements!`);
-                        // Reload to show updated stats
-                        setTimeout(() => location.reload(), 4000);
-                    } else {
-                        showNotification('info', `Created ${response.itemsCreated} items - check thresholds for achievements`);
-                    }
-                } else {
-                    $('#testResults').html('<div style="background: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; margin-top: 10px;">❌ Item seeding test failed: ' + response.message + '</div>');
-                    showNotification('error', 'Item seeding test failed');
-                }
-            })
-            .fail(function() {
-                $('#testResults').html('<div style="background: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; margin-top: 10px;">❌ Test request failed</div>');
-                showNotification('error', 'Test request failed');
-            })
-            .always(function() {
-                $('#testItemSeeding').prop('disabled', false).text('Seed Items & Test Achievements');
-            });
-    });
-
-        // Database check handler
-    $('#checkDatabase').click(function() {
-        $(this).prop('disabled', true).text('Checking...');
-
-        $.post('/Quest/CheckDatabaseSetup')
-            .done(function(response) {
-                if (response.success) {
-                    var resultHtml = '<div style="background: #e2e3e5; border: 1px solid #d1d3d4; padding: 10px; border-radius: 5px; margin-top: 10px;"><strong>📋 Database Status:</strong><ul style="margin: 5px 0;">';
-                    response.results.forEach(function(result) {
-                        resultHtml += '<li style="margin: 2px 0;">' + result + '</li>';
-                    });
-                    resultHtml += '</ul>';
-
-                    if (response.needsSeeding) {
-                        resultHtml += '<div style="background: #fff3cd; padding: 8px; margin-top: 8px; border-radius: 3px;"><strong>⚠️ Action Required:</strong> Some required data is missing. Click "Seed Item Data" to fix this.</div>';
-                    } else {
-                        resultHtml += '<div style="background: #d4edda; padding: 8px; margin-top: 8px; border-radius: 3px;"><strong>✅ Ready:</strong> All required data is present. You can now test item seeding.</div>';
-                    }
-
-                    resultHtml += '</div>';
-                    $('#testResults').html(resultHtml);
-
-                    showNotification(response.needsSeeding ? 'warning' : 'success',
-                        response.needsSeeding ? 'Database setup incomplete' : 'Database ready for testing');
-                } else {
-                    $('#testResults').html('<div style="background: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; margin-top: 10px;">❌ Database check failed: ' + response.message + '</div>');
-                    showNotification('error', 'Database check failed');
-                }
-            })
-            .fail(function() {
-                showNotification('error', 'Database check request failed');
-            })
-            .always(function() {
-                $('#checkDatabase').prop('disabled', false).text('Check Database Setup');
-            });
-    });
-
-    // Seed item data handler
-    $('#seedItemData').click(function() {
-        $(this).prop('disabled', true).text('Seeding...');
-
-        $.post('/Quest/SeedRequiredItemData')
-            .done(function(response) {
-                if (response.success) {
-                    var resultHtml = '<div style="background: #d4edda; border: 1px solid #c3e6cb; padding: 10px; border-radius: 5px; margin-top: 10px;"><strong>✅ Seeding Complete:</strong><ul style="margin: 5px 0;">';
-                    response.results.forEach(function(result) {
-                        resultHtml += '<li style="margin: 2px 0;">' + result + '</li>';
-                    });
-                    resultHtml += '</ul><div style="background: #cce5ff; padding: 8px; margin-top: 8px; border-radius: 3px;"><strong>💡 Next Step:</strong> Now you can click "Seed Items & Test Achievements" to test the full system.</div></div>';
-                    $('#testResults').html(resultHtml);
-
-                    showNotification('success', 'Required item data seeded successfully!');
-                } else {
-                    $('#testResults').html('<div style="background: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; margin-top: 10px;">❌ Seeding failed: ' + response.message + '</div>');
-                    showNotification('error', 'Item data seeding failed');
-                }
-            })
-            .fail(function() {
-                showNotification('error', 'Seeding request failed');
-            })
-            .always(function() {
-                $('#seedItemData').prop('disabled', false).text('Seed Item Data');
-            });
-    });
-
-        $('#testManualUnlock').click(function() {
-        $(this).prop('disabled', true).text('Force Unlocking...');
-
-        $.post('/Quest/ManuallyUnlockTestAchievements')
-            .done(function(response) {
-                if (response.success) {
-                    var resultHtml = '<div style="background: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; margin-top: 10px;"><strong>🔧 Force Unlock Test:</strong><ul style="margin: 5px 0;">';
-                    response.results.forEach(function(result) {
-                        resultHtml += '<li style="margin: 2px 0;">' + result + '</li>';
-                    });
-                    resultHtml += '</ul>';
-
-                    if (response.unlockedAchievements && response.unlockedAchievements.length > 0) {
-                        resultHtml += '<div style="background: #d4edda; padding: 8px; margin-top: 8px; border-radius: 3px;"><strong>🏆 Force Unlocked:</strong><ul>';
-                        response.unlockedAchievements.forEach(function(achievement) {
-                            resultHtml += '<li><strong>' + achievement.name + '</strong>: ' + achievement.description + '</li>';
-                        });
-                        resultHtml += '</ul></div>';
-                    }
-
-                    resultHtml += '</div>';
-                    $('#testResults').html(resultHtml);
-
-                    showNotification('success', `Force unlocked ${response.unlockedAchievements.length} achievements!`);
-                    setTimeout(() => location.reload(), 3000);
-                }
-            })
-            .always(function() {
-                $('#testManualUnlock').prop('disabled', false).text('Force Unlock Achievements');
-            });
-    });
-
-        $('#directUnlock').click(function() {
-        $(this).prop('disabled', true).text('Unlocking...');
-
-        $.post('/Quest/DirectUnlockAchievement', { userId: 1, achievementId: 1 })
-            .done(function(response) {
-                if (response.success) {
-                    var resultHtml = '<div style="background: #d4edda; border: 1px solid #c3e6cb; padding: 10px; border-radius: 5px; margin-top: 10px;"><strong>🔓 Direct Unlock Test:</strong><ul style="margin: 5px 0;">';
-                    response.results.forEach(function(result) {
-                        resultHtml += '<li style="margin: 2px 0;">' + result + '</li>';
-                    });
-                    resultHtml += '</ul></div>';
-                    $('#testResults').html(resultHtml);
-                    showNotification('success', `Unlocked: ${response.achievement.name}!`);
-                    setTimeout(() => location.reload(), 2000);
-                } else {
-                    $('#testResults').html('<div style="background: #f8d7da; padding: 10px; border-radius: 5px; margin-top: 10px;">❌ Direct unlock failed: ' + response.message + '</div>');
-                }
-            })
-            .always(function() {
-                $('#directUnlock').prop('disabled', false).text('Direct Unlock Test Achievement');
-            });
-    });
-
-    $('#unlockMultiple').click(function() {
-        $(this).prop('disabled', true).text('Unlocking Multiple...');
-
-        $.post('/Quest/UnlockMultipleTestAchievements', { userId: 1 })
-            .done(function(response) {
-                if (response.success) {
-                    var resultHtml = '<div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 5px; margin-top: 10px;"><strong>🎯 Multiple Unlock Test:</strong><ul style="margin: 5px 0;">';
-                    response.results.forEach(function(result) {
-                        resultHtml += '<li style="margin: 2px 0;">' + result + '</li>';
-                    });
-                    resultHtml += '</ul></div>';
-                    $('#testResults').html(resultHtml);
-
-                    if (response.unlockedCount > 0) {
-                        showNotification('success', `Unlocked ${response.unlockedCount} achievements!`);
-                        setTimeout(() => location.reload(), 3000);
-                    } else {
-                        showNotification('info', 'No additional achievements unlocked');
-                    }
-                }
-            })
-            .always(function() {
-                $('#unlockMultiple').prop('disabled', false).text('Unlock Multiple Based on Data');
-            });
-    });
-
-        $('#verifyBalances').click(function() {
-        $(this).prop('disabled', true).text('Verifying...');
-
-        $.post('/Quest/VerifyUserBalances', { userId: 1 })
-            .done(function(response) {
-                if (response.success) {
-                    var resultHtml = '<div style="background: #e2e3e5; border: 1px solid #d1d3d4; padding: 10px; border-radius: 5px; margin-top: 10px;"><strong>📊 Balance Verification:</strong><ul style="margin: 5px 0;">';
-                    response.results.forEach(function(result) {
-                        resultHtml += '<li style="margin: 2px 0;">' + result + '</li>';
-                    });
-                    resultHtml += '</ul>';
-
-                    if (!response.balancesMatch || !response.xpMatches) {
-                        resultHtml += '<div style="background: #f8d7da; padding: 8px; margin-top: 8px; border-radius: 3px;"><strong>⚠️ Inconsistency Detected!</strong> Some balances don\'t match.</div>';
-                    } else {
-                        resultHtml += '<div style="background: #d4edda; padding: 8px; margin-top: 8px; border-radius: 3px;"><strong>✅ All Consistent:</strong> All balances match correctly.</div>';
-                    }
-
-                    resultHtml += '</div>';
-                    $('#testResults').html(resultHtml);
-                }
-            })
-            .always(function() {
-                $('#verifyBalances').prop('disabled', false).text('Verify User Balances');
-            });
-    });
-        $('#resetUser').click(function() {
-        if (!confirm('Are you sure you want to reset current user progress? This will delete all test data for user 1.')) {
-            return;
-        }
-
-        $(this).prop('disabled', true).text('Resetting...');
-
-        $.post('/Quest/ResetUserProgress', { userId: 1 })
-            .done(function(response) {
-                if (response.success) {
-                    var resultHtml = '<div style="background: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; margin-top: 10px;"><strong>🔄 User Reset Complete:</strong><ul style="margin: 5px 0;">';
-                    response.results.forEach(function(result) {
-                        resultHtml += '<li style="margin: 2px 0;">' + result + '</li>';
-                    });
-                    resultHtml += '</ul></div>';
-                    $('#testResults').html(resultHtml);
-                    showNotification('success', 'User progress reset successfully!');
-                    setTimeout(() => location.reload(), 2000);
-                } else {
-                    showNotification('error', 'Reset failed: ' + response.message);
-                }
-            })
-            .always(function() {
-                $('#resetUser').prop('disabled', false).text('Reset Current User');
-            });
-    });
-
-    $('#resetAll').click(function() {
-        if (!confirm('Are you sure you want to reset ALL test data? This will affect all test users and cannot be undone!')) {
-            return;
-        }
-
-        $(this).prop('disabled', true).text('Resetting All...');
-
-        $.post('/Quest/ResetAllTestData')
-            .done(function(response) {
-                if (response.success) {
-                    var resultHtml = '<div style="background: #343a40; color: white; border: 1px solid #495057; padding: 10px; border-radius: 5px; margin-top: 10px;"><strong>💥 Complete Reset:</strong><ul style="margin: 5px 0;">';
-                    response.results.forEach(function(result) {
-                        resultHtml += '<li style="margin: 2px 0;">' + result + '</li>';
-                    });
-                    resultHtml += '</ul></div>';
-                    $('#testResults').html(resultHtml);
-                    showNotification('success', 'All test data reset successfully!');
-                    setTimeout(() => location.reload(), 3000);
-                } else {
-                    showNotification('error', 'Complete reset failed: ' + response.message);
-                }
-            })
-            .always(function() {
-                $('#resetAll').prop('disabled', false).text('Reset All Test Data');
-            });
-    });
-
-        // Add to your existing JavaScript section
-    $('#simulateCheckIn').click(function() {
-        $(this).prop('disabled', true).text('Processing...');
-        $.post('/Quest/SimulateCheckIn')
-            .done(function(response) {
-                if (response.success) {
-                    showNotification('success', response.message);
-                    setTimeout(() => location.reload(), 1500);
-                } else {
-                    showNotification('info', response.message);
-                }
-            })
-            .always(function() {
-                $('#simulateCheckIn').prop('disabled', false).text('Simulate Check-In');
-            });
-    });
-
-    $('#simulateItemListing').click(function() {
-        $(this).prop('disabled', true).text('Processing...');
-        $.post('/Quest/SimulateItemListing', { count: 3 })
-            .done(function(response) {
-                if (response.success) {
-                    showNotification('success', response.message);
-                    setTimeout(() => location.reload(), 1500);
-                } else {
-                    showNotification('info', response.message);
-                }
-            })
-            .always(function() {
-                $('#simulateItemListing').prop('disabled', false).text('Simulate Item Listing');
-            });
-    });
-
-    $('#simulatePostCreation').click(function() {
-        $(this).prop('disabled', true).text('Processing...');
-        $.post('/Quest/SimulatePostCreation')
-            .done(function(response) {
-                if (response.success) {
-                    showNotification('success', response.message);
-                    setTimeout(() => location.reload(), 1500);
-                } else {
-                    showNotification('info', response.message);
-                }
-            })
-            .always(function() {
-                $('#simulatePostCreation').prop('disabled', false).text('Simulate Post Creation');
-            });
-    });
-
-    $('#simulateCommentCreation').click(function() {
-        $(this).prop('disabled', true).text('Processing...');
-        $.post('/Quest/SimulateCommentCreation')
-            .done(function(response) {
-                if (response.success) {
-                    showNotification('success', response.message);
-                    setTimeout(() => location.reload(), 1500);
-                } else {
-                    showNotification('info', response.message);
-                }
-            })
-            .always(function() {
-                $('#simulateCommentCreation').prop('disabled', false).text('Simulate Comment Creation');
-            });
-    });
-</script>
-
 <script src="~/js/QuestPage.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-<script src="~/js/questPageFlowMenu.js"></script>
-<script src="~/js/questInteractions.js" asp-append-version="true"></script>
 
-<style>
-    .level-progress-section {
-        margin: 20px 0;
-        padding: 0 20px;
-    }
-
-    .level-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 15px;
-        padding: 20px;
-        color: white;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    }
-
-    .level-info {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-    }
-
-    .level-display {
-        display: flex;
-        align-items: baseline;
-        gap: 10px;
-    }
-
-    .level-number {
-        font-size: 2.5em;
-        font-weight: bold;
-        color: #FFD700;
-    }
-
-    .level-name {
-        font-size: 1.2em;
-        font-weight: 600;
-    }
-
-    .xp-display {
-        font-size: 1.1em;
-        color: #E8E8E8;
-    }
-
-    .level-progress-bar {
-        position: relative;
-        background: rgba(255,255,255,0.2);
-        border-radius: 10px;
-        height: 12px;
-        overflow: hidden;
-    }
-
-    .level-progress-fill {
-        background: linear-gradient(90deg, #FFD700, #FFA500);
-        height: 100%;
-        border-radius: 10px;
-        transition: width 0.5s ease;
-    }
-
-    .level-progress-text {
-        position: absolute;
-        top: -25px;
-        right: 0;
-        font-size: 0.9em;
-        color: #E8E8E8;
-    }
-
-    .quest-notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        border-radius: 8px;
-        color: white;
-        font-weight: 600;
-        z-index: 10000;
-        transform: translateX(400px);
-        transition: transform 0.3s ease;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
-
-        .quest-notification.show {
-            transform: translateX(0);
-        }
-
-        .quest-notification.success {
-            background: linear-gradient(135deg, #00C851, #007E33);
-        }
-
-        .quest-notification.warning {
-            background: linear-gradient(135deg, #ffbb33, #FF8800);
-        }
-
-        .quest-notification.error {
-            background: linear-gradient(135deg, #ff4444, #CC0000);
-        }
-
-        .quest-notification.info {
-            background: linear-gradient(135deg, #33b5e5, #0099cc);
-        }
-
-    .claim-completed {
-        background: linear-gradient(135deg, #00C851, #007E33) !important;
-        cursor: default;
-    }
-
-    .quest-progress-details {
-        margin: 8px 0;
-        font-size: 0.9em;
-        color: #666;
-    }
-
-    .weekly-quest {
-        border-left: 4px solid #764ba2;
-    }
-
-    .special-quest {
-        border-left: 4px solid #FFD700;
-    }
-
-    .check-in-timer {
-        margin-top: 8px;
-        font-size: 0.9em;
-        color: rgba(255, 255, 255, 0.8);
-        background: rgba(255, 255, 255, 0.1);
-        padding: 5px 10px;
-        border-radius: 12px;
-        display: inline-block;
-    }
-
-    #timerDisplay {
-        font-weight: bold;
-        color: #FFD700;
-        font-family: monospace;
-        font-size: 1.1em;
-    }
-
-    .checkin-card.checked-in {
-        background: linear-gradient(135deg, #6c757d, #5a6268);
-    }
-
-        .checkin-card.checked-in .check-in-timer {
-            background: rgba(255, 215, 0, 0.2);
-        }
-
-    /* Enhanced quest card interactivity */
-    .claim-disabled:hover {
-        background: linear-gradient(135deg, #007bff, #0056b3) !important;
-        color: white !important;
-        cursor: pointer !important;
-    }
-</style>
+@if (Model != null)
+{
+    <script>
+        window.questModel = @Html.Raw(Json.Serialize(Model));
+        console.log("QuestModel loaded:", window.questModel);
+    </script>
+}

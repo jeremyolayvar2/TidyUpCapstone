@@ -1,1108 +1,217 @@
 ﻿:root {
     --background: #F5F5F5;
     --primary-color: #6B9080;
+    --dark-primary: #344e41;
     --secondary-color: #A4C3B2;
     --accent-color: #EAF4F4;
     --text-color: #000000;
+    --text-secondary: #6B7280;
     --hover-effect: rgba(217, 217, 217, 0.6);
+    --success-color: #10B981;
+    --warning-color: #F59E0B;
+    --danger-color: #EF4444;
+    --info-color: #3B82F6;
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --border-radius: 16px;
+    --border-radius-sm: 8px;
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 0.75rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
+}
+
+html {
+    overflow-x: hidden;
+    max-width: 100vw;
 }
 
 * {
     box-sizing: border-box;
 }
 
-/* Override body background for quest page */
-body.quest-page {
-    background: var(--primary-color) !important;
-    font-family: 'Montserrat', sans-serif;
+body {
+    background: linear-gradient(135deg, #344e41 0%, #588157 25%, #6b9080 50%, #a3b18a 75%, #cad2c5 100%) !important;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
 }
+
+    
+    body.quest-page {
+        background: linear-gradient(135deg, #344e41 0%, #588157 25%, #6b9080 50%, #a3b18a 75%, #cad2c5 100%) !important;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        background-size: cover;
+        font-family: 'Montserrat', sans-serif;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        min-height: 100vh;
+    }
 
 .righteous-font {
     font-family: "Righteous", sans-serif;
 }
 
-/* Main Quest Page Container - Works with layout system */
-.quest-page-container {
+/* Main Dashboard Container */
+.quest-dashboard {
     width: 100%;
     min-height: 100vh;
-    /* Account for mobile dock space */
-    padding-bottom: clamp(1rem, 3vw, 2rem);
+    padding: var(--spacing-lg);
+    padding-bottom: 120px;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
-/* Mobile: Add extra bottom padding for dock */
-@media (max-width: 768px) {
-    .quest-page-container {
-        padding-bottom: 100px; /* Space for mobile dock */
-    }
-}
-
-/* Header Section */
+/* Header Styles */
 .quest-header {
     text-align: center;
-    margin-bottom: clamp(1rem, 4vw, 3rem);
+    margin-bottom: var(--spacing-2xl);
 }
 
 .quest-title {
-    font-size: clamp(2.5rem, 12vw, 20.25rem);
+    font-size: clamp(2.5rem, 8vw, 6rem);
     color: var(--background);
     font-weight: bold;
-    transform: rotate(-3deg);
-    margin-top: 2rem;
+    transform: rotate(-2deg);
+    margin: var(--spacing-lg) 0;
     line-height: 0.9;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Content Layout - Responsive flex layout */
-.quest-content-wrapper {
-    display: flex;
-    gap: clamp(1rem, 3vw, 2rem);
-    margin-bottom: clamp(2rem, 5vw, 4rem);
-    align-items: flex-start;
-    position: relative;
-    z-index: 10;
-    margin-top: clamp(-2rem, -5vw, -5rem);
-}
-
-/* Quest Illustration */
-.quest-illustration-container {
-    flex-shrink: 0;
-    display: none;
-}
-
-.quest-illustration {
-    max-width: 100%;
-    height: auto;
-    border-radius: 12px;
-    max-height: 600px;
-    object-fit: cover;
-}
-
-/* Quest Cards Container */
-.quest-cards-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    max-width: 500px;
-    max-height: 32rem;
-    overflow-y: auto;
-    padding-right: 0.5rem;
-}
-
-/* Quest Card Styles */
-.quest-card {
-    background: var(--accent-color);
-    border-radius: 12px;
-    padding: clamp(1rem, 3vw, 1.5rem);
-    transition: all 0.3s ease;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-    .quest-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-
-.quest-card-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1rem;
-    gap: 1rem;
-}
-
-.quest-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.quest-timer {
-    font-size: clamp(0.75rem, 2vw, 0.875rem);
-    color: #6b7280;
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 500;
-}
-
-.quest-name {
-    font-size: clamp(1.25rem, 4vw, 1.5rem);
-    color: var(--text-color);
-    font-weight: bold;
-    margin: 0.5rem 0;
-    line-height: 1.2;
-}
-
-.quest-description {
-    color: #374151;
-    margin: 0;
-    font-size: clamp(0.875rem, 2.5vw, 1rem);
-    line-height: 1.4;
-}
-
-.quest-reward {
-    display: flex;
-    align-items: center;
-    gap: clamp(0.5rem, 2vw, 0.75rem);
-    flex-shrink: 0;
-}
-
-.reward-points {
-    font-size: clamp(1.25rem, 3vw, 1.5rem);
-    font-weight: bold;
-    color: var(--text-color);
-}
-
-.claim-button {
-    padding: clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 3vw, 1.5rem);
-    border-radius: 8px;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: white;
-    font-size: clamp(0.875rem, 2vw, 1rem);
-    min-width: clamp(70px, 15vw, 90px);
-    text-align: center;
-}
-
-.claim-disabled {
-    background-color: #9ca3af;
-}
-
-    .claim-disabled:hover {
-        background-color: #6b7280;
-    }
-
-.claim-active {
-    background-color: var(--primary-color);
-}
-
-    .claim-active:hover {
-        background-color: var(--secondary-color);
-        transform: scale(1.05);
-    }
-
-/* Progress Bar */
-.progress-bar {
-    background: var(--secondary-color);
-    height: 8px;
-    border-radius: 4px;
-    overflow: hidden;
-    margin-top: 1rem;
-}
-
-.progress-fill {
-    background: var(--primary-color);
-    height: 100%;
-    transition: width 0.6s ease;
-    border-radius: 4px;
-}
-
-/* Achievements Section */
-.achievements-section {
-    margin: clamp(2rem, 5vw, 4rem) 0;
-}
-
-.achievement-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: clamp(0.5rem, 3vw, 1rem);
-    max-width: 1000px;
-    margin: 0 auto;
-}
-
-/* Profile Avatar */
-.profile-avatar-section {
-    margin-bottom: clamp(0.5rem, 2vw, 1rem);
-}
-
-.profile-avatar {
-    width: clamp(120px, 20vw, 160px);
-    height: clamp(120px, 20vw, 160px);
-    border-radius: 50%;
-    object-fit: cover;
-    border: 4px solid white;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-}
-
-/* Achievement Sections */
-.achievement-title-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 0.5rem;
-}
-
-.achievement-badge {
-    font-size: clamp(1rem, 3vw, 1.25rem);
-    color: var(--primary-color);
-    padding: clamp(0.5rem, 10vw, 0.75rem);
-    background: var(--background);
-    border-radius: 8px;
-    margin: 0;
-}
-
-.achievement-subtitle {
-    color: var(--background);
-    font-size: clamp(0.75rem, 2vw, 0.875rem);
-    font-style: italic;
-}
-
-.achievement-main-section {
+.header-stats {
     display: flex;
     justify-content: center;
-    align-items: center;
-    gap: clamp(0.5rem, 3vw, 1rem);
-    width: 100%;
+    gap: var(--spacing-xl);
+    margin-top: var(--spacing-lg);
     flex-wrap: wrap;
 }
 
-.achievement-text-card {
-    background: var(--background);
-    border-radius: 8px;
-    padding: clamp(0.75rem, 2vw, 1rem);
-    border: 1px solid black;
+.stat-item {
     text-align: center;
-    min-width: clamp(180px, 40vw, 220px);
-    max-width: 300px;
-    max-height: 500px;
-}
-
-    .achievement-text-card p {
-        margin: 0;
-        font-size: clamp(0.75rem, 2vw, 0.875rem);
-        line-height: 1.4;
-    }
-
-.achievement-icon-wrapper {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-    .achievement-icon-wrapper img {
-        max-width: clamp(300px, 50vw, 500px);
-        height: auto;
-    }
-
-.streak-card {
-    background: var(--background);
-    border-radius: 8px;
-    padding: clamp(0.75rem, 2vw, 1rem);
-    text-align: center;
-    min-width: clamp(200px, 45vw, 250px);
-    max-width: 320px;
-}
-
-.streak-title {
-    font-size: clamp(2rem, 6vw, 3rem);
-    color: var(--primary-color);
-    margin: 0 0 0.5rem 0;
-    line-height: 1;
-}
-
-.streak-description {
-    color: #6b7280;
-    font-size: clamp(0.75rem, 2vw, 0.875rem);
-    margin: 0;
-    line-height: 1.4;
-}
-
-.achievement-stats-section {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: clamp(1rem, 3vw, 1.5rem);
-    width: 100%;
-    flex-wrap: wrap;
-}
-
-.token-stats-card {
-    display: flex;
-    align-items: center;
-    background: var(--background);
-    border-radius: 8px;
-    padding: clamp(1rem, 3vw, 1.5rem);
-    gap: clamp(0.5rem, 2vw, 0.75rem);
-    min-width: clamp(180px, 40vw, 220px);
-}
-
-.token-number {
-    font-size: clamp(1.25rem, 3vw, 1.5rem);
-    font-weight: bold;
-    color: var(--primary-color);
-}
-
-.token-label {
-    font-size: clamp(1rem, 2.5vw, 1.25rem);
-    color: var(--primary-color);
-}
-
-.items-stats {
-    display: flex;
-    align-items: center;
-}
-
-.items-text {
-    font-size: clamp(0.75rem, 2vw, 0.875rem);
     color: var(--background);
-    font-style: italic;
-}
-
-/* Flowing Menu */
-.quest-flowing-menu {
-    height: clamp(200px, 35vh, 400px);
-    position: relative;
-    overflow: hidden;
-    margin: clamp(2rem, 4vw, 3rem) 0;
-}
-
-.flowing-menu-container {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-}
-
-.flowing-nav {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
-
-.menu-item {
-    flex: 1;
-    position: relative;
-    overflow: hidden;
-    text-align: center;
-    box-shadow: 0 -1px 0 0 #fff;
-}
-
-.menu-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    position: relative;
-    cursor: pointer;
-    text-transform: uppercase;
-    text-decoration: none;
-    font-weight: 500;
-    color: var(--background);
-    font-size: clamp(1rem, 4vw, 1.5rem);
-    transition: color 0.3s ease;
-}
-
-    .menu-link:hover,
-    .menu-link:focus-visible {
-        color: var(--background);
-    }
-
-.marquee-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    pointer-events: none;
-    background-color: var(--background);
-    transform: translateY(101%);
-}
-
-.marquee-inner {
-    height: 100%;
-    width: 200%;
-    display: flex;
-}
-
-.marquee-content {
-    display: flex;
-    align-items: center;
-    position: relative;
-    height: 100%;
-    width: 200%;
-    will-change: transform;
-}
-
-.marquee-text {
-    color: #060010;
-    text-transform: uppercase;
-    font-weight: normal;
-    font-size: clamp(0.75rem, 2.5vw, 1.5rem);
-    line-height: 1.2;
-    padding: 1vh 1vw 0;
-}
-
-.marquee-image {
-    width: clamp(60px, 12vw, 200px);
-    height: clamp(25px, 4vh, 60px);
-    margin: 1em 1vw;
-    padding: 0.5em 0;
-    border-radius: 25px;
-    background-size: cover;
-    background-position: center;
-}
-
-@keyframes marquee {
-    from {
-        transform: translateX(0%);
-    }
-
-    to {
-        transform: translateX(-50%);
-    }
-}
-
-.animate-marquee {
-    animation: marquee 15s linear infinite;
-}
-
-/* Scrollbar styling */
-::-webkit-scrollbar {
-    width: 6px;
-}
-
-::-webkit-scrollbar-thumb {
-    background-color: rgba(255,255,255,0.2);
-    border-radius: 3px;
-}
-
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-/* Responsive Breakpoints */
-
-/* Large Desktop (1200px+) */
-@media (min-width: 1200px) {
-    .quest-illustration-container {
-        display: block;
-    }
-
-    .quest-content-wrapper {
-        display: flex;
-        justify-content: center !important;
-        align-items: flex-start;
-    }
-
-
-    .quest-cards-container {
-        padding-right: 1rem;
-    }
-
-    .achievement-main-section {
-        flex-wrap: nowrap;
-    }
-
-    .achievement-stats-section {
-        flex-direction: row;
-    }
-}
-
-/* Desktop (1024px-1199px) */
-@media (min-width: 1024px) and (max-width: 1199px) {
-    .quest-illustration-container {
-        display: block;
-    }
-
-    .quest-illustration {
-        max-width: 450px;
-    }
-
-
-    .achievement-main-section {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-}
-
-/* Tablet Landscape (900px-1023px) */
-@media (min-width: 900px) and (max-width: 1023px) {
-    .quest-content-wrapper {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .quest-illustration-container {
-        display: block;
-        margin-bottom: 2rem;
-        align-self: center;
-    }
-
-    .quest-illustration {
-        max-width: 400px;
-    }
-
-    .quest-cards-container {
-        max-height: none;
-        overflow-y: visible;
-        width: 100%;
-        max-width: 600px;
-    }
-}
-
-/* Tablet Portrait (768px-899px) */
-@media (min-width: 768px) and (max-width: 899px) {
-    .quest-content-wrapper {
-        flex-direction: column;
-        align-items: center;
-        margin-top: -1rem;
-    }
-
-    .quest-cards-container {
-        max-height: none;
-        overflow-y: visible;
-        width: 100%;
-        max-width: 500px;
-    }
-
-    .quest-illustration-container {
-        display: block;
-        margin-bottom: 2rem;
-        align-self: center;
-    }
-
-    .quest-illustration {
-        max-width: 400px;
-    }
-
-    .quest-card-content {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-    }
-
-    .quest-reward {
-        align-self: stretch;
-        justify-content: space-between;
-    }
-
-    .achievement-main-section {
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-
-    .achievement-stats-section {
-        flex-direction: column;
-        gap: 1rem;
-    }
-}
-
-/* Mobile Large (480px-767px) */
-@media (min-width: 480px) and (max-width: 767px) {
-    .quest-page-container {
-        padding: 1rem;
-        background: var(--primary-color) !important;
-    }
-
-    .quest-content-wrapper {
-        flex-direction: column;
-        align-items: center;
-        margin-top: -1rem;
-    }
-
-
-    .quest-illustration-container {
-        display: block;
-        margin-bottom: 2rem;
-        align-self: center;
-    }
-
-    .quest-illustration {
-        max-width: 400px;
-    }
-
-    .quest-cards-container {
-        max-height: none;
-        overflow-y: visible;
-        width: 100%;
-        max-width: 500px;
-    }
-
-    .quest-card {
-        padding: 1rem;
-    }
-
-    .quest-card-content {
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .quest-reward {
-        width: 100%;
-        justify-content: space-between;
-    }
-
-    .claim-button {
-        flex: 1;
-        max-width: 120px;
-    }
-
-    .achievement-title-section,
-    .achievement-main-section,
-    .achievement-stats-section {
-        width: 100%;
-        text-align: center;
-    }
-
-    .achievement-main-section {
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .achievement-text-card,
-    .streak-card {
-        width: 100%;
-        max-width: 320px;
-    }
-
-    .token-stats-card {
-        justify-content: center;
-        max-width: 280px;
-    }
-}
-
-/* Mobile Small (320px-479px) */
-@media (min-width: 320px) and (max-width: 479px) {
-    .quest-page-container {
-        background: var(--primary-color) !important;
-    }
-
-    .quest-title {
-        font-size: clamp(2rem, 15vw, 2.5rem);
-    }
-
-
-    .quest-illustration-container {
-        display: block;
-        margin-bottom: 2rem;
-        align-self: center;
-        
-    }
-
-    .quest-illustration {
-        max-width: 200px;
-    }
-
-
-    .quest-content-wrapper {
-        margin-top: -0.5rem;
-        padding: 0.25rem;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .quest-card {
-        padding: 0.75rem;
-    }
-
-    .quest-name {
-        font-size: 1.125rem;
-    }
-
-    .reward-points {
-        font-size: 1.125rem;
-    }
-
-    .claim-button {
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
-        min-width: 70px;
-    }
-
-    .achievement-text-card,
-    .streak-card {
-        max-width: 280px;
-    }
-
-    .streak-title {
-        font-size: 1.5rem;
-    }
-
-    .quest-flowing-menu {
-        height: clamp(150px, 25vh, 250px);
-        margin: 1.5rem 0;
-    }
-
-    .menu-link {
-        font-size: clamp(0.875rem, 5vw, 1.25rem);
-    }
-
-    .marquee-text {
-        font-size: clamp(0.625rem, 3vw, 0.875rem);
-    }
-}
-
-/* Mobile Extra Small (below 320px) */
-@media (max-width: 319px) {
-    .quest-page-container {
-        padding: 0.5rem;
-    }
-
-    .quest-title {
-        font-size: 1.75rem;
-    }
-
-    .quest-card {
-        padding: 0.5rem;
-    }
-
-    .quest-card-content {
-        gap: 0.75rem;
-    }
-
-    .quest-name {
-        font-size: 1rem;
-    }
-
-    .reward-points {
-        font-size: 1rem;
-    }
-
-    .claim-button {
-        padding: 0.375rem 0.75rem;
-        font-size: 0.75rem;
-        min-width: 60px;
-    }
-
-    .achievement-text-card,
-    .streak-card,
-    .token-stats-card {
-        max-width: 240px;
-        padding: 0.5rem;
-    }
-
-    .streak-title {
-        font-size: 1.25rem;
-    }
-
-    .token-number {
-        font-size: 1rem;
-    }
-
-    .token-label {
-        font-size: 0.875rem;
-    }
-
-    .quest-flowing-menu {
-        height: 120px;
-        margin: 1rem 0;
-    }
-}
-
-/* Landscape orientation adjustments for mobile */
-@media (max-width: 767px) and (orientation: landscape) {
-    .quest-title {
-        font-size: clamp(1.5rem, 8vw, 2.5rem);
-        margin-bottom: 1rem;
-    }
-
-    .quest-content-wrapper {
-        margin-top: 0;
-    }
-
-    .quest-cards-container {
-        max-height: 200px;
-        overflow-y: auto;
-    }
-
-    .quest-card {
-        padding: 0.75rem;
-    }
-
-    .quest-flowing-menu {
-        height: 100px;
-    }
-
-    .achievement-container {
-        gap: 1rem;
-    }
-
-    .profile-avatar {
-        width: 80px;
-        height: 80px;
-    }
-}
-
-/* Print styles */
-@media print {
-    .quest-page-container {
-        background: white !important;
-        color: black !important;
-    }
-
-    .quest-title {
-        color: black !important;
-        transform: none !important;
-    }
-
-    .quest-flowing-menu,
-    .claim-button {
-        display: none;
-    }
-
-    .quest-card {
-        break-inside: avoid;
-        margin-bottom: 1rem;
-    }
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-    .quest-card {
-        border: 2px solid currentColor;
-    }
-
-    .claim-button {
-        border: 2px solid currentColor;
-    }
-
-    .progress-bar {
-        border: 1px solid currentColor;
-    }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-
-    .quest-card:hover {
-        transform: none;
-    }
-
-    .animate-marquee {
-        animation: none;
-    }
-}
-
-/* Focus visible support for better accessibility */
-.quest-card:focus-visible,
-.claim-button:focus-visible,
-.menu-link:focus-visible {
-    outline: 3px solid #ffffff;
-    outline-offset: 2px;
-}
-
-/* Dark mode support (if needed in future) */
-@media (prefers-color-scheme: dark) {
-    /* Keep current colors since quest page uses custom theme */
-    /* This section can be customized if dark mode is needed */
-}
-
-/* Additional styles for dynamic quest system */
-.quest-header-stats {
-    display: flex;
-    gap: 2rem;
-    margin-top: 1rem;
-    justify-content: center;
-}
-
-.header-stat {
-    text-align: center;
 }
 
 .stat-value {
     display: block;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-weight: 700;
     font-family: 'Righteous', cursive;
-    font-size: 1.5rem;
-    color: #4F46E5;
 }
 
 .stat-label {
-    font-size: 0.875rem;
-    color: #6B7280;
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    opacity: 0.9;
 }
 
-.daily-checkin-section {
-    margin: 2rem 0;
-    display: flex;
-    justify-content: center;
+/* Bento Grid Layout */
+.bento-grid {
+    display: grid;
+    gap: var(--spacing-lg);
+    max-width: 1400px;
+    margin: 0 auto;
+    grid-template-columns: repeat(12, 1fr);
+    grid-auto-rows: minmax(200px, auto);
+}
+
+/* Base Card Styles */
+.bento-card {
+    background: var(--background);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    position: relative;
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+    .bento-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--card-shadow-hover);
+    }
+
+/* Grid Item Positioning */
+.level-card {
+    grid-column: span 12;
+    grid-row: span 1;
 }
 
 .checkin-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 1.5rem;
-    border-radius: 12px;
-    color: white;
-    display: flex;
-    align-items: center;
-    gap: 2rem;
+    grid-column: span 6;
+    grid-row: span 1;
 }
 
-.difficulty-badge, .quest-type-badge {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    margin-right: 0.5rem;
+.daily-quests,
+.weekly-quests {
+    grid-column: span 6;
+    grid-row: span 3;
 }
 
-.difficulty-easy {
-    background: #10B981;
-    color: white;
+.special-quests,
+.achievement-card {
+    grid-column: span 6;
+    grid-row: span 2;
 }
 
-.difficulty-medium {
-    background: #F59E0B;
-    color: white;
+.browse-card {
+    grid-column: span 6;
+    grid-row: span 1;
 }
 
-.difficulty-hard {
-    background: #EF4444;
-    color: white;
-}
-
-.type-daily {
-    background: #3B82F6;
-    color: white;
-}
-
-.type-weekly {
-    background: #8B5CF6;
-    color: white;
-}
-
-.type-special {
-    background: #EC4899;
-    color: white;
-}
-
-.reward-details {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    margin-bottom: 0.5rem;
-}
-
-.reward-tokens {
-    color: #F59E0B;
-    font-weight: 600;
-}
-
-.reward-xp {
-    color: #3B82F6;
-    font-weight: 600;
-}
-
-.claim-completed {
-    background: #10B981;
-    color: white;
-    cursor: default;
-}
-
-.no-quests-message {
-    text-align: center;
-    padding: 3rem;
-    color: #6B7280;
-}
-
-.browse-quests-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-.browse-quests-link {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.5rem;
-    color: white;
-    text-decoration: none;
-    transition: transform 0.2s;
-}
-
-    .browse-quests-link:hover {
-        transform: translateY(-2px);
-        color: white;
-    }
-
-.browse-arrow {
-    font-size: 1.5rem;
-    font-weight: bold;
-}
-
-.achievement-links {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 1rem;
-}
-
-.achievement-link {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem;
-    background: #F3F4F6;
-    border-radius: 8px;
-    color: #374151;
-    text-decoration: none;
-    transition: background 0.2s;
-}
-
-    .achievement-link:hover {
-        background: #E5E7EB;
-        color: #374151;
-    }
-.level-progress-section {
-    margin: 20px 0;
-    padding: 0 20px;
-}
-
+/* Level Card Styles */
 .level-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 15px;
-    padding: 20px;
+    background: linear-gradient(135deg, #F4A261 0%, #E76F51 100%);
     color: white;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
 
 .level-info {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: var(--spacing-lg);
 }
 
 .level-display {
     display: flex;
     align-items: baseline;
-    gap: 10px;
+    gap: var(--spacing-md);
 }
 
 .level-number {
-    font-size: 2.5em;
+    font-size: clamp(2rem, 6vw, 3.5rem);
     font-weight: bold;
-    color: #FFD700;
+    color: var(--background);
+    font-family: 'Righteous', cursive;
 }
 
 .level-name {
-    font-size: 1.2em;
+    font-size: clamp(1rem, 3vw, 1.5rem);
     font-weight: 600;
 }
 
 .xp-display {
-    font-size: 1.1em;
+    font-size: clamp(0.875rem, 2vw, 1.125rem);
     color: #E8E8E8;
+    text-align: right;
+}
+
+.xp-separator {
+    margin: 0 var(--spacing-xs);
 }
 
 .level-progress-bar {
     position: relative;
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 10px;
     height: 12px;
     overflow: hidden;
@@ -1112,53 +221,759 @@ body.quest-page {
     background: linear-gradient(90deg, #FFD700, #FFA500);
     height: 100%;
     border-radius: 10px;
-    transition: width 0.5s ease;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .level-progress-text {
     position: absolute;
     top: -25px;
     right: 0;
-    font-size: 0.9em;
+    font-size: 0.875rem;
     color: #E8E8E8;
 }
 
-.quest-notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 15px 20px;
-    border-radius: 8px;
+/* Check-in Card Styles */
+.checkin-card {
+    background: linear-gradient(135deg, #2A9D8F 0%, #264653 100%);
     color: white;
+}
+
+.checkin-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: var(--spacing-md);
+}
+
+.checkin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+    .checkin-header h3 {
+        margin: 0;
+        font-size: clamp(1.25rem, 3vw, 1.5rem);
+    }
+
+.streak-display {
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    opacity: 0.9;
     font-weight: 600;
-    z-index: 10000;
-    transform: translateX(400px);
+}
+
+.check-in-timer {
+    background: rgba(255, 255, 255, 0.1);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+#timerDisplay {
+    font-family: monospace;
+    font-weight: bold;
+    color: #FFD700;
+}
+
+.checkin-button {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--border-radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: auto;
+}
+
+    .checkin-button:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-1px);
+    }
+
+    .checkin-button:disabled {
+        background: var(--success-color);
+        border-color: var(--success-color);
+        cursor: default;
+        transform: none;
+    }
+
+/* Quest Cards Glass Styles */
+.quests-card {
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+    .quests-card:hover {
+        background: rgba(255, 255, 255, 0.15) !important;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+    }
+
+.quests-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+    .quests-header h2 {
+        margin: 0;
+        font-size: clamp(1.25rem, 3vw, 1.75rem);
+        color: white !important;
+    }
+
+.quest-count {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: 50%;
+    font-weight: 600;
+    min-width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+}
+
+.quests-container {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    max-height: 600px;
+    padding-right: var(--spacing-xs);
+}
+
+    .quests-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .quests-container::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+    }
+
+    .quests-container::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+.quest-item {
+    background: rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: white;
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-md);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+    .quest-item:hover {
+        background: rgba(255, 255, 255, 0.25) !important;
+        border-color: rgba(255, 255, 255, 0.4) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+.quest-timer {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--spacing-xs);
+}
+
+.quest-name {
+    font-size: clamp(1rem, 2.5vw, 1.125rem);
+    font-weight: 700;
+    margin: var(--spacing-xs) 0;
+    color: white !important;
+    line-height: 1.3;
+}
+
+.quest-description {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.9) !important;
+    margin: var(--spacing-xs) 0 var(--spacing-md) 0;
+    line-height: 1.4;
+}
+
+.quest-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: var(--spacing-md) 0;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+.quest-badges {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.difficulty-badge,
+.type-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.difficulty-easy {
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+.difficulty-medium {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.difficulty-hard {
+    background: #FEE2E2;
+    color: #991B1B;
+}
+
+.type-daily {
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
+.type-weekly {
+    background: #EDE9FE;
+    color: #5B21B6;
+}
+
+.type-special {
+    background: #FCE7F3;
+    color: #BE185D;
+}
+
+.quest-rewards {
+    display: flex;
+    gap: var(--spacing-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.quests-card .reward-tokens {
+    color: #FCD34D !important;
+}
+
+.quests-card .reward-xp {
+    color: #93C5FD !important;
+}
+
+.quest-progress {
+    margin: var(--spacing-md) 0;
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xs);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: white !important;
+}
+
+.progress-bar {
+    background: rgba(255, 255, 255, 0.2) !important;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: var(--spacing-md);
+}
+
+.progress-fill {
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    height: 100%;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 4px;
+}
+
+.claim-button {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--border-radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+}
+
+    .claim-button.active {
+        background: rgba(107, 144, 128, 0.8) !important;
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        border: 1px solid rgba(107, 144, 128, 0.9) !important;
+    }
+
+        .claim-button.active:hover {
+            background: rgba(107, 144, 128, 0.9) !important;
+            transform: translateY(-1px);
+        }
+
+    .claim-button.completed {
+        background: rgba(16, 185, 129, 0.8) !important;
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        border: 1px solid rgba(16, 185, 129, 0.9) !important;
+        cursor: default;
+    }
+
+    .claim-button.disabled {
+        cursor: default;
+    }
+
+.no-quests {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 200px;
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+    .no-quests p {
+        color: rgba(255, 255, 255, 0.8) !important;
+    }
+
+.generate-quest-btn {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--border-radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: var(--spacing-md);
+    transition: all 0.3s ease;
+}
+
+    .generate-quest-btn:hover {
+        background: rgba(255, 255, 255, 0.2) !important;
+        transform: translateY(-1px);
+    }
+
+/* Achievement Card Styles */
+.achievement-card {
+    background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
+}
+
+.achievement-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: var(--spacing-md);
+}
+
+.profile-section {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.profile-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary-color);
+}
+
+.achievement-info {
+    flex: 1;
+}
+
+.achievement-title {
+    margin: 0;
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    color: var(--primary-color);
+}
+
+.achievement-subtitle {
+    margin: var(--spacing-xs) 0 0 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.achievement-icon {
+    align-self: center;
+    margin: var(--spacing-md) 0;
+}
+
+    .achievement-icon img {
+        max-width: 80px;
+        height: auto;
+    }
+
+.streak-info {
+    text-align: center;
+    background: white;
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+}
+
+.streak-title {
+    margin: 0;
+    font-size: clamp(1.25rem, 3vw, 1.5rem);
+    color: var(--primary-color);
+}
+
+.streak-description {
+    margin: var(--spacing-xs) 0 0 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.achievement-stats {
+    display: flex;
+    justify-content: space-around;
+    background: white;
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+    margin-top: auto;
+}
+
+    .achievement-stats .stat-item {
+        text-align: center;
+        color: var(--text-color);
+    }
+
+    .achievement-stats .stat-value {
+        font-size: clamp(1.125rem, 2.5vw, 1.25rem);
+        color: var(--primary-color);
+    }
+
+    .achievement-stats .stat-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+.achievement-links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.achievement-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm);
+    background: rgba(107, 144, 128, 0.1);
+    border-radius: var(--border-radius-sm);
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+}
+
+    .achievement-link span {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+
+    .achievement-link:hover {
+        background: rgba(107, 144, 128, 0.2);
+        transform: translateX(4px);
+        color: var(--primary-color);
+    }
+
+/* Browse Card Styles */
+.browse-card {
+    background: linear-gradient(135deg, #E9C46A 0%, #E76F51 100%);
+    padding: 0;
+    overflow: hidden;
+}
+
+.browse-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: var(--spacing-lg);
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+    .browse-link:hover {
+        color: white;
+        transform: scale(1.02);
+    }
+
+.browse-content {
+    text-align: center;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.browse-icon {
+    margin-bottom: var(--spacing-sm);
+}
+
+    .browse-icon i {
+        font-size: 2.5rem;
+        opacity: 0.9;
+    }
+
+.browse-content h3 {
+    margin: 0;
+    font-size: clamp(1.25rem, 3vw, 1.5rem);
+}
+
+.browse-content p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.875rem;
+}
+
+.browse-arrow {
+    margin-top: var(--spacing-sm);
     transition: transform 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
-    .quest-notification.show {
-        transform: translateX(0);
-    }
-
-    .quest-notification.success {
-        background: linear-gradient(135deg, #00C851, #007E33);
-    }
-
-    .quest-notification.warning {
-        background: linear-gradient(135deg, #ffbb33, #FF8800);
-    }
-
-    .quest-notification.error {
-        background: linear-gradient(135deg, #ff4444, #CC0000);
-    }
-
-/* Update existing claim button styles */
-.claim-completed {
-    background: linear-gradient(135deg, #00C851, #007E33) !important;
-    cursor: default;
+.browse-link:hover .browse-arrow {
+    transform: translateX(4px);
 }
 
-    .claim-completed:hover {
-        background: linear-gradient(135deg, #00C851, #007E33) !important;
+/* Backdrop blur support fallback */
+@supports not (backdrop-filter: blur(10px)) {
+    .quests-card {
+        background: rgba(255, 255, 255, 0.25) !important;
     }
+
+        .quests-card .quest-item {
+            background: rgba(255, 255, 255, 0.35) !important;
+        }
+}
+
+/* Responsive Design */
+@media (min-width: 1200px) {
+    .quest-dashboard {
+        padding: var(--spacing-2xl);
+    }
+
+    .bento-grid {
+        gap: var(--spacing-xl);
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .bento-grid {
+        grid-template-columns: repeat(8, 1fr);
+    }
+
+    .level-card {
+        grid-column: span 8;
+    }
+
+    .checkin-card {
+        grid-column: span 4;
+    }
+
+    .daily-quests,
+    .weekly-quests {
+        grid-column: span 4;
+        grid-row: span 3;
+    }
+
+    .special-quests {
+        grid-column: span 8;
+        grid-row: span 2;
+    }
+
+    .achievement-card {
+        grid-column: span 8;
+        grid-row: span 2;
+    }
+
+    .browse-card {
+        grid-column: span 4;
+    }
+}
+
+@media (min-width: 480px) and (max-width: 767px) {
+    .quest-dashboard {
+        padding: var(--spacing-md);
+        padding-bottom: 140px;
+    }
+
+    .bento-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--spacing-md);
+    }
+
+    .level-card,
+    .checkin-card,
+    .daily-quests,
+    .weekly-quests,
+    .special-quests,
+    .achievement-card,
+    .browse-card {
+        grid-column: span 4;
+        grid-row: span 1;
+    }
+
+    .daily-quests,
+    .weekly-quests,
+    .special-quests {
+        grid-row: span 2;
+    }
+
+    .achievement-card {
+        grid-row: span 2;
+    }
+
+    .quests-container {
+        max-height: 400px;
+    }
+}
+
+@media (min-width: 320px) and (max-width: 479px) {
+    .quest-dashboard {
+        padding: var(--spacing-sm);
+        padding-bottom: 140px;
+    }
+
+    .bento-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .level-card,
+    .checkin-card,
+    .daily-quests,
+    .weekly-quests,
+    .special-quests,
+    .achievement-card,
+    .browse-card {
+        grid-column: span 1;
+        grid-row: span 1;
+    }
+
+    .quest-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-xs);
+    }
+
+    .profile-section {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .achievement-stats {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .quests-container {
+        max-height: 300px;
+    }
+
+    .bento-card {
+        padding: var(--spacing-md);
+    }
+}
+
+@media (max-width: 319px) {
+    .quest-dashboard {
+        padding: var(--spacing-xs);
+        padding-bottom: 120px;
+    }
+
+    .quest-title {
+        font-size: 2rem;
+    }
+
+    .bento-card {
+        padding: var(--spacing-sm);
+    }
+
+    .header-stats {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .quests-container {
+        max-height: 250px;
+    }
+}
+
+@media (max-width: 767px) and (orientation: landscape) {
+    .quest-dashboard {
+        padding-bottom: 100px;
+    }
+
+    .quest-title {
+        font-size: clamp(1.5rem, 6vw, 2.5rem);
+        margin: var(--spacing-md) 0;
+    }
+
+    .bento-grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+
+    .level-card {
+        grid-column: span 6;
+    }
+
+    .checkin-card {
+        grid-column: span 3;
+    }
+
+    .daily-quests,
+    .weekly-quests {
+        grid-column: span 3;
+        grid-row: span 2;
+    }
+
+    .special-quests,
+    .achievement-card {
+        grid-column: span 6;
+        grid-row: span 1;
+    }
+
+    .browse-card {
+        grid-column: span 3;
+    }
+}

@@ -1,0 +1,28 @@
+﻿:root {
+    --background: #F5F5F5;
+    --primary-color: #6B9080;
+    --dark-primary: #344e41;
+    --secondary-color: #A4C3B2;
+    --accent-color: #EAF4F4;
+    --text-color: #000000;
+    --text-secondary: #6B7280;
+    --hover-effect: rgba(217, 217, 217, 0.6);
+    --success-color: #10B981;
+    --warning-color: #F59E0B;
+    --danger-color: #EF4444;
+    --info-color: #3B82F6;
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --border-radius: 16px;
+    --border-radius-sm: 8px;
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 0.75rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
+}
+html {
+    background: var(--primary-color) !important;
+}
+

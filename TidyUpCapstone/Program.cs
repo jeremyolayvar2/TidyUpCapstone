@@ -14,7 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection") ??
-        "Data Source=Raven-PC\\SQLEXPRESS;Initial Catalog=DBcapstone;Integrated Security=True;Trust Server Certificate=True"
+        "Server=OLAYVAR\\SQLEXPRESS;Database=TidyUpdb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=True"
     ));
 
 // Identity Configuration
