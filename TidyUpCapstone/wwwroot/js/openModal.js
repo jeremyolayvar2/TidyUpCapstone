@@ -1,305 +1,260 @@
-﻿// Fixed openModal.js - Works with div structure and includes AI integration
-
+﻿// Fixed openModal.js - Completely Silent AI Integration
 // ============================================================================
-// AI CATEGORY SUGGESTION CLASS
+// AI SUGGESTION SYSTEM - Fully Silent Version (No UI Elements)
 // ============================================================================
-class AICategorySuggestion {
-    constructor() {
-        this.isAnalyzing = false;
-        this.currentSuggestion = null;
-        this.initializeUI();
-    }
+const aiSuggestion = {
+    isAnalyzing: false,
+    detectedCategory: null,
+    detectedCondition: null,
 
-    initializeUI() {
-        this.createSuggestionUI();
-    }
+    // Initialize AI system (no UI elements needed)
+    initialize() {
+        console.log("🤖 Silent AI detection system initialized");
+    },
 
-    createSuggestionUI() {
-        const categoryInput = document.getElementById('categoryInput');
-        if (!categoryInput) return;
-
-        // Create AI suggestion container
-        const suggestionContainer = document.createElement('div');
-        suggestionContainer.id = 'aiSuggestionContainer';
-        suggestionContainer.className = 'ai-suggestion-container';
-        suggestionContainer.style.display = 'none';
-        suggestionContainer.innerHTML = `
-            <div class="ai-suggestion-content">
-                <div class="ai-suggestion-header">
-                    <span class="ai-icon">🤖</span>
-                    <span class="ai-text">AI Suggestion</span>
-                    <div class="ai-loader" id="aiLoader" style="display: none;">
-                        <div class="spinner"></div>
-                        <span>Analyzing...</span>
-                    </div>
-                </div>
-                <div class="ai-suggestion-body" id="aiSuggestionBody">
-                    <!-- Suggestion content will be inserted here -->
-                </div>
-            </div>
-        `;
-
-        // Insert after category input
-        categoryInput.parentNode.insertBefore(suggestionContainer, categoryInput.nextSibling);
-        this.addSuggestionStyles();
-    }
-
-    addSuggestionStyles() {
-        if (document.getElementById('aiSuggestionStyles')) return;
-
-        const style = document.createElement('style');
-        style.id = 'aiSuggestionStyles';
-        style.textContent = `
-            .ai-suggestion-container {
-                margin-top: 10px;
-                border: 2px solid #e3f2fd;
-                border-radius: 8px;
-                background: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
-                animation: slideDown 0.3s ease-out;
-            }
-            .ai-suggestion-content { padding: 12px; }
-            .ai-suggestion-header {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                margin-bottom: 8px;
-                font-weight: 600;
-                color: #1976d2;
-            }
-            .ai-loader {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                margin-left: auto;
-            }
-            .spinner {
-                width: 16px;
-                height: 16px;
-                border: 2px solid #e3f2fd;
-                border-top: 2px solid #1976d2;
-                border-radius: 50%;
-                animation: spin 1s linear infinite;
-            }
-            .suggestion-option {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 8px 12px;
-                margin: 4px 0;
-                background: white;
-                border: 1px solid #ddd;
-                border-radius: 6px;
-                cursor: pointer;
-                transition: all 0.2s ease;
-            }
-            .suggestion-option:hover {
-                background: #f0f8ff;
-                border-color: #1976d2;
-                transform: translateY(-1px);
-            }
-            .confidence-badge {
-                background: #4caf50;
-                color: white;
-                padding: 2px 8px;
-                border-radius: 12px;
-                font-size: 12px;
-                font-weight: 500;
-            }
-            .confidence-badge.medium { background: #ff9800; }
-            .confidence-badge.low { background: #757575; }
-            @keyframes slideDown {
-                from { opacity: 0; transform: translateY(-10px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
-        `;
-        document.head.appendChild(style);
-    }
-
+    // Analyze image for both category and condition (COMPLETELY SILENT)
     async analyzeImageForCategory(imageFile) {
         if (this.isAnalyzing) return;
 
-        console.log("🤖 AI analysis starting for:", imageFile.name);
+        console.log("🤖 Silent AI analysis starting for:", imageFile.name);
         this.isAnalyzing = true;
-        this.showAnalysisLoader(true);
 
         try {
-            const formData = new FormData();
-            formData.append('imageFile', imageFile);
+            // Run both detections in parallel
+            const [categoryResult, conditionResult] = await Promise.all([
+                this.detectCategory(imageFile),
+                this.detectCondition(imageFile)
+            ]);
 
-            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
-            if (token) {
-                formData.append('__RequestVerificationToken', token);
-            }
-
-            const response = await fetch('/api/Vision/AnalyzeImage', {
-                method: 'POST',
-                body: formData
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const result = await response.json();
-
-            if (result.success) {
-                this.currentSuggestion = result;
-                this.displaySuggestion(result);
-                this.showSuggestionContainer(true);
-            } else {
-                this.showFallbackMessage();
-            }
+            this.applySilentAIResults(categoryResult, conditionResult);
 
         } catch (error) {
-            console.error("❌ AI Analysis error:", error);
-            this.showErrorMessage(error.message);
+            console.error('AI processing failed:', error);
+            console.log('Continuing with manual selection...');
         } finally {
             this.isAnalyzing = false;
-            this.showAnalysisLoader(false);
         }
-    }
+    },
 
-    displaySuggestion(result) {
-        const bodyElement = document.getElementById('aiSuggestionBody');
-        if (!bodyElement) return;
+    // Google Vision API category detection
+    async detectCategory(file) {
+        const formData = new FormData();
+        formData.append('imageFile', file);
 
-        const confidenceLevel = this.getConfidenceLevel(result.confidenceScore);
-        const categoryName = result.categoryName || 'Unknown Category';
+        // Add anti-forgery token
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+        if (token) {
+            formData.append('__RequestVerificationToken', token);
+        }
 
-        bodyElement.innerHTML = `
-            <div class="suggestion-option" onclick="window.aiSuggestion.applySuggestion(${result.suggestedCategoryId})">
-                <div>
-                    <strong>${categoryName}</strong>
-                    <div style="font-size: 12px; color: #666; margin-top: 2px;">
-                        Based on: ${result.topLabels?.slice(0, 2).map(l => l.description).join(', ') || 'Image analysis'}
-                    </div>
-                </div>
-                <span class="confidence-badge ${confidenceLevel.class}">
-                    ${Math.round(result.confidenceScore * 100)}%
-                </span>
-            </div>
-            <div style="margin-top: 8px; font-size: 12px; color: #666;">
-                Click to apply this suggestion
-            </div>
-        `;
-    }
+        try {
+            const response = await fetch('/api/Vision/AnalyzeImage', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
 
-    applySuggestion(categoryId) {
+            if (!response.ok) throw new Error('Vision API failed');
+
+            const result = await response.json();
+            return {
+                success: result.success,
+                categoryId: result.suggestedCategoryId,
+                categoryName: this.getCategoryName(result.suggestedCategoryId),
+                confidence: result.confidenceScore
+            };
+        } catch (error) {
+            console.warn('Vision API failed:', error);
+            return { success: false };
+        }
+    },
+
+    // Vertex AI condition detection
+    async detectCondition(file) {
+        const formData = new FormData();
+        formData.append('imageFile', file);
+
+        // Add anti-forgery token
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+        if (token) {
+            formData.append('__RequestVerificationToken', token);
+        }
+
+        try {
+            const response = await fetch('/api/AI/DetectCondition', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!response.ok) throw new Error('Vertex AI failed');
+
+            const result = await response.json();
+            return {
+                success: result.success,
+                conditionId: result.conditionId,
+                conditionName: this.getConditionName(result.conditionId),
+                confidence: result.confidence
+            };
+        } catch (error) {
+            console.warn('Vertex AI failed:', error);
+            return { success: false };
+        }
+    },
+
+    // Apply AI results COMPLETELY SILENTLY - just set dropdown values
+    applySilentAIResults(categoryResult, conditionResult) {
+        console.log('AI Results received:', { categoryResult, conditionResult });
+
+        let aiApplied = false;
+
+        // Apply category if detected successfully
+        if (categoryResult.success && categoryResult.categoryId) {
+            this.detectedCategory = categoryResult;
+            this.setSilentCategory(categoryResult);
+            aiApplied = true;
+            console.log(`Category automatically set: ${categoryResult.categoryName} (${(categoryResult.confidence * 100).toFixed(0)}% confidence)`);
+        }
+
+        // Apply condition if detected successfully
+        if (conditionResult.success && conditionResult.conditionId) {
+            this.detectedCondition = conditionResult;
+            this.setSilentCondition(conditionResult);
+            aiApplied = true;
+            console.log(`Condition automatically set: ${conditionResult.conditionName} (${(conditionResult.confidence * 100).toFixed(0)}% confidence)`);
+        }
+
+        if (aiApplied) {
+            // Trigger form validation and price update after setting values
+            setTimeout(() => {
+                if (typeof checkFormValidity === 'function') {
+                    checkFormValidity();
+                }
+                if (typeof updateCreateFinalPrice === 'function') {
+                    updateCreateFinalPrice();
+                }
+            }, 100);
+            console.log("AI detection completed - dropdown values set automatically");
+        } else {
+            console.log("AI detection failed - manual selection required");
+        }
+    },
+
+    // Set category dropdown value silently (no visual indicators)
+    setSilentCategory(result) {
         const categorySelect = document.getElementById('categoryInput');
-        if (categorySelect) {
-            categorySelect.value = categoryId;
+        if (categorySelect && result.categoryId) {
+            // Set the dropdown value
+            categorySelect.value = result.categoryId;
 
+            // Trigger change event to update dependent systems
             const changeEvent = new Event('change', { bubbles: true });
             categorySelect.dispatchEvent(changeEvent);
 
-            categorySelect.style.borderColor = '#4caf50';
-            setTimeout(() => {
-                categorySelect.style.borderColor = '';
-            }, 2000);
-
-            // Update form validation
-            checkFormValidity();
-            updateCreateFinalPrice();
-        }
-    }
-
-    getConfidenceLevel(score) {
-        if (score >= 0.7) return { class: 'high', label: 'High' };
-        if (score >= 0.4) return { class: 'medium', label: 'Medium' };
-        return { class: 'low', label: 'Low' };
-    }
-
-    showAnalysisLoader(show) {
-        const loader = document.getElementById('aiLoader');
-        if (loader) {
-            loader.style.display = show ? 'flex' : 'none';
-        }
-        if (show) {
-            this.showSuggestionContainer(true);
-            const bodyElement = document.getElementById('aiSuggestionBody');
-            if (bodyElement) {
-                bodyElement.innerHTML = '<div style="color: #666; font-style: italic;">Analyzing image...</div>';
+            // Store AI values in hidden fields for backend
+            const aiCategoryId = document.getElementById('aiCategoryId');
+            if (aiCategoryId) {
+                aiCategoryId.value = result.categoryId;
             }
-        }
-    }
 
-    showSuggestionContainer(show) {
-        const container = document.getElementById('aiSuggestionContainer');
-        if (container) {
-            container.style.display = show ? 'block' : 'none';
+            console.log(`📝 Category dropdown set to: ${result.categoryName} (ID: ${result.categoryId})`);
         }
-    }
+    },
 
-    showFallbackMessage() {
-        const bodyElement = document.getElementById('aiSuggestionBody');
-        if (bodyElement) {
-            bodyElement.innerHTML = `
-                <div style="color: #ff9800; font-style: italic;">
-                    AI analysis unavailable. Please select category manually.
-                </div>
-            `;
+    // Set condition dropdown value silently (no visual indicators)
+    setSilentCondition(result) {
+        const conditionSelect = document.getElementById('conditionInput');
+        if (conditionSelect && result.conditionId) {
+            // Set the dropdown value
+            conditionSelect.value = result.conditionId;
+
+            // Trigger change event to update dependent systems
+            const changeEvent = new Event('change', { bubbles: true });
+            conditionSelect.dispatchEvent(changeEvent);
+
+            // Store AI values in hidden fields for backend
+            const aiConditionId = document.getElementById('aiConditionId');
+            const aiConfidenceScore = document.getElementById('aiConfidenceScore');
+
+            if (aiConditionId) {
+                aiConditionId.value = result.conditionId;
+            }
+            if (aiConfidenceScore) {
+                aiConfidenceScore.value = result.confidence;
+            }
+
+            console.log(`📝 Condition dropdown set to: ${result.conditionName} (ID: ${result.conditionId})`);
         }
-        this.showSuggestionContainer(true);
-    }
+    },
 
-    showErrorMessage(error) {
-        const bodyElement = document.getElementById('aiSuggestionBody');
-        if (bodyElement) {
-            bodyElement.innerHTML = `
-                <div style="color: #f44336; font-style: italic;">
-                    Analysis failed. Please select category manually.
-                </div>
-            `;
-        }
-        this.showSuggestionContainer(true);
-    }
+    // Utility functions
+    getCategoryName(categoryId) {
+        const categories = {
+            1: 'Books & Stationery',
+            2: 'Electronics & Gadgets',
+            3: 'Toys & Games',
+            4: 'Home & Kitchen',
+            5: 'Furniture',
+            6: 'Appliances',
+            7: 'Health & Beauty',
+            8: 'Crafts & DIY',
+            9: 'School & Office',
+            10: 'Sentimental Items',
+            11: 'Miscellaneous',
+            12: 'Clothing'
+        };
+        return categories[categoryId] || 'Unknown';
+    },
 
+    getConditionName(conditionId) {
+        const conditions = {
+            1: 'Excellent',
+            2: 'Good',
+            3: 'Good',  // Your system uses 3 for Good
+            4: 'Fair'   // Your system uses 4 for Fair
+        };
+        return conditions[conditionId] || 'Unknown';
+    },
+
+    // Reset function (clear stored values only)
     reset() {
-        this.currentSuggestion = null;
         this.isAnalyzing = false;
-        this.showSuggestionContainer(false);
-        this.showAnalysisLoader(false);
-    }
-}
+        this.detectedCategory = null;
+        this.detectedCondition = null;
 
-// ============================================================================
-// GLOBAL VARIABLES
-// ============================================================================
-let aiSuggestion = null;
-
-// ============================================================================
-// MAIN INITIALIZATION
-// ============================================================================
-document.addEventListener("DOMContentLoaded", () => {
-    console.log("OpenModal.js loaded");
-
-    const modal = document.getElementById("createPostModal");
-
-    // Initialize AI suggestion system
-    if (!aiSuggestion) {
-        aiSuggestion = new AICategorySuggestion();
-        window.aiSuggestion = aiSuggestion; // Make it globally accessible
-    }
-
-    // Modal triggers - Updated selectors
-    const triggers = document.querySelectorAll(
-        '#openCreateModal, .floating-add-btn, .dock-item[data-label="Create"]'
-    );
-
-    triggers.forEach(trigger => {
-        trigger.addEventListener("click", (e) => {
-            e.preventDefault();
-            if (modal) {
-                modal.style.display = "flex";
-                console.log("Modal opened");
-            } else {
-                console.error("Modal not found!");
-            }
+        // Clear AI hidden fields
+        const aiFields = ['aiCategoryId', 'aiConditionId', 'aiConfidenceScore'];
+        aiFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) field.value = '';
         });
+
+        console.log("🤖 AI detection reset");
+    }
+};
+
+// ============================================================================
+// MODAL INITIALIZATION - Enhanced Version
+// ============================================================================
+document.addEventListener("DOMContentLoaded", function () {
+    const modal = document.getElementById("createPostModal");
+    if (!modal) return;
+
+    // Initialize AI system
+    aiSuggestion.initialize();
+
+    // Open modal functionality
+    const openModalBtns = document.querySelectorAll("#openCreateModal, .open-create-modal");
+    openModalBtns.forEach(btn => {
+        if (btn) {
+            btn.addEventListener("click", () => {
+                modal.style.display = "block";
+            });
+        }
     });
 
     // Close modal when clicking outside
@@ -334,7 +289,7 @@ document.addEventListener("DOMContentLoaded", () => {
         conditionInput.addEventListener("change", updateCreateFinalPrice);
     }
 
-    // Image preview functionality
+    // Enhanced image input handling with SILENT AI detection
     if (imageInput) {
         imageInput.addEventListener('change', function (e) {
             const file = e.target.files[0];
@@ -348,7 +303,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Show preview
                 showImagePreview(file);
 
-                // Trigger AI analysis
+                // Trigger SILENT AI analysis (no UI changes, just dropdown updates)
                 if (aiSuggestion) {
                     aiSuggestion.analyzeImageForCategory(file);
                 }
@@ -378,7 +333,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ============================================================================
-// IMAGE PREVIEW FUNCTIONS
+// IMAGE PREVIEW FUNCTIONS (Existing functionality preserved)
 // ============================================================================
 function showImagePreview(file) {
     const reader = new FileReader();
@@ -398,6 +353,7 @@ function showImagePreview(file) {
                 imagePreview.className = 'image-preview';
                 imagePreview.style.cssText = `
                     position: relative;
+                    display: block;
                     margin-top: 10px;
                     border-radius: 8px;
                     overflow: hidden;
@@ -463,6 +419,12 @@ function removeImage() {
     if (imagePreview) imagePreview.style.display = 'none';
     if (uploadSection) uploadSection.style.display = 'block';
 
+    // Reset dropdowns to default when image is removed
+    const categoryInput = document.getElementById('categoryInput');
+    const conditionInput = document.getElementById('conditionInput');
+    if (categoryInput) categoryInput.selectedIndex = 0;
+    if (conditionInput) conditionInput.selectedIndex = 0;
+
     // Reset AI suggestions
     if (aiSuggestion) {
         aiSuggestion.reset();
@@ -488,7 +450,7 @@ function validateImageFile(file) {
 }
 
 // ============================================================================
-// FORM VALIDATION
+// FORM VALIDATION (Enhanced to work with AI)
 // ============================================================================
 function checkFormValidity() {
     const categoryInput = document.getElementById("categoryInput");
@@ -498,169 +460,127 @@ function checkFormValidity() {
     const locationInput = document.getElementById("locationInput");
     const imageInput = document.getElementById("imageInput");
     const submitBtn = document.getElementById("submitPost");
-
-    const categoryId = categoryInput?.value;
-    const conditionId = conditionInput?.value;
-    const title = titleInput?.value?.trim();
-    const description = descriptionInput?.value?.trim();
-    const location = locationInput?.value?.trim();
-    const image = imageInput?.files?.length > 0;
-
-    const isValid = categoryId && conditionId && title && description && location && image;
-
-    if (submitBtn) {
-        submitBtn.disabled = !isValid;
-
-        if (isValid) {
-            submitBtn.classList.add('valid');
-            submitBtn.classList.remove('invalid');
-        } else {
-            submitBtn.classList.remove('valid');
-            submitBtn.classList.add('invalid');
-        }
-    }
-}
-
-// ============================================================================
-// PRICE CALCULATION
-// ============================================================================
-async function updateCreateFinalPrice() {
-    const categorySelect = document.getElementById("categoryInput");
-    const conditionSelect = document.getElementById("conditionInput");
-    const finalPriceElement = document.getElementById("finalPrice");
-
-    if (!categorySelect || !conditionSelect || !finalPriceElement) {
-        return;
-    }
-
-    const categoryId = parseInt(categorySelect.value);
-    const conditionId = parseInt(conditionSelect.value);
-
-    if (!categoryId || !conditionId || isNaN(categoryId) || isNaN(conditionId)) {
-        finalPriceElement.textContent = "0.00";
-        return;
-    }
-
-    try {
-        finalPriceElement.textContent = "Calculating...";
-
-        const response = await fetch(`/api/Pricing/Calculate?categoryId=${categoryId}&conditionId=${conditionId}`);
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const result = await response.json();
-
-        if (result && typeof result.finalPrice === 'number') {
-            finalPriceElement.textContent = result.finalPrice.toFixed(2);
-        } else {
-            throw new Error("Invalid response format");
-        }
-
-    } catch (error) {
-        console.error("Price calculation failed:", error);
-        finalPriceElement.textContent = "0.00";
-    }
-}
-
-// ============================================================================
-// FORM SUBMISSION
-// ============================================================================
-async function handleFormSubmission(e) {
-    e.preventDefault();
-
-    const submitBtn = document.getElementById("submitPost");
-    const titleInput = document.getElementById("titleInput");
-    const categoryInput = document.getElementById("categoryInput");
-    const conditionInput = document.getElementById("conditionInput");
-    const descriptionInput = document.getElementById("descriptionInput");
-    const imageInput = document.getElementById("imageInput");
-    const locationInput = document.getElementById("locationInput");
     const latitudeInput = document.getElementById("Latitude");
     const longitudeInput = document.getElementById("Longitude");
 
-    // Validate required fields
-    if (!titleInput?.value?.trim() || !categoryInput?.value || !conditionInput?.value ||
-        !descriptionInput?.value?.trim() || !locationInput?.value?.trim() || !imageInput?.files?.length) {
-
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Missing Information',
-                text: 'Please fill in all required fields.'
-            });
-        } else {
-            alert('Please fill in all required fields.');
-        }
+    if (!categoryInput || !conditionInput || !titleInput || !descriptionInput ||
+        !locationInput || !imageInput || !submitBtn) {
         return;
     }
 
-    // Check location coordinates
-    const latitude = latitudeInput?.value || '14.5995';  // Default Manila
-    const longitude = longitudeInput?.value || '120.9842';
+    const isValid =
+        titleInput.value.trim() !== "" &&
+        descriptionInput.value.trim() !== "" &&
+        locationInput.value.trim() !== "" &&
+        categoryInput.value !== "" &&
+        conditionInput.value !== "" &&
+        imageInput.files.length > 0 &&
+        latitudeInput && latitudeInput.value !== "" &&
+        longitudeInput && longitudeInput.value !== "";
+
+    submitBtn.disabled = !isValid;
+
+    // Update final price when form is valid
+    if (isValid && typeof updateCreateFinalPrice === 'function') {
+        updateCreateFinalPrice();
+    }
+
+    return isValid;
+}
+
+// ============================================================================
+// FORM SUBMISSION (Enhanced to include AI data)
+// ============================================================================
+async function handleFormSubmission() {
+    const submitBtn = document.getElementById("submitPost");
+    if (!submitBtn || submitBtn.disabled) return;
+
+    // Get form data
+    const formData = new FormData();
+
+    // Add all form fields
+    const fields = [
+        'titleInput', 'descriptionInput', 'locationInput',
+        'categoryInput', 'conditionInput', 'imageInput'
+    ];
+
+    fields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            if (field.type === 'file') {
+                if (field.files[0]) {
+                    formData.append('ImageFile', field.files[0]);
+                }
+            } else {
+                formData.append(field.name || fieldId.replace('Input', ''), field.value);
+            }
+        }
+    });
+
+    // Add hidden location data
+    const hiddenFields = ['Latitude', 'Longitude', 'LocationName'];
+    hiddenFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field && field.value) {
+            formData.append(fieldId, field.value);
+        }
+    });
+
+    // Add AI detection data if available
+    const aiFields = ['aiCategoryId', 'aiConditionId', 'aiConfidenceScore'];
+    aiFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field && field.value) {
+            formData.append(fieldId, field.value);
+        }
+    });
+
+    // Add anti-forgery token
+    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+    if (token) {
+        formData.append('__RequestVerificationToken', token);
+    }
+
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="loading-spinner"></span><span class="btn-text">Posting...</span>';
 
     try {
-        // Show loading state
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Posting...";
-
-        const formData = new FormData();
-
-        // Add anti-forgery token
-        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
-        if (token) {
-            formData.append('__RequestVerificationToken', token);
-        }
-
-        formData.append("ItemTitle", titleInput.value.trim());
-        formData.append("CategoryId", parseInt(categoryInput.value));
-        formData.append("ConditionId", parseInt(conditionInput.value));
-        formData.append("Description", descriptionInput.value.trim());
-        formData.append("Latitude", parseFloat(latitude));
-        formData.append("Longitude", parseFloat(longitude));
-        formData.append("LocationName", locationInput.value.trim());
-        formData.append("ImageFile", imageInput.files[0]);
-
-        const response = await fetch("/Item/Create", {
-            method: "POST",
+        const response = await fetch('/api/Items/Create', {
+            method: 'POST',
             body: formData
         });
 
-        if (response.ok) {
-            const result = await response.json();
+        const result = await response.json();
 
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Posted Successfully!',
-                    text: 'Your item has been posted with AI analysis!',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-            } else {
-                alert('Posted successfully!');
-            }
-
-            // Close modal and reset
-            document.getElementById('createPostModal').style.display = 'none';
+        if (response.ok && result.success) {
+            // Success - close modal and refresh
+            document.getElementById("createPostModal").style.display = "none";
             resetForm();
 
-            // Reload page to show new item
-            setTimeout(() => window.location.reload(), 1500);
+            // Show success message
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Your item has been posted successfully.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });
+            }
 
+            // Refresh the page to show new item
+            setTimeout(() => window.location.reload(), 1500);
         } else {
-            const errorText = await response.text();
-            throw new Error(errorText || 'Failed to post item');
+            throw new Error(result.message || 'Failed to post item');
         }
     } catch (err) {
-        console.error("Submission error:", err);
-
+        console.error('Error submitting form:', err);
         if (typeof Swal !== 'undefined') {
             Swal.fire({
+                title: 'Error',
+                text: err.message || 'Failed to post item. Please try again.',
                 icon: 'error',
-                title: 'Failed to Post',
-                text: err.message || 'Please try again.'
+                confirmButtonText: 'OK'
             });
         } else {
             alert('Failed to post: ' + err.message);
@@ -668,7 +588,7 @@ async function handleFormSubmission(e) {
     } finally {
         // Reset button state
         submitBtn.disabled = false;
-        submitBtn.textContent = "Post";
+        submitBtn.innerHTML = '<span class="btn-text">Post</span>';
     }
 }
 
@@ -709,7 +629,7 @@ function resetForm() {
 }
 
 // ============================================================================
-// GOOGLE PLACES INTEGRATION
+// GOOGLE PLACES INTEGRATION (Preserved existing functionality)
 // ============================================================================
 document.addEventListener("DOMContentLoaded", function () {
     if (typeof google !== 'undefined' && google.maps && google.maps.places) {
@@ -731,9 +651,11 @@ function initGoogleAutocomplete() {
         if (place.geometry && place.geometry.location) {
             const latField = document.getElementById("Latitude");
             const lngField = document.getElementById("Longitude");
+            const locationNameField = document.getElementById("LocationName");
 
             if (latField) latField.value = place.geometry.location.lat();
             if (lngField) lngField.value = place.geometry.location.lng();
+            if (locationNameField) locationNameField.value = place.formatted_address;
         }
     });
 }
@@ -743,3 +665,4 @@ function initGoogleAutocomplete() {
 // ============================================================================
 window.removeImage = removeImage;
 window.aiSuggestion = aiSuggestion;
+window.checkFormValidity = checkFormValidity;

@@ -100,7 +100,15 @@ public static class DatabaseSeeder
                     Description = "Other items not fitting specific categories",
                     IsActive = true,
                     SortOrder = 11
-                }
+                },
+                new ItemCategory
+{
+    CategoryId = 12,
+    Name = "Clothing",
+    Description = "Apparel, shoes, accessories, and fashion items",
+    IsActive = true,
+    SortOrder = 12
+}
             };
 
             context.ItemCategories.AddRange(categories);
@@ -112,46 +120,30 @@ public static class DatabaseSeeder
         {
             var conditions = new[]
             {
-                new ItemCondition
-                {
-                    ConditionId = 1,
-                    Name = "Brand New",
-                    Description = "Item is completely new and unused",
-                    ConditionMultiplier = 1.25m, // +25% as per your PricingController
-                    IsActive = true
-                },
-                new ItemCondition
-                {
-                    ConditionId = 2,
-                    Name = "Like New",
-                    Description = "Item is barely used and in excellent condition",
-                    ConditionMultiplier = 1.15m, // +15% as per your PricingController
-                    IsActive = true
-                },
-                new ItemCondition
-                {
-                    ConditionId = 3,
-                    Name = "Gently Used",
-                    Description = "Item shows minimal signs of use",
-                    ConditionMultiplier = 1.05m, // +5% as per your PricingController
-                    IsActive = true
-                },
-                new ItemCondition
-                {
-                    ConditionId = 4,
-                    Name = "Visible Wear",
-                    Description = "Item shows noticeable signs of use but still functional",
-                    ConditionMultiplier = 0.90m, // -10% as per your PricingController
-                    IsActive = true
-                },
-                new ItemCondition
-                {
-                    ConditionId = 5,
-                    Name = "For Repair/Parts",
-                    Description = "Item needs repair or is suitable for parts only",
-                    ConditionMultiplier = 0.75m, // -25% as per your PricingController
-                    IsActive = true
-                }
+    new ItemCondition
+    {
+        ConditionId = 1,
+        Name = "Excellent",
+        Description = "Item is in perfect or near-perfect condition",
+        ConditionMultiplier = 1.25m, // +25% (same as Brand New)
+        IsActive = true
+    },
+    new ItemCondition
+    {
+        ConditionId = 3,
+        Name = "Good",
+        Description = "Item shows minimal signs of use but functions perfectly",
+        ConditionMultiplier = 1.05m, // +5% (same as Gently Used)
+        IsActive = true
+    },
+    new ItemCondition
+    {
+        ConditionId = 4,
+        Name = "Fair",
+        Description = "Item shows noticeable signs of use but still functional",
+        ConditionMultiplier = 0.90m, // -10% (same as Visible Wear)
+        IsActive = true
+    }
             };
 
             context.ItemConditions.AddRange(conditions);

@@ -39,7 +39,8 @@ namespace TidyUpCapstone.Services
                 8 => 60,   // Crafts & DIY
                 9 => 60,   // School & Office
                 10 => 90,  // Sentimental Items
-                11 => 75,  // Miscellaneous
+                11 => 40,  // Miscellaneous
+                12 => 75,  // Chlothing
                 _ => 50
             };
         }
@@ -49,11 +50,9 @@ namespace TidyUpCapstone.Services
       
             return conditionId switch
             {
-                1 => 0.25m,   // Brand New
-                2 => 0.15m,   // Like New
-                3 => 0.05m,   // Gently Used
-                4 => -0.10m,  // Visible Wear
-                5 => -0.25m,  // For Repair/Parts
+                1 => 0.25m,   // Excellent
+                3 => 0.05m,   // Good
+                4 => -0.10m,  // Fair
                 _ => 0m
             };
         }

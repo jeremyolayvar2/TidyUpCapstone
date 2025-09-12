@@ -3708,6 +3708,12 @@ select.invalid {
         color: #1976d2;
     }
 
+    .suggestion-option.applied {
+        background: #e8f5e8 !important;
+        border-color: #4caf50 !important;
+        box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2) !important;
+    }
+
 .confidence-badge {
     background: #4caf50;
     color: white;
@@ -3889,4 +3895,6 @@ select.invalid {
 
 .remove-image {
     position: absolute;
-    top: 8
+    top: 8;
+}
+

@@ -196,6 +196,7 @@ namespace TidyUpCapstone.Services
                 9 => "School & Office",
                 10 => "Sentimental Items",
                 11 => "Miscellaneous",
+                12 => "Clothing",
                 _ => "Unknown"
             };
         }
@@ -573,10 +574,8 @@ namespace TidyUpCapstone.Services
             return conditionId switch
             {
                 1 => 5.0m, // Brand New
-                2 => 4.5m, // Like New
-                3 => 3.5m, // Gently Used
+                3=> 3.5m, // Gently Used
                 4 => 2.5m, // Visible Wear
-                5 => 1.5m, // For Repair/Parts
                 _ => 3.0m
             };
         }

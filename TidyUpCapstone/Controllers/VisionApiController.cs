@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TidyUpCapstone.Services;
 using TidyUpCapstone.Services.Interfaces;
 
 namespace TidyUpCapstone.Controllers.Api
@@ -9,10 +10,12 @@ namespace TidyUpCapstone.Controllers.Api
     {
         private readonly IVisionService _visionService;
         private readonly ILogger<VisionController> _logger;
+        private readonly IVertexAiService _vertexAiService;
 
-        public VisionController(IVisionService visionService, ILogger<VisionController> logger)
+        public VisionController(IVisionService visionService, IVertexAiService vertexAiService, ILogger<VisionController> logger)
         {
             _visionService = visionService;
+            _vertexAiService = vertexAiService;
             _logger = logger;
         }
 
@@ -46,117 +49,48 @@ namespace TidyUpCapstone.Controllers.Api
                     return BadRequest(new { success = false, message = "Invalid file type. Please use JPEG, PNG, or WebP." });
                 }
 
-                _logger.LogInformation("Analyzing image: {FileName}, Size: {Size} bytes",
-                    imageFile.FileName, imageFile.Length);
+                using var memoryStream = new MemoryStream();
+                await imageFile.CopyToAsync(memoryStream);
+                var imageBytes = memoryStream.ToArray();
 
-                // Perform Vision API analysis
-                var result = await _visionService.AnalyzeImageAsync(imageFile);
+                // Run both Vision API (category) and Vertex AI (condition) in parallel
+                var categoryTask = _visionService.AnalyzeImageAsync(imageBytes);
+                var conditionTask = _vertexAiService.PredictConditionAsync(imageBytes);
 
-                if (!result.Success)
-                {
-                    _logger.LogWarning("Vision analysis failed: {Error}", result.ErrorMessage);
-                    return Ok(new
-                    {
-                        success = false,
-                        message = "Analysis failed",
-                        fallbackToManual = true
-                    });
-                }
+                await Task.WhenAll(categoryTask, conditionTask);
 
-                // Return successful analysis
-                var response = new
+                var categoryResult = await categoryTask;
+                var conditionResult = await conditionTask;
+
+                return Ok(new
                 {
                     success = true,
-                    suggestedCategoryId = result.SuggestedCategoryId,
-                    categoryName = GetCategoryName(result.SuggestedCategoryId),
-                    confidenceScore = result.ConfidenceScore,
-                    topLabels = result.Labels.Take(5).Select(l => new
+                    // Category prediction (existing)
+                    suggestedCategoryId = categoryResult.SuggestedCategoryId,
+                    categoryName = GetCategoryName(categoryResult.SuggestedCategoryId),
+                    confidenceScore = categoryResult.ConfidenceScore, // Keep the old name for compatibility
+                    categoryConfidence = categoryResult.ConfidenceScore,
+                    // Condition prediction (NEW)
+                    suggestedConditionId = conditionResult.SuggestedConditionId,
+                    conditionName = GetConditionName(conditionResult.SuggestedConditionId),
+                    conditionConfidence = conditionResult.ConfidenceScore,
+                    conditionLabel = conditionResult.PredictedLabel,
+                    // Combined results
+                    topLabels = categoryResult.Labels?.Take(3).Select(l => new
                     {
                         description = l.Description,
-                        score = Math.Round(l.Score, 3)
-                    }),
-                    topObjects = result.Objects.Take(3).Select(o => new
-                    {
-                        name = o.Name,
-                        score = Math.Round(o.Score, 3)
-                    }),
-                    processedAt = result.ProcessedAt
-                };
-
-                _logger.LogInformation("Vision analysis completed. Category: {CategoryId}, Confidence: {Confidence:P2}",
-                    result.SuggestedCategoryId, result.ConfidenceScore);
-
-                return Ok(response);
+                        score = l.Score
+                    }).ToList()
+                });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error during image analysis");
-                return StatusCode(500, new
-                {
-                    success = false,
-                    message = "Analysis service temporarily unavailable",
-                    fallbackToManual = true
-                });
+                return BadRequest(new { success = false, message = "Analysis failed" });
             }
         }
 
-        /// <summary>
-        /// Get analysis history for debugging/admin purposes
-        /// </summary>
-        /// <param name="itemId">Item ID to get analysis for</param>
-        /// <returns>Analysis history</returns>
-        [HttpGet("GetAnalysis/{itemId}")]
-        public async Task<IActionResult> GetAnalysis(int itemId)
-        {
-            try
-            {
-                // This would require adding a method to your service to retrieve stored analyses
-                // For now, return a simple response
-                return Ok(new { success = true, message = "Analysis retrieval not implemented yet" });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving analysis for item {ItemId}", itemId);
-                return StatusCode(500, new { success = false, message = "Error retrieving analysis" });
-            }
-        }
-
-        /// <summary>
-        /// Test endpoint to verify Vision API connectivity
-        /// </summary>
-        /// <returns>API status</returns>
-        [HttpGet("TestConnection")]
-        public async Task<IActionResult> TestConnection()
-        {
-            try
-            {
-                // Create a small test image (1x1 pixel PNG)
-                var testImageBytes = Convert.FromBase64String(
-                    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==");
-
-                var result = await _visionService.AnalyzeImageAsync(testImageBytes);
-
-                return Ok(new
-                {
-                    success = true,
-                    visionApiWorking = result.Success,
-                    message = result.Success ? "Vision API is working" : "Vision API connection failed",
-                    error = result.ErrorMessage
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Vision API test failed");
-                return Ok(new
-                {
-                    success = false,
-                    visionApiWorking = false,
-                    message = "Vision API test failed",
-                    error = ex.Message
-                });
-            }
-        }
-
+        // Add these helper methods to your VisionController
         private string GetCategoryName(int categoryId)
         {
             return categoryId switch
@@ -172,8 +106,22 @@ namespace TidyUpCapstone.Controllers.Api
                 9 => "School & Office",
                 10 => "Sentimental Items",
                 11 => "Miscellaneous",
+                12 => "Clothing",
+                _ => "Unknown Category"
+            };
+        }
+
+        private string GetConditionName(int conditionId)
+        {
+            return conditionId switch
+            {
+                1 => "Excellent",
+                3 => "Good",
+                4 => "Fair",
                 _ => "Unknown"
             };
         }
+
     }
+
 }

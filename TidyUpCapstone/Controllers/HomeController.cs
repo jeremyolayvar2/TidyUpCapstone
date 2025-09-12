@@ -159,7 +159,8 @@ namespace TidyUpCapstone.Controllers
                 new() { CategoryId = 8, Name = "Crafts & DIY", IsActive = true, SortOrder = 8 },
                 new() { CategoryId = 9, Name = "School & Office", IsActive = true, SortOrder = 9 },
                 new() { CategoryId = 10, Name = "Sentimental Items", IsActive = true, SortOrder = 10 },
-                new() { CategoryId = 11, Name = "Miscellaneous", IsActive = true, SortOrder = 11 }
+                new() { CategoryId = 11, Name = "Miscellaneous", IsActive = true, SortOrder = 11 },
+                new() { CategoryId = 12, Name = "Clothing", IsActive = true, SortOrder = 12 }
             };
         }
 
@@ -167,11 +168,9 @@ namespace TidyUpCapstone.Controllers
         {
             return new List<ItemConditionDto>
             {
-                new() { ConditionId = 1, Name = "Brand New", ConditionMultiplier = 1.25m, IsActive = true },
-                new() { ConditionId = 2, Name = "Like New", ConditionMultiplier = 1.15m, IsActive = true },
-                new() { ConditionId = 3, Name = "Gently Used", ConditionMultiplier = 1.05m, IsActive = true },
-                new() { ConditionId = 4, Name = "Visible Wear", ConditionMultiplier = 0.90m, IsActive = true },
-                new() { ConditionId = 5, Name = "For Repair/Parts", ConditionMultiplier = 0.75m, IsActive = true }
+             new() { ConditionId = 1, Name = "Excellent", ConditionMultiplier = 1.25m, IsActive = true },
+             new() { ConditionId = 3, Name = "Good", ConditionMultiplier = 1.05m, IsActive = true },
+             new() { ConditionId = 4, Name = "Fair", ConditionMultiplier = 0.90m, IsActive = true }
             };
         }
 

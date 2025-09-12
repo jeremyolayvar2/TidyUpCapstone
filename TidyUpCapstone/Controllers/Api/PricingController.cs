@@ -127,7 +127,7 @@ namespace TidyUpCapstone.Controllers.Api
                 }
 
                 var basePrice = GetBaseCapForCategory(categoryId);
-                var conditions = new[] { 1, 2, 3, 4, 5 }; // All condition IDs
+                var conditions = new[] { 1, 2, 3 }; // All condition IDs
 
                 var priceRanges = conditions.Select(conditionId =>
                 {

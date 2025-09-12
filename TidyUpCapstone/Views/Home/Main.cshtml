@@ -405,92 +405,100 @@
 </div>
 
 <!-- Modal for Posting an Item ====================================================================================================================== -->
-<div id="createPostModal" class="modal" enctype="multipart/form-data">
-
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Post an Item</h2>
-            <button type="button" class="close-modal" onclick="closeCreateModal()">
-                <span class="material-symbols-outlined">close</span>
-            </button>
-        </div>
-
-        <div class="modal-content-child1">
-            <div class="upload-section">
-                <label for="imageInput" class="upload-label">
-                    <img src="~/assets/upload-image-input.svg" alt="Upload" class="upload-image-btn">
-                    <span class="upload-text">Click to upload image</span>
-                </label>
-                <input type="file" id="imageInput" name="ImageFile" accept="image/*" required>
-
-                <!-- ADD THIS IMAGE PREVIEW CONTAINER -->
-                <div class="image-preview" id="imagePreview" style="display: none;">
-                    <img id="previewImg" src="" alt="Preview" />
-                    <button type="button" class="remove-image" onclick="removeImage()">
-                        <span class="material-symbols-outlined">close</span>
-                    </button>
-                </div>
+    <div id="createPostModal" class="modal" enctype="multipart/form-data">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Post an Item</h2>
+                <button type="button" class="close-modal" onclick="closeCreateModal()">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
             </div>
 
-            <div class="cat-con-price">
+            <div class="modal-content-child1">
+                <div class="upload-section">
+                    <label for="imageInput" class="upload-label">
+                        <img src="~/assets/upload-image-input.svg" alt="Upload" class="upload-image-btn">
+                        <span class="upload-text">Click to upload image</span>
+                    </label>
+                    <input type="file" id="imageInput" name="ImageFile" accept="image/*" required>
 
-                <select id="categoryInput" name="CategoryId" required>
-                    <option value="" disabled selected hidden>Select a category</option>
-                    @foreach (var category in Model?.Categories ?? new List<TidyUpCapstone.Models.DTOs.Items.ItemCategoryDto>())
-                    {
-                        <option value="@category.CategoryId">@category.Name</option>
-                    }
-                </select>
-                <select id="conditionInput" name="ConditionId" required>
-                    <option value="" disabled selected hidden>Select condition</option>
-                    @foreach (var condition in Model?.Conditions ?? new List<TidyUpCapstone.Models.DTOs.Items.ItemConditionDto>())
-                    {
-                        <option value="@condition.ConditionId">@condition.Name</option>
-                    }
-                </select>
-
-                <div class="input-wrapper">
-                    <input class="input-form" type="text" id="locationInput" name="LocationName" placeholder=" " required />
-                    <label class="input-label" for="locationInput">Location</label>
-
-                </div>
-            </div>
-        </div>
-
-        <div class="modal-content-child2">
-            <div class="item-info">
-                <!-- Title -->
-                <div class="input-wrapper">
-                    <input class="input-form" type="text" id="titleInput" name="ItemTitle" placeholder=" " required maxlength="100" />
-                    <label class="input-label" for="titleInput">Item</label>
-
-                </div>
-
-                <!-- Description -->
-                <div class="input-wrapper">
-                    <textarea class="input-form" id="descriptionInput" name="Description" placeholder=" " required maxlength="1000"></textarea>
-                    <label class="input-label" for="descriptionInput">Description</label>
-                </div>
-
-                <input type="hidden" id="LocationName" name="LocationName" />
-                <!-- Hidden Lat/Lng -->
-                <input type="hidden" name="Latitude" id="Latitude" />
-                <input type="hidden" name="Longitude" id="Longitude" />
-            </div>
-
-
-            <div class="token-post">
-                <div class="price-display">
-                    <span class="token-count" id="finalPrice">0.00</span>
-                    <img src="~/assets/game-icons_token.svg" alt="token" />
-                    <div class="price-breakdown" id="priceBreakdown" style="display: none;">
-                        <small id="priceDetails"></small>
+                    <!-- Image Preview Container -->
+                    <div class="image-preview" id="imagePreview" style="display: none;">
+                        <img id="previewImg" src="" alt="Preview" />
+                        <button type="button" class="remove-image" onclick="removeImage()">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
                     </div>
                 </div>
-                <button type="submit" class="post-btn" id="submitPost" disabled>
-                    <span class="loading-spinner" style="display: none;"></span>
-                    <span class="btn-text">Post</span>
-                </button>
+
+                <div class="cat-con-price">
+                    <!-- Category Dropdown - AI will silently set this -->
+                    <div id="categoryContainer">
+                        <select id="categoryInput" name="CategoryId" required>
+                            <option value="" disabled selected hidden>Select a category</option>
+                            @foreach (var category in Model?.Categories ?? new List<TidyUpCapstone.Models.DTOs.Items.ItemCategoryDto>())
+                            {
+                                <option value="@category.CategoryId">@category.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Condition Dropdown - AI will silently set this -->
+                    <div id="conditionContainer">
+                        <select id="conditionInput" name="ConditionId" required>
+                            <option value="" disabled selected hidden>Select condition</option>
+                            @foreach (var condition in Model?.Conditions ?? new List<TidyUpCapstone.Models.DTOs.Items.ItemConditionDto>())
+                            {
+                                <option value="@condition.ConditionId">@condition.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="input-wrapper">
+                        <input class="input-form" type="text" id="locationInput" name="LocationName" placeholder=" " required />
+                        <label class="input-label" for="locationInput">Location</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-content-child2">
+                <div class="item-info">
+                    <!-- Title -->
+                    <div class="input-wrapper">
+                        <input class="input-form" type="text" id="titleInput" name="ItemTitle" placeholder=" " required maxlength="100" />
+                        <label class="input-label" for="titleInput">Item</label>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="input-wrapper">
+                        <textarea class="input-form" id="descriptionInput" name="Description" placeholder=" " required maxlength="1000"></textarea>
+                        <label class="input-label" for="descriptionInput">Description</label>
+                    </div>
+
+                    <!-- Hidden fields for location data -->
+                    <input type="hidden" id="LocationName" name="LocationName" />
+                    <input type="hidden" name="Latitude" id="Latitude" />
+                    <input type="hidden" name="Longitude" id="Longitude" />
+
+                    <!-- Hidden fields for AI data (backend tracking only - no UI) -->
+                    <input type="hidden" id="aiCategoryId" name="AiCategoryId" />
+                    <input type="hidden" id="aiConditionId" name="AiConditionId" />
+                    <input type="hidden" id="aiConfidenceScore" name="AiConfidenceScore" />
+                </div>
+
+                <div class="token-post">
+                    <div class="price-display">
+                        <span class="token-count" id="finalPrice">0.00</span>
+                        <img src="~/assets/game-icons_token.svg" alt="token" />
+                        <div class="price-breakdown" id="priceBreakdown" style="display: none;">
+                            <small id="priceDetails"></small>
+                        </div>
+                    </div>
+                    <button type="submit" class="post-btn" id="submitPost" disabled>
+                        <span class="loading-spinner" style="display: none;"></span>
+                        <span class="btn-text">Post</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -519,20 +527,25 @@
             </div>
 
             <div class="cat-con-price">
-                <select id="editCategoryInput">
-                    <option value="" disabled selected hidden>Select a category</option>
-                    @foreach (var category in Model?.Categories ?? new List<TidyUpCapstone.Models.DTOs.Items.ItemCategoryDto>())
-                    {
-                        <option value="@category.CategoryId">@category.Name</option>
-                    }
-                </select>
-                <select id="editConditionInput">
-                    <option value="" disabled selected hidden>Select condition</option>
-                    @foreach (var condition in Model?.Conditions ?? new List<TidyUpCapstone.Models.DTOs.Items.ItemConditionDto>())
-                    {
-                        <option value="@condition.ConditionId">@condition.Name</option>
-                    }
-                </select>
+                <div id="categoryContainer">
+                    <select id="categoryInput" name="CategoryId" required>
+                        <!-- your existing options stay exactly the same -->
+                        @foreach (var category in Model?.Categories ?? new List<TidyUpCapstone.Models.DTOs.Items.ItemCategoryDto>())
+                        {
+                            <option value="@category.CategoryId">@category.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div id="conditionContainer">
+                    <select id="conditionInput" name="ConditionId" required>
+                        <!-- your existing options stay exactly the same -->
+                        @foreach (var condition in Model?.Conditions ?? new List<TidyUpCapstone.Models.DTOs.Items.ItemConditionDto>())
+                        {
+                            <option value="@condition.ConditionId">@condition.Name</option>
+                        }
+                    </select>
+                </div>
                 <div class="input-wrapper">
                     <input class="input-form" type="text" id="editLocationInput" name="LocationName" placeholder=" " required />
                     <label class="input-label" for="editLocationInput">Location</label>

@@ -53,6 +53,7 @@ if (!string.IsNullOrEmpty(googleCloudSettings?.CredentialsPath))
 
 // Register Vision service
 builder.Services.AddScoped<IVisionService, VisionService>();
+builder.Services.AddScoped<IVertexAiService, VertexAiService>();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())

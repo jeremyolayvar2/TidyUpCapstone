@@ -59,9 +59,18 @@ namespace TidyUpCapstone.Services
             { "backpack", 9 }, { "briefcase", 9 },
 
             // Sentimental Items (CategoryId: 10)
-            { "photo", 10 }, { "frame", 10 }, { "jewelry", 10 }, { "watch", 10 },
-            { "ring", 10 }, { "necklace", 10 }, { "bracelet", 10 }, { "trophy", 10 },
-            { "medal", 10 }, { "collectible", 10 },
+            { "photo", 10 }, { "frame", 10 }, { "ring", 10 }, { "necklace", 10 },
+            { "bracelet", 10 }, { "trophy", 10 }, { "medal", 10 }, { "collectible", 10 },
+
+            // Clothing (CategoryId: 12)
+            { "clothing", 12 }, { "shirt", 12 }, { "pants", 12 }, { "dress", 12 },
+            { "shoe", 12 }, { "shoes", 12 }, { "jacket", 12 }, { "sweater", 12 },
+            { "jeans", 12 }, { "hat", 12 }, { "bag", 12 }, { "purse", 12 },
+            { "belt", 12 }, { "accessories", 12 }, { "scarf", 12 }, { "gloves", 12 },
+            { "socks", 12 }, { "underwear", 12 }, { "swimwear", 12 }, { "t-shirt", 12 },
+            { "tshirt", 12 }, { "long-sleeved", 12 }, { "long sleeve", 12 },
+            { "sleeve", 12 }, { "top", 12 }, { "blouse", 12 }, { "collar", 12 },
+            { "button", 12 }, { "footwear", 12 }, { "jewelry", 12 }, { "watch", 12 },
 
             // Miscellaneous (CategoryId: 11) - Default fallback
         };
@@ -137,7 +146,7 @@ namespace TidyUpCapstone.Services
             var categoryScores = new Dictionary<int, decimal>();
 
             // Initialize all categories with 0 score
-            for (int i = 1; i <= 11; i++)
+            for (int i = 1; i <= 12; i++)
             {
                 categoryScores[i] = 0;
             }
