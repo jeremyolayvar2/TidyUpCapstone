@@ -349,7 +349,8 @@ namespace TidyUpCapstone.Services
             try
             {
                 var items = await _context.Items
-                    .Where(i => i.Status == ItemStatus.Available && i.ExpiresAt > DateTime.UtcNow)
+                    .Where(i => i.Status == ItemStatus.Available &&
+                               (i.ExpiresAt == null || i.ExpiresAt > DateTime.UtcNow)) // ← Fixed: Allow NULL expiry
                     .Include(i => i.User)
                     .Include(i => i.Category)
                     .Include(i => i.Condition)
