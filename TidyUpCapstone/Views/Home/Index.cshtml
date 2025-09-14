@@ -6,6 +6,7 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/style1.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/responsive-improvements.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/modal.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/AlertIndex.css" asp-append-version="true" />
     <script src="https://cdn.tailwindcss.com"></script>
@@ -192,8 +193,6 @@
 </div>
 
 <!-- REGISTER MODAL -->
-<!-- Replace the register form section in your Index.cshtml with this corrected version -->
-<!-- REGISTER MODAL -->
 <div class="register-modal-overlay" id="registerModal">
     <div class="register-modal-container">
         <div class="register-modal-header">
@@ -234,7 +233,7 @@
                 <span>OR</span>
             </div>
 
-            <!-- Manual Registration Form - FIXED -->
+            <!-- Manual Registration Form -->
             <form method="post" action="/Account/ModalRegister" id="registerForm">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
@@ -327,8 +326,8 @@
     </div>
 </div>
 
-
 @section Scripts {
     <script src="~/js/IndexPageScroll.js"></script>
+    <script src="~/js/IndexAvatarAnimation.js"></script>
     <script src="~/js/modalIndex.js"></script>
 }
