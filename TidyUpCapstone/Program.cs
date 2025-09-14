@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection") ??
-        "Server=(localdb)\\MSSQLLocalDB;Database=TidyUpdbSettings;Trusted_Connection=True;MultipleActiveResultSets=True;TrustServerCertificate=True"
+        "Server=OLAYVAR\\SQLEXPRESS;Database=TidyUpdb;Trusted_Connection=True;MultipleActiveResultSets=True;TrustServerCertificate=True"
     ));
 
 // Identity Configuration
