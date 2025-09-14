@@ -1,17 +1,17 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using TidyUpCapstone.Helpers;
 using TidyUpCapstone.Models.DTOs.Community;
 using TidyUpCapstone.Models.Entities.Community;
 using TidyUpCapstone.Models.Entities.User;
 using TidyUpCapstone.Services;
-using TidyUpCapstone.Helpers;
 
 namespace TidyUpCapstone.Controllers
 {
     /// <summary>
     /// Clean controller for managing community posts with CRUD operations, reactions, and comments
-    /// Refactored to use service layer for better separation of concerns
+    /// Production version - requires authentication for all operations
     /// </summary>
     [Authorize]
     public class CommunityController : Controller
@@ -21,7 +21,6 @@ namespace TidyUpCapstone.Controllers
         private readonly IReactionService _reactionService;
         private readonly IImageService _imageService;
         private readonly IViewModelService _viewModelService;
-        private readonly ITestUserHelper _testUserHelper;
         private readonly UserManager<AppUser> _userManager;
         private readonly ILogger<CommunityController> _logger;
 
@@ -31,7 +30,6 @@ namespace TidyUpCapstone.Controllers
             IReactionService reactionService,
             IImageService imageService,
             IViewModelService viewModelService,
-            ITestUserHelper testUserHelper,
             UserManager<AppUser> userManager,
             ILogger<CommunityController> logger)
         {
@@ -40,7 +38,6 @@ namespace TidyUpCapstone.Controllers
             _reactionService = reactionService;
             _imageService = imageService;
             _viewModelService = viewModelService;
-            _testUserHelper = testUserHelper;
             _userManager = userManager;
             _logger = logger;
         }
@@ -49,7 +46,11 @@ namespace TidyUpCapstone.Controllers
 
         private async Task<AppUser?> GetCurrentUserAsync()
         {
-            return await _testUserHelper.GetCurrentUserAsync(HttpContext, _userManager, User);
+            if (User?.Identity?.IsAuthenticated != true)
+            {
+                return null;
+            }
+            return await _userManager.GetUserAsync(User);
         }
 
         #endregion
@@ -136,7 +137,6 @@ namespace TidyUpCapstone.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [AllowAnonymous]
         public async Task<IActionResult> CreatePost([FromForm] CreatePostDto model)
         {
             try
@@ -149,7 +149,7 @@ namespace TidyUpCapstone.Controllers
 
                 var currentUser = await GetCurrentUserAsync();
                 if (currentUser == null)
-                    return Json(new { success = false, message = "Authentication error." });
+                    return Json(new { success = false, message = "You must be logged in to create posts." });
 
                 // Validate content
                 var (isValidContent, contentError) = ValidationHelper.PostValidation.ValidatePostContent(model.PostContent);
@@ -174,6 +174,11 @@ namespace TidyUpCapstone.Controllers
 
                 return Json(new { success = true, message = "Post created successfully!", post = postDto });
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex, "Unauthorized access in CreatePost");
+                return Json(new { success = false, message = "You must be logged in to create posts." });
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating post via API");
@@ -186,7 +191,6 @@ namespace TidyUpCapstone.Controllers
         /// </summary>
         [HttpPost("Community/EditPost/{id}")]
         [ValidateAntiForgeryToken]
-        [AllowAnonymous]
         public async Task<IActionResult> EditPost(int id, [FromForm] string PostContent, [FromForm] string PostType,
             [FromForm] string? RemoveImage, [FromForm] IFormFile? ImageFile)
         {
@@ -194,7 +198,7 @@ namespace TidyUpCapstone.Controllers
             {
                 var currentUser = await GetCurrentUserAsync();
                 if (currentUser == null)
-                    return Json(new { success = false, message = "Authentication error." });
+                    return Json(new { success = false, message = "You must be logged in to edit posts." });
 
                 // Validate content
                 var (isValidContent, contentError) = ValidationHelper.PostValidation.ValidatePostContent(PostContent);
@@ -237,6 +241,11 @@ namespace TidyUpCapstone.Controllers
                     imageRemoved = string.IsNullOrEmpty(finalImageUrl)
                 });
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex, "Unauthorized access in EditPost: {PostId}", id);
+                return Json(new { success = false, message = "You must be logged in to edit posts." });
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating post via API. PostId: {PostId}", id);
@@ -249,7 +258,6 @@ namespace TidyUpCapstone.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [AllowAnonymous]
         public async Task<IActionResult> DeletePost([FromForm] int postId)
         {
             try
@@ -267,6 +275,11 @@ namespace TidyUpCapstone.Controllers
                     postId, currentUser.Id);
 
                 return Json(new { success = true, message = "Post deleted successfully!" });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex, "Unauthorized access in DeletePost: {PostId}", postId);
+                return Json(new { success = false, message = "You must be logged in to delete posts." });
             }
             catch (Exception ex)
             {
@@ -306,7 +319,6 @@ namespace TidyUpCapstone.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [AllowAnonymous]
         public async Task<IActionResult> ToggleReaction([FromForm] int postId)
         {
             try
@@ -324,6 +336,11 @@ namespace TidyUpCapstone.Controllers
                     reactionCount = reactionCount,
                     message = isLiked ? "Post liked!" : "Post unliked!"
                 });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex, "Unauthorized access in ToggleReaction: {PostId}", postId);
+                return Json(new { success = false, message = "You must be logged in to react to posts." });
             }
             catch (Exception ex)
             {
@@ -362,7 +379,6 @@ namespace TidyUpCapstone.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [AllowAnonymous]
         public async Task<IActionResult> CreateCommentFromForm([FromForm] int postId, [FromForm] string content, [FromForm] int? parentCommentId = null)
         {
             try
@@ -387,6 +403,11 @@ namespace TidyUpCapstone.Controllers
 
                 return Json(new { success = true, message = "Comment added successfully!", comment = commentDto });
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex, "Unauthorized access in CreateCommentFromForm: {PostId}", postId);
+                return Json(new { success = false, message = "You must be logged in to comment." });
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating comment for post {PostId}", postId);
@@ -399,7 +420,6 @@ namespace TidyUpCapstone.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [AllowAnonymous]
         public async Task<IActionResult> UpdateComment([FromForm] int commentId, [FromForm] string content)
         {
             try
@@ -420,6 +440,11 @@ namespace TidyUpCapstone.Controllers
 
                 return Json(new { success = true, message = "Comment updated successfully!" });
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex, "Unauthorized access in UpdateComment: {CommentId}", commentId);
+                return Json(new { success = false, message = "You must be logged in to edit comments." });
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating comment {CommentId}", commentId);
@@ -432,7 +457,6 @@ namespace TidyUpCapstone.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [AllowAnonymous]
         public async Task<IActionResult> DeleteComment([FromForm] int commentId)
         {
             try
@@ -448,62 +472,15 @@ namespace TidyUpCapstone.Controllers
 
                 return Json(new { success = true, message = "Comment deleted successfully!" });
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex, "Unauthorized access in DeleteComment: {CommentId}", commentId);
+                return Json(new { success = false, message = "You must be logged in to delete comments." });
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting comment {CommentId}", commentId);
                 return Json(new { success = false, message = "Error deleting comment. Please try again." });
-            }
-        }
-
-        #endregion
-
-        #region Test Mode & Admin
-
-        [HttpPost]
-        [AllowAnonymous]
-        public IActionResult SwitchTestUser([FromForm] string username)
-        {
-            try
-            {
-                var validUsers = new[] { "Alice", "Bob", "Charlie" };
-
-                if (validUsers.Contains(username))
-                {
-                    HttpContext.Session.SetString("CurrentTestUser", username);
-                    _logger.LogInformation("Switched test user to: {Username}", username);
-                    return Json(new { success = true, message = $"Switched to {username}" });
-                }
-
-                return Json(new { success = false, message = "Invalid user" });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error switching test user");
-                return Json(new { success = false, message = "Error switching user" });
-            }
-        }
-
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> DebugCurrentUser()
-        {
-            try
-            {
-                var sessionUser = HttpContext.Session.GetString("CurrentTestUser");
-                var currentUser = await GetCurrentUserAsync();
-
-                return Json(new
-                {
-                    sessionUser = sessionUser,
-                    actualUserId = currentUser?.Id,
-                    actualUserName = currentUser?.UserName,
-                    isAuthenticated = User?.Identity?.IsAuthenticated,
-                    sessionId = HttpContext.Session.Id
-                });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { error = ex.Message });
             }
         }
 

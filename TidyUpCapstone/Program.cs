@@ -22,7 +22,6 @@ builder.Services
 builder.Services.AddScoped<ICommunityService, CommunityService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IReactionService, ReactionService>();
-builder.Services.AddScoped<ITestUserHelper, TestUserHelper>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IViewModelService, ViewModelService>();
 

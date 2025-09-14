@@ -9,6 +9,7 @@ using TidyUpCapstone.Data;
 namespace TidyUpCapstone.Controllers
 {
     [Route("[controller]")]
+    [Authorize] // Require authentication for all actions
     public class ItemController : Controller
     {
         private readonly IItemService _itemService;
@@ -67,31 +68,26 @@ namespace TidyUpCapstone.Controllers
 
                 // Get current user ID
                 int currentUserId = GetCurrentUserId();
-                if (currentUserId <= 0)
-                {
-                    return Json(new { success = false, message = "User authentication required" });
-                }
 
-                // FIXED: Create DTO with LocationName, let the service handle location resolution
+                // Create DTO with LocationName, let the service handle location resolution
                 var createDto = new CreateItemDto
                 {
                     ItemTitle = itemTitle,
                     Description = description,
                     CategoryId = categoryId,
                     ConditionId = conditionId,
-                    LocationName = locationName, // FIXED: Set the LocationName in the DTO
+                    LocationName = locationName,
                     LocationId = 0, // The service will resolve this
                     Latitude = latitude,
                     Longitude = longitude,
                     ImageFile = imageFile
                 };
 
-                // FIXED: Let the service handle location resolution internally
+                // Let the service handle location resolution internally
                 var createdItem = await _itemService.CreateItemAsync(createDto, currentUserId);
 
                 _logger.LogInformation("Item created successfully: {ItemId}", createdItem.ItemId);
 
-                // Return success response (rest of the method stays the same)
                 return Json(new
                 {
                     success = true,
@@ -122,6 +118,11 @@ namespace TidyUpCapstone.Controllers
                         aiConfidenceLevel = createdItem.AiConfidenceLevel
                     }
                 });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex, "Unauthorized access in Create");
+                return Json(new { success = false, message = "Authentication required" });
             }
             catch (Exception ex)
             {
@@ -161,6 +162,11 @@ namespace TidyUpCapstone.Controllers
                         : null
                 });
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex, "Unauthorized access in Edit: {ItemId}", id);
+                return Json(new { success = false, message = "Authentication required" });
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading item for edit: {ItemId}", id);
@@ -178,10 +184,6 @@ namespace TidyUpCapstone.Controllers
                 _logger.LogInformation("Item ID: {ItemId}", id);
 
                 var currentUserId = GetCurrentUserId();
-                if (currentUserId <= 0)
-                {
-                    return Json(new { success = false, message = "User authentication required" });
-                }
 
                 // Extract form values
                 var itemTitle = form["ItemTitle"].ToString()?.Trim();
@@ -196,7 +198,7 @@ namespace TidyUpCapstone.Controllers
                 _logger.LogInformation("Form data - Title: {Title}, Description: {Description}, LocationName: {LocationName}, Lat: {Lat}, Lng: {Lng}",
                     itemTitle, description, locationName, latitude, longitude);
 
-                // UPDATED: Only validate fields that users can actually edit
+                // Only validate fields that users can actually edit
                 var validationErrors = new List<string>();
 
                 if (string.IsNullOrWhiteSpace(itemTitle)) validationErrors.Add("Item title is required");
@@ -276,12 +278,8 @@ namespace TidyUpCapstone.Controllers
             try
             {
                 var currentUserId = GetCurrentUserId();
-                if (currentUserId <= 0)
-                {
-                    return Json(new { success = false, message = "User authentication required" });
-                }
-
                 var success = await _itemService.DeleteItemAsync(id, currentUserId);
+
                 if (success)
                 {
                     return Json(new { success = true, message = "Item deleted successfully" });
@@ -290,6 +288,11 @@ namespace TidyUpCapstone.Controllers
                 {
                     return Json(new { success = false, message = "Item not found or you don't have permission to delete it" });
                 }
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex, "Unauthorized access in Delete: {ItemId}", id);
+                return Json(new { success = false, message = "Authentication required" });
             }
             catch (Exception ex)
             {
@@ -305,11 +308,6 @@ namespace TidyUpCapstone.Controllers
             try
             {
                 var currentUserId = GetCurrentUserId();
-                if (currentUserId <= 0)
-                {
-                    return Json(new { success = false, message = "User authentication required" });
-                }
-
                 var itemIdStr = form["itemId"].ToString();
                 var reason = form["reason"].ToString();
 
@@ -359,6 +357,11 @@ namespace TidyUpCapstone.Controllers
 
                 return Json(new { success = true, message = "Report submitted successfully" });
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex, "Unauthorized access in Report");
+                return Json(new { success = false, message = "Authentication required" });
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error submitting report");
@@ -378,28 +381,25 @@ namespace TidyUpCapstone.Controllers
             };
         }
 
-        // Helper method to get current user ID
+        /// <summary>
+        /// Gets the current authenticated user ID
+        /// </summary>
+        /// <returns>User ID</returns>
+        /// <exception cref="UnauthorizedAccessException">Thrown when user is not authenticated</exception>
         private int GetCurrentUserId()
         {
-            // For authenticated users
-            if (User.Identity?.IsAuthenticated == true)
+            if (User?.Identity?.IsAuthenticated != true)
             {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (int.TryParse(userIdClaim, out int userId))
-                {
-                    return userId;
-                }
+                throw new UnauthorizedAccessException("User must be authenticated");
             }
 
-            // For test mode (development only)
-            var currentTestUser = HttpContext.Session.GetString("CurrentTestUser") ?? "Alice";
-            return currentTestUser switch
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
             {
-                "Alice" => 1,
-                "Bob" => 2,
-                "Charlie" => 3,
-                _ => 1
-            };
+                throw new UnauthorizedAccessException("Invalid user ID claim");
+            }
+
+            return userId;
         }
     }
 }

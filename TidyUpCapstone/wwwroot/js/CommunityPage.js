@@ -13,7 +13,6 @@ class CommunityHub {
     }
 
     init() {
-        console.log("Initializing Community Hub (Community Posts Only)");
         this.setupEventListeners();
         this.initializeComponents();
         this.loadCommunityPosts();
@@ -287,7 +286,6 @@ class CommunityHub {
     async handleDoubleClickLike(postElement) {
         const postId = postElement.getAttribute('data-post-id');
         if (!postId) {
-            console.error("Community post ID not found for double-click like");
             return;
         }
 
@@ -309,7 +307,6 @@ class CommunityHub {
 
         const postId = likeBtn.getAttribute('data-post-id');
         if (!postId) {
-            console.error("Community post ID not found on like button");
             return;
         }
 
@@ -465,7 +462,6 @@ class CommunityHub {
         const sendBtn = document.getElementById('sendCommentBtn');
 
         if (!modal) {
-            console.error("Modal element not found!");
             return;
         }
 
@@ -531,7 +527,6 @@ class CommunityHub {
         if (result.success && result.comments) {
             this.displayComments(result.comments);
         } else {
-            console.error("Failed to load comments:", result.message);
             this.displayEmptyCommentsState();
         }
     }
@@ -634,7 +629,6 @@ class CommunityHub {
             if (result.success && result.posts) {
                 this.replaceExistingPosts(result.posts);
                 this.addHeartOverlays();
-                console.log(`Loaded ${result.posts.length} community posts from database`);
             }
         } catch (error) {
             console.error('Error loading posts:', error);
@@ -1175,8 +1169,6 @@ async function switchTestUser() {
     if (!username) return;
 
     try {
-        console.log(`🔄 Switching to ${username}...`);
-
         const formData = new FormData();
         formData.append('username', username);
 
@@ -1191,14 +1183,12 @@ async function switchTestUser() {
         const result = await response.json();
 
         if (result.success) {
-            console.log(`✅ Backend switched to: ${username}`);
             window.location.reload();
         } else {
-            console.error('❌ Error switching user:', result.message);
             alert('Error switching user: ' + result.message);
         }
     } catch (error) {
-        console.error('❌ Error switching user:', error);
+        console.error('Error switching user:', error);
         alert('Error switching user');
     }
 }
@@ -1257,8 +1247,6 @@ async function deletePost(postId) {
 }
 
 function editPost(postId) {
-    console.log('Edit COMMUNITY post clicked for ID:', postId);
-
     const postElement = document.querySelector(`div.community-post[data-post-id="${postId}"]`);
     if (!postElement) {
         communityHub.showNotification('Community post not found', 'error');
@@ -1391,7 +1379,7 @@ async function savePostEdit(postId) {
 
         if (result.success) {
             updatePostInDOM(postId, content, result);
-            communityHub.showNotification('Community post updated successfully! ✨', 'success');
+            communityHub.showNotification('Community post updated successfully!', 'success');
             closeEditModal(postId);
         } else {
             communityHub.showNotification('Error: ' + (result.message || 'Failed to update post'), 'error');
@@ -1916,65 +1904,6 @@ function hideReplies(repliesContainer, icon, displayCount) {
 }
 
 // ============================================================================
-// DEBUG FUNCTIONS
-// ============================================================================
-
-function testReactionManually(postId) {
-    console.log("=== MANUAL REACTION TEST ===");
-
-    if (!postId) {
-        const firstPost = document.querySelector('.community-post[data-post-id]');
-        postId = firstPost ? firstPost.getAttribute('data-post-id') : 'sample-1';
-        console.log("Using post ID:", postId);
-    }
-
-    communityHub.togglePostLike(postId)
-        .then(result => {
-            console.log("✅ Manual test successful:", result);
-        })
-        .catch(error => {
-            console.log("❌ Manual test failed:", error);
-        });
-}
-
-function checkReactionSetup() {
-    console.log("=== REACTION SETUP CHECK ===");
-
-    const token = document.querySelector('input[name="__RequestVerificationToken"]');
-    console.log("Anti-forgery token found:", !!token);
-
-    const communityPosts = document.querySelectorAll('.community-post');
-    console.log("Community posts found:", communityPosts.length);
-
-    const likeButtons = document.querySelectorAll('.community-post .like-btn');
-    console.log("Like buttons found:", likeButtons.length);
-
-    if (likeButtons.length > 0) {
-        const firstBtn = likeButtons[0];
-        const postId = firstBtn.getAttribute('data-post-id');
-        console.log("First button post ID:", postId);
-        console.log("First button classes:", firstBtn.className);
-    }
-
-    console.log("=========================");
-}
-
-function debugReactionState() {
-    console.log('=== REACTION DEBUG ===');
-    console.log('Current User ID:', communityHub.currentUserId);
-
-    document.querySelectorAll('.community-post').forEach(post => {
-        const postId = post.getAttribute('data-post-id');
-        const likeBtn = post.querySelector('.like-btn');
-        const isLiked = likeBtn?.classList.contains('liked');
-        const count = post.querySelector('.likes-count')?.textContent;
-
-        console.log(`Post ${postId}: Liked=${isLiked}, Count=${count}`);
-    });
-    console.log('===================');
-}
-
-// ============================================================================
 // INITIALIZATION
 // ============================================================================
 
@@ -1992,9 +1921,6 @@ window.closeEditModal = closeEditModal;
 window.savePostEdit = savePostEdit;
 window.editComment = editComment;
 window.deleteComment = deleteComment;
-window.testReactionManually = testReactionManually;
-window.checkReactionSetup = checkReactionSetup;
-window.debugReactionState = debugReactionState;
 
 // Initialize comment action handlers
 document.addEventListener('click', function (e) {
@@ -2014,11 +1940,3 @@ if (document.readyState === 'loading') {
 } else {
     communityHub.init();
 }
-
-console.log("🚀 Clean Community Hub JavaScript Loaded Successfully!");
-console.log("✅ Features: Instagram-style hearts, reactions, comments - COMMUNITY POSTS ONLY");
-console.log("✅ Fixed user switching with proper backend communication and page reload");
-console.log("🔧 Debug commands available:");
-console.log("   - checkReactionSetup() - Check if everything is set up correctly");
-console.log("   - testReactionManually('postId') - Test reactions manually");
-console.log("   - debugReactionState() - Show current reaction states");
