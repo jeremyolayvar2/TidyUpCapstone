@@ -10,6 +10,360 @@ function initializeLeaderboard() {
     initializeSidebarResponsiveness();
     enforceFirstPlacePositioning();
     setupResponsivePositioning();
+
+    // Load initial data
+    const activeFilter = document.querySelector('.filter-btn.active');
+    if (activeFilter) {
+        const filterType = activeFilter.getAttribute('data-filter');
+        updateLeaderboardData(filterType);
+    }
+}
+
+// API Integration Functions
+async function fetchLeaderboardData(filterType) {
+    try {
+        const response = await fetch(`/api/leaderboardapi/${filterType}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching leaderboard data:', error);
+        return null;
+    }
+}
+
+// Main leaderboard update function
+async function updateLeaderboardData(filterType) {
+    showLoadingState(true);
+
+    try {
+        const data = await fetchLeaderboardData(filterType);
+
+        if (!data) {
+            showErrorState('Failed to load leaderboard data');
+            return;
+        }
+
+        // Update top three cards
+        updateTopThreeCards(data.topThree);
+
+        // Update table
+        updateTableData(filterType, data.tableEntries);
+
+        showLoadingState(false);
+
+    } catch (error) {
+        console.error('Error updating leaderboard:', error);
+        showErrorState('Error loading data');
+        showLoadingState(false);
+    }
+}
+
+function updateTopThreeCards(topThreeData) {
+    topThreeData.forEach(userData => {
+        let targetCard;
+
+        // Find the correct card based on position
+        if (userData.position === 'first') {
+            targetCard = document.querySelector('.winner-card.first-place');
+        } else if (userData.position === 'second') {
+            targetCard = document.querySelector('.winner-card.second-place');
+        } else if (userData.position === 'third') {
+            targetCard = document.querySelector('.winner-card.third-place');
+        }
+
+        if (targetCard) {
+            // Add updating animation
+            targetCard.style.opacity = '0.7';
+            targetCard.style.transition = 'all 0.3s ease';
+
+            setTimeout(() => {
+                const nameElement = targetCard.querySelector('.winner-name');
+                const statsNumbers = targetCard.querySelectorAll('.stat-number');
+
+                // Update content with real data
+                nameElement.innerHTML = `${userData.name} <span class="rank-number">#${userData.rank}</span>`;
+                statsNumbers[0].textContent = userData.items;
+                statsNumbers[1].textContent = `${userData.streak}d`;
+                statsNumbers[2].textContent = userData.level;
+
+                // Store user ID for profile navigation
+                targetCard.dataset.userId = userData.userId;
+
+                // Restore card appearance
+                targetCard.style.opacity = '1';
+
+                // Ensure proper positioning is maintained
+                setTimeout(() => {
+                    enforceFirstPlacePositioning();
+                }, 50);
+
+            }, 300);
+        }
+    });
+}
+
+function updateTableData(filterType, tableData) {
+    const tableBody = document.querySelector('.leaderboard-table tbody');
+
+    if (tableBody) {
+        // Add fade out animation
+        tableBody.style.opacity = '0.7';
+        tableBody.style.transition = 'opacity 0.3s ease';
+
+        setTimeout(() => {
+            // Clear existing rows
+            tableBody.innerHTML = '';
+
+            // Add new rows with real data
+            tableData.forEach(rowData => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><span class="rank-badge">#${rowData.rank}</span></td>
+                    <td>${rowData.name}</td>
+                    <td>${rowData.items}</td>
+                    <td>${rowData.streak}</td>
+                    <td>${rowData.level}</td>
+                `;
+                row.dataset.userId = rowData.userId;
+                tableBody.appendChild(row);
+            });
+
+            // Fade back in
+            tableBody.style.opacity = '1';
+        }, 300);
+    }
+}
+
+// Filter functionality
+function initializeFilters() {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            // Remove active class from all buttons
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+
+            // Add active class to clicked button
+            this.classList.add('active');
+
+            // Get filter type
+            const filterType = this.getAttribute('data-filter');
+
+            // Apply filter
+            applyFilter(filterType);
+        });
+    });
+}
+
+async function applyFilter(filterType) {
+    const container = document.querySelector('.leaderboard-container');
+
+    // Add loading state
+    container.style.pointerEvents = 'none';
+
+    // Update data from API
+    await updateLeaderboardData(filterType);
+
+    // Remove loading state and show feedback after animation completes
+    setTimeout(() => {
+        container.style.pointerEvents = 'auto';
+        showFilterFeedback(filterType);
+    }, 800);
+}
+
+function showFilterFeedback(filterType) {
+    const feedback = document.createElement('div');
+    feedback.textContent = `Showing ${filterType.replace('-', ' ')} rankings`;
+    feedback.style.cssText = `
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        background: var(--primary-color);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        z-index: 1000;
+        opacity: 0;
+        transform: translateX(100px);
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    `;
+
+    // Adjust position for mobile
+    if (window.innerWidth <= 768) {
+        feedback.style.top = 'auto';
+        feedback.style.bottom = '2rem';
+        feedback.style.left = '50%';
+        feedback.style.right = 'auto';
+        feedback.style.transform = 'translateX(-50%) translateY(50px)';
+        feedback.style.fontSize = '0.9rem';
+        feedback.style.padding = '0.5rem 1rem';
+    }
+
+    document.body.appendChild(feedback);
+
+    // Animate in
+    setTimeout(() => {
+        feedback.style.opacity = '1';
+        if (window.innerWidth <= 768) {
+            feedback.style.transform = 'translateX(-50%) translateY(0)';
+        } else {
+            feedback.style.transform = 'translateX(0)';
+        }
+    }, 100);
+
+    // Remove after delay
+    setTimeout(() => {
+        feedback.style.opacity = '0';
+        if (window.innerWidth <= 768) {
+            feedback.style.transform = 'translateX(-50%) translateY(50px)';
+        } else {
+            feedback.style.transform = 'translateX(100px)';
+        }
+        setTimeout(() => {
+            if (feedback.parentNode) {
+                feedback.remove();
+            }
+        }, 300);
+    }, 2500);
+}
+
+function showLoadingState(show) {
+    const container = document.querySelector('.leaderboard-container');
+
+    if (show) {
+        // Add loading overlay
+        if (!document.querySelector('.loading-overlay')) {
+            const overlay = document.createElement('div');
+            overlay.className = 'loading-overlay';
+            overlay.innerHTML = `
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Updating leaderboard...</div>
+                </div>
+            `;
+            overlay.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(255, 255, 255, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+                backdrop-filter: blur(2px);
+            `;
+
+            const spinner = overlay.querySelector('.spinner');
+            spinner.style.cssText = `
+                width: 40px;
+                height: 40px;
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid #6B9080;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin-bottom: 1rem;
+            `;
+
+            const loadingText = overlay.querySelector('.loading-text');
+            loadingText.style.cssText = `
+                color: #6B9080;
+                font-weight: 600;
+                font-size: 1rem;
+            `;
+
+            // Add spinner animation
+            if (!document.querySelector('#spinner-keyframes')) {
+                const style = document.createElement('style');
+                style.id = 'spinner-keyframes';
+                style.textContent = `
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            container.style.position = 'relative';
+            container.appendChild(overlay);
+        }
+    } else {
+        // Remove loading overlay
+        const overlay = document.querySelector('.loading-overlay');
+        if (overlay) {
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                if (overlay.parentNode) {
+                    overlay.remove();
+                }
+            }, 300);
+        }
+    }
+}
+
+function showErrorState(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.textContent = message;
+    errorDiv.style.cssText = `
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        background: #dc3545;
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        z-index: 1000;
+        opacity: 0;
+        transform: translateX(100px);
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    `;
+
+    // Adjust position for mobile
+    if (window.innerWidth <= 768) {
+        errorDiv.style.top = 'auto';
+        errorDiv.style.bottom = '2rem';
+        errorDiv.style.left = '50%';
+        errorDiv.style.right = 'auto';
+        errorDiv.style.transform = 'translateX(-50%) translateY(50px)';
+        errorDiv.style.fontSize = '0.9rem';
+        errorDiv.style.padding = '0.75rem 1rem';
+    }
+
+    document.body.appendChild(errorDiv);
+
+    // Animate in
+    setTimeout(() => {
+        errorDiv.style.opacity = '1';
+        if (window.innerWidth <= 768) {
+            errorDiv.style.transform = 'translateX(-50%) translateY(0)';
+        } else {
+            errorDiv.style.transform = 'translateX(0)';
+        }
+    }, 100);
+
+    // Remove after delay
+    setTimeout(() => {
+        errorDiv.style.opacity = '0';
+        if (window.innerWidth <= 768) {
+            errorDiv.style.transform = 'translateX(-50%) translateY(50px)';
+        } else {
+            errorDiv.style.transform = 'translateX(100px)';
+        }
+        setTimeout(() => {
+            if (errorDiv.parentNode) {
+                errorDiv.remove();
+            }
+        }, 300);
+    }, 5000);
 }
 
 // Enhanced function to ensure first place positioning based on screen size
@@ -208,224 +562,6 @@ function resetMobileLayout() {
     setMobilePositioning();
 }
 
-// Filter functionality with enhanced positioning maintenance
-function initializeFilters() {
-    const filterButtons = document.querySelectorAll('.filter-btn');
-
-    filterButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            // Remove active class from all buttons
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-
-            // Add active class to clicked button
-            this.classList.add('active');
-
-            // Get filter type
-            const filterType = this.getAttribute('data-filter');
-
-            // Apply filter with animation and maintain positioning
-            applyFilter(filterType);
-        });
-    });
-}
-
-// Apply filter with smooth transition and consistent positioning
-function applyFilter(filterType) {
-    const container = document.querySelector('.leaderboard-container');
-
-    // Add loading state
-    container.style.pointerEvents = 'none';
-
-    // Use the new animation function for filtering
-    animateFilterTransition(() => {
-        updateLeaderboardData(filterType);
-    });
-
-    // Remove loading state and show feedback after animation completes
-    setTimeout(() => {
-        container.style.pointerEvents = 'auto';
-        showFilterFeedback(filterType);
-    }, 800);
-}
-
-function updateLeaderboardData(filterType) {
-    // Sample data for different filters - position property helps maintain order
-    const sampleData = {
-        'all-time': [
-            { name: 'Kate Gonzales', rank: 1, items: 251, streak: 24, level: 602, position: 'first' },
-            { name: 'Deither Arias', rank: 2, items: 178, streak: 19, level: 472, position: 'second' },
-            { name: 'Jiro Llaguno', rank: 3, items: 142, streak: 11, level: 401, position: 'third' }
-        ],
-        'weekly': [
-            { name: 'Maria Santos', rank: 1, items: 45, streak: 7, level: 285, position: 'first' },
-            { name: 'Juan Dela Cruz', rank: 2, items: 38, streak: 6, level: 268, position: 'second' },
-            { name: 'Anna Reyes', rank: 3, items: 32, streak: 5, level: 245, position: 'third' }
-        ],
-        'daily': [
-            { name: 'Pedro Garcia', rank: 1, items: 12, streak: 1, level: 180, position: 'first' },
-            { name: 'Lisa Wong', rank: 2, items: 9, streak: 1, level: 165, position: 'second' },
-            { name: 'Carlos Lopez', rank: 3, items: 7, streak: 1, level: 148, position: 'third' }
-        ]
-    };
-
-    const data = sampleData[filterType] || sampleData['all-time'];
-
-    // Update cards while maintaining their position classes and order
-    data.forEach(cardData => {
-        let targetCard;
-
-        // Find the correct card based on position, not current rank
-        if (cardData.position === 'first') {
-            targetCard = document.querySelector('.winner-card.first-place');
-        } else if (cardData.position === 'second') {
-            targetCard = document.querySelector('.winner-card.second-place');
-        } else if (cardData.position === 'third') {
-            targetCard = document.querySelector('.winner-card.third-place');
-        }
-
-        if (targetCard) {
-            // Add updating animation
-            targetCard.style.opacity = '0.7';
-            targetCard.style.transition = 'all 0.3s ease';
-
-            setTimeout(() => {
-                const nameElement = targetCard.querySelector('.winner-name');
-                const statsNumbers = targetCard.querySelectorAll('.stat-number');
-
-                // Update content
-                nameElement.innerHTML = `${cardData.name} <span class="rank-number">#${cardData.rank}</span>`;
-                statsNumbers[0].textContent = cardData.items;
-                statsNumbers[1].textContent = `${cardData.streak}d`;
-                statsNumbers[2].textContent = cardData.level;
-
-                // Restore card appearance
-                targetCard.style.opacity = '1';
-
-                // Ensure proper positioning is maintained
-                setTimeout(() => {
-                    enforceFirstPlacePositioning();
-                }, 50);
-
-            }, 300);
-        }
-    });
-
-    // Update table data as well
-    updateTableData(filterType, data);
-}
-
-function updateTableData(filterType, topThreeData) {
-    // Sample table data for different filters
-    const tableData = {
-        'all-time': [
-            { rank: 4, name: 'Russel Saldivar', items: 98, streak: 10, level: 373 },
-            { rank: 5, name: 'Joaquin Bordado', items: 80, streak: 11, level: 371 },
-            { rank: 6, name: 'Nardong Putik', items: 78, streak: 8, level: 302 },
-            { rank: 7, name: 'Tonyong Bayawak', items: 58, streak: 8, level: 290 }
-        ],
-        'weekly': [
-            { rank: 4, name: 'Mike Johnson', items: 28, streak: 4, level: 285 },
-            { rank: 5, name: 'Sarah Lee', items: 25, streak: 3, level: 268 },
-            { rank: 6, name: 'Tom Wilson', items: 22, streak: 3, level: 245 },
-            { rank: 7, name: 'Emma Davis', items: 20, streak: 2, level: 230 }
-        ],
-        'daily': [
-            { rank: 4, name: 'Alex Chen', items: 5, streak: 1, level: 180 },
-            { rank: 5, name: 'Maya Patel', items: 4, streak: 1, level: 165 },
-            { rank: 6, name: 'Jake Miller', items: 3, streak: 1, level: 150 },
-            { rank: 7, name: 'Zoe Taylor', items: 3, streak: 1, level: 148 }
-        ]
-    };
-
-    const data = tableData[filterType] || tableData['all-time'];
-    const tableBody = document.querySelector('.leaderboard-table tbody');
-
-    if (tableBody) {
-        // Add fade out animation
-        tableBody.style.opacity = '0.7';
-        tableBody.style.transition = 'opacity 0.3s ease';
-
-        setTimeout(() => {
-            // Clear existing rows
-            tableBody.innerHTML = '';
-
-            // Add new rows
-            data.forEach(rowData => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><span class="rank-badge">#${rowData.rank}</span></td>
-                    <td>${rowData.name}</td>
-                    <td>${rowData.items}</td>
-                    <td>${rowData.streak}</td>
-                    <td>${rowData.level}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-
-            // Fade back in
-            tableBody.style.opacity = '1';
-        }, 300);
-    }
-}
-
-function showFilterFeedback(filterType) {
-    const feedback = document.createElement('div');
-    feedback.textContent = `Showing ${filterType.replace('-', ' ')} rankings`;
-    feedback.style.cssText = `
-        position: fixed;
-        top: 2rem;
-        right: 2rem;
-        background: var(--primary-color);
-        color: white;
-        padding: 0.75rem 1.5rem;
-        border-radius: 50px;
-        font-weight: 600;
-        z-index: 1000;
-        opacity: 0;
-        transform: translateX(100px);
-        transition: all 0.3s ease;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    `;
-
-    // Adjust position for mobile
-    if (window.innerWidth <= 768) {
-        feedback.style.top = 'auto';
-        feedback.style.bottom = '2rem';
-        feedback.style.left = '50%';
-        feedback.style.right = 'auto';
-        feedback.style.transform = 'translateX(-50%) translateY(50px)';
-        feedback.style.fontSize = '0.9rem';
-        feedback.style.padding = '0.5rem 1rem';
-    }
-
-    document.body.appendChild(feedback);
-
-    // Animate in
-    setTimeout(() => {
-        feedback.style.opacity = '1';
-        if (window.innerWidth <= 768) {
-            feedback.style.transform = 'translateX(-50%) translateY(0)';
-        } else {
-            feedback.style.transform = 'translateX(0)';
-        }
-    }, 100);
-
-    // Remove after delay
-    setTimeout(() => {
-        feedback.style.opacity = '0';
-        if (window.innerWidth <= 768) {
-            feedback.style.transform = 'translateX(-50%) translateY(50px)';
-        } else {
-            feedback.style.transform = 'translateX(100px)';
-        }
-        setTimeout(() => {
-            if (feedback.parentNode) {
-                feedback.remove();
-            }
-        }, 300);
-    }, 2500);
-}
-
 // Initialize animations with positioning enforcement
 function initializeAnimations() {
     // Entrance animations
@@ -481,6 +617,7 @@ function initializeProfileButtons() {
 
             // Get user info from parent card
             const card = this.closest('.winner-card');
+            const userId = card.dataset.userId;
             const userName = card.querySelector('.winner-name').textContent.split('#')[0].trim();
 
             // Add loading state
@@ -493,7 +630,7 @@ function initializeProfileButtons() {
 
             // Simulate profile loading
             setTimeout(() => {
-                console.log(`Navigating to profile for: ${userName}`);
+                console.log(`Navigating to profile for: ${userName} (ID: ${userId})`);
 
                 // Reset button
                 this.textContent = originalText;
