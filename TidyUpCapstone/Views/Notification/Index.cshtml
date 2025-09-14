@@ -1,0 +1,327 @@
+﻿@model TidyUpCapstone.Models.ViewModels.Notifications.NotificationPageViewModel
+@{
+    ViewBag.HideNavigation = false;
+    ViewData["Title"] = "Notifications";
+}
+
+@section Styles {
+    <link href="~/css/NotificationPage.css" rel="stylesheet" />
+}
+
+<div class="notification-page-container">
+
+    <div class="notification-page-container-child1">
+        <!-- Header -->
+        <div class="notification-header">
+            <h1 class="notification-title">Notifications</h1>
+
+            <!-- Filter Tabs -->
+            <div class="notification-tabs">
+                <button id="tab-all" class="tab-button active" onclick="switchTab('all')">
+                    All
+                </button>
+                <button id="tab-unread" class="tab-button" onclick="switchTab('unread')">
+                    Unread @if(Model.UnreadCount > 0) {
+                    <span class="unread-badge">(@Model.UnreadCount)</span>
+                                        }
+                </button>
+            </div>
+        </div>
+
+        @* TESTING PANEL COMMENTED OUT FOR PRODUCTION
+        @if (Model.TestingPanel?.IsEnabled == true)
+        {
+            <div class="testing-panel-container">
+                <button id="toggle-testing-panel" class="testing-toggle-btn" onclick="toggleTestingPanel()">
+                    <span class="toggle-icon">🧪</span>
+                    <span class="toggle-text">Testing Panel</span>
+                    <span class="toggle-arrow">▼</span>
+                </button>
+
+                <div id="testing-panel" class="testing-panel hidden">
+                    <div class="testing-panel-header">
+                        <h3>Notification Testing Module</h3>
+                        <p>Generate test notifications for development and testing purposes</p>
+                    </div>
+
+                    <div class="testing-controls">
+                        <div class="quick-actions">
+                            <h4>Quick Test Actions</h4>
+                            <div class="quick-action-buttons">
+                                <button onclick="createQuickNotification('transaction', 'success')" class="quick-btn transaction-btn">
+                                    ✅ Transaction Success
+                                </button>
+                                <button onclick="createQuickNotification('transaction', 'confirmation')" class="quick-btn transaction-btn">
+                                    ⏳ Transaction Confirm
+                                </button>
+                                <button onclick="createQuickNotification('social', 'like')" class="quick-btn social-btn">
+                                    ❤️ Post Liked
+                                </button>
+                                <button onclick="createQuickNotification('social', 'comment')" class="quick-btn social-btn">
+                                    💬 New Comment
+                                </button>
+                                <button onclick="createQuickNotification('gamification', 'quest')" class="quick-btn gamification-btn">
+                                    🏆 Quest Complete
+                                </button>
+                                <button onclick="createQuickNotification('gamification', 'achievement')" class="quick-btn gamification-btn">
+                                    🥇 Achievement
+                                </button>
+                                <button onclick="createQuickNotification('communication', 'message')" class="quick-btn communication-btn">
+                                    📨 New Message
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bulk-actions">
+                            <h4>Bulk Test Actions</h4>
+                            <div class="bulk-controls">
+                                <div class="bulk-input-group">
+                                    <label for="bulk-count">Number of notifications:</label>
+                                    <input type="number" id="bulk-count" min="1" max="50" value="5" class="bulk-input">
+                                </div>
+                                <button onclick="createBulkNotifications()" class="bulk-btn">
+                                    📦 Create Random Bulk Notifications
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="advanced-testing">
+                            <h4>Advanced Testing</h4>
+                            <div class="advanced-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="test-category">Category:</label>
+                                        <select id="test-category" onchange="updateTestForm()" class="form-control">
+                                            <option value="">Select Category</option>
+                                            <option value="transaction">Transaction</option>
+                                            <option value="social">Social</option>
+                                            <option value="gamification">Gamification</option>
+                                            <option value="communication">Communication</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="test-type">Type:</label>
+                                        <select id="test-type" class="form-control" disabled>
+                                            <option value="">Select Type</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-row" id="additional-fields" style="display: none;">
+                                    <div class="form-group">
+                                        <label for="test-item-name">Item Name:</label>
+                                        <input type="text" id="test-item-name" placeholder="e.g., Wireless Headphones" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="test-username">Username:</label>
+                                        <input type="text" id="test-username" placeholder="e.g., Ana Santos" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="test-details">Details:</label>
+                                        <input type="text" id="test-details" placeholder="Additional details" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="test-count">Count:</label>
+                                        <input type="number" id="test-count" min="1" max="20" value="1" class="form-control">
+                                    </div>
+                                </div>
+
+                                <button onclick="createAdvancedNotification()" class="advanced-btn" id="create-advanced-btn" disabled>
+                                    Create Custom Notification
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="management-actions">
+                            <h4>Management Actions</h4>
+                            <div class="management-buttons">
+                                <button onclick="markAllAsRead()" class="management-btn read-btn">
+                                    👁️ Mark All as Read
+                                </button>
+                                <button onclick="clearAllNotifications()" class="management-btn clear-btn">
+                                    🗑️ Clear All Notifications
+                                </button>
+                                <button onclick="refreshNotifications()" class="management-btn refresh-btn">
+                                    🔄 Refresh
+                                </button>
+                                <button onclick="getNotificationSummary()" class="management-btn summary-btn">
+                                    📊 Show Summary
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="testing-results" class="testing-results hidden">
+                        <h4>Testing Results</h4>
+                        <div id="results-content"></div>
+                    </div>
+                </div>
+            </div>
+        }
+        *@
+
+        <!-- Notifications List -->
+        <div class="notifications-container" id="notifications-container">
+            @if (Model.HasNotifications)
+            {
+                @foreach (var notification in Model.Notifications)
+                {
+                    <div class="notification-card @notification.NotificationCategory-notification"
+                         data-category="all"
+                         data-read="@notification.IsRead.ToString().ToLower()"
+                         data-type="@notification.NotificationCategory"
+                         data-id="@notification.NotificationId"
+                         onclick="handleNotificationClick(this, @notification.NotificationId)">
+
+                        <div class="notification-content">
+                            <div class="notification-main">
+                                <div class="notification-title-section">
+                                    <h3 class="notification-card-title">@notification.Title</h3>
+                                    <span class="notification-time">@notification.TimeAgo</span>
+                                </div>
+                                <div class="notification-message">
+                                    <p class="message-text">@notification.Message</p>
+                                </div>
+                            </div>
+
+                            <!-- Notification Actions -->
+                            <div class="notification-actions">
+                                @if (!notification.IsRead)
+                                {
+                                    <button onclick="event.stopPropagation(); markAsReadFromButton(@notification.NotificationId, event)"
+                                            class="action-btn mark-read-btn"
+                                            title="Mark as read"
+                                            aria-label="Mark notification as read">
+                                        <span>👁️</span>
+                                    </button>
+                                }
+                                <button onclick="event.stopPropagation(); deleteNotification(@notification.NotificationId, event)"
+                                        class="action-btn delete-btn"
+                                        title="Delete notification"
+                                        aria-label="Delete notification">
+                                    <span>🗑️</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="#A4C3B2" />
+                        </svg>
+                    </div>
+                    <h3>No notifications</h3>
+                    <p id="empty-message">
+                        @if (Model.CurrentFilter == "unread")
+                        {
+                            @:You have no unread notifications.
+                        }
+                        else
+                        {
+                            @:You're all caught up! Check back later for new updates.
+                        }
+                    </p>
+                    @* Testing button commented out for production
+                    @if (Model.TestingPanel?.IsEnabled == true)
+                    {
+                        <button onclick="toggleTestingPanel()" class="empty-test-btn">
+                            🧪 Open Testing Panel to Create Test Notifications
+                        </button>
+                    }
+                    *@
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="notification-page-container-child2">
+        <!-- Modal Content (Desktop) -->
+        <div id="confirm-meetup-modal" class="modal-wrapper hidden">
+            <div class="modal-container">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Confirm Meet-up Transaction</h2>
+                        <span class="modal-time">Transaction Details</span>
+                    </div>
+
+                    <div class="modal-body">
+                        <p class="modal-message-label">Message:</p>
+                        <p class="modal-message">You have selected Meet-up as the transaction method for the item:</p>
+
+                        <div class="transaction-details">
+                            <p><strong>Item:</strong> "<span id="modal-item-name">Wireless Headphones</span>"</p>
+                            <p><strong>Buyer:</strong> <span id="modal-buyer-name">Juan Dela Cruz</span></p>
+                            <p><strong>Seller:</strong> <span id="modal-seller-name">Ana Santos</span></p>
+                        </div>
+
+                        <p class="confirmation-text">
+                            Please confirm that the item has been successfully exchanged.
+                        </p>
+
+                        <p class="confirmation-text">
+                            Once both parties click "Confirm", the transaction will be marked as complete and tokens will be released to the seller.
+                        </p>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button onclick="confirmTransaction()" class="confirm-button">Confirm</button>
+                        <button onclick="closeModal('confirm-meetup-modal')" class="cancel-button">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Mobile Modal Overlay -->
+<div id="mobile-confirm-modal" class="modal-overlay hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-container">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Confirm Meet-up Transaction</h2>
+                <button class="modal-close" onclick="closeModal('mobile-confirm-modal')" aria-label="Close modal">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <p class="modal-message-label">Message:</p>
+                <p class="modal-message">You have selected Meet-up as the transaction method for the item:</p>
+
+                <div class="transaction-details">
+                    <p><strong>Item:</strong> "<span id="mobile-modal-item-name">Wireless Headphones</span>"</p>
+                    <p><strong>Buyer:</strong> <span id="mobile-modal-buyer-name">Juan Dela Cruz</span></p>
+                    <p><strong>Seller:</strong> <span id="mobile-modal-seller-name">Ana Santos</span></p>
+                </div>
+
+                <p class="confirmation-text">
+                    Please confirm that the item has been successfully exchanged.
+                </p>
+
+                <p class="confirmation-text">
+                    Once both parties click "Confirm", the transaction will be marked as complete and tokens will be released to the seller.
+                </p>
+            </div>
+
+            <div class="modal-actions">
+                <button onclick="confirmTransaction()" class="confirm-button">Confirm</button>
+                <button onclick="closeModal('mobile-confirm-modal')" class="cancel-button">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/NotificationPage.js"></script>
+    @* Testing script commented out for production
+    <script src="~/js/NotificationTesting.js"></script>
+    *@
+}

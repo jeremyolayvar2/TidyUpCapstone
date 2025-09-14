@@ -413,7 +413,7 @@ function addLoadMoreButton() {
             card.style.display = 'block';
             card.removeAttribute('data-lazy');
         });
-
+         
         if (document.querySelectorAll('[data-lazy="true"]').length === 0) {
             loadMoreBtn.remove();
         }
@@ -422,10 +422,10 @@ function addLoadMoreButton() {
     container.appendChild(loadMoreBtn);
 }
 
-function handleNotificationClick(notificationElement, event) {
+async function handleNotificationClick(notificationElement, notificationId) {
     console.log('Notification clicked:', notificationElement.dataset.type);
 
-    // Enhanced click animation with better performance
+    // Enhanced click animation
     requestAnimationFrame(() => {
         notificationElement.style.transform = 'scale(0.98)';
         notificationElement.style.transition = 'transform 0.1s ease';
@@ -436,23 +436,177 @@ function handleNotificationClick(notificationElement, event) {
         }, 100);
     });
 
-    // Mark as read with optimistic updates
+    // Mark as read if it's unread - FIXED API CALL
     if (notificationElement.dataset.read === 'false') {
-        markAsRead(notificationElement);
+        try {
+            const response = await fetch(`/api/notification/user/1/mark-read/${notificationId}`, {
+                method: 'PUT', // Changed from POST to PUT to match API
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Update UI - IMPROVED VISUAL FEEDBACK
+                notificationElement.dataset.read = 'true';
+                notificationElement.classList.add('read');
+
+                // Add visual transition for read state
+                notificationElement.style.opacity = '0.7';
+                notificationElement.style.transition = 'opacity 0.3s ease';
+
+                // Remove mark as read button with animation
+                const markReadBtn = notificationElement.querySelector('.mark-read-btn');
+                if (markReadBtn) {
+                    markReadBtn.style.opacity = '0';
+                    markReadBtn.style.transform = 'scale(0)';
+                    setTimeout(() => markReadBtn.remove(), 200);
+                }
+
+                // Update unread count
+                const unreadResponse = await fetch('/Notification/GetUnreadCount');
+                if (unreadResponse.ok) {
+                    const unreadResult = await unreadResponse.json();
+                    updateUnreadCountDisplay(unreadResult.count);
+                }
+
+                // Update current tab if showing unread
+                if (currentTab === 'unread') {
+                    setTimeout(() => switchTab('unread'), 300);
+                }
+
+                console.log('Notification marked as read');
+
+                // Show visual feedback
+                showEnhancedNotificationToast('Marked as read', 'success');
+
+            } else {
+                console.warn('Failed to mark as read:', result.message);
+                showEnhancedNotificationToast('Failed to mark as read', 'error');
+            }
+
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
+            showEnhancedNotificationToast('Error marking as read', 'error');
+        }
     }
 
-    // Handle different notification types with enhanced feedback
+    // Handle different notification types with enhanced actions
     const notificationType = notificationElement.dataset.type;
-    handleNotificationTypeAction(notificationType);
+    handleNotificationTypeAction(notificationType, notificationElement);
 }
 
-function handleNotificationTypeAction(type) {
+function handleNotificationTypeAction(type, notificationElement) {
+    switch (type) {
+        case 'transaction':
+            console.log('Opening transaction modal');
+
+            // Extract transaction details from notification for modal
+            const itemName = extractItemNameFromNotification(notificationElement);
+            updateTransactionModalDetails(itemName);
+
+            openTransactionModal();
+            break;
+
+        case 'reaction':
+        case 'social':
+            showEnhancedNotificationToast('Viewing post reactions', 'info');
+            // Could redirect to post URL if available
+            break;
+
+        case 'comment':
+            showEnhancedNotificationToast('Opening comment thread', 'info');
+            // Could redirect to comment URL if available
+            break;
+
+        case 'delivery':
+            showEnhancedNotificationToast('Viewing delivery details', 'success');
+            break;
+
+        case 'gamification':
+            showEnhancedNotificationToast('Viewing achievement details', 'success');
+            break;
+
+        case 'communication':
+            showEnhancedNotificationToast('Opening message thread', 'info');
+            break;
+
+        default:
+            console.log('Unknown notification type:', type);
+            showEnhancedNotificationToast('Notification details', 'info');
+    }
+}
+
+// Helper function to extract item name from notification text
+function extractItemNameFromNotification(notificationElement) {
+    const messageText = notificationElement.querySelector('.message-text')?.textContent || '';
+
+    // Try to extract item name from common patterns
+    const patterns = [
+        /item:\s*"([^"]+)"/i,
+        /for\s+"([^"]+)"/i,
+        /"([^"]+)"\s+has been/i
+    ];
+
+    for (const pattern of patterns) {
+        const match = messageText.match(pattern);
+        if (match) {
+            return match[1];
+        }
+    }
+
+    return 'Item'; // Fallback
+}
+
+// Function to update modal with transaction details
+function updateTransactionModalDetails(itemName) {
+    // Update desktop modal
+    const desktopItemName = document.getElementById('modal-item-name');
+    if (desktopItemName) {
+        desktopItemName.textContent = itemName;
+    }
+
+    // Update mobile modal
+    const mobileItemName = document.getElementById('mobile-modal-item-name');
+    if (mobileItemName) {
+        mobileItemName.textContent = itemName;
+    }
+}
+
+// Enhanced updateUnreadCountDisplay function
+function updateUnreadCountDisplay(count) {
+    const unreadTab = document.getElementById('tab-unread');
+    if (unreadTab) {
+        // Update tab text
+        const badgeHtml = count > 0 ? ` <span class="unread-badge">(${count})</span>` : '';
+        unreadTab.innerHTML = `Unread${badgeHtml}`;
+
+        // Update tab attributes for accessibility
+        unreadTab.setAttribute('aria-label', `${count} unread notifications`);
+
+        // Add visual indicator for unread count
+        if (count > 0) {
+            unreadTab.setAttribute('data-count', count);
+        } else {
+            unreadTab.removeAttribute('data-count');
+        }
+    }
+
+    console.log('Updated unread count display:', count);
+} function handleNotificationTypeAction(type) {
     switch (type) {
         case 'transaction':
             console.log('Opening transaction modal');
             openTransactionModal();
             break;
         case 'reaction':
+        case 'social':
             showEnhancedNotificationToast('Viewing post reactions', 'info');
             break;
         case 'comment':
@@ -460,6 +614,12 @@ function handleNotificationTypeAction(type) {
             break;
         case 'delivery':
             showEnhancedNotificationToast('Viewing delivery details', 'success');
+            break;
+        case 'gamification': // Add this case
+            showEnhancedNotificationToast('Viewing achievement details', 'success');
+            break;
+        case 'communication': // Add this case
+            showEnhancedNotificationToast('Opening message thread', 'info');
             break;
         default:
             console.log('Unknown notification type:', type);
@@ -1115,6 +1275,220 @@ function registerServiceWorker() {
     }
 }
 
+
+
+// Separate function for mark-as-read button (different from notification click)
+async function markAsReadFromButton(notificationId, event) {
+    if (event) {
+        event.stopPropagation();
+    }
+
+    const button = event.target.closest('.mark-read-btn');
+    const notificationCard = event.target.closest('.notification-card');
+
+    if (!button || !notificationCard) return;
+
+    // Show button loading state
+    const originalContent = button.innerHTML;
+    button.innerHTML = '<span>⏳</span>';
+    button.disabled = true;
+
+    try {
+        const response = await fetch(`/api/notification/user/1/mark-read/${notificationId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+            // Update notification card
+            notificationCard.dataset.read = 'true';
+            notificationCard.classList.add('read');
+
+            // Animate button removal
+            button.style.opacity = '0';
+            button.style.transform = 'scale(0)';
+            button.style.transition = 'all 0.2s ease';
+
+            setTimeout(() => {
+                button.remove();
+            }, 200);
+
+            // Update unread count
+            const unreadResponse = await fetch('/Notification/GetUnreadCount');
+            if (unreadResponse.ok) {
+                const unreadResult = await unreadResponse.json();
+                updateUnreadCountDisplay(unreadResult.count);
+            }
+
+            // Update current tab if showing unread
+            if (currentTab === 'unread') {
+                setTimeout(() => switchTab('unread'), 300);
+            }
+
+            showEnhancedNotificationToast('Marked as read', 'success');
+            console.log('Notification marked as read via button');
+
+        } else {
+            throw new Error(result.message || 'Failed to mark as read');
+        }
+
+    } catch (error) {
+        console.error('Error marking notification as read:', error);
+
+        // Reset button state on error
+        button.innerHTML = originalContent;
+        button.disabled = false;
+
+        showEnhancedNotificationToast('Failed to mark as read', 'error');
+    }
+}
+
+// Enhanced confirmTransaction function with better feedback
+async function confirmTransaction() {
+    console.log('Confirming transaction...');
+
+    const confirmButtons = document.querySelectorAll('.confirm-button');
+    const activeButton = Array.from(confirmButtons).find(btn => {
+        const modal = btn.closest('.modal-wrapper, .modal-overlay');
+        return modal && !modal.classList.contains('hidden');
+    });
+
+    if (!activeButton) {
+        console.error('No active confirm button found');
+        return;
+    }
+
+    // Enhanced loading state
+    const originalText = activeButton.textContent;
+    activeButton.textContent = 'Processing...';
+    activeButton.disabled = true;
+    activeButton.style.opacity = '0.7';
+
+    // Add loading spinner
+    const spinner = document.createElement('span');
+    spinner.innerHTML = '⟳';
+    spinner.style.animation = 'spin 1s linear infinite';
+    spinner.style.marginRight = '8px';
+    activeButton.prepend(spinner);
+
+    try {
+        // Simulate API call - replace with actual API call
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        // Find and mark the transaction notification as read
+        const transactionNotification = document.querySelector('.transaction-notification[data-read="false"]');
+        if (transactionNotification) {
+            const notificationId = transactionNotification.dataset.id;
+
+            // Call API to mark as read
+            const response = await fetch(`/api/notification/user/1/mark-read/${notificationId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                // Update UI
+                transactionNotification.dataset.read = 'true';
+                transactionNotification.classList.add('read');
+
+                // Remove mark as read button if exists
+                const markReadBtn = transactionNotification.querySelector('.mark-read-btn');
+                if (markReadBtn) {
+                    markReadBtn.remove();
+                }
+
+                // Update unread count
+                const unreadResponse = await fetch('/Notification/GetUnreadCount');
+                if (unreadResponse.ok) {
+                    const unreadResult = await unreadResponse.json();
+                    updateUnreadCountDisplay(unreadResult.count);
+                }
+            }
+        }
+
+        showEnhancedNotificationToast('Transaction confirmed successfully!', 'success');
+        closeAllModals();
+
+        // Provide haptic feedback if available
+        if (navigator.vibrate) {
+            navigator.vibrate(50);
+        }
+
+        console.log('Transaction confirmed successfully');
+
+    } catch (error) {
+        console.error('Error confirming transaction:', error);
+        showEnhancedNotificationToast('Failed to confirm transaction', 'error');
+    } finally {
+        // Reset button state
+        activeButton.textContent = originalText;
+        activeButton.disabled = false;
+        activeButton.style.opacity = '1';
+        if (spinner.parentNode) {
+            spinner.remove();
+        }
+    }
+}
+// Function to update notification badge
+async function updateNotificationBadge() {
+    try {
+        const response = await fetch('/api/notification/user/1/count');
+        if (response.ok) {
+            const data = await response.json();
+            const badge = document.getElementById('notification-badge');
+            const count = data.count || 0;
+
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count.toString();
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+    } catch (error) {
+        console.error('Error updating notification badge:', error);
+    }
+}
+
+// Update badge on page load
+document.addEventListener('DOMContentLoaded', function () {
+    updateNotificationBadge();
+
+    // Update badge every 30 seconds
+    setInterval(updateNotificationBadge, 30000);
+});
+
+// Update badge when notifications are marked as read
+window.addEventListener('notificationUpdate', function () {
+    updateNotificationBadge();
+});
+
+// Add this to your notification page after marking as read
+function triggerBadgeUpdate() {
+    window.dispatchEvent(new CustomEvent('notificationUpdate'));
+}
+
+// Call this after successful mark as read operations
+async function markAsReadFromButton(notificationId, event) {
+    // ... existing code ...
+
+    if (result.success) {
+        // ... existing UI updates ...
+        triggerBadgeUpdate(); // Add this line
+    }
+}
+
+
 // Enhanced error boundary
 window.addEventListener('error', function (event) {
     console.error('Global error caught:', event.error);
@@ -1131,6 +1505,9 @@ window.addEventListener('error', function (event) {
 });
 
 // Export enhanced functions for global access
+// Export the new function for global access
+window.markAsReadFromButton = markAsReadFromButton;
+window.handleNotificationClick = handleNotificationClick;
 window.switchTab = switchTab;
 window.openModal = openModal;
 window.closeModal = closeModal;
