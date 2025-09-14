@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TidyUpCapstone.Data;
 
@@ -11,9 +12,11 @@ using TidyUpCapstone.Data;
 namespace TidyUpCapstone.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250824153209_AddProfileSettingsFields")]
+    partial class AddProfileSettingsFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,7 +52,7 @@ namespace TidyUpCapstone.Migrations
                         .HasDatabaseName("RoleNameIndex")
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
-                    b.ToTable("app_roles", (string)null);
+                    b.ToTable("AspNetRoles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -73,7 +76,7 @@ namespace TidyUpCapstone.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("app_role_claims", (string)null);
+                    b.ToTable("AspNetRoleClaims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
@@ -97,7 +100,7 @@ namespace TidyUpCapstone.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("app_user_claims", (string)null);
+                    b.ToTable("AspNetUserClaims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
@@ -118,7 +121,7 @@ namespace TidyUpCapstone.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("app_user_logins", (string)null);
+                    b.ToTable("AspNetUserLogins", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
@@ -133,7 +136,7 @@ namespace TidyUpCapstone.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("app_user_roles", (string)null);
+                    b.ToTable("AspNetUserRoles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
@@ -152,7 +155,7 @@ namespace TidyUpCapstone.Migrations
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable("app_user_tokens", (string)null);
+                    b.ToTable("AspNetUserTokens", (string)null);
                 });
 
             modelBuilder.Entity("TidyUpCapstone.Models.Entities.AI.AiProcessingPipeline", b =>
@@ -1444,45 +1447,6 @@ namespace TidyUpCapstone.Migrations
                     b.ToTable("notifications", (string)null);
                 });
 
-            modelBuilder.Entity("TidyUpCapstone.Models.Entities.Notifications.NotificationSettings", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int")
-                        .HasColumnName("user_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
-
-                    b.Property<bool>("DesktopNotifications")
-                        .HasColumnType("bit")
-                        .HasColumnName("desktop_notifications");
-
-                    b.Property<bool>("EmailItemUpdates")
-                        .HasColumnType("bit")
-                        .HasColumnName("email_item_updates");
-
-                    b.Property<bool>("EmailNewMessages")
-                        .HasColumnType("bit")
-                        .HasColumnName("email_new_messages");
-
-                    b.Property<bool>("EmailWeeklySummary")
-                        .HasColumnType("bit")
-                        .HasColumnName("email_weekly_summary");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("UserId");
-
-                    b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasDatabaseName("idx_notification_settings_user");
-
-                    b.ToTable("notification_settings", (string)null);
-                });
-
             modelBuilder.Entity("TidyUpCapstone.Models.Entities.Notifications.NotificationType", b =>
                 {
                     b.Property<int>("TypeId")
@@ -2299,20 +2263,6 @@ namespace TidyUpCapstone.Migrations
                         .HasColumnType("nvarchar(20)")
                         .HasColumnName("gender");
 
-                    b.Property<bool>("HighContrast")
-                        .HasColumnType("bit")
-                        .HasColumnName("high_contrast");
-
-                    b.Property<string>("Language")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)")
-                        .HasColumnName("language");
-
-                    b.Property<bool>("LargeText")
-                        .HasColumnType("bit")
-                        .HasColumnName("large_text");
-
                     b.Property<DateTime?>("LastLogin")
                         .HasColumnType("datetime2")
                         .HasColumnName("last_login");
@@ -2350,8 +2300,7 @@ namespace TidyUpCapstone.Migrations
                         .HasColumnName("password_hash");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("PhoneNumber");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
@@ -2361,14 +2310,6 @@ namespace TidyUpCapstone.Migrations
                         .HasColumnType("nvarchar(500)")
                         .HasColumnName("profile_picture_url");
 
-                    b.Property<bool>("ReduceMotion")
-                        .HasColumnType("bit")
-                        .HasColumnName("reduce_motion");
-
-                    b.Property<bool>("ScreenReader")
-                        .HasColumnType("bit")
-                        .HasColumnName("screen_reader");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -2377,12 +2318,6 @@ namespace TidyUpCapstone.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("status");
-
-                    b.Property<string>("Timezone")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("timezone");
 
                     b.Property<decimal>("TokenBalance")
                         .HasColumnType("decimal(10,2)")
@@ -2825,17 +2760,6 @@ namespace TidyUpCapstone.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TidyUpCapstone.Models.Entities.Notifications.NotificationSettings", b =>
-                {
-                    b.HasOne("TidyUpCapstone.Models.Entities.User.AppUser", "User")
-                        .WithOne("NotificationSettings")
-                        .HasForeignKey("TidyUpCapstone.Models.Entities.Notifications.NotificationSettings", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("TidyUpCapstone.Models.Entities.Notifications.UserNotificationPreference", b =>
                 {
                     b.HasOne("TidyUpCapstone.Models.Entities.Notifications.NotificationType", "Type")
@@ -3214,8 +3138,6 @@ namespace TidyUpCapstone.Migrations
                     b.Navigation("LoginLogs");
 
                     b.Navigation("ManagedUsers");
-
-                    b.Navigation("NotificationSettings");
 
                     b.Navigation("Notifications");
 

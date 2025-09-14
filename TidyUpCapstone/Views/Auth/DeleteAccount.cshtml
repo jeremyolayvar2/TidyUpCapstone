@@ -1,0 +1,188 @@
+﻿@{
+    ViewData["Title"] = "Delete Account";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white text-center">
+                    <h3 class="mb-0">
+                        <i class="bx bx-trash me-2"></i>
+                        Delete Account
+                    </h3>
+                </div>
+
+                <div class="card-body">
+                    <!-- Warning Message -->
+                    <div class="alert alert-danger">
+                        <h5 class="alert-heading">
+                            <i class="bx bx-error-circle me-2"></i>
+                            Warning: This Action Cannot Be Undone
+                        </h5>
+                        <p class="mb-0">Deleting your account will permanently remove all your data, including:</p>
+                        <ul class="mt-2 mb-0">
+                            <li>Your profile and account information</li>
+                            <li>All posted items and photos</li>
+                            <li>Your token balance and transaction history</li>
+                            <li>All achievements, streaks, and progress</li>
+                            <li>Messages and community interactions</li>
+                        </ul>
+                    </div>
+
+                    <!-- Confirmation Form -->
+                    <div id="deleteForm">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                <i class="bx bx-lock me-1"></i>
+                                Enter your password to confirm:
+                            </label>
+                            <input type="password" id="confirmPassword" class="form-control" placeholder="Your current password" required />
+                            <div class="text-danger mt-1" id="passwordError"></div>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input type="checkbox" id="confirmDeletion" class="form-check-input" required />
+                            <label class="form-check-label fw-bold" for="confirmDeletion">
+                                I understand this action cannot be undone and I want to permanently delete my account
+                            </label>
+                            <div class="text-danger mt-1" id="confirmError"></div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="button" id="deleteBtn" class="btn btn-danger btn-lg">
+                                <i class="bx bx-trash me-2"></i>
+                                Permanently Delete My Account
+                            </button>
+                            <a href="/Home/SettingsPage" class="btn btn-outline-secondary">
+                                <i class="bx bx-arrow-back me-2"></i>
+                                Cancel and Go Back
+                            </a>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            <div class="mt-4">
+                <div class="card border-info">
+                    <div class="card-header bg-info bg-opacity-10">
+                        <h6 class="mb-0 text-info">
+                            <i class="bx bx-info-circle me-2"></i>
+                            Before You Delete Your Account
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2">Consider these alternatives:</p>
+                        <ul class="small">
+                            <li><strong>Temporary Break:</strong> Simply stop using the platform without deleting</li>
+                            <li><strong>Privacy Settings:</strong> Adjust your privacy settings instead</li>
+                            <li><strong>Data Export:</strong> Download your data before deletion</li>
+                            <li><strong>Contact Support:</strong> We're here to help resolve any issues</li>
+                        </ul>
+                        <a href="/Support/ContactUs" class="btn btn-sm btn-outline-info">Contact Support</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteBtn = document.getElementById('deleteBtn');
+            const confirmPassword = document.getElementById('confirmPassword');
+            const confirmDeletion = document.getElementById('confirmDeletion');
+
+            deleteBtn.addEventListener('click', function() {
+                // Clear previous errors
+                document.getElementById('passwordError').textContent = '';
+                document.getElementById('confirmError').textContent = '';
+
+                const password = confirmPassword.value.trim();
+                const isConfirmed = confirmDeletion.checked;
+
+                // Client-side validation
+                let isValid = true;
+
+                if (!password) {
+                    document.getElementById('passwordError').textContent = 'Password is required';
+                    isValid = false;
+                }
+
+                if (!isConfirmed) {
+                    document.getElementById('confirmError').textContent = 'You must confirm you understand this action cannot be undone';
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    return;
+                }
+
+                // Final confirmation dialog
+                if (!confirm('Are you absolutely sure you want to delete your account? This action cannot be undone.')) {
+                    return;
+                }
+
+                // Show loading state
+                deleteBtn.disabled = true;
+                deleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Deleting Account...';
+
+                // Create form data
+                const formData = new FormData();
+                formData.append('confirmPassword', password);
+                formData.append('confirmDeletion', isConfirmed);
+
+                // Get anti-forgery token
+                const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (tokenElement) {
+                    formData.append('__RequestVerificationToken', tokenElement.value);
+                }
+
+                // Send request
+                fetch('/Auth/ConfirmDeleteAccount', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        document.getElementById('deleteForm').innerHTML = `
+                            <div class="alert alert-success text-center">
+                                <h5><i class="bx bx-check-circle me-2"></i>Account Deleted Successfully</h5>
+                                <p class="mb-0">Your account and all associated data have been permanently deleted.</p>
+                                <p class="small mt-2 mb-0">Redirecting to home page...</p>
+                            </div>
+                        `;
+
+                        // Clear storage
+                        localStorage.clear();
+                        sessionStorage.clear();
+
+                        // Redirect after delay using replace to prevent back button
+                        setTimeout(() => {
+                            window.location.replace(data.redirectUrl || '/');
+                        }, 3000);
+                    } else {
+                        // Show error message
+                        alert(data.message || 'An error occurred while deleting your account. Please try again.');
+
+                        // Reset button
+                        deleteBtn.disabled = false;
+                        deleteBtn.innerHTML = '<i class="bx bx-trash me-2"></i>Permanently Delete My Account';
+                    }
+                })
+                .catch(error => {
+                    alert('An error occurred. Please try again.');
+                    deleteBtn.disabled = false;
+                    deleteBtn.innerHTML = '<i class="bx bx-trash me-2"></i>Permanently Delete My Account';
+                });
+            });
+        });
+    </script>
+}

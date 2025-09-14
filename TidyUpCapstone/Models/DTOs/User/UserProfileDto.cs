@@ -8,6 +8,15 @@ namespace TidyUpCapstone.Models.DTOs.User
         public int UserId { get; set; }
         public string Username { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
+
+        // Add these new fields
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? Location { get; set; }
+        public DateTime? Birthday { get; set; }
+        public string? Gender { get; set; }
+        public string? ProfilePictureUrl { get; set; }
+
         public bool IsVerified { get; set; }
         public UserRole Role { get; set; }
         public decimal TokenBalance { get; set; }
@@ -25,12 +34,16 @@ namespace TidyUpCapstone.Models.DTOs.User
 
     public class UpdateUserProfileDto
     {
-        [Required]
-        [StringLength(255, MinimumLength = 3)]
-        public string Username { get; set; } = string.Empty;
+        [StringLength(20)]
+        public string? Phone { get; set; }
+
+        [StringLength(100)]
+        public string? Location { get; set; }
 
         [StringLength(20)]
-        public string? PhoneNumber { get; set; }
+        public string? Gender { get; set; }
+
+        public DateTime? Birthday { get; set; }
 
         public bool MarketingEmailsEnabled { get; set; }
 
@@ -39,17 +52,17 @@ namespace TidyUpCapstone.Models.DTOs.User
     }
 
     public class UserStatsDto
-    {
-        public int TotalItemsPosted { get; set; }
-        public int TotalItemsSold { get; set; }
-        public int TotalItemsBought { get; set; }
-        public decimal TotalEarned { get; set; }
-        public decimal TotalSpent { get; set; }
-        public int CurrentLevel { get; set; }
-        public int CurrentXp { get; set; }
-        public int XpToNextLevel { get; set; }
-        public int AchievementsEarned { get; set; }
-        public int ActiveStreaks { get; set; }
-        public int CompletedQuests { get; set; }
+        {
+            public int TotalItemsPosted { get; set; }
+            public int TotalItemsSold { get; set; }
+            public int TotalItemsBought { get; set; }
+            public decimal TotalEarned { get; set; }
+            public decimal TotalSpent { get; set; }
+            public int CurrentLevel { get; set; }
+            public int CurrentXp { get; set; }
+            public int XpToNextLevel { get; set; }
+            public int AchievementsEarned { get; set; }
+            public int ActiveStreaks { get; set; }
+            public int CompletedQuests { get; set; }
+        }
     }
-}

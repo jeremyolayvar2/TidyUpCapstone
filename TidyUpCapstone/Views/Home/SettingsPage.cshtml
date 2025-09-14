@@ -1,0 +1,782 @@
+﻿@using TidyUpCapstone.Models;
+
+@{
+    ViewBag.HideNavigation = false;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/settings.css" />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link href="https://fonts.googleapis.com/css2?family=Righteous:wght@400&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+}
+
+
+<!-- Mobile Menu Toggle Button -->
+<button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Open settings menu">
+    <i class="bx bx-menu"></i>
+</button>
+
+<!-- Sidebar Overlay for Mobile -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- Settings container with improved structure -->
+<div class="settings-container" id="settings-container">
+    <!-- Settings Header -->
+    <div class="settings-header">
+        <h1>
+            <span>Settings</span>
+            <i class="bx bx-chevron-right"></i>
+            <span id="current-tab-name">Profile & Account</span>
+        </h1>
+    </div>
+
+    <!-- Main Settings Layout -->
+    <div class="settings-layout">
+        <!-- Sidebar Navigation -->
+        <div class="settings-sidebar" id="settings-sidebar">
+            <div class="sidebar-header">
+                <h2>My Account</h2>
+            </div>
+            <button class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Close settings menu">
+                <i class="bx bx-x"></i>
+            </button>
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="#" class="tab-link active" data-tab="profile" role="tab" aria-selected="true">
+                        <i class="bx bx-user" aria-hidden="true"></i>
+                        <span>Profile & Account</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="tab-link" data-tab="privacy" role="tab" aria-selected="false">
+                        <i class="bx bx-shield" aria-hidden="true"></i>
+                        <span>Privacy & Visibility</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="tab-link" data-tab="notifications" role="tab" aria-selected="false">
+                        <i class="bx bx-bell" aria-hidden="true"></i>
+                        <span>Notifications</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="tab-link" data-tab="security" role="tab" aria-selected="false">
+                        <i class="bx bx-lock" aria-hidden="true"></i>
+                        <span>Security</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="tab-link" data-tab="activity" role="tab" aria-selected="false">
+                        <i class="bx bx-trophy" aria-hidden="true"></i>
+                        <span>Token & Activity</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="tab-link" data-tab="language" role="tab" aria-selected="false">
+                        <i class="bx bx-globe" aria-hidden="true"></i>
+                        <span>Language & Accessibility</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="tab-link" data-tab="support" role="tab" aria-selected="false">
+                        <i class="bx bx-help-circle" aria-hidden="true"></i>
+                        <span>Support & Legal</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+
+        <!-- Main Content Area -->
+        <div class="settings-content">
+            <!-- PROFILE TAB -->
+            <div id="profile" class="tab-content active" role="tabpanel" aria-labelledby="profile-tab">
+                <div class="profile-main-container">
+                    <!-- Profile Header with Avatar and Edit Button -->
+                    <div class="profile-header-card">
+                        <div class="profile-avatar-section">
+                            <div class="profile-avatar" id="profile-avatar-upload"
+                                 role="button"
+                                 tabindex="0"
+                                 aria-label="Upload profile picture"
+                                 title="Click to upload profile picture">
+                                <i class="bx bx-user" aria-hidden="true"></i>
+                            </div>
+                            <div class="profile-info">
+                                <!-- Dynamic values - populate from your data -->
+                                <h2 id="profile-display-name"></h2>
+                                <p id="profile-display-username"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Form -->
+                    <div class="profile-form" novalidate>
+
+                        @Html.AntiForgeryToken()
+
+                        <!-- Top Row: First Name, Last Name, Phone -->
+
+                        <input type="file"
+                               id="profile-picture-input"
+                               name="ProfilePicture"
+                               accept="image/*"
+                               style="display: none;" />
+
+                        <div class="form-row-top">
+                            <div class="form-field">
+                                <label for="firstName">First Name *</label>
+                                <!-- Made readonly - locked after signup -->
+                                <input type="text"
+                                       id="firstName"
+                                       name="FirstName"
+                                       placeholder="Enter your first name"
+                                       value=""
+                                       required
+                                       readonly
+                                       class="readonly-field"
+                                       aria-describedby="firstName-error"
+                                       title="This field cannot be edited after signup" />
+                                <div id="firstName-error" class="error-message" role="alert" aria-live="polite"></div>
+                            </div>
+                            <div class="form-field">
+                                <label for="lastName">Last Name *</label>
+                                <!-- Made readonly - locked after signup -->
+                                <input type="text"
+                                       id="lastName"
+                                       name="LastName"
+                                       placeholder="Enter your last name"
+                                       value=""
+                                       required
+                                       readonly
+                                       class="readonly-field"
+                                       aria-describedby="lastName-error"
+                                       title="This field cannot be edited after signup" />
+                                <div id="lastName-error" class="error-message" role="alert" aria-live="polite"></div>
+                            </div>
+                            <div class="form-field phone-field">
+                                <label for="phone">Phone Number</label>
+                                <!-- Phone is editable and optional -->
+                                <div class="phone-input-container">
+                                    <input type="tel"
+                                           id="phone"
+                                           name="Phone"
+                                           placeholder="+63 912 345 6789"
+                                           value=""
+                                           aria-describedby="phone-error phone-help" />
+                                    <button type="button"
+                                            class="btn-get-verified"
+                                            id="verify-phone-btn"
+                                            aria-label="Verify phone number">
+                                        Get Verified
+                                    </button>
+                                </div>
+                                <div id="phone-error" class="error-message" role="alert" aria-live="polite"></div>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Row: Email, Location -->
+                        <div class="form-row-bottom">
+                            <div class="form-field">
+                                <label for="email">Email Address *</label>
+                                <!-- Made readonly - locked after signup -->
+                                <input type="email"
+                                       id="email"
+                                       name="Email"
+                                       placeholder="your.email@example.com"
+                                       value=""
+                                       required
+                                       readonly
+                                       class="readonly-field"
+                                       aria-describedby="email-error"
+                                       title="This field cannot be edited after signup" />
+                                <div id="email-error" class="error-message" role="alert" aria-live="polite"></div>
+                            </div>
+                            <div class="form-field">
+                                <label for="location">Location</label>
+                                <!-- Location is editable and optional -->
+                                <input type="text"
+                                       id="location"
+                                       name="Location"
+                                       placeholder="City, Country"
+                                       value=""
+                                       aria-describedby="location-error" />
+                                <div id="location-error" class="error-message" role="alert" aria-live="polite"></div>
+                            </div>
+                        </div>
+
+                        <!-- Account Details Section -->
+                        <div class="account-details-section">
+                            <div class="account-form-left">
+                                <div class="form-field-account">
+                                    <label for="username">Username *</label>
+                                    <!-- Made readonly - locked after signup -->
+                                    <input type="text"
+                                           id="username"
+                                           name="Username"
+                                           placeholder="Choose a username"
+                                           value=""
+                                           required
+                                           readonly
+                                           class="readonly-field"
+                                           aria-describedby="username-error"
+                                           title="This field cannot be edited after signup" />
+                                    <div id="username-error" class="error-message" role="alert" aria-live="polite"></div>
+                                </div>
+
+                                <div class="form-field-account">
+                                    <label for="gender">Gender</label>
+                                    <!-- Gender is optional - removed required -->
+                                    <select id="gender" name="Gender" aria-describedby="gender-error">
+                                        <option value="">Select gender</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="other">Other</option>
+                                        <option value="prefer-not-to-say">Prefer not to say</option>
+                                    </select>
+                                    <div id="gender-error" class="error-message" role="alert" aria-live="polite"></div>
+                                </div>
+
+                                <div class="form-field-account">
+                                    <label for="birthday">Date of Birth</label>
+                                    <!-- Date of Birth is optional - removed required -->
+                                    <input type="date"
+                                           id="birthday"
+                                           name="Birthday"
+                                           value=""
+                                           aria-describedby="birthday-error" />
+                                    <div id="birthday-error" class="error-message" role="alert" aria-live="polite"></div>
+                                </div>
+                            </div>
+
+                            <!-- Connected Accounts - Optional Section -->
+                            <div class="connected-accounts-section">
+                                <h3>Connected Accounts <span class="optional-label">(Optional)</span></h3>
+
+                                <div class="account-connection-item">
+                                    <div class="account-info">
+                                        <div class="account-icon facebook-icon">
+                                            <i class="bx bxl-facebook" aria-hidden="true"></i>
+                                        </div>
+                                        <span>Facebook</span>
+                                    </div>
+                                    <button type="button"
+                                            class="btn-connect"
+                                            data-account="facebook"
+                                            aria-label="Connect Facebook account">
+                                        <i class="bx bx-plus" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+
+                                <div class="account-connection-item">
+                                    <div class="account-info">
+                                        <div class="account-icon google-icon">
+                                            <i class="bx bxl-google" aria-hidden="true"></i>
+                                        </div>
+                                        <span>Google</span>
+                                    </div>
+                                    <button type="button"
+                                            class="btn-connect"
+                                            data-account="google"
+                                            aria-label="Connect Google account">
+                                        <i class="bx bx-plus" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Save Button -->
+                        <div class="save-button-section">
+                            <button type="button" class="btn-save-profile">
+                                <i class="bx bx-save" aria-hidden="true"></i>
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- PRIVACY TAB -->
+            <div id="privacy" class="tab-content" role="tabpanel" aria-labelledby="privacy-tab">
+                <div class="content-header">
+                    <h3>Privacy & Visibility</h3>
+                    <p>Control who can see your information and activities</p>
+                </div>
+
+                <div method="post" asp-action="UpdatePrivacy" asp-controller="Settings">
+                    @Html.AntiForgeryToken()
+
+                    <div class="privacy-section">
+
+
+                        <div class="toggle-group">
+                            <div>
+                                <h4>Profile Visibility</h4>
+                                <p>Control who can see your profile information</p>
+                            </div>
+                            <div class="toggle-buttons" data-setting="profile-visibility" role="radiogroup" aria-labelledby="profile-visibility-label">
+                                <input type="hidden" name="ProfileVisibility" value="public" />
+                                <button type="button" class="toggle-btn active" data-value="public" role="radio" aria-checked="true">Public</button>
+
+                                <button type="button" class="toggle-btn" data-value="private" role="radio" aria-checked="false">Private</button>
+                            </div>
+                        </div>
+
+                        <div class="toggle-group">
+                            <div>
+                                <h4>Location Sharing</h4>
+                                <p>Show or hide your location information</p>
+                            </div>
+                            <div class="toggle-buttons" data-setting="location-visibility" role="radiogroup">
+                                <input type="hidden" name="LocationVisibility" value="show" />
+                                <button type="button" class="toggle-btn active" data-value="show" role="radio" aria-checked="true">Show</button>
+                                <button type="button" class="toggle-btn" data-value="hide" role="radio" aria-checked="false">Hide</button>
+                            </div>
+                        </div>
+
+                        <div class="toggle-group">
+                            <div>
+                                <h4>Activity Streaks</h4>
+                                <p>Display your activity streaks to others</p>
+                            </div>
+                            <div class="toggle-buttons" data-setting="activity-streaks" role="radiogroup">
+                                <input type="hidden" name="ActivityStreaksVisibility" value="show" />
+                                <button type="button" class="toggle-btn active" data-value="show" role="radio" aria-checked="true">Show</button>
+                                <button type="button" class="toggle-btn" data-value="hide" role="radio" aria-checked="false">Hide</button>
+                            </div>
+                        </div>
+
+                        <div class="toggle-group">
+                            <div>
+                                <h4>Online Status</h4>
+                                <p>Show when you're online</p>
+                            </div>
+                            <div class="toggle-buttons" data-setting="online-status" role="radiogroup">
+                                <input type="hidden" name="OnlineStatus" value="show" />
+                                <button type="button" class="toggle-btn active" data-value="show" role="radio" aria-checked="true">Show</button>
+                                <button type="button" class="toggle-btn" data-value="hide" role="radio" aria-checked="false">Hide</button>
+                            </div>
+                        </div>
+
+                        <div class="toggle-group">
+                            <div>
+                                <h4>Search Engine Indexing</h4>
+                                <p>Allow search engines to index your public profile</p>
+                            </div>
+                            <div class="toggle-buttons" data-setting="search-indexing" role="radiogroup">
+                                <input type="hidden" name="SearchIndexing" value="allow" />
+                                <button type="button" class="toggle-btn active" data-value="allow" role="radio" aria-checked="true">Allow</button>
+                                <button type="button" class="toggle-btn" data-value="block" role="radio" aria-checked="false">Block</button>
+                            </div>
+                        </div>
+
+                        <div class="toggle-group">
+                            <div>
+                                <h4>Contact Information</h4>
+                                <p>Who can see your email and phone number</p>
+                            </div>
+                            <div class="toggle-buttons" data-setting="contact-visibility" role="radiogroup">
+                                <input type="hidden" name="ContactVisibility" value="public" />
+                                <button type="button" class="toggle-btn active" data-value="public" role="radio" aria-checked="true">Public</button>
+
+                                <button type="button" class="toggle-btn" data-value="private" role="radio" aria-checked="false">Private</button>
+                            </div>
+                        </div>
+
+                        <div class="toggle-group">
+                            <div>
+                                <h4>Activity History</h4>
+                                <p>Show your recent activity to other users</p>
+                            </div>
+                            <div class="toggle-buttons" data-setting="activity-history" role="radiogroup">
+                                <input type="hidden" name="ActivityHistory" value="show" />
+                                <button type="button" class="toggle-btn active" data-value="show" role="radio" aria-checked="true">Show</button>
+                                <button type="button" class="toggle-btn" data-value="hide" role="radio" aria-checked="false">Hide</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-save">
+                        <i class="bx bx-save" aria-hidden="true"></i>
+                        Save Privacy Settings
+                    </button>
+                </div>
+            </div>
+
+
+
+            <!-- NOTIFICATIONS TAB -->
+            <div id="notifications" class="tab-content" role="tabpanel" aria-labelledby="notifications-tab">
+                <div class="content-header">
+                    <h3>Notification Preferences</h3>
+                    <p>Manage how and when you receive notifications</p>
+                </div>
+
+                @Html.AntiForgeryToken()
+
+                <div class="notification-section">
+                    <h4>Email Notifications</h4>
+                    <div class="notification-item">
+                        <div class="notification-info-child">
+                            <span>New Messages</span>
+                            <small>Receive email when you get new messages</small>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" name="EmailNewMessages" @(ViewBag.EmailNewMessages == true ? "checked" : "") aria-label="Email notifications for new messages">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="notification-item">
+                        <div class="notification-info-child">
+                            <span>Item Updates</span>
+                            <small>Get notified about item status changes</small>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" name="EmailItemUpdates" @(ViewBag.EmailItemUpdates == true ? "checked" : "") aria-label="Email notifications for item updates">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="notification-item">
+                        <div class="notification-info-child">
+                            <span>Weekly Summary</span>
+                            <small>Receive weekly quest progress and activity summary</small>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" name="EmailWeeklySummary" @(ViewBag.EmailWeeklySummary == true ? "checked" : "") aria-label="Weekly summary emails">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="notification-section">
+                    <h4>Desktop Notifications</h4>
+                    <div class="notification-item">
+                        <div class="notification-info-child">
+                            <span>Desktop Notifications</span>
+                            <small id="desktop-notification-status">Show desktop pop-ups for messages and quest updates</small>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" name="DesktopNotifications" @(ViewBag.DesktopNotifications == true ? "checked" : "") aria-label="Desktop notifications">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="notification-item" id="test-notification-section" style="display: none;">
+                        <div class="notification-info-child">
+                            <small>Test your desktop notifications</small>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="test-notification-btn">
+                            <i class="bx bx-bell"></i> Test Notification
+                        </button>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-save">
+                    <i class="bx bx-save" aria-hidden="true"></i>
+                    Save Notification Settings
+                </button>
+            </div>
+
+            <!-- SECURITY TAB -->
+            <div id="security" class="tab-content" role="tabpanel" aria-labelledby="security-tab">
+                <div class="content-header">
+                    <h3>Security Settings</h3>
+                    <p>Manage your account security and login preferences</p>
+                </div>
+
+                <div method="post" asp-action="UpdateSecurity" asp-controller="Settings">
+                    @Html.AntiForgeryToken()
+
+                    <div class="security-section">
+                        <h4>Change Password</h4>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="currentPassword">Current Password *</label>
+                                <input type="password"
+                                       id="currentPassword"
+                                       name="CurrentPassword"
+                                       placeholder="Enter current password"
+                                       required
+                                       aria-describedby="currentPassword-error" />
+                                <div id="currentPassword-error" class="error-message" role="alert" aria-live="polite"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="newPassword">New Password *</label>
+                                <input type="password"
+                                       id="newPassword"
+                                       name="NewPassword"
+                                       placeholder="Enter new password"
+                                       required
+                                       aria-describedby="newPassword-error newPassword-help" />
+                                <div id="newPassword-error" class="error-message" role="alert" aria-live="polite"></div>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="confirmNewPassword">Confirm New Password *</label>
+                                <input type="password"
+                                       id="confirmNewPassword"
+                                       name="ConfirmNewPassword"
+                                       placeholder="Confirm new password"
+                                       required
+                                       aria-describedby="confirmNewPassword-error" />
+                                <div id="confirmNewPassword-error" class="error-message" role="alert" aria-live="polite"></div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <small id="newPassword-help" style="color: var(--gray-600); font-size: 14px;">
+                                Password must be at least 8 characters long and contain uppercase, lowercase, numbers, and special characters.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="security-section">
+                        <h4>Login Security</h4>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="sessionTimeout">Session Timeout</label>
+                                <select id="sessionTimeout" name="SessionTimeout">
+                                    <option value="15">15 minutes</option>
+                                    <option value="30" selected>30 minutes</option>
+                                    <option value="60">1 hour</option>
+                                    <option value="120">2 hours</option>
+                                    <option value="240">4 hours</option>
+                                    <option value="0">Never</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="security-section">
+                        <h4>Active Sessions</h4>
+                        <div class="session-item">
+                            <div class="session-info">
+                                <span>Current Session</span>
+                                <small>Chrome on Windows • Manila, Philippines • Active now</small>
+                            </div>
+                            <span class="session-status active">Current</span>
+                        </div>
+                        <div class="session-item">
+                            <div class="session-info">
+                                <span>Mobile App</span>
+                                <small>TidyUp iOS App • Manila, Philippines • Last seen 2 hours ago</small>
+                            </div>
+                            <button type="button" class="btn-danger-small" aria-label="End mobile app session">
+                                <i class="bx bx-x" aria-hidden="true"></i>
+                                End Session
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="security-section">
+                        <h4>Security History</h4>
+                        <div style="background-color: var(--gray-50); border-radius: 12px; padding: 24px; border: 1px solid var(--gray-200);">
+                            <div style="display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--gray-200);">
+                                <div style="width: 40px; height: 40px; background-color: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
+                                    <i class="bx bx-check" style="font-size: 20px;" aria-hidden="true"></i>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; color: var(--gray-800);">Successful login</div>
+                                    <small style="color: var(--gray-600);">Chrome on Windows • Manila, Philippines • 2 hours ago</small>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: none;">
+                                <div style="width: 40px; height: 40px; background-color: var(--warning); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
+                                    <i class="bx bx-shield" style="font-size: 20px;" aria-hidden="true"></i>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; color: var(--gray-800);">Password changed</div>
+                                    <small style="color: var(--gray-600);">Security settings updated • Yesterday</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-save">
+                        <i class="bx bx-save" aria-hidden="true"></i>
+                        Update Security Settings
+                    </button>
+                </div>
+            </div>
+
+            <!-- ACTIVITY TAB -->
+            <div id="activity" class="tab-content" role="tabpanel" aria-labelledby="activity-tab">
+                <div class="content-header">
+                    <h3>Token & Activity</h3>
+                    <p>Track your progress and manage your rewards</p>
+                </div>
+                <div style="padding: 40px; text-align: center; color: var(--gray-600);">
+                    <i class="bx bx-trophy" style="font-size: 4rem; margin-bottom: 16px; color: var(--primary-color);" aria-hidden="true"></i>
+                    <h4>Activity tracking coming soon!</h4>
+                    <p>We're working on bringing you detailed activity insights and token management.</p>
+                </div>
+            </div>
+
+            <!-- LANGUAGE TAB -->
+            <div id="language" class="tab-content" role="tabpanel" aria-labelledby="language-tab">
+                <div class="content-header">
+                    <h3 data-translate="language_accessibility_title">Language & Accessibility</h3>
+                    <p data-translate="language_accessibility_desc">Customize your language preferences and accessibility options</p>
+                </div>
+                <div method="post" asp-action="UpdateLanguage" asp-controller="Settings">
+                    @Html.AntiForgeryToken()
+                    <div class="language-section">
+                        <h4 data-translate="language_preferences">Language Preferences</h4>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="language" data-translate="display_language">Display Language</label>
+                                <select id="language" name="Language">
+                                    <option value="en">English</option>
+                                    <option value="tl">Filipino (Tagalog)</option>
+                                    <option value="es">Spanish</option>
+                                    <option value="zh">Chinese</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="timezone" data-translate="timezone">Timezone</label>
+                                <select id="timezone" name="Timezone">
+                                    <option value="Asia/Manila">Asia/Manila (GMT+8)</option>
+                                    <option value="UTC">UTC (GMT+0)</option>
+                                    <option value="America/New_York">Eastern Time (GMT-5)</option>
+                                    <option value="America/Los_Angeles">Pacific Time (GMT-8)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accessibility-section">
+                        <h4 data-translate="accessibility_options">Accessibility Options</h4>
+                        <div class="notification-item">
+                            <div class="notification-info-child">
+                                <span data-translate="high_contrast">High Contrast Mode</span>
+                                <small data-translate="high_contrast_desc">Increase contrast for better visibility</small>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" name="HighContrast" aria-label="Enable high contrast mode">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="notification-item">
+                            <div class="notification-info-child">
+                                <span data-translate="large_text">Large Text</span>
+                                <small data-translate="large_text_desc">Increase text size for better readability</small>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" name="LargeText" aria-label="Enable large text">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="notification-item">
+                            <div class="notification-info-child">
+                                <span data-translate="reduce_motion">Reduce Motion</span>
+                                <small data-translate="reduce_motion_desc">Minimize animations and transitions</small>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" name="ReduceMotion" aria-label="Reduce motion">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="notification-item">
+                            <div class="notification-info-child">
+                                <span data-translate="screen_reader">Screen Reader Support</span>
+                                <small data-translate="screen_reader_desc">Optimize interface for screen readers</small>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" name="ScreenReader" aria-label="Enable screen reader support">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-save">
+                        <i class="bx bx-save" aria-hidden="true"></i>
+                        <span data-translate="save_button">Save Language & Accessibility Settings</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SUPPORT TAB -->
+            <div id="support" class="tab-content" role="tabpanel" aria-labelledby="support-tab">
+                <div class="content-header">
+                    <h3>Support & Legal</h3>
+                    <p>Get help and review important legal information</p>
+                </div>
+
+                <div class="support-section">
+                    <h4>Help & Support</h4>
+                    <div class="support-grid">
+                        <div class="support-item">
+                            <div class="support-icon">
+                                <i class="bx bx-help-circle" aria-hidden="true"></i>
+                            </div>
+                            <div class="support-content">
+                                <h5>Help Center</h5>
+                                <p>Browse our comprehensive help articles and guides</p>
+                                <a href="/Support/HelpCenter" class="btn-secondary">Visit Help Center</a>
+                            </div>
+                        </div>
+                        <div class="support-item">
+                            <div class="support-icon">
+                                <i class="bx bx-message" aria-hidden="true"></i>
+                            </div>
+                            <div class="support-content">
+                                <h5>Contact Support</h5>
+                                <p>Get in touch with our support team for assistance</p>
+                                <a href="@Url.Action("ContactUs", "Support")" class="btn-secondary">Contact Us</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="legal-section">
+                    <h4>Legal Information</h4>
+                    <div class="legal-links">
+                        <a href="/Legal/PrivacyPolicy" class="legal-link">
+                            <i class="bx bx-file-blank" aria-hidden="true"></i>
+                            <span>Privacy Policy</span>
+                            <i class="bx bx-chevron-right" aria-hidden="true"></i>
+                        </a>
+                        <a href="/Legal/TermsOfService" class="legal-link">
+                            <i class="bx bx-file-blank" aria-hidden="true"></i>
+                            <span>Terms of Service</span>
+                            <i class="bx bx-chevron-right" aria-hidden="true"></i>
+                        </a>
+                        <a href="/Legal/CookiePolicy" class="legal-link">
+                            <i class="bx bx-file-blank" aria-hidden="true"></i>
+                            <span>Cookie Policy</span>
+                            <i class="bx bx-chevron-right" aria-hidden="true"></i>
+                        </a>
+                        <a href="/Legal/DataProtection" class="legal-link">
+                            <i class="bx bx-file-blank" aria-hidden="true"></i>
+                            <span>Data Protection</span>
+                            <i class="bx bx-chevron-right" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="account-actions-section">
+                    <h4>Account Actions</h4>
+                    <div class="action-buttons">
+                      
+                        <button type="button" class="btn-logout" id="logout-btn">
+                            <i class="bx bx-log-out" aria-hidden="true"></i>
+                            Logout
+                        </button>
+                        <button type="button" class="btn-danger" id="delete-account-btn">
+                            <i class="bx bx-trash" aria-hidden="true"></i>
+                            Delete Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading overlay for better UX -->
+<div id="loading-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 9999; backdrop-filter: blur(4px);">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--white); padding: 40px; border-radius: 16px; text-align: center; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);">
+        <i class="bx bx-loader-alt bx-spin" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 16px;"></i>
+        <p style="margin: 0; color: var(--gray-700); font-weight: 600;">Processing...</p>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="/js/settings.js"></script>
+}

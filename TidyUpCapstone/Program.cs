@@ -8,6 +8,8 @@ using TidyUpCapstone.Models.DTOs.Configuration;
 using SendGrid.Helpers.Mail;
 using TidyUpCapstone.Services.Interfaces;
 using TidyUpCapstone.Services;
+using TidyUpCapstone.Models.Entities.Core;
+using TidyUpCapstone.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -101,15 +103,39 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 // -----------------------------------------------------
 builder.Services.AddControllersWithViews();
 
+// Add antiforgery token configuration
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "X-CSRF-TOKEN";
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+});
+
 var app = builder.Build();
 
-// -----------------------------------------------------
-// 6. Middleware
-// -----------------------------------------------------
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        await context.Database.EnsureCreatedAsync();
+        Console.WriteLine("? Database initialized successfully");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"? Error during database initialization: {ex.Message}");
+    }
+}
+
+// Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
+}
+else
+{
+    app.UseDeveloperExceptionPage();
 }
 
 app.UseHttpsRedirection();
@@ -123,5 +149,11 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Add this line for Account routes
+app.MapControllerRoute(
+    name: "account",
+    pattern: "Account/{action=Index}",
+    defaults: new { controller = "Account" });
 
 app.Run();
