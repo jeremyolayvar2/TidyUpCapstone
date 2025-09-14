@@ -94,7 +94,7 @@
                 updateActiveDot(sectionIndex);
                 currentSection = sectionIndex;
 
-                // Trigger section-specific animations
+                // Trigger section-specific animations (AVATAR CODE REMOVED)
                 triggerSectionAnimations(entry.target, sectionIndex);
             }
         });
@@ -128,23 +128,10 @@
         setTimeout(() => newRipple.remove(), 600);
     }
 
-    // Section-specific animation triggers
+    // Section-specific animation triggers (AVATAR ANIMATION REMOVED)
     function triggerSectionAnimations(section, index) {
-        // Community section avatar re-animation
-        if (section.classList.contains('community-section')) {
-            const avatars = section.querySelectorAll('.avatar');
-            avatars.forEach((avatar, avatarIndex) => {
-                // Reset and retrigger animations with stagger
-                avatar.style.animation = 'none';
-                requestAnimationFrame(() => {
-                    avatar.style.animation = `
-                        modernPopIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards ${avatarIndex * 0.1}s,
-                        modernFloat 8s ease-in-out infinite ${0.8 + avatarIndex * 0.1}s,
-                        pulseGlow 4s ease-in-out infinite ${1.2 + avatarIndex * 0.1}s
-                    `;
-                });
-            });
-        }
+        // Community section avatar animation is now handled by IndexAvatarAnimation.js
+        // Removed conflicting avatar code that was interfering with the dedicated avatar script
 
         // Add parallax effect to background elements
         const parallaxElements = section.querySelectorAll('[data-parallax]');
@@ -326,11 +313,6 @@
     updateActiveDot(0);
     currentSection = 0;
 
-    // Performance monitoring (optional - remove in production)
-    if (window.performance && window.performance.mark) {
-        window.performance.mark('scroll-animation-initialized');
-    }
-
     // Expose API for external control
     window.scrollAnimationAPI = {
         goToSection: (index) => {
@@ -343,4 +325,4 @@
         isScrolling: () => isScrolling,
         getSectionCount: () => sections.length
     };
-});    
+});
