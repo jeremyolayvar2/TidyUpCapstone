@@ -1,0 +1,223 @@
+﻿@{
+    ViewData["Title"] = "Help Center";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <!-- Header Section -->
+            <div class="text-center mb-5">
+                <h1 class="display-5 fw-bold text-primary mb-3">Help Center</h1>
+                <p class="lead text-muted">Find answers to common questions about using Tidy Up</p>
+            </div>
+
+            <!-- Help Categories Grid -->
+            <div class="row g-4 mb-5">
+                <!-- Getting Started -->
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm hover-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="icon-circle bg-primary bg-opacity-10 me-3">
+                                    <i class="bx bx-play-circle text-primary fs-3"></i>
+                                </div>
+                                <h4 class="card-title mb-0">Getting Started</h4>
+                            </div>
+                            <p class="card-text text-muted mb-3">
+                                New to Tidy Up? Learn how to declutter effectively and earn tokens through our comprehensive platform guide.
+
+                            </p>
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="bx bx-time me-1"></i>5 min read
+                                </small>
+                            </div>
+                            <a href="/Support/GettingStarted" class="btn btn-outline-primary">
+                                <i class="bx bx-book-open me-2"></i>Read Guide
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Safety & Security -->
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm hover-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="icon-circle bg-success bg-opacity-10 me-3">
+                                    <i class="bx bx-shield text-success fs-3"></i>
+                                </div>
+                                <h4 class="card-title mb-0">Safety Tips</h4>
+                            </div>
+                            <p class="card-text text-muted mb-3">
+                                Learn how to trade safely and securely. Important guidelines for meeting other traders and protecting yourself.
+                            </p>
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="bx bx-time me-1"></i>3 min read
+                                </small>
+                            </div>
+                            <a href="/Support/SafetyTips" class="btn btn-outline-success">
+                                <i class="bx bx-shield-check me-2"></i>Stay Safe
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions Section -->
+            <div class="row g-4 mb-5">
+                <div class="col-md-4">
+                    <div class="text-center p-4 bg-light rounded">
+                        <i class="bx bx-message-square-detail text-primary fs-1 mb-3"></i>
+                        <h5>Need More Help?</h5>
+                        <p class="text-muted mb-3">Can't find what you're looking for? Our support team is here to help.</p>
+                        <a href="/Support/ContactUs" class="btn btn-primary">Contact Support</a>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="text-center p-4 bg-light rounded">
+                        <i class="bx bx-search text-info fs-1 mb-3"></i>
+                        <h5>Search Help</h5>
+                        <p class="text-muted mb-3">Looking for something specific? Use our search to find answers quickly.</p>
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Search help articles..." id="helpSearch">
+                            <button class="btn btn-outline-info" type="button">
+                                <i class="bx bx-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="text-center p-4 bg-light rounded">
+                        <i class="bx bx-file-blank text-warning fs-1 mb-3"></i>
+                        <h5>Legal Information</h5>
+                        <p class="text-muted mb-3">Review our terms, privacy policy, and other important legal documents.</p>
+                        <a href="/Legal/PrivacyPolicy" class="btn btn-outline-warning">View Policies</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Popular Topics -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom-0 py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="bx bx-star text-warning me-2"></i>
+                        Popular Topics
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <a href="/Support/GettingStarted" class="text-decoration-none d-flex align-items-center">
+                                        <i class="bx bx-chevron-right text-muted me-2"></i>
+                                        How to post your first item
+                                    </a>
+                                </li>
+                                <li class="mb-2">
+                                    <a href="/Support/GettingStarted" class="text-decoration-none d-flex align-items-center">
+                                        <i class="bx bx-chevron-right text-muted me-2"></i>
+                                        Earning your first tokens"
+                                    </a>
+                                </li>
+                                <li class="mb-2">
+                                    <a href="/Support/SafetyTips" class="text-decoration-none d-flex align-items-center">
+                                        <i class="bx bx-chevron-right text-muted me-2"></i>
+                                        Safe meeting locations
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <a href="/Support/GettingStarted" class="text-decoration-none d-flex align-items-center">
+                                        <i class="bx bx-chevron-right text-muted me-2"></i>
+                                        Understanding token rewards
+                                    </a>
+                                </li>
+                                <li class="mb-2">
+                                    <a href="/Support/SafetyTips" class="text-decoration-none d-flex align-items-center">
+                                        <i class="bx bx-chevron-right text-muted me-2"></i>
+                                        Reporting problematic users
+                                    </a>
+                                </li>
+                                <li class="mb-2">
+                                    <a href="/Support/ContactUs" class="text-decoration-none d-flex align-items-center">
+                                        <i class="bx bx-chevron-right text-muted me-2"></i>
+                                        Getting help from support
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back to Settings -->
+            <div class="text-center mt-4">
+                <a href="/Home/SettingsPage" class="btn btn-outline-secondary">
+                    <i class="bx bx-arrow-back me-2"></i>Back to Settings
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-card {
+        transition: transform 0.2s ease-in-out;
+    }
+
+        .hover-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .icon-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #helpSearch {
+        border-right: none;
+    }
+
+    .list-unstyled a {
+        color: #6c757d;
+        transition: color 0.2s ease;
+    }
+
+        .list-unstyled a:hover {
+            color: #495057;
+        }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Simple search functionality (placeholder)
+        const searchInput = document.getElementById('helpSearch');
+        const searchBtn = searchInput.nextElementSibling;
+
+        searchBtn.addEventListener('click', function() {
+            const query = searchInput.value.trim();
+            if (query) {
+                // For now, just show an alert. In a real app, this would search help articles
+                alert('Search functionality coming soon! You searched for: ' + query);
+            }
+        });
+
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchBtn.click();
+            }
+        });
+    });
+</script>

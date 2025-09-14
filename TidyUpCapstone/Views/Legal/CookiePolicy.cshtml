@@ -1,0 +1,375 @@
+﻿@{
+    ViewData["Title"] = "Cookie Policy";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <h1 class="display-6 fw-bold text-primary">Cookie Policy</h1>
+                <p class="lead text-muted">How we use cookies and similar technologies on Tidy Up</p>
+                <p class="small text-muted">Last updated: @DateTime.Now.ToString("MMMM dd, yyyy")</p>
+            </div>
+
+            <!-- Introduction -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="text-primary mb-3">What Are Cookies?</h4>
+                    <p>Cookies are small text files that are stored on your device when you visit our website. They help us provide you with a better experience by remembering your preferences, keeping you logged in, and helping us understand how you use our platform.</p>
+                    <p>This policy explains what cookies we use, why we use them, and how you can control them.</p>
+                </div>
+            </div>
+
+            <!-- Types of Cookies -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">Types of Cookies We Use</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h6><i class="bx bx-shield text-success me-2"></i>Essential Cookies</h6>
+                                <p class="text-muted">Required for basic platform functionality</p>
+                                <ul>
+                                    <li>Authentication and login sessions</li>
+                                    <li>Security and fraud prevention</li>
+                                    <li>Form data and user preferences</li>
+                                    <li>Shopping cart and token balance</li>
+                                </ul>
+                                <span class="badge bg-success">Always Active</span>
+                            </div>
+
+                            <div class="mb-4">
+                                <h6><i class="bx bx-bar-chart text-info me-2"></i>Analytics Cookies</h6>
+                                <p class="text-muted">Help us understand platform usage</p>
+                                <ul>
+                                    <li>Page views and user behavior</li>
+                                    <li>Popular features and content</li>
+                                    <li>Platform performance metrics</li>
+                                    <li>Error tracking and diagnostics</li>
+                                </ul>
+                                <span class="badge bg-info">Optional</span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h6><i class="bx bx-cog text-warning me-2"></i>Functionality Cookies</h6>
+                                <p class="text-muted">Remember your preferences and settings</p>
+                                <ul>
+                                    <li>Language and location preferences</li>
+                                    <li>Display settings and themes</li>
+                                    <li>Notification preferences</li>
+                                    <li>Recently viewed items</li>
+                                </ul>
+                                <span class="badge bg-warning">Optional</span>
+                            </div>
+
+                            <div class="mb-4">
+                                <h6><i class="bx bx-target-lock text-secondary me-2"></i>Performance Cookies</h6>
+                                <p class="text-muted">Optimize platform performance</p>
+                                <ul>
+                                    <li>Load balancing and server optimization</li>
+                                    <li>Content delivery network (CDN)</li>
+                                    <li>Image and resource optimization</li>
+                                    <li>Platform speed improvements</li>
+                                </ul>
+                                <span class="badge bg-secondary">Optional</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Specific Cookies Used -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Specific Cookies We Use</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Cookie Name</th>
+                                    <th>Purpose</th>
+                                    <th>Duration</th>
+                                    <th>Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>tidyup_session</code></td>
+                                    <td>Maintains your login session</td>
+                                    <td>Session</td>
+                                    <td><span class="badge bg-success">Essential</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>user_preferences</code></td>
+                                    <td>Stores your platform settings</td>
+                                    <td>1 year</td>
+                                    <td><span class="badge bg-warning">Functionality</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>token_balance</code></td>
+                                    <td>Caches your current token count</td>
+                                    <td>Session</td>
+                                    <td><span class="badge bg-success">Essential</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>analytics_id</code></td>
+                                    <td>Anonymous usage tracking</td>
+                                    <td>2 years</td>
+                                    <td><span class="badge bg-info">Analytics</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>csrf_token</code></td>
+                                    <td>Security protection</td>
+                                    <td>Session</td>
+                                    <td><span class="badge bg-success">Essential</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>location_pref</code></td>
+                                    <td>Remembers your location settings</td>
+                                    <td>6 months</td>
+                                    <td><span class="badge bg-warning">Functionality</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Third-Party Cookies -->
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">Third-Party Services</h4>
+                </div>
+                <div class="card-body">
+                    <p>We use some third-party services that may set their own cookies:</p>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bx bx-line-chart text-info me-2"></i>Analytics Services</h6>
+                            <ul>
+                                <li><strong>Google Analytics:</strong> Website usage statistics</li>
+                                <li><strong>Platform Analytics:</strong> User behavior insights</li>
+                                <li><strong>Performance Monitoring:</strong> Error tracking</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bx bx-cloud text-primary me-2"></i>Infrastructure Services</h6>
+                            <ul>
+                                <li><strong>CloudFlare:</strong> Security and performance</li>
+                                <li><strong>CDN Services:</strong> Content delivery</li>
+                                <li><strong>Email Services:</strong> Notification delivery</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <h6><i class="bx bx-info-circle me-2"></i>Third-Party Policies</h6>
+                        <p class="mb-0">These services have their own privacy policies and cookie practices. We recommend reviewing their policies for more information about how they handle your data.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cookie Control -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">Managing Your Cookie Preferences</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bx bx-cog text-success me-2"></i>Platform Settings</h6>
+                            <p>You can control optional cookies through your account preferences:</p>
+                            <ul>
+                                <li>Visit your <strong>Privacy Settings</strong></li>
+                                <li>Toggle analytics and functionality cookies</li>
+                                <li>Save your preferences</li>
+                                <li>Changes take effect immediately</li>
+                            </ul>
+                            <a href="/Account/PrivacySettings" class="btn btn-outline-success">Manage Cookie Preferences</a>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bx bx-globe text-success me-2"></i>Browser Settings</h6>
+                            <p>You can also control cookies through your browser:</p>
+                            <ul>
+                                <li>Block all cookies (may break functionality)</li>
+                                <li>Block third-party cookies only</li>
+                                <li>Delete existing cookies</li>
+                                <li>Set cookie expiration preferences</li>
+                            </ul>
+                            <p class="small text-muted">Note: Blocking essential cookies may prevent you from using certain platform features.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Browser Instructions -->
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h4 class="mb-0">Browser-Specific Instructions</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bx bxl-chrome text-warning me-2"></i>Google Chrome</h6>
+                            <ol class="small">
+                                <li>Click the three dots menu</li>
+                                <li>Go to Settings > Privacy and security</li>
+                                <li>Click "Cookies and other site data"</li>
+                                <li>Choose your preferred settings</li>
+                            </ol>
+
+                            <h6 class="mt-3"><i class="bx bxl-firefox text-warning me-2"></i>Mozilla Firefox</h6>
+                            <ol class="small">
+                                <li>Click the menu button</li>
+                                <li>Go to Settings > Privacy & Security</li>
+                                <li>Find "Cookies and Site Data"</li>
+                                <li>Configure your preferences</li>
+                            </ol>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bx bxl-edge text-info me-2"></i>Microsoft Edge</h6>
+                            <ol class="small">
+                                <li>Click the three dots menu</li>
+                                <li>Go to Settings > Cookies and site permissions</li>
+                                <li>Click "Cookies and site data"</li>
+                                <li>Adjust your settings</li>
+                            </ol>
+
+                            <h6 class="mt-3"><i class="bx bxl-apple text-secondary me-2"></i>Safari</h6>
+                            <ol class="small">
+                                <li>Go to Safari > Preferences</li>
+                                <li>Click the Privacy tab</li>
+                                <li>Choose "Block all cookies" or customize</li>
+                                <li>Close preferences to save</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Devices -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">Mobile Devices</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bx bxl-android text-success me-2"></i>Android Devices</h6>
+                            <p>Cookie settings vary by browser app:</p>
+                            <ul>
+                                <li>Chrome: Menu > Settings > Site settings > Cookies</li>
+                                <li>Firefox: Menu > Settings > Privacy</li>
+                                <li>Samsung Internet: Menu > Settings > Sites and downloads</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bx bxl-apple text-secondary me-2"></i>iOS Devices</h6>
+                            <p>Configure through device settings:</p>
+                            <ul>
+                                <li>Settings > Safari > Privacy & Security</li>
+                                <li>Toggle "Block All Cookies" or "Prevent Cross-Site Tracking"</li>
+                                <li>Changes apply to Safari and in-app browsers</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Impact of Disabling Cookies -->
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">Impact of Disabling Cookies</h4>
+                </div>
+                <div class="card-body">
+                    <p>Disabling certain cookies may affect your experience on Tidy Up:</p>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-danger">Essential Cookies Disabled</h6>
+                            <ul>
+                                <li>Cannot stay logged in</li>
+                                <li>Settings won't be saved</li>
+                                <li>Token balance may not display correctly</li>
+                                <li>Forms may not work properly</li>
+                                <li>Security features may be compromised</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-warning">Optional Cookies Disabled</h6>
+                            <ul>
+                                <li>Preferences reset on each visit</li>
+                                <li>No personalized experience</li>
+                                <li>We can't improve platform based on usage</li>
+                                <li>May see more generic content</li>
+                                <li>Performance may be slower</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Updates to Policy -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Updates to This Policy</h4>
+                </div>
+                <div class="card-body">
+                    <p>We may update this Cookie Policy when:</p>
+                    <ul>
+                        <li>We add new features that require different cookies</li>
+                        <li>We change third-party service providers</li>
+                        <li>Legal requirements change</li>
+                        <li>We improve our platform technology</li>
+                    </ul>
+                    <p>Changes will be reflected in the "Last updated" date above. Significant changes will be communicated through platform notifications.</p>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="card border-primary mb-4">
+                <div class="card-header bg-primary bg-opacity-10">
+                    <h5 class="mb-0 text-primary">
+                        <i class="bx bx-envelope me-2"></i>
+                        Questions About Cookies
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>If you have questions about our use of cookies or this policy, please contact us:</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li><i class="bx bx-envelope me-2"></i>Email: privacy@tidyup.com</li>
+                                <li><i class="bx bx-message me-2"></i><a href="/Support/ContactUs">Contact Support Form</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li><i class="bx bx-help-circle me-2"></i><a href="/Support/HelpCenter">Help Center</a></li>
+                                <li><i class="bx bx-shield me-2"></i><a href="/Legal/PrivacyPolicy">Privacy Policy</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="/Home/SettingsPage" class="btn btn-outline-secondary">
+                    <i class="bx bx-arrow-back me-2"></i>Back to Settings
+                </a>
+                <div>
+                    <a href="/Legal/TermsOfService" class="btn btn-outline-primary me-2">Terms of Service</a>
+                    <a href="/Legal/DataProtection" class="btn btn-outline-primary">Data Protection</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

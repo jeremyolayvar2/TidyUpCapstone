@@ -12,6 +12,7 @@ using TidyUpCapstone.Models.Entities.System;
 using TidyUpCapstone.Models.Entities.Transactions;
 using TidyUpCapstone.Models.Entities.User;
 using TidyUpCapstone.Models.Entities.Core;
+using TidyUpCapstone.Models.Entities.Support;
 
 namespace TidyUpCapstone.Data
 {
@@ -83,6 +84,12 @@ namespace TidyUpCapstone.Data
         public DbSet<UserReport> UserReports { get; set; }
         public DbSet<AdminReport> AdminReports { get; set; }
 
+        public DbSet<UserPrivacySettings> UserPrivacySettings { get; set; }
+
+        public DbSet<ContactMessage> ContactMessages { get; set; }
+
+        public DbSet<NotificationSettings> NotificationSettings { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -101,6 +108,22 @@ namespace TidyUpCapstone.Data
                 entity.Property(e => e.AdminNotes).HasColumnName("admin_notes");
                 entity.Property(e => e.Status).HasColumnName("status");
                 entity.Property(e => e.LastLogin).HasColumnName("last_login");
+
+                entity.Property(e => e.FirstName).HasColumnName("first_name");
+                entity.Property(e => e.LastName).HasColumnName("last_name");
+                entity.Property(e => e.Gender).HasColumnName("gender");
+                entity.Property(e => e.Birthday).HasColumnName("birthday");
+                entity.Property(e => e.Location).HasColumnName("location");
+                entity.Property(e => e.ProfilePictureUrl).HasColumnName("profile_picture_url");
+                entity.Property(e => e.PhoneNumber).HasColumnName("PhoneNumber");
+
+                // Language & Accessibility Properties
+                entity.Property(e => e.Language).HasColumnName("language");
+                entity.Property(e => e.Timezone).HasColumnName("timezone");
+                entity.Property(e => e.HighContrast).HasColumnName("high_contrast");
+                entity.Property(e => e.LargeText).HasColumnName("large_text");
+                entity.Property(e => e.ReduceMotion).HasColumnName("reduce_motion");
+                entity.Property(e => e.ScreenReader).HasColumnName("screen_reader");
             });
 
             builder.Entity<IdentityRole<int>>().ToTable("app_roles");
@@ -189,6 +212,13 @@ namespace TidyUpCapstone.Data
             // Reporting entities
             builder.Entity<UserReport>().ToTable("user_reports");
             builder.Entity<AdminReport>().ToTable("admin_reports");
+
+            builder.Entity<UserPrivacySettings>().ToTable("user_privacy_settings");
+
+            builder.Entity<ContactMessage>().ToTable("contact_messages");
+
+            builder.Entity<NotificationSettings>().ToTable("notification_settings");
+
 
             // Configure JSON columns as nvarchar(max) for compatibility
             builder.Entity<Admin>()
@@ -478,7 +508,24 @@ namespace TidyUpCapstone.Data
                 .WithMany(u => u.EmailVerifications)
                 .HasForeignKey(ev => ev.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // UserPrivacySettings relationship (one-to-one)
+            builder.Entity<UserPrivacySettings>()
+                .HasOne(ups => ups.User)
+                .WithOne(u => u.PrivacySettings)
+                .HasForeignKey<UserPrivacySettings>(ups => ups.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<NotificationSettings>()
+    .HasOne(ns => ns.User)
+    .WithOne(u => u.NotificationSettings)
+    .HasForeignKey<NotificationSettings>(ns => ns.UserId)
+    .OnDelete(DeleteBehavior.Cascade);
         }
+
+
+
+
 
         private void ConfigureIndexes(ModelBuilder builder)
         {
@@ -529,6 +576,11 @@ namespace TidyUpCapstone.Data
             builder.Entity<Notification>()
                 .HasIndex(n => new { n.UserId, n.IsRead })
                 .HasDatabaseName("idx_notification_user_read");
+
+            builder.Entity<NotificationSettings>()
+    .HasIndex(ns => ns.UserId)
+    .IsUnique()
+    .HasDatabaseName("idx_notification_settings_user");
         }
 
         private void ConfigureCheckConstraints(ModelBuilder builder)

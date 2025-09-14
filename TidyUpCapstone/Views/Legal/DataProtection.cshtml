@@ -1,0 +1,438 @@
+﻿@{
+    ViewData["Title"] = "Data Protection";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <h1 class="display-6 fw-bold text-primary">Data Protection</h1>
+                <p class="lead text-muted">How we protect your personal information and comply with data protection laws</p>
+                <p class="small text-muted">Last updated: @DateTime.Now.ToString("MMMM dd, yyyy")</p>
+            </div>
+
+            <!-- Overview -->
+            <div class="alert alert-primary">
+                <h5 class="alert-heading">
+                    <i class="bx bx-shield-check me-2"></i>
+                    Our Commitment to Data Protection
+                </h5>
+                <p class="mb-0">Tidy Up is committed to protecting your personal data and complying with applicable data protection laws, including GDPR, CCPA, and other regional privacy regulations. This page outlines our data protection practices and your rights.</p>
+            </div>
+
+            <!-- Legal Basis for Processing -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">Legal Basis for Data Processing</h4>
+                </div>
+                <div class="card-body">
+                    <p>We process your personal data based on the following legal grounds:</p>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bx bx-check-circle text-success me-2"></i>Legitimate Interests</h6>
+                            <ul>
+                                <li>Platform security and fraud prevention</li>
+                                <li>Service improvement and analytics</li>
+                                <li>Customer support and communications</li>
+                                <li>Business operations and administration</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bx bx-user-check text-primary me-2"></i>Contract Performance</h6>
+                            <ul>
+                                <li>Providing our decluttering platform services</li>
+                                <li>Managing your account and token system</li>
+                                <li>Processing your item posts and activities</li>
+                                <li>Maintaining platform functionality</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h6><i class="bx bx-heart text-warning me-2"></i>Consent</h6>
+                            <ul>
+                                <li>Marketing communications (optional)</li>
+                                <li>Optional analytics and tracking</li>
+                                <li>Additional data collection for new features</li>
+                                <li>Third-party integrations you choose</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bx bx-balance-scale text-secondary me-2"></i>Legal Compliance</h6>
+                            <ul>
+                                <li>Responding to legal requests</li>
+                                <li>Compliance with tax and financial regulations</li>
+                                <li>Data protection law requirements</li>
+                                <li>Law enforcement cooperation when required</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Categories -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Categories of Personal Data</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Identity Data</h6>
+                            <ul>
+                                <li>Username and display name</li>
+                                <li>Email address</li>
+                                <li>Profile information</li>
+                                <li>Account preferences</li>
+                            </ul>
+
+                            <h6 class="mt-3">Content Data</h6>
+                            <ul>
+                                <li>Item photos and descriptions</li>
+                                <li>Comments and community posts</li>
+                                <li>Messages and communications</li>
+                                <li>Ratings and reviews</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Usage Data</h6>
+                            <ul>
+                                <li>Platform activity and interactions</li>
+                                <li>Token earning and spending history</li>
+                                <li>Login times and frequency</li>
+                                <li>Feature usage patterns</li>
+                            </ul>
+
+                            <h6 class="mt-3">Technical Data</h6>
+                            <ul>
+                                <li>IP address and device information</li>
+                                <li>Browser type and version</li>
+                                <li>Operating system details</li>
+                                <li>Cookies and tracking data</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Protection Principles -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">Data Protection Principles</h4>
+                </div>
+                <div class="card-body">
+                    <p>We follow these core data protection principles:</p>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6><i class="bx bx-target-lock text-success me-2"></i>Purpose Limitation</h6>
+                                <p class="small text-muted">We collect data only for specific, legitimate purposes and don't use it for incompatible purposes.</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6><i class="bx bx-minimize text-success me-2"></i>Data Minimization</h6>
+                                <p class="small text-muted">We collect only the minimum data necessary to provide our services effectively.</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6><i class="bx bx-check-shield text-success me-2"></i>Accuracy</h6>
+                                <p class="small text-muted">We keep your data accurate and up-to-date, and provide ways for you to correct inaccuracies.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6><i class="bx bx-timer text-success me-2"></i>Storage Limitation</h6>
+                                <p class="small text-muted">We retain data only as long as necessary for the purposes it was collected.</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6><i class="bx bx-lock text-success me-2"></i>Security</h6>
+                                <p class="small text-muted">We implement appropriate technical and organizational measures to protect your data.</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6><i class="bx bx-user-voice text-success me-2"></i>Accountability</h6>
+                                <p class="small text-muted">We can demonstrate compliance with data protection principles and are responsible for our practices.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Measures -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h4 class="mb-0">Security Measures</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bx bx-lock-alt text-dark me-2"></i>Technical Safeguards</h6>
+                            <ul>
+                                <li>End-to-end encryption for sensitive data</li>
+                                <li>Secure HTTPS connections</li>
+                                <li>Regular security updates and patches</li>
+                                <li>Automated backup and recovery systems</li>
+                                <li>Intrusion detection and monitoring</li>
+                                <li>Multi-factor authentication options</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bx bx-group text-dark me-2"></i>Organizational Safeguards</h6>
+                            <ul>
+                                <li>Employee privacy and security training</li>
+                                <li>Access controls and role-based permissions</li>
+                                <li>Regular security audits and assessments</li>
+                                <li>Incident response and breach procedures</li>
+                                <li>Vendor and third-party security requirements</li>
+                                <li>Data protection impact assessments</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Your Rights -->
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">Your Data Protection Rights</h4>
+                </div>
+                <div class="card-body">
+                    <p>Under data protection laws, you have the following rights:</p>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bx bx-search text-warning me-2"></i>Right of Access</h6>
+                            <p class="small">Request a copy of the personal data we hold about you, including details about how we process it.</p>
+
+                            <h6><i class="bx bx-edit text-warning me-2"></i>Right to Rectification</h6>
+                            <p class="small">Correct any inaccurate or incomplete personal data we have about you.</p>
+
+                            <h6><i class="bx bx-trash text-warning me-2"></i>Right to Erasure</h6>
+                            <p class="small">Request deletion of your personal data in certain circumstances (right to be forgotten).</p>
+
+                            <h6><i class="bx bx-block text-warning me-2"></i>Right to Restrict Processing</h6>
+                            <p class="small">Limit how we use your personal data in specific situations.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bx bx-transfer text-warning me-2"></i>Right to Data Portability</h6>
+                            <p class="small">Receive your personal data in a structured, machine-readable format for transfer to another service.</p>
+
+                            <h6><i class="bx bx-x-circle text-warning me-2"></i>Right to Object</h6>
+                            <p class="small">Object to processing of your personal data for direct marketing or legitimate interests.</p>
+
+                            <h6><i class="bx bx-shield-x text-warning me-2"></i>Right to Withdraw Consent</h6>
+                            <p class="small">Withdraw consent for processing where we rely on consent as our legal basis.</p>
+
+                            <h6><i class="bx bx-error text-warning me-2"></i>Right to Complain</h6>
+                            <p class="small">Lodge complaints with your local data protection authority if you believe we've violated your rights.</p>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <h6><i class="bx bx-info-circle me-2"></i>Exercising Your Rights</h6>
+                        <p class="mb-0">To exercise any of these rights, contact us using the information provided at the bottom of this page. We will respond within 30 days of receiving your request.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Retention -->
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h4 class="mb-0">Data Retention</h4>
+                </div>
+                <div class="card-body">
+                    <p>We retain your personal data for different periods depending on the type of data and purpose:</p>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Data Type</th>
+                                    <th>Retention Period</th>
+                                    <th>Reason</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Account Information</td>
+                                    <td>Until account deletion + 30 days</td>
+                                    <td>Service provision and legal compliance</td>
+                                </tr>
+                                <tr>
+                                    <td>Item Posts and Content</td>
+                                    <td>Until deletion by user or account closure</td>
+                                    <td>Platform functionality</td>
+                                </tr>
+                                <tr>
+                                    <td>Token Transaction History</td>
+                                    <td>7 years after last transaction</td>
+                                    <td>Financial record keeping</td>
+                                </tr>
+                                <tr>
+                                    <td>Support Communications</td>
+                                    <td>3 years after resolution</td>
+                                    <td>Customer service and legal compliance</td>
+                                </tr>
+                                <tr>
+                                    <td>Analytics Data (Anonymized)</td>
+                                    <td>2 years</td>
+                                    <td>Platform improvement</td>
+                                </tr>
+                                <tr>
+                                    <td>Security Logs</td>
+                                    <td>1 year</td>
+                                    <td>Security and fraud prevention</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- International Transfers -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">International Data Transfers</h4>
+                </div>
+                <div class="card-body">
+                    <p>We may transfer your personal data to countries outside your region for processing and storage:</p>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Transfer Safeguards</h6>
+                            <ul>
+                                <li>Adequacy decisions by data protection authorities</li>
+                                <li>Standard contractual clauses (SCCs)</li>
+                                <li>Binding corporate rules</li>
+                                <li>Appropriate technical and organizational measures</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Transfer Purposes</h6>
+                            <ul>
+                                <li>Cloud hosting and data storage</li>
+                                <li>Customer support services</li>
+                                <li>Analytics and platform improvement</li>
+                                <li>Backup and disaster recovery</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Breach Notification -->
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">Data Breach Procedures</h4>
+                </div>
+                <div class="card-body">
+                    <p>In the unlikely event of a data breach:</p>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Our Response</h6>
+                            <ul>
+                                <li>Immediate containment and investigation</li>
+                                <li>Assessment of risks to your rights and freedoms</li>
+                                <li>Notification to authorities within 72 hours (if required)</li>
+                                <li>Documentation and root cause analysis</li>
+                                <li>Implementation of additional safeguards</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>User Notification</h6>
+                            <ul>
+                                <li>Direct notification if high risk to your rights</li>
+                                <li>Clear description of what happened</li>
+                                <li>Explanation of likely consequences</li>
+                                <li>Details of measures taken and planned</li>
+                                <li>Contact information for further questions</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Children's Data -->
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">Protection of Children's Data</h4>
+                </div>
+                <div class="card-body">
+                    <p>Tidy Up is designed for users aged 18 and older. We have specific protections for children's data:</p>
+                    <ul>
+                        <li>We do not knowingly collect personal data from children under 18</li>
+                        <li>If we discover we have collected children's data, we delete it immediately</li>
+                        <li>We verify age during the registration process</li>
+                        <li>Parents can contact us to request deletion of their child's data</li>
+                        <li>We comply with COPPA and other children's privacy laws</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="card border-primary mb-4">
+                <div class="card-header bg-primary bg-opacity-10">
+                    <h5 class="mb-0 text-primary">
+                        <i class="bx bx-envelope me-2"></i>
+                        Data Protection Contact
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>For data protection inquiries, rights requests, or concerns:</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Data Protection Officer</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bx bx-envelope me-2"></i>Email: dpo@tidyup.com</li>
+                                <li><i class="bx bx-phone me-2"></i>Phone: [Your DPO Phone]</li>
+                                <li><i class="bx bx-map me-2"></i>Address: [Your DPO Address]</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Alternative Contacts</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bx bx-message me-2"></i><a href="/Support/ContactUs">Support Contact Form</a></li>
+                                <li><i class="bx bx-envelope me-2"></i>General: privacy@tidyup.com</li>
+                                <li><i class="bx bx-help-circle me-2"></i><a href="/Support/HelpCenter">Help Center</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Supervisory Authority -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">Supervisory Authority</h4>
+                </div>
+                <div class="card-body">
+                    <p>If you believe we have not adequately addressed your data protection concerns, you have the right to lodge a complaint with your local supervisory authority:</p>
+                    <ul>
+                        <li><strong>EU residents:</strong> Your national data protection authority</li>
+                        <li><strong>UK residents:</strong> Information Commissioner's Office (ICO)</li>
+                        <li><strong>California residents:</strong> California Attorney General</li>
+                        <li><strong>Other regions:</strong> Your local privacy regulator</li>
+                    </ul>
+                    <p>You can find contact details for your local authority through official government websites.</p>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="/Home/SettingsPage" class="btn btn-outline-secondary">
+                    <i class="bx bx-arrow-back me-2"></i>Back to Settings
+                </a>
+                <div>
+                    <a href="/Legal/PrivacyPolicy" class="btn btn-outline-primary me-2">Privacy Policy</a>
+                    <a href="/Legal/CookiePolicy" class="btn btn-outline-primary">Cookie Policy</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,88 @@
+﻿@{
+    ViewData["Title"] = "Message Sent";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow text-center">
+                <div class="card-body py-5">
+                    <!-- Success Icon -->
+                    <div class="mb-4">
+                        <i class="bx bx-check-circle text-success" style="font-size: 4rem;"></i>
+                    </div>
+
+                    <!-- Success Message -->
+                    <h3 class="text-success mb-3">Message Sent Successfully!</h3>
+
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success border-0">
+                            @TempData["SuccessMessage"]
+                        </div>
+                    }
+
+                    <p class="text-muted mb-4">
+                        We've received your message and our support team will review it shortly.
+                        We typically respond within 24 hours during business days.
+                    </p>
+
+                    <!-- What happens next section -->
+                    <div class="mb-4">
+                        <h5 class="mb-3">What happens next?</h5>
+                        <div class="row text-start">
+                            <div class="col-12 mb-2">
+                                <i class="bx bx-check text-success me-2"></i>
+                                <small>Your message has been saved to our support system</small>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <i class="bx bx-user text-primary me-2"></i>
+                                <small>A support representative will review your inquiry</small>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <i class="bx bx-envelope text-info me-2"></i>
+                                <small>You'll receive a response via email within 24 hours</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-primary">
+                            <i class="bx bx-home me-1"></i>
+                            Back to Home
+                        </a>
+
+                        <a href="@Url.Action("HelpCenter", "Support")" class="btn btn-outline-secondary">
+                            <i class="bx bx-help-circle me-1"></i>
+                            Visit Help Center
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Help Section -->
+            <div class="mt-4">
+                <div class="card border-info">
+                    <div class="card-body text-center">
+                        <h6 class="text-info mb-2">
+                            <i class="bx bx-info-circle me-1"></i>
+                            Need immediate help?
+                        </h6>
+                        <p class="small text-muted mb-3">
+                            While you wait for our response, check out our helpful resources:
+                        </p>
+                        <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+                            <a href="@Url.Action("HowToTrade", "Support")" class="btn btn-outline-info btn-sm">
+                                Trading Guide
+                            </a>
+                            <a href="@Url.Action("SafetyTips", "Support")" class="btn btn-outline-info btn-sm">
+                                Safety Tips
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
