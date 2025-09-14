@@ -33,12 +33,7 @@ namespace TidyUpCapstone.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                // If no authenticated user, try to get testuser for development
-                user = await _userManager.FindByEmailAsync("test@tidyup.com");
-                if (user == null)
-                {
-                    return RedirectToAction("TestLogin", "Auth");
-                }
+                return RedirectToAction("Login", "Account");
             }
 
             var profileDto = new UserProfileDto
@@ -127,14 +122,8 @@ namespace TidyUpCapstone.Controllers
                 var user = await _userManager.GetUserAsync(User);
                 if (user == null)
                 {
-                    user = await _userManager.FindByEmailAsync("test@tidyup.com");
-                    if (user == null)
-                    {
-                        Console.WriteLine("❌ No user found at all");
-                        return Json(new { success = false, message = "User not found" });
-                    }
+                    return Json(new { success = false, message = "User not authenticated" });
                 }
-
                 Console.WriteLine($"✅ Found user: {user.UserName} (ID: {user.Id})");
 
                 // HANDLE PROFILE PICTURE UPLOAD

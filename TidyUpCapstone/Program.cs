@@ -71,103 +71,18 @@ builder.Services.AddAntiforgery(options =>
 
 var app = builder.Build();
 
-// Database seeding and initialization
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
-        var userManager = services.GetRequiredService<UserManager<AppUser>>();
-
-        // Ensure database exists
         await context.Database.EnsureCreatedAsync();
-
-        // Check if test user already exists
-        var existingUser = await userManager.FindByEmailAsync("test@tidyup.com");
-        if (existingUser == null)
-        {
-            var testUser = new AppUser
-            {
-                UserName = "testuser",
-                Email = "test@tidyup.com",
-                EmailConfirmed = true,
-                DateCreated = DateTime.UtcNow,
-                Status = "active"
-            };
-
-            var result = await userManager.CreateAsync(testUser, "Test123!");
-            if (result.Succeeded)
-            {
-                // Create default privacy settings for the test user
-                var privacySettings = new UserPrivacySettings
-                {
-                    UserId = testUser.Id,
-                    ProfileVisibility = "public",
-                    LocationVisibility = "show",
-                    ActivityStreaksVisibility = "show",
-                    OnlineStatus = "show",
-                    SearchIndexing = "allow",
-                    ContactVisibility = "public",
-                    ActivityHistory = "show",
-                    DateCreated = DateTime.UtcNow,
-                    DateUpdated = DateTime.UtcNow
-                };
-
-                context.UserPrivacySettings.Add(privacySettings);
-                await context.SaveChangesAsync();
-
-                Console.WriteLine("? Test user created successfully!");
-                Console.WriteLine("Email: test@tidyup.com");
-                Console.WriteLine("Password: Test123!");
-                Console.WriteLine("? Default privacy settings created");
-            }
-            else
-            {
-                Console.WriteLine("? Failed to create test user:");
-                foreach (var error in result.Errors)
-                {
-                    Console.WriteLine($"- {error.Description}");
-                }
-            }
-        }
-        else
-        {
-            Console.WriteLine("? Test user already exists: test@tidyup.com");
-
-            // Check if privacy settings exist for existing user
-            var existingSettings = await context.UserPrivacySettings
-                .FirstOrDefaultAsync(p => p.UserId == existingUser.Id);
-
-            if (existingSettings == null)
-            {
-                var privacySettings = new UserPrivacySettings
-                {
-                    UserId = existingUser.Id,
-                    ProfileVisibility = "public",
-                    LocationVisibility = "show",
-                    ActivityStreaksVisibility = "show",
-                    OnlineStatus = "show",
-                    SearchIndexing = "allow",
-                    ContactVisibility = "public",
-                    ActivityHistory = "show",
-                    DateCreated = DateTime.UtcNow,
-                    DateUpdated = DateTime.UtcNow
-                };
-
-                context.UserPrivacySettings.Add(privacySettings);
-                await context.SaveChangesAsync();
-                Console.WriteLine("? Default privacy settings created for existing user");
-            }
-        }
+        Console.WriteLine("? Database initialized successfully");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"? Error during initialization: {ex.Message}");
-        if (ex.InnerException != null)
-        {
-            Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
-        }
+        Console.WriteLine($"? Error during database initialization: {ex.Message}");
     }
 }
 
