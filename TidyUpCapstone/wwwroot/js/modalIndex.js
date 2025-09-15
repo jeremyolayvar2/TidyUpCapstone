@@ -259,7 +259,6 @@
         }
     });
 
-    // FIXED: Handle login form submission
     if (loginForm) {
         loginForm.addEventListener('submit', async function (e) {
             e.preventDefault();
@@ -301,12 +300,14 @@
                     // Show success message
                     showLoginSuccess('Sign in successful! Redirecting...');
 
-                    // CRITICAL FIX: Immediate redirect
-                    const redirectUrl = result.redirectUrl || '/Home/Main';
-                    console.log('Final redirect URL:', redirectUrl);
+                    // FIXED: Use the exact URL returned by the server
+                    const redirectUrl = result.redirectUrl;
+                    console.log('Redirecting to:', redirectUrl);
 
-                    // Redirect immediately - don't wait
-                    window.location.href = redirectUrl;
+                    // Small delay to show success message, then redirect
+                    setTimeout(() => {
+                        window.location.href = redirectUrl;
+                    }, 500);
 
                 } else {
                     console.log('Login failed:', result.message);
@@ -385,16 +386,17 @@
                     // Show success message
                     showRegisterSuccess(result.message || 'Account created successfully!');
 
-                    // Handle different redirect scenarios
+                    // Handle different scenarios
                     if (result.showLogin) {
                         // For new registrations that need email verification
                         setTimeout(() => {
                             closeRegisterModalOnly();
-                            openLoginModal();
-                            showLoginSuccess('Please check your email to verify your account, then sign in.');
+                            setTimeout(() => {
+                                openLoginModal();
+                            }, 300);
                         }, 2000);
                     } else if (result.redirectUrl) {
-                        // For OAuth or auto-verified users
+                        // For OAuth or auto-verified users - FIXED: Use server URL
                         setTimeout(() => {
                             window.location.href = result.redirectUrl;
                         }, 2000);
@@ -402,7 +404,9 @@
                         // Default fallback
                         setTimeout(() => {
                             closeRegisterModalOnly();
-                            openLoginModal();
+                            setTimeout(() => {
+                                openLoginModal();
+                            }, 300);
                         }, 2000);
                     }
 

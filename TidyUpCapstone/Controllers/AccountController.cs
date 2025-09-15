@@ -228,8 +228,10 @@ namespace TidyUpCapstone.Controllers
                     user.LastLogin = GetPhilippinesTime();
                     await _userManager.UpdateAsync(user);
 
-                    // FIXED: Use proper action URL
-                    return LocalRedirect(returnUrl ?? Url.Action("Main", "Home"));
+                    // FIXED: Use consistent URL generation
+                    var redirectUrl = returnUrl ?? Url.Action("Main", "Home");
+                    _logger.LogInformation("Manual login successful, redirecting to: {RedirectUrl}", redirectUrl);
+                    return LocalRedirect(redirectUrl);
                 }
 
                 if (result.IsLockedOut)
@@ -265,14 +267,18 @@ namespace TidyUpCapstone.Controllers
 
             try
             {
+                _logger.LogInformation("Modal login attempt for email: {Email}", Email);
+
                 var user = await _userManager.FindByEmailAsync(Email);
                 if (user == null)
                 {
+                    _logger.LogWarning("Modal login failed - user not found: {Email}", Email);
                     return Json(new { success = false, message = "Invalid email or password." });
                 }
 
                 if (!user.EmailConfirmed)
                 {
+                    _logger.LogWarning("Modal login failed - email not confirmed: {Email}", Email);
                     return Json(new { success = false, message = "Please verify your email before signing in." });
                 }
 
@@ -280,15 +286,29 @@ namespace TidyUpCapstone.Controllers
 
                 if (result.Succeeded)
                 {
+                    _logger.LogInformation("Modal login successful for user: {UserId}", user.Id);
+
+                    // Update last login
                     user.LastLogin = GetPhilippinesTime();
                     await _userManager.UpdateAsync(user);
 
-                    // FIXED: Use proper MVC action URL instead of direct path
+                    // FIXED: Generate proper action URL
                     var redirectUrl = returnUrl ?? Url.Action("Main", "Home");
+                    _logger.LogInformation("Modal login successful, redirecting to: {RedirectUrl}", redirectUrl);
+
                     return Json(new { success = true, redirectUrl = redirectUrl });
                 }
 
-                return Json(new { success = false, message = "Invalid email or password." });
+                if (result.IsLockedOut)
+                {
+                    _logger.LogWarning("Modal login failed - account locked: {Email}", Email);
+                    return Json(new { success = false, message = "Account is locked. Please try again later." });
+                }
+                else
+                {
+                    _logger.LogWarning("Modal login failed - invalid credentials: {Email}", Email);
+                    return Json(new { success = false, message = "Invalid email or password." });
+                }
             }
             catch (Exception ex)
             {
@@ -325,13 +345,11 @@ namespace TidyUpCapstone.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ExternalLoginCallback(string? returnUrl = null, string? remoteError = null)
         {
-            returnUrl ??= Url.Content("~/");
-
             if (remoteError != null)
             {
                 _logger.LogError("External provider error: {Error}", remoteError);
                 TempData["ErrorMessage"] = $"External provider error: {remoteError}";
-                return RedirectToAction("Login");
+                return RedirectToAction("Index", "Home", new { showLogin = true });
             }
 
             var info = await _signInManager.GetExternalLoginInfoAsync();
@@ -339,7 +357,7 @@ namespace TidyUpCapstone.Controllers
             {
                 _logger.LogError("Error loading external login info");
                 TempData["ErrorMessage"] = "Error loading external login information.";
-                return RedirectToAction("Login");
+                return RedirectToAction("Index", "Home", new { showLogin = true });
             }
 
             try
@@ -364,8 +382,11 @@ namespace TidyUpCapstone.Controllers
                             await _userManager.UpdateAsync(existingUser);
                         }
                     }
-                    // FIXED: Use proper action URL
-                    return LocalRedirect(returnUrl ?? Url.Action("Main", "Home"));
+
+                    // FIXED: Generate proper action URL
+                    var redirectUrl = returnUrl ?? Url.Action("Main", "Home");
+                    _logger.LogInformation("OAuth login successful, redirecting to: {RedirectUrl}", redirectUrl);
+                    return LocalRedirect(redirectUrl);
                 }
 
                 // If user doesn't exist, redirect to confirmation page
@@ -379,7 +400,7 @@ namespace TidyUpCapstone.Controllers
                 {
                     _logger.LogError("Email claim not found in external login info from {Provider}", info.LoginProvider);
                     TempData["ErrorMessage"] = "Could not retrieve email from external provider.";
-                    return RedirectToAction("Login");
+                    return RedirectToAction("Index", "Home", new { showLogin = true });
                 }
 
                 var model = new ExternalLoginConfirmationViewModel
@@ -400,7 +421,7 @@ namespace TidyUpCapstone.Controllers
             {
                 _logger.LogError(ex, "Error during external login callback from {Provider}", info.LoginProvider);
                 TempData["ErrorMessage"] = "An error occurred during login. Please try again.";
-                return RedirectToAction("Login");
+                return RedirectToAction("Index", "Home", new { showLogin = true });
             }
         }
 
@@ -460,8 +481,10 @@ namespace TidyUpCapstone.Controllers
                     await LogRegistrationAttempt(user.Id, info.LoginProvider, "Success",
                         Request.HttpContext.Connection.RemoteIpAddress?.ToString());
 
-                    // FIXED: OAuth users go directly to Main page since they're auto-verified
-                    return LocalRedirect(model.ReturnUrl ?? Url.Action("Main", "Home"));
+                    // FIXED: Generate proper action URL
+                    var redirectUrl = model.ReturnUrl ?? Url.Action("Main", "Home");
+                    _logger.LogInformation("OAuth registration successful, redirecting to: {RedirectUrl}", redirectUrl);
+                    return LocalRedirect(redirectUrl);
                 }
 
                 foreach (var error in result.Errors)
@@ -598,6 +621,8 @@ namespace TidyUpCapstone.Controllers
         {
             try
             {
+                _logger.LogInformation("Modal registration attempt for email: {Email}", model?.Email ?? "unknown");
+
                 // Handle HTML checkbox values
                 var request = HttpContext.Request;
                 if (request.Form.ContainsKey("AcceptTerms"))
@@ -637,6 +662,7 @@ namespace TidyUpCapstone.Controllers
                 if (!ModelState.IsValid)
                 {
                     var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                    _logger.LogWarning("Modal registration validation failed: {Errors}", string.Join("; ", errors));
                     return Json(new { success = false, message = string.Join("; ", errors) });
                 }
 
@@ -646,10 +672,12 @@ namespace TidyUpCapstone.Controllers
                 {
                     if (existingEmailUser.EmailConfirmed)
                     {
+                        _logger.LogWarning("Modal registration failed - email already exists and verified: {Email}", model.Email);
                         return Json(new { success = false, message = "This email address is already registered and verified." });
                     }
                     else
                     {
+                        _logger.LogWarning("Modal registration failed - email already exists but not verified: {Email}", model.Email);
                         return Json(new { success = false, message = "This email is already registered but not verified. Please check your email or request a new verification link." });
                     }
                 }
@@ -658,6 +686,7 @@ namespace TidyUpCapstone.Controllers
                 var existingUsername = await _userManager.FindByNameAsync(model.Username);
                 if (existingUsername != null)
                 {
+                    _logger.LogWarning("Modal registration failed - username already exists: {Username}", model.Username);
                     return Json(new { success = false, message = "This username is already taken. Please choose another." });
                 }
 
@@ -678,28 +707,39 @@ namespace TidyUpCapstone.Controllers
                 if (!result.Succeeded)
                 {
                     var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                    _logger.LogError("Modal registration user creation failed for {Email}: {Errors}", model.Email, errors);
                     return Json(new { success = false, message = errors });
                 }
+
+                _logger.LogInformation("Modal registration user created successfully: {UserId}", user.Id);
 
                 // Send verification email
                 try
                 {
                     var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     await SendVerificationEmail(user.Email, user.FirstName, emailToken);
+                    _logger.LogInformation("Verification email sent for modal registration: {Email}", user.Email);
                 }
                 catch (Exception emailEx)
                 {
-                    _logger.LogError(emailEx, "Failed to send verification email to: {Email}", user.Email);
+                    _logger.LogError(emailEx, "Failed to send verification email for modal registration: {Email}", user.Email);
                     // Continue with success response even if email fails
                 }
 
                 // Log registration
-                await LogRegistrationAttempt(user.Id, "Modal", "Success",
-                    Request.HttpContext.Connection.RemoteIpAddress?.ToString());
+                try
+                {
+                    await LogRegistrationAttempt(user.Id, "Modal", "Success",
+                        Request.HttpContext.Connection.RemoteIpAddress?.ToString());
+                }
+                catch (Exception logEx)
+                {
+                    _logger.LogError(logEx, "Failed to log modal registration attempt for user: {UserId}", user.Id);
+                }
 
                 _logger.LogInformation("Modal registration successful for user: {UserId}", user.Id);
 
-                // FIXED: For new registrations, show success message and redirect to login
+                // FIXED: Return success without automatic redirect for email verification
                 return Json(new
                 {
                     success = true,
@@ -722,23 +762,28 @@ namespace TidyUpCapstone.Controllers
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
             {
+                _logger.LogWarning("Email verification failed - missing email or token");
                 TempData["ErrorMessage"] = "Invalid verification link.";
-                return RedirectToAction("Login");
+                return RedirectToAction("Index", "Home", new { showLogin = true });
             }
 
             try
             {
+                _logger.LogInformation("Email verification attempt for: {Email}", email);
+
                 var user = await _userManager.FindByEmailAsync(email);
                 if (user == null)
                 {
+                    _logger.LogWarning("Email verification failed - user not found: {Email}", email);
                     TempData["ErrorMessage"] = "User not found.";
-                    return RedirectToAction("Login");
+                    return RedirectToAction("Index", "Home", new { showLogin = true });
                 }
 
                 if (user.EmailConfirmed)
                 {
-                    TempData["InfoMessage"] = "Email is already verified.";
-                    return RedirectToAction("Login");
+                    _logger.LogInformation("Email already verified for user: {Email}", email);
+                    TempData["SuccessMessage"] = "Email is already verified. You can now sign in.";
+                    return RedirectToAction("Index", "Home", new { showLogin = true });
                 }
 
                 var result = await _userManager.ConfirmEmailAsync(user, token);
@@ -750,19 +795,19 @@ namespace TidyUpCapstone.Controllers
 
                     _logger.LogInformation("Email verified successfully for user: {UserId}", user.Id);
                     TempData["SuccessMessage"] = "Email verified successfully! You can now sign in.";
+                    return RedirectToAction("Index", "Home", new { showLogin = true });
                 }
                 else
                 {
-                    _logger.LogWarning("Email verification failed for user: {UserId}", user.Id);
-                    TempData["ErrorMessage"] = "Email verification failed. The link may be expired.";
+                    _logger.LogWarning("Email verification failed for user: {UserId}. Errors: {@Errors}", user.Id, result.Errors);
+                    TempData["ErrorMessage"] = "Email verification failed. The link may be expired or invalid.";
+                    return RedirectToAction("Index", "Home", new { showLogin = true });
                 }
-
-                return RedirectToAction("Login");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error during email verification for email: {Email}", email);
-                TempData["LoginError"] = "An error occurred during email verification.";
+                TempData["ErrorMessage"] = "An error occurred during email verification.";
                 return RedirectToAction("Index", "Home", new { showLogin = true });
             }
         }
@@ -776,8 +821,11 @@ namespace TidyUpCapstone.Controllers
         {
             try
             {
+                var userId = _userManager.GetUserId(User);
                 await _signInManager.SignOutAsync();
-                _logger.LogInformation("User logged out successfully");
+                _logger.LogInformation("User {UserId} logged out successfully", userId);
+
+                TempData["SuccessMessage"] = "You have been logged out successfully.";
                 return RedirectToAction("Index", "Home");
             }
             catch (Exception ex)
@@ -790,9 +838,12 @@ namespace TidyUpCapstone.Controllers
         // ===== ERROR HANDLING =====
 
         [AllowAnonymous]
-        public IActionResult AccessDenied()
+        public IActionResult AccessDenied(string? returnUrl = null)
         {
             ViewBag.HideNavigation = true;
+            ViewData["ReturnUrl"] = returnUrl;
+
+            _logger.LogWarning("Access denied for return URL: {ReturnUrl}", returnUrl);
             return View();
         }
     }

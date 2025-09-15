@@ -47,6 +47,7 @@ namespace TidyUpCapstone.Controllers
         }
 
         [Authorize]
+        [Authorize]
         public async Task<IActionResult> Main()
         {
             try
@@ -56,13 +57,13 @@ namespace TidyUpCapstone.Controllers
                 {
                     _logger.LogWarning("User not found in Main action, redirecting to Index");
 
-                    // If user is not found but claims to be authenticated, sign them out and redirect to home
+                    // Sign out if user claims to be authenticated but doesn't exist
                     if (User.Identity?.IsAuthenticated == true)
                     {
-                        await _signInManager.SignOutAsync(); // NOW WORKS: _signInManager is available
+                        await _signInManager.SignOutAsync();
                     }
 
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Index", "Home", new { showLogin = true });
                 }
 
                 _logger.LogInformation("User {UserId} accessed Main page successfully", currentUser.Id);

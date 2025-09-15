@@ -82,15 +82,17 @@ builder.Services.AddIdentity<AppUser, IdentityRole<int>>(options =>
 .AddDefaultTokenProviders();
 
 // -----------------------------------------------------
-// 4. Application Cookie Configuration FOR MODAL SYSTEM
+// 4. FIXED: Application Cookie Configuration FOR MODAL SYSTEM
 // -----------------------------------------------------
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    // CRITICAL: Redirect to home page instead of Login views for modal system
-    options.LoginPath = "/";
+    // FIXED: For modal-based authentication, keep these paths pointed to the home page
+    // The modals will handle the UI, and we'll pass query parameters to trigger them
+    options.LoginPath = "/"; // User goes to home page, modals handle login UI
     options.LogoutPath = "/Account/Logout";
     options.AccessDeniedPath = "/";
 
+    // Cookie settings
     options.ExpireTimeSpan = TimeSpan.FromDays(30);
     options.SlidingExpiration = true;
     options.Cookie.HttpOnly = true;
@@ -98,6 +100,58 @@ builder.Services.ConfigureApplicationCookie(options =>
         ? CookieSecurePolicy.SameAsRequest
         : CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.Lax;
+
+    // FIXED: Add custom logic to handle unauthorized requests properly
+    options.Events.OnRedirectToLogin = context =>
+    {
+        // If this is an AJAX request (from modals), return JSON instead of redirecting
+        if (context.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        {
+            context.Response.StatusCode = 401;
+            context.Response.ContentType = "application/json";
+            var jsonResponse = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                success = false,
+                message = "Authentication required",
+                requiresLogin = true
+            });
+            return context.Response.WriteAsync(jsonResponse);
+        }
+
+        // For regular requests, redirect to home page with login modal trigger
+        var returnUrl = context.RedirectUri;
+        if (!string.IsNullOrEmpty(returnUrl))
+        {
+            context.Response.Redirect($"/?showLogin=true&returnUrl={Uri.EscapeDataString(returnUrl)}");
+        }
+        else
+        {
+            context.Response.Redirect("/?showLogin=true");
+        }
+        return Task.CompletedTask;
+    };
+
+    // FIXED: Handle access denied scenarios
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        // If this is an AJAX request, return JSON
+        if (context.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        {
+            context.Response.StatusCode = 403;
+            context.Response.ContentType = "application/json";
+            var jsonResponse = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                success = false,
+                message = "Access denied",
+                accessDenied = true
+            });
+            return context.Response.WriteAsync(jsonResponse);
+        }
+
+        // For regular requests, redirect to home page
+        context.Response.Redirect("/?error=access_denied");
+        return Task.CompletedTask;
+    };
 });
 
 // -----------------------------------------------------
@@ -115,8 +169,9 @@ builder.Services.AddAuthentication(options =>
 
     if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
     {
-        var logger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger("Program");
-        logger.LogWarning("Google OAuth credentials are not properly configured. Google authentication will not work.");
+        var loggerFactory = LoggerFactory.Create(b => b.AddConsole());
+        var startupLogger = loggerFactory.CreateLogger("Program");
+        startupLogger.LogWarning("Google OAuth credentials are not properly configured. Google authentication will not work.");
     }
     else
     {
@@ -126,22 +181,27 @@ builder.Services.AddAuthentication(options =>
         googleOptions.Scope.Add("email");
         googleOptions.Scope.Add("profile");
 
-        // OAuth event handlers for modal system with enhanced error handling
+        // FIXED: OAuth event handlers for modal system with enhanced error handling
         googleOptions.Events.OnCreatingTicket = context =>
         {
-            // OAuth ticket created successfully
+            var contextLogger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            contextLogger.LogInformation("Google OAuth ticket created for user: {Email}",
+                context.Principal?.FindFirstValue(ClaimTypes.Email) ?? "unknown");
             return Task.CompletedTask;
         };
 
         googleOptions.Events.OnRemoteFailure = context =>
         {
+            var contextLogger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            contextLogger.LogError("Google OAuth remote failure: {Error}", context.Failure?.Message ?? "Unknown error");
+
             var errorMessage = "oauth_failed";
             if (context.Failure?.Message?.Contains("access_denied") == true)
             {
                 errorMessage = "access_denied";
             }
 
-            // Redirect to home with modal parameters for modal system
+            // FIXED: Redirect to home with modal parameters for modal system
             context.Response.Redirect($"/?error={errorMessage}&showLogin=true");
             context.HandleResponse();
             return Task.CompletedTask;
@@ -149,7 +209,18 @@ builder.Services.AddAuthentication(options =>
 
         googleOptions.Events.OnTicketReceived = context =>
         {
-            // OAuth ticket received successfully
+            var contextLogger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            contextLogger.LogInformation("Google OAuth ticket received successfully");
+            return Task.CompletedTask;
+        };
+
+        googleOptions.Events.OnAccessDenied = context =>
+        {
+            var contextLogger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            contextLogger.LogWarning("Google OAuth access denied");
+
+            context.Response.Redirect("/?error=access_denied&showLogin=true");
+            context.HandleResponse();
             return Task.CompletedTask;
         };
     }
@@ -174,8 +245,18 @@ builder.Services.AddAuthentication(options =>
         
         facebookOptions.Events.OnCreatingTicket = context =>
         {
-            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-            logger.LogInformation("Facebook OAuth ticket created");
+            var contextLogger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            contextLogger.LogInformation("Facebook OAuth ticket created");
+            return Task.CompletedTask;
+        };
+        
+        facebookOptions.Events.OnRemoteFailure = context =>
+        {
+            var contextLogger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            contextLogger.LogError("Facebook OAuth remote failure: {Error}", context.Failure?.Message ?? "Unknown error");
+            
+            context.Response.Redirect("/?error=oauth_failed&showLogin=true");
+            context.HandleResponse();
             return Task.CompletedTask;
         };
     }
@@ -192,11 +273,15 @@ builder.Services.Configure<EmailSettingsDto>(builder.Configuration.GetSection("E
 builder.Services.AddSingleton<ISendGridClient>(provider =>
 {
     var settings = provider.GetRequiredService<IOptions<SendGridSettingsDto>>().Value;
-    var logger = provider.GetRequiredService<ILogger<Program>>();
+    var serviceLogger = provider.GetRequiredService<ILogger<Program>>();
 
     if (string.IsNullOrEmpty(settings.ApiKey))
     {
-        logger.LogWarning("SendGrid API key is not configured. Email functionality will not work.");
+        serviceLogger.LogWarning("SendGrid API key is not configured. Email functionality will not work.");
+    }
+    else
+    {
+        serviceLogger.LogInformation("SendGrid client configured successfully");
     }
 
     return new SendGridClient(settings.ApiKey ?? "");
@@ -244,24 +329,27 @@ builder.Services.AddAntiforgery(options =>
 // -----------------------------------------------------
 var app = builder.Build();
 
+// Get logger for this scope
+var appLogger = app.Services.GetRequiredService<ILogger<Program>>();
+
 // -----------------------------------------------------
 // 10. Database Initialization with Better Error Handling
 // -----------------------------------------------------
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    var logger = services.GetRequiredService<ILogger<Program>>();
+    var scopeLogger = services.GetRequiredService<ILogger<Program>>();
 
     try
     {
-        logger.LogInformation("Initializing database...");
+        scopeLogger.LogInformation("Initializing database...");
         var context = services.GetRequiredService<ApplicationDbContext>();
 
         // Check if database exists and is accessible
         var canConnect = await context.Database.CanConnectAsync();
         if (!canConnect)
         {
-            logger.LogError("Cannot connect to database. Check connection string and SQL Server status.");
+            scopeLogger.LogError("Cannot connect to database. Check connection string and SQL Server status.");
             if (!app.Environment.IsDevelopment())
                 throw new InvalidOperationException("Database connection failed");
         }
@@ -271,7 +359,7 @@ using (var scope = app.Services.CreateScope())
             var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
             if (pendingMigrations.Any())
             {
-                logger.LogInformation("Applying {Count} pending migrations", pendingMigrations.Count());
+                scopeLogger.LogInformation("Applying {Count} pending migrations", pendingMigrations.Count());
                 await context.Database.MigrateAsync();
             }
             else
@@ -279,20 +367,20 @@ using (var scope = app.Services.CreateScope())
                 await context.Database.EnsureCreatedAsync();
             }
 
-            logger.LogInformation("✅ Database initialized successfully");
+            scopeLogger.LogInformation("Database initialized successfully");
 
             // Seed initial data if needed
-            await SeedInitialData(services, logger);
+            await SeedInitialData(services, scopeLogger);
         }
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "❌ Error during database initialization: {Message}", ex.Message);
+        scopeLogger.LogError(ex, "Error during database initialization: {Message}", ex.Message);
 
         if (app.Environment.IsDevelopment())
         {
             // In development, we can continue without database for some features
-            logger.LogWarning("Continuing in development mode despite database error");
+            scopeLogger.LogWarning("Continuing in development mode despite database error");
         }
         else
         {
@@ -321,6 +409,10 @@ app.Use(async (context, next) =>
     context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
     context.Response.Headers.Add("X-Frame-Options", "DENY");
     context.Response.Headers.Add("X-XSS-Protection", "1; mode=block");
+
+    // FIXED: Add referrer policy for better OAuth compatibility
+    context.Response.Headers.Add("Referrer-Policy", "strict-origin-when-cross-origin");
+
     await next();
 });
 
@@ -339,11 +431,28 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// Account routes - simplified since we're using modals
+// FIXED: Account routes - simplified since we're using modals primarily
 app.MapControllerRoute(
     name: "account",
     pattern: "Account/{action=Index}",
     defaults: new { controller = "Account", action = "Index" });
+
+// FIXED: Add specific route for Main page
+app.MapControllerRoute(
+    name: "main",
+    pattern: "Main",
+    defaults: new { controller = "Home", action = "Main" });
+
+// FIXED: Add specific routes for authentication actions
+app.MapControllerRoute(
+    name: "login",
+    pattern: "Login",
+    defaults: new { controller = "Account", action = "Login" });
+
+app.MapControllerRoute(
+    name: "register",
+    pattern: "Register",
+    defaults: new { controller = "Account", action = "Register" });
 
 // Health check endpoint
 app.MapGet("/health", async (ApplicationDbContext context) =>
@@ -351,14 +460,44 @@ app.MapGet("/health", async (ApplicationDbContext context) =>
     try
     {
         var canConnect = await context.Database.CanConnectAsync();
-        return canConnect ? Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow })
-                          : Results.Problem("Database connection failed");
+        return canConnect ? Results.Ok(new
+        {
+            status = "healthy",
+            timestamp = DateTime.UtcNow,
+            database = "connected"
+        }) : Results.Problem("Database connection failed");
     }
     catch (Exception ex)
     {
         return Results.Problem($"Health check failed: {ex.Message}");
     }
 });
+
+// FIXED: Add status endpoint for debugging authentication
+//app.MapGet("/auth-status", async (HttpContext context, UserManager<AppUser> userManager) =>
+//{
+//    try
+//    {
+//        var isAuthenticated = context.User?.Identity?.IsAuthenticated ?? false;
+//        var userId = userManager.GetUserId(context.User);
+//        var userName = context.User?.Identity?.Name;
+
+//        var claimsList = context.User?.Claims?.Select(c => new { c.Type, c.Value }).ToList();
+
+//        return Results.Ok(new
+//        {
+//            isAuthenticated,
+//            userId,
+//            userName,
+//            timestamp = DateTime.UtcNow,
+//            claims = claimsList ?? new List<object>()
+//        });
+//    }
+//    catch (Exception ex)
+//    {
+//        return Results.Problem($"Auth status check failed: {ex.Message}");
+//    }
+//});
 
 // -----------------------------------------------------
 // 13. Helper Methods
@@ -392,4 +531,8 @@ static async Task SeedInitialData(IServiceProvider services, ILogger logger)
 // -----------------------------------------------------
 // 14. Start Application
 // -----------------------------------------------------
+appLogger.LogInformation("TidyUp application starting...");
+appLogger.LogInformation("Environment: {Environment}", app.Environment.EnvironmentName);
+appLogger.LogInformation("Authentication configured with modal system");
+
 app.Run();
