@@ -77,6 +77,73 @@
             'Please check your email to verify your account before signing in.'
         );
     }
+
+    // **NEW: Handle server-side data and URL parameters**
+    function handleServerData() {
+        if (typeof window.serverData !== 'undefined') {
+            console.log('Server data found:', window.serverData);
+
+            // Handle login errors from OAuth or other server operations
+            if (window.serverData.loginError && window.serverData.loginError.trim() !== '') {
+                console.log('Showing login error from server:', window.serverData.loginError);
+                showLoginError(window.serverData.loginError);
+                openLoginModal();
+            }
+
+            // Handle success messages
+            if (window.serverData.successMessage && window.serverData.successMessage.trim() !== '') {
+                console.log('Showing success message from server:', window.serverData.successMessage);
+                topAlert.success('Success!', window.serverData.successMessage);
+            }
+
+            // Handle URL parameters to show specific modals
+            if (window.serverData.showLogin === 'true') {
+                console.log('URL parameter indicates login modal should be shown');
+                setTimeout(() => openLoginModal(), 100);
+            }
+
+            if (window.serverData.showRegister === 'true') {
+                console.log('URL parameter indicates register modal should be shown');
+                setTimeout(() => openRegisterModal(), 100);
+            }
+        } else {
+            console.log('No server data found, checking URL parameters manually');
+
+            // Fallback: Check URL parameters directly
+            const urlParams = new URLSearchParams(window.location.search);
+
+            if (urlParams.get('showLogin') === 'true') {
+                console.log('URL showLogin parameter found');
+                setTimeout(() => openLoginModal(), 100);
+            }
+
+            if (urlParams.get('showRegister') === 'true') {
+                console.log('URL showRegister parameter found');
+                setTimeout(() => openRegisterModal(), 100);
+            }
+
+            // Check for error parameter in URL
+            const errorParam = urlParams.get('error');
+            if (errorParam) {
+                let errorMessage = 'An error occurred. Please try again.';
+
+                switch (errorParam) {
+                    case 'oauth_failed':
+                        errorMessage = 'There was an error with the external login provider. Please try again.';
+                        break;
+                    case 'access_denied':
+                        errorMessage = 'Access was denied by the external provider.';
+                        break;
+                    default:
+                        errorMessage = errorParam;
+                }
+
+                showLoginError(errorMessage);
+                setTimeout(() => openLoginModal(), 100);
+            }
+        }
+    }
+
     // Event listeners for opening modals
     document.addEventListener('click', function (e) {
         console.log('Click detected on:', e.target);
@@ -184,9 +251,6 @@
     }
 
     // Handle register form submission
-    // Replace the register form submission part in your JavaScript with this updated version
-
-    // Handle register form submission
     if (registerForm) {
         registerForm.addEventListener('submit', async function (e) {
             e.preventDefault();
@@ -218,9 +282,9 @@
                 formData.delete('MarketingEmails');
 
                 // Set boolean values as strings
-                formData.append('AcceptTerms', acceptTermsCheckbox.checked ? 'true' : 'false');
-                formData.append('AcceptPrivacy', acceptPrivacyCheckbox.checked ? 'true' : 'false');
-                formData.append('MarketingEmails', marketingEmailsCheckbox.checked ? 'true' : 'false');
+                formData.append('AcceptTerms', acceptTermsCheckbox && acceptTermsCheckbox.checked ? 'true' : 'false');
+                formData.append('AcceptPrivacy', acceptPrivacyCheckbox && acceptPrivacyCheckbox.checked ? 'true' : 'false');
+                formData.append('MarketingEmails', marketingEmailsCheckbox && marketingEmailsCheckbox.checked ? 'true' : 'false');
 
                 console.log('Form data being sent:');
                 for (let [key, value] of formData.entries()) {
@@ -258,6 +322,7 @@
             }
         });
     }
+
     // Input focus animations
     const formControls = document.querySelectorAll('.login-form-control, .register-form-control');
     formControls.forEach(input => {
@@ -350,6 +415,21 @@
         }
     });
 
+    // **NEW: Initialize modal handling when DOM is ready**
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('DOM loaded, handling server data...');
+        handleServerData();
+    });
+
+    // **NEW: Also handle server data immediately if DOM is already loaded**
+    if (document.readyState === 'loading') {
+        // DOM is still loading
+        document.addEventListener('DOMContentLoaded', handleServerData);
+    } else {
+        // DOM is already loaded
+        setTimeout(handleServerData, 100);
+    }
+
     // Debug: Log when DOM is ready
     console.log('Modal script loaded. Elements found:');
     console.log('Login modal:', !!loginModal);
@@ -359,11 +439,7 @@
 
 })();
 
-
-
-
-//Alert for creating an account
-
+// Alert for creating an account
 class SimpleTopAlert {
     constructor() {
         this.alerts = [];
@@ -492,36 +568,3 @@ class SimpleTopAlert {
 // Initialize and make globally available
 const topAlert = new SimpleTopAlert();
 window.topAlert = topAlert;
-
-// Demo functions
-function showSuccessDemo() {
-    topAlert.success(
-        'Account Created Successfully!',
-        'Please check your email to verify your account before signing in.'
-    );
-}
-
-function showWarningDemo() {
-    topAlert.warning(
-        'Verification Required',
-        'Your email address needs to be verified before you can continue.'
-    );
-}
-
-function showErrorDemo() {
-    topAlert.error(
-        'Registration Failed',
-        'There was an error creating your account. Please try again.'
-    );
-}
-
-// Example of how to use in your registration success handler
-function showSuccess(message) {
-    console.log('Success:', message);
-
-    // Replace the old alert() with this:
-    topAlert.success(
-        'Account Created Successfully!',
-        'Please check your email to verify your account before signing in.'
-    );
-}

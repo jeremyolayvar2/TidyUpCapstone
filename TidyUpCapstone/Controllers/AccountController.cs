@@ -756,8 +756,8 @@ namespace TidyUpCapstone.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error during email verification for email: {Email}", email);
-                TempData["ErrorMessage"] = "An error occurred during email verification.";
-                return RedirectToAction("Login");
+                TempData["LoginError"] = "An error occurred during email verification.";
+                return RedirectToAction("Index", "Home", new { showLogin = true });
             }
         }
 

@@ -127,7 +127,7 @@
             <form method="post" action="/Account/ExternalLogin" class="login-oauth-section">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="provider" value="Google" />
-                <input type="hidden" name="returnUrl" value="" />
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
                 <button type="submit" class="login-btn login-btn-google">
                     <i class="fab fa-google"></i>
                     Sign in with Google
@@ -147,7 +147,7 @@
             <!-- Manual Login Form -->
             <form method="post" action="/Account/ModalLogin" id="loginForm">
                 @Html.AntiForgeryToken()
-                <input type="hidden" name="returnUrl" value="" />
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
 
                 <!-- Email -->
                 <div class="login-form-group">
@@ -325,6 +325,16 @@
         </div>
     </div>
 </div>
+
+<!-- Server-side data for JavaScript -->
+<script>
+    window.serverData = {
+        loginError: '@Html.Raw(TempData["LoginError"]?.ToString()?.Replace("'", "\\'") ?? "")',
+        successMessage: '@Html.Raw(TempData["SuccessMessage"]?.ToString()?.Replace("'", "\\'") ?? "")',
+        showLogin: '@(Context.Request.Query["showLogin"].ToString() == "true" ? "true" : "false")',
+        showRegister: '@(Context.Request.Query["showRegister"].ToString() == "true" ? "true" : "false")'
+    };
+</script>
 
 @section Scripts {
     <script src="~/js/IndexPageScroll.js"></script>
