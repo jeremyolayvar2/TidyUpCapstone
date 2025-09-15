@@ -329,11 +329,14 @@
 <!-- Server-side data for JavaScript -->
 <script>
     window.serverData = {
-        loginError: '@Html.Raw(TempData["LoginError"]?.ToString()?.Replace("'", "\\'") ?? "")',
-        successMessage: '@Html.Raw(TempData["SuccessMessage"]?.ToString()?.Replace("'", "\\'") ?? "")',
+        loginError: '@Html.Raw(TempData["LoginError"]?.ToString()?.Replace("'", "\\'").Replace("\"", "\\\"") ?? "")',
+        successMessage: '@Html.Raw(TempData["SuccessMessage"]?.ToString()?.Replace("'", "\\'").Replace("\"", "\\\"") ?? "")',
         showLogin: '@(Context.Request.Query["showLogin"].ToString() == "true" ? "true" : "false")',
-        showRegister: '@(Context.Request.Query["showRegister"].ToString() == "true" ? "true" : "false")'
+        showRegister: '@(Context.Request.Query["showRegister"].ToString() == "true" ? "true" : "false")',
+        error: '@Html.Raw(Context.Request.Query["error"].ToString().Replace("'", "\\'").Replace("\"", "\\\""))'
     };
+
+    console.log('Server data loaded:', window.serverData);
 </script>
 
 @section Scripts {

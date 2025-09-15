@@ -84,10 +84,9 @@ namespace TidyUpCapstone.Data
         public DbSet<UserReport> UserReports { get; set; }
         public DbSet<AdminReport> AdminReports { get; set; }
 
+        // NEW: Support entities (from dev branch)
         public DbSet<UserPrivacySettings> UserPrivacySettings { get; set; }
-
         public DbSet<ContactMessage> ContactMessages { get; set; }
-
         public DbSet<NotificationSettings> NotificationSettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -109,6 +108,7 @@ namespace TidyUpCapstone.Data
                 entity.Property(e => e.Status).HasColumnName("status");
                 entity.Property(e => e.LastLogin).HasColumnName("last_login");
 
+                // MERGED: Both FirstName/LastName and additional profile fields from dev
                 entity.Property(e => e.FirstName).HasColumnName("first_name");
                 entity.Property(e => e.LastName).HasColumnName("last_name");
                 entity.Property(e => e.Gender).HasColumnName("gender");
@@ -117,15 +117,28 @@ namespace TidyUpCapstone.Data
                 entity.Property(e => e.ProfilePictureUrl).HasColumnName("profile_picture_url");
                 entity.Property(e => e.PhoneNumber).HasColumnName("PhoneNumber");
 
-                // Language & Accessibility Properties
+                // Language & Accessibility Properties (from dev)
                 entity.Property(e => e.Language).HasColumnName("language");
                 entity.Property(e => e.Timezone).HasColumnName("timezone");
                 entity.Property(e => e.HighContrast).HasColumnName("high_contrast");
                 entity.Property(e => e.LargeText).HasColumnName("large_text");
                 entity.Property(e => e.ReduceMotion).HasColumnName("reduce_motion");
                 entity.Property(e => e.ScreenReader).HasColumnName("screen_reader");
+
+                // KEPT: OAuth-related properties from feature/user-authentication
+                entity.Property(e => e.NormalizedUserName).HasColumnName("NormalizedUserName");
+                entity.Property(e => e.NormalizedEmail).HasColumnName("NormalizedEmail");
+                entity.Property(e => e.EmailConfirmed).HasColumnName("EmailConfirmed");
+                entity.Property(e => e.SecurityStamp).HasColumnName("SecurityStamp");
+                entity.Property(e => e.ConcurrencyStamp).HasColumnName("ConcurrencyStamp");
+                entity.Property(e => e.PhoneNumberConfirmed).HasColumnName("PhoneNumberConfirmed");
+                entity.Property(e => e.TwoFactorEnabled).HasColumnName("TwoFactorEnabled");
+                entity.Property(e => e.LockoutEnd).HasColumnName("LockoutEnd");
+                entity.Property(e => e.LockoutEnabled).HasColumnName("LockoutEnabled");
+                entity.Property(e => e.AccessFailedCount).HasColumnName("AccessFailedCount");
             });
 
+            // CRITICAL: Configure Identity tables - these are REQUIRED for OAuth
             builder.Entity<IdentityRole<int>>().ToTable("app_roles");
             builder.Entity<IdentityUserRole<int>>().ToTable("app_user_roles");
             builder.Entity<IdentityUserClaim<int>>().ToTable("app_user_claims");
@@ -213,12 +226,10 @@ namespace TidyUpCapstone.Data
             builder.Entity<UserReport>().ToTable("user_reports");
             builder.Entity<AdminReport>().ToTable("admin_reports");
 
+            // NEW: Support entities table mappings (from dev)
             builder.Entity<UserPrivacySettings>().ToTable("user_privacy_settings");
-
             builder.Entity<ContactMessage>().ToTable("contact_messages");
-
             builder.Entity<NotificationSettings>().ToTable("notification_settings");
-
 
             // Configure JSON columns as nvarchar(max) for compatibility
             builder.Entity<Admin>()
@@ -509,7 +520,7 @@ namespace TidyUpCapstone.Data
                 .HasForeignKey(ev => ev.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // UserPrivacySettings relationship (one-to-one)
+            // NEW: Support entity relationships (from dev)
             builder.Entity<UserPrivacySettings>()
                 .HasOne(ups => ups.User)
                 .WithOne(u => u.PrivacySettings)
@@ -517,15 +528,11 @@ namespace TidyUpCapstone.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<NotificationSettings>()
-    .HasOne(ns => ns.User)
-    .WithOne(u => u.NotificationSettings)
-    .HasForeignKey<NotificationSettings>(ns => ns.UserId)
-    .OnDelete(DeleteBehavior.Cascade);
+                .HasOne(ns => ns.User)
+                .WithOne(u => u.NotificationSettings)
+                .HasForeignKey<NotificationSettings>(ns => ns.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
-
-
-
-
 
         private void ConfigureIndexes(ModelBuilder builder)
         {
@@ -577,10 +584,11 @@ namespace TidyUpCapstone.Data
                 .HasIndex(n => new { n.UserId, n.IsRead })
                 .HasDatabaseName("idx_notification_user_read");
 
+            // NEW: Support entity indexes (from dev)
             builder.Entity<NotificationSettings>()
-    .HasIndex(ns => ns.UserId)
-    .IsUnique()
-    .HasDatabaseName("idx_notification_settings_user");
+                .HasIndex(ns => ns.UserId)
+                .IsUnique()
+                .HasDatabaseName("idx_notification_settings_user");
         }
 
         private void ConfigureCheckConstraints(ModelBuilder builder)

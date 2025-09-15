@@ -70,8 +70,6 @@
 
     function showSuccess(message) {
         console.log('Success:', message);
-
-        // Use the custom top alert instead of browser alert
         topAlert.success(
             'Account Created Successfully!',
             'Please check your email to verify your account before signing in.'
@@ -80,6 +78,8 @@
 
     // **NEW: Handle server-side data and URL parameters**
     function handleServerData() {
+        console.log('Handling server data...');
+
         if (typeof window.serverData !== 'undefined') {
             console.log('Server data found:', window.serverData);
 
@@ -94,6 +94,26 @@
             if (window.serverData.successMessage && window.serverData.successMessage.trim() !== '') {
                 console.log('Showing success message from server:', window.serverData.successMessage);
                 topAlert.success('Success!', window.serverData.successMessage);
+            }
+
+            // Handle URL error parameter (from OAuth failures)
+            if (window.serverData.error && window.serverData.error.trim() !== '') {
+                console.log('Showing error from URL parameter:', window.serverData.error);
+                let errorMessage = 'An error occurred. Please try again.';
+
+                switch (window.serverData.error) {
+                    case 'oauth_failed':
+                        errorMessage = 'There was an error with Google sign-in. Please try again.';
+                        break;
+                    case 'access_denied':
+                        errorMessage = 'Access was denied. Please try signing in again.';
+                        break;
+                    default:
+                        errorMessage = window.serverData.error;
+                }
+
+                showLoginError(errorMessage);
+                openLoginModal();
             }
 
             // Handle URL parameters to show specific modals
@@ -129,10 +149,10 @@
 
                 switch (errorParam) {
                     case 'oauth_failed':
-                        errorMessage = 'There was an error with the external login provider. Please try again.';
+                        errorMessage = 'There was an error with Google sign-in. Please try again.';
                         break;
                     case 'access_denied':
-                        errorMessage = 'Access was denied by the external provider.';
+                        errorMessage = 'Access was denied. Please try signing in again.';
                         break;
                     default:
                         errorMessage = errorParam;
@@ -421,13 +441,35 @@
         handleServerData();
     });
 
-    // **NEW: Also handle server data immediately if DOM is already loaded**
+    // **NEW: Initialize modal handling when DOM is ready**
+    function initializeModals() {
+        console.log('Initializing modals...');
+        handleServerData();
+
+        // Clean up URL parameters after processing
+        if (window.history && window.history.replaceState) {
+            const url = new URL(window.location);
+            const params = ['error', 'showLogin', 'showRegister'];
+            let hasParams = false;
+
+            params.forEach(param => {
+                if (url.searchParams.has(param)) {
+                    url.searchParams.delete(param);
+                    hasParams = true;
+                }
+            });
+
+            if (hasParams) {
+                window.history.replaceState({}, document.title, url.pathname);
+            }
+        }
+    }
+
+    // Initialize when DOM is ready
     if (document.readyState === 'loading') {
-        // DOM is still loading
-        document.addEventListener('DOMContentLoaded', handleServerData);
+        document.addEventListener('DOMContentLoaded', initializeModals);
     } else {
-        // DOM is already loaded
-        setTimeout(handleServerData, 100);
+        setTimeout(initializeModals, 100);
     }
 
     // Debug: Log when DOM is ready
