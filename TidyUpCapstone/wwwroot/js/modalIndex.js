@@ -43,6 +43,23 @@
         document.body.style.overflow = '';
     }
 
+    // Individual modal closing functions
+    function closeLoginModalOnly() {
+        console.log('Closing login modal only');
+        if (loginModal) {
+            loginModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    }
+
+    function closeRegisterModalOnly() {
+        console.log('Closing register modal only');
+        if (registerModal) {
+            registerModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    }
+
     // Show error message functions
     function showLoginError(message) {
         console.log('Login error:', message);
@@ -68,6 +85,25 @@
         }
     }
 
+    // FIXED: Success message functions (these were missing)
+    function showLoginSuccess(message) {
+        console.log('Login success:', message);
+        topAlert.success('Login Successful!', message);
+
+        if (loginErrorAlert) {
+            loginErrorAlert.style.display = 'none';
+        }
+    }
+
+    function showRegisterSuccess(message) {
+        console.log('Register success:', message);
+        topAlert.success('Registration Successful!', message);
+
+        if (registerErrorAlert) {
+            registerErrorAlert.style.display = 'none';
+        }
+    }
+
     function showSuccess(message) {
         console.log('Success:', message);
         topAlert.success(
@@ -76,7 +112,7 @@
         );
     }
 
-    // **NEW: Handle server-side data and URL parameters**
+    // Handle server-side data and URL parameters
     function handleServerData() {
         console.log('Handling server data...');
 
@@ -223,7 +259,7 @@
         }
     });
 
-    // Handle login form submission
+    // FIXED: Handle login form submission
     if (loginForm) {
         loginForm.addEventListener('submit', async function (e) {
             e.preventDefault();
@@ -241,10 +277,9 @@
             }
 
             try {
-                // Get form data
                 const formData = new FormData(loginForm);
 
-                // Submit form via AJAX
+                console.log('Submitting login request...');
                 const response = await fetch('/Account/ModalLogin', {
                     method: 'POST',
                     body: formData,
@@ -253,24 +288,44 @@
                     }
                 });
 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const result = await response.json();
-                console.log('Login response:', result);
+                console.log('Login response received:', result);
 
                 if (result.success) {
-                    // Success - redirect to main page
-                    window.location.href = result.redirectUrl || '/Home/Main';
+                    console.log('Login successful, redirecting to:', result.redirectUrl);
+
+                    // Show success message
+                    showLoginSuccess('Sign in successful! Redirecting...');
+
+                    // CRITICAL FIX: Immediate redirect
+                    const redirectUrl = result.redirectUrl || '/Home/Main';
+                    console.log('Final redirect URL:', redirectUrl);
+
+                    // Redirect immediately - don't wait
+                    window.location.href = redirectUrl;
+
                 } else {
-                    // Show error
+                    console.log('Login failed:', result.message);
                     showLoginError(result.message || 'An error occurred during login.');
                 }
             } catch (error) {
                 console.error('Login error:', error);
                 showLoginError('An unexpected error occurred. Please try again.');
+            } finally {
+                // Reset button state
+                if (loginSubmitBtn) {
+                    loginSubmitBtn.disabled = false;
+                    loginSubmitBtn.innerHTML = 'Sign In';
+                }
             }
         });
     }
 
-    // Handle register form submission
+    // FIXED: Handle register form submission
     if (registerForm) {
         registerForm.addEventListener('submit', async function (e) {
             e.preventDefault();
@@ -288,30 +343,27 @@
             }
 
             try {
-                // Get form data
                 const formData = new FormData(registerForm);
 
-                // Fix checkbox values - convert to proper boolean strings
+                // Fix checkbox values
                 const acceptTermsCheckbox = document.getElementById('acceptTerms');
                 const acceptPrivacyCheckbox = document.getElementById('acceptPrivacy');
                 const marketingEmailsCheckbox = document.getElementById('marketingEmails');
 
-                // Remove existing checkbox values and set proper ones
                 formData.delete('AcceptTerms');
                 formData.delete('AcceptPrivacy');
                 formData.delete('MarketingEmails');
 
-                // Set boolean values as strings
-                formData.append('AcceptTerms', acceptTermsCheckbox && acceptTermsCheckbox.checked ? 'true' : 'false');
-                formData.append('AcceptPrivacy', acceptPrivacyCheckbox && acceptPrivacyCheckbox.checked ? 'true' : 'false');
-                formData.append('MarketingEmails', marketingEmailsCheckbox && marketingEmailsCheckbox.checked ? 'true' : 'false');
+                formData.append('AcceptTerms', acceptTermsCheckbox.checked ? 'true' : 'false');
+                formData.append('AcceptPrivacy', acceptPrivacyCheckbox.checked ? 'true' : 'false');
+                formData.append('MarketingEmails', marketingEmailsCheckbox.checked ? 'true' : 'false');
 
-                console.log('Form data being sent:');
-                for (let [key, value] of formData.entries()) {
-                    console.log(key + ': ' + value);
-                }
+                console.log('Form data being sent:', {
+                    AcceptTerms: acceptTermsCheckbox.checked,
+                    AcceptPrivacy: acceptPrivacyCheckbox.checked,
+                    MarketingEmails: marketingEmailsCheckbox.checked
+                });
 
-                // Submit form via AJAX
                 const response = await fetch('/Account/ModalRegister', {
                     method: 'POST',
                     body: formData,
@@ -320,25 +372,53 @@
                     }
                 });
 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const result = await response.json();
                 console.log('Register response:', result);
 
                 if (result.success) {
-                    // Success - show message and redirect
-                    closeAllModals();
-                    showSuccess(result.message);
-                    if (result.redirectUrl) {
+                    console.log('Registration successful');
+
+                    // Show success message
+                    showRegisterSuccess(result.message || 'Account created successfully!');
+
+                    // Handle different redirect scenarios
+                    if (result.showLogin) {
+                        // For new registrations that need email verification
+                        setTimeout(() => {
+                            closeRegisterModalOnly();
+                            openLoginModal();
+                            showLoginSuccess('Please check your email to verify your account, then sign in.');
+                        }, 2000);
+                    } else if (result.redirectUrl) {
+                        // For OAuth or auto-verified users
                         setTimeout(() => {
                             window.location.href = result.redirectUrl;
                         }, 2000);
+                    } else {
+                        // Default fallback
+                        setTimeout(() => {
+                            closeRegisterModalOnly();
+                            openLoginModal();
+                        }, 2000);
                     }
+
                 } else {
-                    // Show error
+                    console.log('Registration failed:', result.message);
                     showRegisterError(result.message || 'An error occurred during registration.');
                 }
             } catch (error) {
-                console.error('Registration error:', error);
+                console.error('Register error:', error);
                 showRegisterError('An unexpected error occurred. Please try again.');
+            } finally {
+                // Reset button state
+                if (registerSubmitBtn) {
+                    registerSubmitBtn.disabled = false;
+                    registerSubmitBtn.innerHTML = 'Start Your Journey';
+                }
             }
         });
     }
@@ -418,13 +498,15 @@
     window.LoginModal = {
         open: openLoginModal,
         close: closeAllModals,
-        showError: showLoginError
+        showError: showLoginError,
+        showSuccess: showLoginSuccess
     };
 
     window.RegisterModal = {
         open: openRegisterModal,
         close: closeAllModals,
-        showError: showRegisterError
+        showError: showRegisterError,
+        showSuccess: showRegisterSuccess
     };
 
     // Prevent form submission on disabled buttons
@@ -435,13 +517,7 @@
         }
     });
 
-    // **NEW: Initialize modal handling when DOM is ready**
-    document.addEventListener('DOMContentLoaded', function () {
-        console.log('DOM loaded, handling server data...');
-        handleServerData();
-    });
-
-    // **NEW: Initialize modal handling when DOM is ready**
+    // Initialize modal handling when DOM is ready
     function initializeModals() {
         console.log('Initializing modals...');
         handleServerData();
@@ -481,7 +557,7 @@
 
 })();
 
-// Alert for creating an account
+// Alert system for creating an account
 class SimpleTopAlert {
     constructor() {
         this.alerts = [];

@@ -228,7 +228,8 @@ namespace TidyUpCapstone.Controllers
                     user.LastLogin = GetPhilippinesTime();
                     await _userManager.UpdateAsync(user);
 
-                    return LocalRedirect(returnUrl ?? "/Home/Main");
+                    // FIXED: Use proper action URL
+                    return LocalRedirect(returnUrl ?? Url.Action("Main", "Home"));
                 }
 
                 if (result.IsLockedOut)
@@ -282,7 +283,9 @@ namespace TidyUpCapstone.Controllers
                     user.LastLogin = GetPhilippinesTime();
                     await _userManager.UpdateAsync(user);
 
-                    return Json(new { success = true, redirectUrl = returnUrl ?? "/Home/Main" });
+                    // FIXED: Use proper MVC action URL instead of direct path
+                    var redirectUrl = returnUrl ?? Url.Action("Main", "Home");
+                    return Json(new { success = true, redirectUrl = redirectUrl });
                 }
 
                 return Json(new { success = false, message = "Invalid email or password." });
@@ -361,7 +364,8 @@ namespace TidyUpCapstone.Controllers
                             await _userManager.UpdateAsync(existingUser);
                         }
                     }
-                    return LocalRedirect(returnUrl);
+                    // FIXED: Use proper action URL
+                    return LocalRedirect(returnUrl ?? Url.Action("Main", "Home"));
                 }
 
                 // If user doesn't exist, redirect to confirmation page
@@ -456,7 +460,8 @@ namespace TidyUpCapstone.Controllers
                     await LogRegistrationAttempt(user.Id, info.LoginProvider, "Success",
                         Request.HttpContext.Connection.RemoteIpAddress?.ToString());
 
-                    return LocalRedirect(model.ReturnUrl ?? "/Home/Main");
+                    // FIXED: OAuth users go directly to Main page since they're auto-verified
+                    return LocalRedirect(model.ReturnUrl ?? Url.Action("Main", "Home"));
                 }
 
                 foreach (var error in result.Errors)
@@ -694,11 +699,12 @@ namespace TidyUpCapstone.Controllers
 
                 _logger.LogInformation("Modal registration successful for user: {UserId}", user.Id);
 
+                // FIXED: For new registrations, show success message and redirect to login
                 return Json(new
                 {
                     success = true,
-                    message = "Account created successfully! Please check your email to verify your account.",
-                    redirectUrl = "/Account/Login"
+                    message = "Account created successfully! Please check your email to verify your account before signing in.",
+                    showLogin = true // This will trigger the login modal to open
                 });
             }
             catch (Exception ex)
