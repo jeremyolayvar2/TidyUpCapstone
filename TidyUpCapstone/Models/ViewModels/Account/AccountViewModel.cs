@@ -1,66 +1,51 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using TidyUpCapstone.Models.DTOs.User;
-// using TidyUpCapstone.Models.DTOs.Authentication;
+using TidyUpCapstone.Models.DTOs.Authentication;
 
 namespace TidyUpCapstone.Models.ViewModels.Account
 {
-    // EXTERNAL LOGIN VIEWMODELS (NEW):
-
-    /// <summary>
-    /// ViewModel for the main login page - External providers only
-    /// </summary>
     public class LoginViewModel
     {
         public string? ReturnUrl { get; set; }
         public string? ErrorMessage { get; set; }
-        public string? SuccessMessage { get; set; }
-
-        // External provider options - only Google and Facebook
         public bool GoogleEnabled { get; set; } = true;
-        public bool FacebookEnabled { get; set; } = true;
+        public bool FacebookEnabled { get; set; } = false;
     }
 
     /// <summary>
-    /// ViewModel for confirming new user registration from external provider
+    /// ViewModel for external login confirmation
     /// </summary>
     public class ExternalLoginConfirmationViewModel
     {
         [Required(ErrorMessage = "Email is required")]
-        [EmailAddress(ErrorMessage = "Please enter a valid email address")]
-        [Display(Name = "Email")]
+        [EmailAddress(ErrorMessage = "Invalid email format")]
         public string Email { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Username is required")]
         [StringLength(50, MinimumLength = 3, ErrorMessage = "Username must be between 3 and 50 characters")]
-        [Display(Name = "Username (Optional)")]
-        public string? Username { get; set; }
+        public string Username { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "First name is required")]
         [StringLength(50, ErrorMessage = "First name cannot exceed 50 characters")]
-        [Display(Name = "First Name")]
-        public string? FirstName { get; set; }
+        public string FirstName { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Last name is required")]
         [StringLength(50, ErrorMessage = "Last name cannot exceed 50 characters")]
-        [Display(Name = "Last Name")]
-        public string? LastName { get; set; }
+        public string LastName { get; set; } = string.Empty;
 
-        // Hidden fields populated from external provider (Google/Facebook)
+        [Required(ErrorMessage = "You must accept the Terms of Service")]
+        public bool AcceptTerms { get; set; } = false;
+
+        [Required(ErrorMessage = "You must accept the Privacy Policy")]
+        public bool AcceptPrivacy { get; set; } = false;
+
+        public bool MarketingEmails { get; set; } = false;
+
+        // OAuth provider information
         public string Provider { get; set; } = string.Empty;
         public string ProviderUserId { get; set; } = string.Empty;
         public string? ProviderDisplayName { get; set; }
-        public string? ProviderAvatarUrl { get; set; }
-
-        // Required agreements
-        [Required(ErrorMessage = "You must accept the Terms and Conditions")]
-        [Display(Name = "I accept the Terms and Conditions")]
-        public bool AcceptTerms { get; set; }
-
-        [Required(ErrorMessage = "You must accept the Privacy Policy")]
-        [Display(Name = "I accept the Privacy Policy")]
-        public bool AcceptPrivacy { get; set; }
-
-        // Optional preferences
-        [Display(Name = "Subscribe to marketing emails")]
-        public bool MarketingEmails { get; set; } = false;
-
+        public string? ProviderAvatarUrl { get; set; } 
         public string? ReturnUrl { get; set; }
     }
 
@@ -76,7 +61,7 @@ namespace TidyUpCapstone.Models.ViewModels.Account
         public bool CanRetry { get; set; } = true;
     }
 
-    // EXISTING VIEWMODELS (CLEANED FOR EXTERNAL LOGIN):
+    
 
     public class ProfileViewModel
     {
@@ -99,10 +84,10 @@ namespace TidyUpCapstone.Models.ViewModels.Account
         public bool PhoneNumberConfirmed { get; set; }
         public List<LoginSessionDto> ActiveSessions { get; set; } = new List<LoginSessionDto>();
         public List<LoginLogDto> RecentLogins { get; set; } = new List<LoginLogDto>();
-        // REMOVED: ChangePasswordDto - not needed for external login only
+        public ChangePasswordDto ChangePassword { get; set; } = new ChangePasswordDto();
         public List<string> ConnectedSsoProviders { get; set; } = new List<string>();
-        public DateTime? LastPasswordChange { get; set; } // Keep for audit purposes
-        public bool RequirePasswordChange { get; set; } // Keep but will always be false
+        public DateTime? LastPasswordChange { get; set; }
+        public bool RequirePasswordChange { get; set; }
     }
 
     public class NotificationSettingsViewModel
@@ -130,12 +115,34 @@ namespace TidyUpCapstone.Models.ViewModels.Account
         public DateTime LoginTime { get; set; }
         public string IpAddress { get; set; } = string.Empty;
         public string UserAgent { get; set; } = string.Empty;
-        public string LoginMethod { get; set; } = string.Empty; // Will be "Google" or "Facebook"
+        public string LoginMethod { get; set; } = string.Empty;
         public bool Success { get; set; }
         public string? Location { get; set; }
     }
 
-    // REMOVED: ChangePasswordDto - not needed for external login only
+    /// <summary>
+    /// DTO for changing user password in Settings
+    /// This is the CORRECT version that matches your existing implementation
+    /// </summary>
+    public class ChangePasswordDto
+    {
+        [Required(ErrorMessage = "Current password is required")]
+        [DataType(DataType.Password)]
+        [Display(Name = "Current Password")]
+        public string CurrentPassword { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "New password is required")]
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be at least 6 characters long")]
+        [DataType(DataType.Password)]
+        [Display(Name = "New Password")]
+        public string NewPassword { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Password confirmation is required")]
+        [DataType(DataType.Password)]
+        [Display(Name = "Confirm New Password")]
+        [Compare("NewPassword", ErrorMessage = "New password and confirmation password do not match")]
+        public string ConfirmNewPassword { get; set; } = string.Empty;
+    }
 
     public class NotificationPreferenceDto
     {

@@ -5,7 +5,7 @@
 namespace TidyUpCapstone.Migrations
 {
     /// <inheritdoc />
-    public partial class AddContactMessagesTable : Migration
+    public partial class withSettingsMerged : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
