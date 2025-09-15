@@ -61,14 +61,17 @@ namespace TidyUpCapstone.Controllers
                 MarketingEmailsEnabled = false // Default
             };
 
-            // FIXED: Only include properties that exist in UpdateUserProfileDto
+            // FIXED: Include properties that exist in UpdateUserProfileDto
             var updateDto = new UpdateUserProfileDto
             {
-                Phone = user.PhoneNumber,
+                Username = user.UserName ?? string.Empty,
+                PhoneNumber = user.PhoneNumber,
+                Phone = user.PhoneNumber, // Map to Phone as well for compatibility
                 Location = user.Location,
                 Gender = user.Gender,
                 Birthday = user.Birthday,
-                AvatarUrl = user.ProfilePictureUrl
+                AvatarUrl = user.ProfilePictureUrl,
+                MarketingEmailsEnabled = false // Default value
             };
 
             var viewModel = new ProfileViewModel
@@ -83,7 +86,7 @@ namespace TidyUpCapstone.Controllers
             return View(viewModel);
         }
 
-        // POST: Settings/UpdateProfile - CLEAN VERSION
+        // POST: Settings/UpdateProfile - PROPERLY FIXED VERSION
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateProfile(UpdateUserProfileDto model, IFormFile ProfilePicture)
@@ -96,7 +99,9 @@ namespace TidyUpCapstone.Controllers
 
                 if (model != null)
                 {
+                    Console.WriteLine($"Username: '{model.Username}' (null: {model.Username == null})");
                     Console.WriteLine($"Phone: '{model.Phone}' (null: {model.Phone == null})");
+                    Console.WriteLine($"PhoneNumber: '{model.PhoneNumber}' (null: {model.PhoneNumber == null})");
                     Console.WriteLine($"Location: '{model.Location}' (null: {model.Location == null})");
                     Console.WriteLine($"Gender: '{model.Gender}' (null: {model.Gender == null})");
                     Console.WriteLine($"Birthday: '{model.Birthday}' (null: {model.Birthday == null})");
@@ -202,17 +207,24 @@ namespace TidyUpCapstone.Controllers
                     }
                 }
 
-                // UPDATE USER FIELDS
+                // UPDATE USER FIELDS - PROPERLY HANDLE ALL FIELDS
                 Console.WriteLine("=== BEFORE UPDATE VALUES ===");
-                Console.WriteLine($"Original - Phone: '{user.PhoneNumber}', Location: '{user.Location}', Gender: '{user.Gender}', Birthday: '{user.Birthday}'");
+                Console.WriteLine($"Original - Username: '{user.UserName}', Phone: '{user.PhoneNumber}', Location: '{user.Location}', Gender: '{user.Gender}', Birthday: '{user.Birthday}'");
 
-                user.PhoneNumber = model?.Phone;
+                // Update username if provided and valid
+                if (!string.IsNullOrEmpty(model?.Username) && model.Username.Length >= 3)
+                {
+                    user.UserName = model.Username;
+                }
+
+                // Use Phone field first, then fall back to PhoneNumber
+                user.PhoneNumber = model?.Phone ?? model?.PhoneNumber;
                 user.Location = model?.Location;
                 user.Gender = model?.Gender;
                 user.Birthday = model?.Birthday;
 
                 Console.WriteLine("=== AFTER SETTING VALUES ===");
-                Console.WriteLine($"Updated - Phone: '{user.PhoneNumber}', Location: '{user.Location}', Gender: '{user.Gender}', Birthday: '{user.Birthday}'");
+                Console.WriteLine($"Updated - Username: '{user.UserName}', Phone: '{user.PhoneNumber}', Location: '{user.Location}', Gender: '{user.Gender}', Birthday: '{user.Birthday}'");
 
                 Console.WriteLine("Calling _userManager.UpdateAsync...");
                 var result = await _userManager.UpdateAsync(user);
@@ -401,35 +413,72 @@ namespace TidyUpCapstone.Controllers
             return random.Next(100000, 999999).ToString();
         }
 
-        // POST: Settings/ChangePassword
+        // POST: Settings/ChangePassword - FIXED TO USE EXISTING DTO FROM AccountViewModel
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(ChangePasswordDto model)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return Json(new { success = false, message = "Please check your input." });
-            }
+                Console.WriteLine("=== CHANGE PASSWORD DEBUG ===");
+                Console.WriteLine($"Model validation: {ModelState.IsValid}");
 
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                user = await _userManager.FindByEmailAsync("test@tidyup.com");
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                    return Json(new { success = false, message = string.Join("; ", errors) });
+                }
+
+                var user = await _userManager.GetUserAsync(User);
                 if (user == null)
                 {
                     return Json(new { success = false, message = "User not found." });
                 }
+
+                Console.WriteLine($"✅ Found user: {user.UserName} (ID: {user.Id})");
+
+                // Verify current password
+                var isCurrentPasswordValid = await _userManager.CheckPasswordAsync(user, model.CurrentPassword);
+                if (!isCurrentPasswordValid)
+                {
+                    Console.WriteLine("❌ Current password is invalid");
+                    return Json(new { success = false, message = "Current password is incorrect." });
+                }
+
+                Console.WriteLine("✅ Current password verified");
+
+                // FIXED: Use the existing DTO structure with ConfirmNewPassword
+                // Note: The validation will ensure NewPassword matches ConfirmNewPassword
+                var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+
+                if (result.Succeeded)
+                {
+                    Console.WriteLine("✅ Password changed successfully");
+
+                    // Update security stamp to invalidate other sessions (optional)
+                    await _userManager.UpdateSecurityStampAsync(user);
+
+                    return Json(new { success = true, message = "Password changed successfully!" });
+                }
+                else
+                {
+                    Console.WriteLine("❌ Password change failed:");
+                    foreach (var error in result.Errors)
+                    {
+                        Console.WriteLine($"  - Code: {error.Code}, Description: {error.Description}");
+                    }
+
+                    var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                    return Json(new { success = false, message = errors });
+                }
             }
-
-            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
-
-            if (result.Succeeded)
+            catch (Exception ex)
             {
-                return Json(new { success = true, message = "Password changed successfully!" });
+                Console.WriteLine($"❌ EXCEPTION in ChangePassword:");
+                Console.WriteLine($"Message: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return Json(new { success = false, message = "An error occurred while changing the password. Please try again." });
             }
-
-            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            return Json(new { success = false, message = errors });
         }
 
         [HttpPost]

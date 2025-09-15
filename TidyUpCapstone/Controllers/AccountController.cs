@@ -35,9 +35,6 @@ namespace TidyUpCapstone.Controllers
         // ===== MODAL LOGIN/REGISTER ENDPOINTS =====
 
         /// <summary>
-        /// Handle modal login requests - returns JSON for AJAX
-        /// </summary>
-        /// <summary>
         /// Handle modal login requests - returns JSON for AJAX - FIXED REDIRECT
         /// </summary>
         [HttpPost]
@@ -94,7 +91,6 @@ namespace TidyUpCapstone.Controllers
         /// <summary>
         /// Handle modal registration requests - returns JSON for AJAX
         /// </summary>
-
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -211,108 +207,49 @@ namespace TidyUpCapstone.Controllers
             }
         }
 
-        // ===== KEEP EXISTING METHODS FOR BACKWARD COMPATIBILITY =====
+        // ===== MAIN LOGIN/REGISTER PAGES =====
 
-        // ✅ LOGIN VIEW (Enhanced to support both OAuth + Manual) - Keep for direct access
         [HttpGet]
         [AllowAnonymous]
         public IActionResult Login(string? returnUrl = null)
         {
+            ViewBag.HideNavigation = true;
             ViewData["ReturnUrl"] = returnUrl;
-            return View(new LoginViewModel
-            {
-                ReturnUrl = returnUrl,
-                GoogleEnabled = true,
-                FacebookEnabled = false
-            });
+            return View(new LoginViewModel { ReturnUrl = returnUrl });
         }
 
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ManualLogin(string Email, string Password, bool RememberMe = false, string? returnUrl = null)
+        public async Task<IActionResult> ManualLogin(LoginDto model, string? returnUrl = null)
         {
-            _logger.LogInformation("=== MANUAL LOGIN DEBUG ===");
-            _logger.LogInformation("Email: {Email}", Email);
-            _logger.LogInformation("Password length: {Length}", Password?.Length ?? 0);
-
-            if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
+            if (!ModelState.IsValid)
             {
-                _logger.LogWarning("Empty email or password");
-                ViewBag.ErrorMessage = "Email and password are required.";
-                return View("Login", new LoginViewModel
-                {
-                    ReturnUrl = returnUrl,
-                    GoogleEnabled = true,
-                    FacebookEnabled = false
-                });
+                return View("Login", new LoginViewModel { ReturnUrl = returnUrl });
             }
 
-            // Check if user exists and email is verified
-            var user = await _userManager.FindByEmailAsync(Email);
-            if (user == null)
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null || !user.EmailConfirmed)
             {
-                _logger.LogWarning("User not found for email: {Email}", Email);
-                ViewBag.ErrorMessage = "Invalid email or password.";
-                return View("Login", new LoginViewModel
-                {
-                    ReturnUrl = returnUrl,
-                    GoogleEnabled = true,
-                    FacebookEnabled = false
-                });
+                ModelState.AddModelError("", user == null ? "Invalid email or password." : "Please verify your email before logging in.");
+                return View("Login", new LoginViewModel { ReturnUrl = returnUrl });
             }
 
-            _logger.LogInformation("User found - ID: {UserId}, Username: {Username}, EmailConfirmed: {EmailConfirmed}",
-                user.Id, user.UserName, user.EmailConfirmed);
-
-            if (!user.EmailConfirmed)
-            {
-                _logger.LogWarning("Email not confirmed for user: {Email}", Email);
-                ViewBag.ErrorMessage = "Please verify your email before logging in. Check your inbox for verification link.";
-                return View("Login", new LoginViewModel
-                {
-                    ReturnUrl = returnUrl,
-                    GoogleEnabled = true,
-                    FacebookEnabled = false
-                });
-            }
-
-            // Try login with email first
-            var result = await _signInManager.PasswordSignInAsync(Email, Password, RememberMe, lockoutOnFailure: false);
-            _logger.LogInformation("PasswordSignInAsync with email - Succeeded: {Succeeded}, IsLockedOut: {IsLockedOut}, RequiresTwoFactor: {RequiresTwoFactor}",
-                result.Succeeded, result.IsLockedOut, result.RequiresTwoFactor);
-
-            if (!result.Succeeded)
-            {
-                // Try with username if email didn't work
-                var usernameResult = await _signInManager.PasswordSignInAsync(user.UserName, Password, RememberMe, lockoutOnFailure: false);
-                _logger.LogInformation("PasswordSignInAsync with username - Succeeded: {Succeeded}, IsLockedOut: {IsLockedOut}, RequiresTwoFactor: {RequiresTwoFactor}",
-                    usernameResult.Succeeded, usernameResult.IsLockedOut, usernameResult.RequiresTwoFactor);
-
-                result = usernameResult;
-            }
+            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
             if (result.Succeeded)
             {
-                // Update LastLogin timestamp (Philippines time)
                 user.LastLogin = GetPhilippinesTime();
                 await _userManager.UpdateAsync(user);
-
-                _logger.LogInformation("User {Email} logged in successfully", Email);
-                return LocalRedirect(returnUrl ?? "/Home/Main"); // FIXED: Changed from "~/Home/Main"
+                return LocalRedirect(returnUrl ?? "/Home/Main");
             }
 
-            _logger.LogWarning("Login failed for user: {Email}", Email);
-            ViewBag.ErrorMessage = "Invalid email or password.";
-            return View("Login", new LoginViewModel
-            {
-                ReturnUrl = returnUrl,
-                GoogleEnabled = true,
-                FacebookEnabled = false
-            });
+            ModelState.AddModelError("", "Invalid email or password.");
+            return View("Login", new LoginViewModel { ReturnUrl = returnUrl });
         }
 
-        // ✅ GOOGLE / FACEBOOK LOGIN CHALLENGE (Preserved exactly)
+        // ===== EXTERNAL LOGIN (OAUTH) METHODS =====
+
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -323,7 +260,6 @@ namespace TidyUpCapstone.Controllers
             return new ChallengeResult(provider, properties);
         }
 
-        // ✅ CALLBACK AFTER GOOGLE LOGIN (Preserved + Enhanced with FirstName/LastName)
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> ExternalLoginCallback(string? returnUrl = null, string? remoteError = null)
@@ -352,7 +288,7 @@ namespace TidyUpCapstone.Controllers
                     existingUser.LastLogin = GetPhilippinesTime();
                     await _userManager.UpdateAsync(existingUser);
                 }
-                return LocalRedirect("/Home/Main"); // FIXED: Changed from "~/Home/Main"
+                return LocalRedirect("/Home/Main");
             }
 
             // If no account exists, show confirmation page
@@ -360,6 +296,7 @@ namespace TidyUpCapstone.Controllers
             var name = info.Principal.FindFirstValue(ClaimTypes.Name);
             var givenName = info.Principal.FindFirstValue(ClaimTypes.GivenName);
             var surname = info.Principal.FindFirstValue(ClaimTypes.Surname);
+            var picture = info.Principal.FindFirstValue("picture") ?? info.Principal.FindFirstValue("avatar_url");
 
             return View("ExternalLoginConfirmation", new ExternalLoginConfirmationViewModel
             {
@@ -370,11 +307,11 @@ namespace TidyUpCapstone.Controllers
                 Provider = info.LoginProvider,
                 ProviderUserId = info.ProviderKey,
                 ProviderDisplayName = name,
+                // ProviderAvatarUrl = picture, // Temporarily commented out
                 ReturnUrl = returnUrl
             });
         }
 
-        // ✅ CONFIRM OAUTH REGISTRATION (Enhanced to save FirstName/LastName)
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -421,9 +358,9 @@ namespace TidyUpCapstone.Controllers
             {
                 UserName = cleanUsername,
                 Email = model.Email,
-                FirstName = model.FirstName,  // ✅ Now saves FirstName
-                LastName = model.LastName,    // ✅ Now saves LastName
-                EmailConfirmed = true,        // OAuth emails are pre-verified
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                EmailConfirmed = true, // OAuth emails are pre-verified
                 DateCreated = GetPhilippinesTime(),
                 Status = "active",
                 TokenBalance = 0.00m,
@@ -438,7 +375,7 @@ namespace TidyUpCapstone.Controllers
 
                 _logger.LogInformation("OAuth user {UserId} created account using {Provider}", user.Id, info.LoginProvider);
 
-                return LocalRedirect(model.ReturnUrl ?? "/Home/Main"); 
+                return LocalRedirect(model.ReturnUrl ?? "/Home/Main");
             }
 
             foreach (var error in result.Errors)
@@ -447,9 +384,8 @@ namespace TidyUpCapstone.Controllers
             return View(model);
         }
 
-        // ===== KEEP EXISTING REGISTER METHODS FOR BACKWARD COMPATIBILITY =====
+        // ===== REGISTRATION METHODS =====
 
-        // ✅ MANUAL REGISTRATION FORM
         [HttpGet]
         [AllowAnonymous]
         public IActionResult Register(string? returnUrl = null)
@@ -461,54 +397,42 @@ namespace TidyUpCapstone.Controllers
             return View(model);
         }
 
-        // ✅ PROCESS MANUAL REGISTRATION
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterDto model, string? returnUrl = null)
         {
-            ViewBag.HideNavigation = true;
-            ViewData["ReturnUrl"] = returnUrl;
-
             if (!ModelState.IsValid)
             {
+                ViewData["ReturnUrl"] = returnUrl;
                 return View(model);
             }
 
             try
             {
-                // 1. Check email uniqueness across ALL users (OAuth + Manual)
-                var existingEmailUser = await _userManager.FindByEmailAsync(model.Email);
-                if (existingEmailUser != null)
+                // 1. Check for existing email
+                if (await _userManager.FindByEmailAsync(model.Email) != null)
                 {
-                    if (existingEmailUser.EmailConfirmed)
-                    {
-                        ModelState.AddModelError("Email", "This email address is already registered and verified.");
-                    }
-                    else
-                    {
-                        ModelState.AddModelError("Email", "This email is already registered but not verified. Check your email for verification link or request a new one.");
-                    }
+                    ModelState.AddModelError("Email", "An account with this email already exists.");
                     return View(model);
                 }
 
-                // 2. Check username uniqueness
-                var existingUsernameUser = await _userManager.FindByNameAsync(model.Username);
-                if (existingUsernameUser != null)
+                // 2. Check for existing username
+                if (await _userManager.FindByNameAsync(model.Username) != null)
                 {
-                    ModelState.AddModelError("Username", "This username is already taken. Please choose another one.");
+                    ModelState.AddModelError("Username", "This username is already taken.");
                     return View(model);
                 }
 
-                // 3. Create new user account (inactive until email verified)
+                // 3. Create user
                 var user = new AppUser
                 {
                     UserName = model.Username,
                     Email = model.Email,
                     FirstName = model.FirstName,
                     LastName = model.LastName,
-                    EmailConfirmed = false,  // CRITICAL: User cannot login until verified
-                    DateCreated = DateTime.UtcNow,
+                    EmailConfirmed = false,
+                    DateCreated = GetPhilippinesTime(),
                     Status = "pending_verification",
                     TokenBalance = 0.00m
                 };
@@ -527,24 +451,17 @@ namespace TidyUpCapstone.Controllers
                 // 5. Generate email verification token
                 var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-                // 6. Create email verification link
-                var confirmationLink = Url.Action(
-                    nameof(ConfirmEmail),
-                    "Account",
-                    new { token = emailToken, email = user.Email },
-                    Request.Scheme);
-
-                // 7. Send verification email (placeholder for now)
+                // 6. Send verification email
                 await SendVerificationEmail(user.Email, user.FirstName, emailToken);
 
-                // 8. Log registration attempt
+                // 7. Log registration attempt
                 await LogRegistrationAttempt(user.Id, "Manual", "Success",
                     Request.HttpContext.Connection.RemoteIpAddress?.ToString());
 
                 _logger.LogInformation("Manual user {UserId} registered with email {Email}. Verification email sent.",
                     user.Id, user.Email);
 
-                // 9. Redirect to verification sent page
+                // 8. Redirect to verification sent page
                 return RedirectToAction(nameof(EmailVerificationSent), new { email = user.Email });
             }
             catch (Exception ex)
@@ -555,9 +472,8 @@ namespace TidyUpCapstone.Controllers
             }
         }
 
-        // ===== REST OF THE EXISTING METHODS REMAIN THE SAME =====
+        // ===== EMAIL VERIFICATION METHODS =====
 
-        // ✅ EMAIL VERIFICATION HANDLER
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> ConfirmEmail(string token, string email)
@@ -565,7 +481,6 @@ namespace TidyUpCapstone.Controllers
             _logger.LogInformation("=== CONFIRM EMAIL DEBUG ===");
             _logger.LogInformation("Received email: {Email}", email);
             _logger.LogInformation("Received token: {Token}", token?.Substring(0, Math.Min(50, token?.Length ?? 0)) + "...");
-            _logger.LogInformation("Received token length: {Length}", token?.Length ?? 0);
 
             if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(email))
             {
@@ -578,8 +493,6 @@ namespace TidyUpCapstone.Controllers
             {
                 // URL decode the token since it was encoded in the email
                 var decodedToken = Uri.UnescapeDataString(token);
-                _logger.LogInformation("Decoded token: {Token}", decodedToken.Substring(0, Math.Min(50, decodedToken.Length)) + "...");
-                _logger.LogInformation("Decoded token length: {Length}", decodedToken.Length);
 
                 var user = await _userManager.FindByEmailAsync(email);
                 if (user == null)
@@ -589,28 +502,13 @@ namespace TidyUpCapstone.Controllers
                         new { message = "User not found. The verification link may be invalid." });
                 }
 
-                _logger.LogInformation("User found - ID: {UserId}, EmailConfirmed: {EmailConfirmed}", user.Id, user.EmailConfirmed);
-
                 if (user.EmailConfirmed)
                 {
                     _logger.LogInformation("Email already confirmed for user {UserId}", user.Id);
                     return RedirectToAction(nameof(EmailAlreadyConfirmed));
                 }
 
-                // Generate a fresh token to compare
-                var freshToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                _logger.LogInformation("Fresh token: {Token}", freshToken.Substring(0, Math.Min(50, freshToken.Length)) + "...");
-                _logger.LogInformation("Fresh token length: {Length}", freshToken.Length);
-                _logger.LogInformation("Tokens match: {Match}", decodedToken == freshToken);
-
-                // Use the decoded token
                 var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
-
-                _logger.LogInformation("ConfirmEmailAsync result - Succeeded: {Succeeded}", result.Succeeded);
-                if (!result.Succeeded)
-                {
-                    _logger.LogWarning("ConfirmEmailAsync errors: {Errors}", string.Join("; ", result.Errors.Select(e => e.Description)));
-                }
 
                 if (result.Succeeded)
                 {
@@ -634,7 +532,6 @@ namespace TidyUpCapstone.Controllers
             }
         }
 
-        // ✅ RESEND VERIFICATION EMAIL
         [HttpGet]
         [AllowAnonymous]
         public IActionResult ResendVerification(string? email = null)
@@ -679,12 +576,6 @@ namespace TidyUpCapstone.Controllers
                 }
 
                 var emailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                var confirmationLink = Url.Action(
-                    nameof(ConfirmEmail),
-                    "Account",
-                    new { token = emailToken, email = user.Email },
-                    Request.Scheme);
-
                 await SendVerificationEmail(user.Email, user.FirstName, emailToken);
                 await LogEmailResend(user.Id);
 
@@ -696,6 +587,113 @@ namespace TidyUpCapstone.Controllers
             {
                 _logger.LogError(ex, "Error resending verification email to {Email}", model.Email);
                 ModelState.AddModelError("", "An error occurred while sending the verification email. Please try again.");
+                return View(model);
+            }
+        }
+
+        // ===== PASSWORD RESET METHODS =====
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ForgotPassword()
+        {
+            ViewBag.HideNavigation = true;
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null || !user.EmailConfirmed)
+            {
+                // Don't reveal whether a user account exists or not
+                return RedirectToAction(nameof(ForgotPasswordConfirmation));
+            }
+
+            try
+            {
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var success = await _emailService.SendPasswordResetAsync(user.Email, user.FirstName ?? "User", token);
+
+                if (success)
+                {
+                    _logger.LogInformation("Password reset email sent to user {UserId} at {Email}", user.Id, user.Email);
+                }
+
+                return RedirectToAction(nameof(ForgotPasswordConfirmation));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending password reset email to {Email}", model.Email);
+                ModelState.AddModelError("", "An error occurred while sending the password reset email. Please try again.");
+                return View(model);
+            }
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ResetPassword(string? token = null, string? email = null)
+        {
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            var model = new ResetPasswordDto
+            {
+                Token = token,
+                Email = email
+            };
+
+            ViewBag.HideNavigation = true;
+            return View(model);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                // Don't reveal whether a user account exists or not
+                return RedirectToAction(nameof(ResetPasswordConfirmation));
+            }
+
+            try
+            {
+                var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("Password successfully reset for user {UserId}", user.Id);
+                    return RedirectToAction(nameof(ResetPasswordConfirmation));
+                }
+
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error resetting password for email {Email}", model.Email);
+                ModelState.AddModelError("", "An error occurred while resetting the password. Please try again.");
                 return View(model);
             }
         }
@@ -737,12 +735,203 @@ namespace TidyUpCapstone.Controllers
             return View();
         }
 
-        // ✅ LOGOUT (Preserved exactly)
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ForgotPasswordConfirmation()
+        {
+            ViewBag.HideNavigation = true;
+            return View();
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ResetPasswordConfirmation()
+        {
+            ViewBag.HideNavigation = true;
+            return View();
+        }
+
+        // ===== LOGOUT =====
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
+        }
+
+        // ===== PRIVATE HELPER METHODS =====
+
+        /// <summary>
+        /// Generate unique username for OAuth users
+        /// </summary>
+        private async Task<string> GenerateUniqueUsername(string email, string? firstName, string? lastName)
+        {
+            string baseUsername = email.Split('@')[0];
+
+            if (!string.IsNullOrWhiteSpace(firstName) && !string.IsNullOrWhiteSpace(lastName))
+            {
+                baseUsername = $"{firstName.ToLower()}{lastName.ToLower()}";
+            }
+
+            baseUsername = System.Text.RegularExpressions.Regex.Replace(baseUsername, @"[^a-zA-Z0-9]", "");
+
+            if (baseUsername.Length < 3) baseUsername = "user" + baseUsername;
+            if (baseUsername.Length > 20) baseUsername = baseUsername.Substring(0, 20);
+
+            string username = baseUsername;
+            int counter = 1;
+
+            while (await _userManager.FindByNameAsync(username) != null)
+            {
+                username = $"{baseUsername}{counter}";
+                counter++;
+                if (counter > 999) break;
+            }
+
+            return username;
+        }
+
+        /// <summary>
+        /// Get current Philippines time
+        /// </summary>
+        private DateTime GetPhilippinesTime()
+        {
+            return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.FindSystemTimeZoneById("Singapore Standard Time"));
+        }
+
+        /// <summary>
+        /// Send verification email using SendGrid service
+        /// </summary>
+        private async Task SendVerificationEmail(string email, string? firstName, string emailToken)
+        {
+            try
+            {
+                _logger.LogInformation("=== SEND VERIFICATION EMAIL DEBUG ===");
+                _logger.LogInformation("Email: {Email}", email);
+                _logger.LogInformation("FirstName: {FirstName}", firstName);
+                _logger.LogInformation("EmailToken: {Token}", emailToken.Substring(0, Math.Min(50, emailToken.Length)) + "...");
+
+                var success = await _emailService.SendEmailVerificationAsync(email, firstName ?? "User", emailToken);
+
+                if (success)
+                {
+                    _logger.LogInformation("SUCCESS: Verification email sent successfully to {Email}", email);
+                }
+                else
+                {
+                    _logger.LogWarning("FAILED: Failed to send verification email to {Email}", email);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "EXCEPTION: Error sending verification email to {Email}", email);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Log registration attempt for audit trail
+        /// </summary>
+        private async Task LogRegistrationAttempt(int userId, string method, string status, string? ipAddress)
+        {
+            try
+            {
+                var loginLog = new LoginLog
+                {
+                    UserId = userId,
+                    IpAddress = ipAddress ?? "Unknown",
+                    UserAgent = Request.Headers["User-Agent"].ToString(),
+                    LoginStatus = $"Registration_{status}",
+                    LoginTimestamp = DateTime.UtcNow,
+                    SessionId = HttpContext.Session.Id
+                };
+
+                _context.LoginLogs.Add(loginLog);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error logging registration attempt for user {UserId}", userId);
+            }
+        }
+
+        /// <summary>
+        /// Log email verification attempt
+        /// </summary>
+        private async Task LogEmailVerification(int userId, string status)
+        {
+            try
+            {
+                var loginLog = new LoginLog
+                {
+                    UserId = userId,
+                    IpAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown",
+                    UserAgent = Request.Headers["User-Agent"].ToString(),
+                    LoginStatus = $"EmailVerification_{status}",
+                    LoginTimestamp = DateTime.UtcNow,
+                    SessionId = HttpContext.Session.Id
+                };
+
+                _context.LoginLogs.Add(loginLog);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error logging email verification for user {UserId}", userId);
+            }
+        }
+
+        /// <summary>
+        /// Log email resend attempt
+        /// </summary>
+        private async Task LogEmailResend(int userId)
+        {
+            try
+            {
+                var loginLog = new LoginLog
+                {
+                    UserId = userId,
+                    IpAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown",
+                    UserAgent = Request.Headers["User-Agent"].ToString(),
+                    LoginStatus = "EmailResend",
+                    LoginTimestamp = DateTime.UtcNow,
+                    SessionId = HttpContext.Session.Id
+                };
+
+                _context.LoginLogs.Add(loginLog);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error logging email resend for user {UserId}", userId);
+            }
+        }
+
+        /// <summary>
+        /// Get today's resend count for rate limiting
+        /// </summary>
+        private async Task<int> GetTodayResendCount(int userId)
+        {
+            try
+            {
+                var today = DateTime.UtcNow.Date;
+                var tomorrow = today.AddDays(1);
+                var count = await Task.FromResult(_context.LoginLogs
+                    .Where(l => l.UserId == userId
+                        && l.LoginStatus == "EmailResend"
+                        && l.LoginTimestamp >= today
+                        && l.LoginTimestamp < tomorrow)
+                    .Count());
+                return count;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting today's resend count for user {UserId}", userId);
+                return 0;
+            }
         }
     }
 }
