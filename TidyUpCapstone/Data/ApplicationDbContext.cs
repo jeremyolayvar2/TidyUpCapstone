@@ -101,8 +101,26 @@ namespace TidyUpCapstone.Data
                 entity.Property(e => e.AdminNotes).HasColumnName("admin_notes");
                 entity.Property(e => e.Status).HasColumnName("status");
                 entity.Property(e => e.LastLogin).HasColumnName("last_login");
+
+                // IMPORTANT: Add the missing FirstName and LastName mappings
+                entity.Property(e => e.FirstName).HasColumnName("first_name");
+                entity.Property(e => e.LastName).HasColumnName("last_name");
+
+                // Add other properties from AppUser model that were missing
+                entity.Property(e => e.NormalizedUserName).HasColumnName("NormalizedUserName");
+                entity.Property(e => e.NormalizedEmail).HasColumnName("NormalizedEmail");
+                entity.Property(e => e.EmailConfirmed).HasColumnName("EmailConfirmed");
+                entity.Property(e => e.SecurityStamp).HasColumnName("SecurityStamp");
+                entity.Property(e => e.ConcurrencyStamp).HasColumnName("ConcurrencyStamp");
+                entity.Property(e => e.PhoneNumber).HasColumnName("PhoneNumber");
+                entity.Property(e => e.PhoneNumberConfirmed).HasColumnName("PhoneNumberConfirmed");
+                entity.Property(e => e.TwoFactorEnabled).HasColumnName("TwoFactorEnabled");
+                entity.Property(e => e.LockoutEnd).HasColumnName("LockoutEnd");
+                entity.Property(e => e.LockoutEnabled).HasColumnName("LockoutEnabled");
+                entity.Property(e => e.AccessFailedCount).HasColumnName("AccessFailedCount");
             });
 
+            // CRITICAL: Configure Identity tables - these are REQUIRED for OAuth
             builder.Entity<IdentityRole<int>>().ToTable("app_roles");
             builder.Entity<IdentityUserRole<int>>().ToTable("app_user_roles");
             builder.Entity<IdentityUserClaim<int>>().ToTable("app_user_claims");
