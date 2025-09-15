@@ -401,36 +401,36 @@ namespace TidyUpCapstone.Controllers
             return random.Next(100000, 999999).ToString();
         }
 
-        // POST: Settings/ChangePassword
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ChangePassword(ChangePasswordDto model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return Json(new { success = false, message = "Please check your input." });
-            }
+        //// POST: Settings/ChangePassword
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> ChangePassword(ChangePasswordDto model)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return Json(new { success = false, message = "Please check your input." });
+        //    }
 
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                user = await _userManager.FindByEmailAsync("test@tidyup.com");
-                if (user == null)
-                {
-                    return Json(new { success = false, message = "User not found." });
-                }
-            }
+        //    var user = await _userManager.GetUserAsync(User);
+        //    if (user == null)
+        //    {
+        //        user = await _userManager.FindByEmailAsync("test@tidyup.com");
+        //        if (user == null)
+        //        {
+        //            return Json(new { success = false, message = "User not found." });
+        //        }
+        //    }
 
-            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+        //    var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
 
-            if (result.Succeeded)
-            {
-                return Json(new { success = true, message = "Password changed successfully!" });
-            }
+        //    if (result.Succeeded)
+        //    {
+        //        return Json(new { success = true, message = "Password changed successfully!" });
+        //    }
 
-            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            return Json(new { success = false, message = errors });
-        }
+        //    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+        //    return Json(new { success = false, message = errors });
+        //}
 
         [HttpPost]
         [ValidateAntiForgeryToken]
