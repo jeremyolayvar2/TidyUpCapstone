@@ -327,7 +327,7 @@ namespace TidyUp.Controllers
                     StartTime = DateTime.UtcNow,
                     LastMessageTime = DateTime.UtcNow,
                     EscrowAmount = 10.00m,
-                    EscrowStatus = EscrowStatus.Pending
+                    EscrowStatus = EscrowStatus.Held
                 };
 
                 _context.Chats.Add(chat);

@@ -17,6 +17,12 @@ namespace TidyUpCapstone.Models.Entities.User
         [Column("token_balance", TypeName = "decimal(10,2)")]
         public decimal TokenBalance { get; set; } = 0.00m;
 
+        [Column("EscrowedBalance", TypeName = "decimal(10,2)")]
+        public decimal EscrowedBalance { get; set; } = 0m;
+
+        [NotMapped]
+        public decimal AvailableBalance => TokenBalance - EscrowedBalance;
+
         [Column("date_created")]
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 

@@ -11,31 +11,24 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection") ??
-        "Server=(localdb)\\MSSQLLocalDB;Database=TidyUpChatDb;Trusted_Connection=true;MultipleActiveResultSets=true;\r\n"
+        "Server=(localdb)\\MSSQLLocalDB;Database=TidyUpChatDb;Trusted_Connection=true;MultipleActiveResultSets=true;"
     ));
 
 // Identity Configuration
 builder.Services.AddIdentity<AppUser, IdentityRole<int>>(options =>
 {
-    // Password settings
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireNonAlphanumeric = true;
     options.Password.RequireUppercase = true;
     options.Password.RequiredLength = 6;
     options.Password.RequiredUniqueChars = 1;
-
-    // Lockout settings
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.Lockout.AllowedForNewUsers = true;
-
-    // User settings
     options.User.AllowedUserNameCharacters =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
     options.User.RequireUniqueEmail = true;
-
-    // Sign-in settings
     options.SignIn.RequireConfirmedEmail = false;
     options.SignIn.RequireConfirmedPhoneNumber = false;
 })
@@ -45,14 +38,18 @@ builder.Services.AddIdentity<AppUser, IdentityRole<int>>(options =>
 // Add services to the container
 builder.Services.AddControllersWithViews();
 
-// Add SignalR (built into .NET 9)
+// Add SignalR
 builder.Services.AddSignalR(options =>
 {
-    options.EnableDetailedErrors = true; // Enable for development
+    options.EnableDetailedErrors = true;
     options.HandshakeTimeout = TimeSpan.FromSeconds(30);
     options.KeepAliveInterval = TimeSpan.FromSeconds(15);
     options.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
 });
+
+// NEW: Add Transaction Services
+builder.Services.AddScoped<IEscrowService, EscrowService>();
+
 
 // Add Session support for testing
 builder.Services.AddDistributedMemoryCache();
@@ -69,13 +66,13 @@ builder.Services.AddAntiforgery(options =>
     options.HeaderName = "RequestVerificationToken";
 });
 
-// Add CORS for SignalR (if needed)
+// Add CORS for SignalR
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("SignalRCorsPolicy", policy =>
     {
         policy
-            .WithOrigins("https://localhost:5001", "http://localhost:5000") // Add your frontend origins
+            .WithOrigins("https://localhost:5001", "http://localhost:5000")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -83,20 +80,6 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-
-// Seed test users on startup
-using (var scope = app.Services.CreateScope())
-{
-    try
-    {
-        await DatabaseSeeder.SeedTestUsersAsync(scope.ServiceProvider);
-    }
-    catch (Exception ex)
-    {
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding test users");
-    }
-}
 
 // Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())
@@ -106,20 +89,14 @@ if (!app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseDeveloperExceptionPage(); // Add detailed errors in development
+    app.UseDeveloperExceptionPage();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
-// Use CORS
 app.UseCors("SignalRCorsPolicy");
-
-// Add Session middleware
 app.UseSession();
-
 app.UseAuthentication();
 app.UseAuthorization();
 

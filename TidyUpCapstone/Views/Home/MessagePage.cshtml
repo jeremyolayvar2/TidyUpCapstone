@@ -17,21 +17,33 @@
     {
         "currentUser": @if (Model.CurrentUser != null)
     {
-        @Html.Raw(Json.Serialize(new { id = Model.CurrentUser.Id, name = Model.CurrentUser.UserName }))
+            @Html.Raw(Json.Serialize(new { id = Model.CurrentUser.Id, name = Model.CurrentUser.UserName }))
     }
-    else
+        else
     {
-        @Html.Raw("null")
-    },
+            @Html.Raw("null")
+    }
+,
         "otherUser": @if (Model.OtherUser != null)
     {
-        @Html.Raw(Json.Serialize(new { id = Model.OtherUser.Id, name = Model.OtherUser.UserName }))
+            @Html.Raw(Json.Serialize(new { id = Model.OtherUser.Id, name = Model.OtherUser.UserName }))
     }
-    else
+        else
     {
-        @Html.Raw("null")
-    },
-        "testUsers": @Html.Raw(Json.Serialize(Model.TestUsers.Select(u => new { id = u.Id, name = u.UserName }).ToList()))
+            @Html.Raw("null")
+    }
+,
+        
+        "currentTransactionId": @(Model.CurrentTransactionId?.ToString() ?? "null"),
+        "hasActiveTransaction": @Json.Serialize(Model.HasActiveTransaction),
+        "transactionStatus": @if (Model.TransactionStatus != null)
+    {
+            @Html.Raw(Json.Serialize(Model.TransactionStatus))
+    }
+        else
+    {
+            @Html.Raw("null")
+    }
     }
 </script>
 
@@ -40,37 +52,6 @@
         document.body.classList.add('message-page');
     });
 </script>
-
-<!-- Test Mode Controls (Development Only) -->
-@if (Model.IsTestMode && Model.TestUsers.Any())
-{
-    <div class="fixed top-4 left-4 z-50 bg-yellow-100 border border-yellow-400 rounded-lg p-4 shadow-lg test-mode-controls">
-        <h4 class="font-bold text-sm mb-2">🧪 Test Mode - Real-time Chat</h4>
-        <div class="text-xs mb-2">
-            Current User: <strong>@(Model.CurrentUser?.UserName ?? "None")</strong><br>
-            Chat Partner: <strong>@(Model.OtherUser?.UserName ?? "None")</strong><br>
-            <span id="connectionStatus" class="text-gray-500">Connecting...</span>
-        </div>
-        <div class="space-y-1">
-            <p class="text-xs font-semibold">Switch User:</p>
-            @foreach (var user in Model.TestUsers)
-            {
-                <button onclick="switchTestUser(@user.Id)"
-                        class="block w-full text-left text-xs px-2 py-1 bg-blue-100 hover:bg-blue-200 rounded @(Model.CurrentUser?.Id == user.Id ? "bg-blue-300" : "")"
-                        data-user-id="@user.Id">
-                    <span class="flex items-center">
-                        <div class="status-indicator w-2 h-2 rounded-full bg-gray-400 mr-2"></div>
-                        @user.UserName
-                    </span>
-                </button>
-            }
-        </div>
-        <div class="mt-2 text-xs">
-            <button onclick="testSignalRConnection()" class="bg-green-100 hover:bg-green-200 px-2 py-1 rounded text-xs">
-                Test Connection
-            </button>
-        </div>
-    </div>
 }
 
 <div class="flex h-[calc(100vh-4rem)] font-['Montserrat'] min-h-screen">
@@ -86,36 +67,10 @@
 
         <!-- Conversations List -->
         <div class="overflow-y-auto conversations-list">
-            @if (Model.TestUsers.Any())
-            {
-                @foreach (var user in Model.TestUsers.Where(u => u.Id != Model.CurrentUser?.Id))
-                {
-                    <div class="flex items-center px-4 py-3 hover:bg-gray-200 cursor-pointer transition @(Model.OtherUser?.Id == user.Id ? "bg-gray-200 conversation-active" : "")"
-                         onclick="window.location.href='/Home/MessagePage?otherUserId=@user.Id'"
-                         data-user-id="@user.Id">
-                        <div class="relative">
-                            <div class="w-14 h-14 bg-gray-300 rounded-full mr-4 flex items-center justify-center text-lg font-bold text-gray-600">
-                                @user.UserName.First()
-                            </div>
-                            <div class="status-indicator absolute bottom-0 right-4 w-4 h-4 bg-gray-400 rounded-full border-2 border-white"></div>
-                        </div>
-                        <div class="flex-1">
-                            <div class="text-lg font-medium">@user.UserName</div>
-                            <div class="text-sm text-gray-500 truncate">Click to start chatting...</div>
-                        </div>
-                        <div class="text-xs text-gray-400">
-                            <div id="unread-@user.Id" class="hidden bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">0</div>
-                        </div>
-                    </div>
-                }
-            }
-            else
-            {
-                <div class="p-4 text-center text-gray-500">
-                    <p>No conversations yet</p>
-                    <p class="text-xs mt-2">Start by creating test users</p>
-                </div>
-            }
+            <div class="p-4 text-center text-gray-500">
+                <p>Your conversations will appear here</p>
+                <p class="text-xs mt-2">Conversations start when you express interest in items</p>
+            </div>
         </div>
     </div>
 
@@ -145,6 +100,12 @@
                     @if (Model.OtherUser != null)
                     {
                         <div class="text-sm opacity-75" id="userStatus">Online</div>
+                        @if (Model.HasActiveTransaction)
+                        {
+                            <div class="text-xs bg-white/20 px-2 py-1 rounded mt-1">
+                                💼 Transaction: @Model.TransactionItemTitle
+                            </div>
+                        }
                     }
                 </div>
             </div>
@@ -152,17 +113,36 @@
                 <button class="text-white p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all">
                     <i class='bx bx-info-circle text-xl'></i>
                 </button>
-                <button class="text-white toggle-delivery-button p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all" id="toggleDeliveryBtn">
-                    <i class='bx bx-transfer-alt text-xl'></i>
-                </button>
+                @if (Model.HasActiveTransaction)
+                {
+                    <button class="text-white toggle-delivery-button p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all" id="toggleDeliveryBtn" title="Transaction Options">
+                        <i class='bx bx-transfer-alt text-xl'></i>
+                    </button>
+                }
             </div>
         </div>
 
-        <!-- Delivery Options (Initially Hidden) -->
-        <div class="flex gap-2 items-center px-6 pb-4 delivery-options" id="deliveryOptions">
-            <button class="bg-white text-[#6B9080] px-4 py-2 rounded-tl-md rounded-bl-md flex-1 hover:bg-gray-100 transition-all">via Meet-up</button>
-            <button class="bg-white text-[#6B9080] px-4 py-2 rounded-tr-md rounded-br-md flex-1 hover:bg-gray-100 transition-all">via Delivery</button>
-        </div>
+        
+
+        <!-- Escrow Controls -->
+        @if (Model.HasActiveTransaction)
+        {
+            <div id="escrowControls" class="escrow-buttons bg-white/10 backdrop-blur-sm rounded-lg p-4 mx-6 mb-4">
+                <div class="text-center mb-3 text-sm text-white/90">
+                    Tokens are now held in escrow by the system.
+                </div>
+                <div class="flex gap-3 justify-center">
+                    <button onclick="confirmTransaction()"
+                            class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md transition-all">
+                        Confirm Transaction
+                    </button>
+                    <button onclick="cancelTransaction()"
+                            class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-md transition-all">
+                        Cancel Transaction
+                    </button>
+                </div>
+            </div>
+        }
 
         <!-- Chat Messages -->
         <div class="flex-1 px-6 py-4 overflow-y-auto w-full chat-messages" id="chatMessages">
@@ -172,7 +152,7 @@
                     <div class="text-center text-white opacity-75">
                         <i class='bx bx-message-square-dots text-6xl mb-4'></i>
                         <p class="text-lg">Select a conversation to start messaging</p>
-                        <p class="text-sm mt-2">Real-time chat powered by SignalR</p>
+                        <p class="text-sm mt-2">Real-time chat with transaction support</p>
                     </div>
                 </div>
             }
@@ -183,6 +163,10 @@
                     <div class="text-center text-white opacity-75">
                         <i class='bx bx-loader-alt bx-spin text-4xl mb-2'></i>
                         <p>Connecting to real-time chat...</p>
+                        @if (Model.HasActiveTransaction)
+                        {
+                            <p class="text-sm mt-1">Transaction system ready</p>
+                        }
                     </div>
                 </div>
             }
@@ -221,22 +205,12 @@
 <!-- Anti-forgery token for AJAX requests -->
 @Html.AntiForgeryToken()
 
-<!-- Additional JavaScript for SignalR testing -->
-<script>
-    // Test SignalR connection function
-    async function testSignalRConnection() {
-        if (window.MessagePage && window.MessagePage.connection) {
-            try {
-                await window.MessagePage.connection.invoke("TestConnection");
-                showNotification("SignalR connection test successful!", "success");
-            } catch (err) {
-                showNotification("SignalR connection test failed: " + err.message, "error");
-            }
-        } else {
-            showNotification("SignalR not initialized yet", "warning");
-        }
-    }
+<!-- JavaScript Files - Transaction.js MUST load first -->
+<script src="~/js/EscrowManager.js" asp-append-version="true"></script>
+<script src="~/js/MessagePage.js" asp-append-version="true"></script>
 
+<!-- Connection Status Monitoring -->
+<script>
     // Update connection status in UI
     function updateConnectionStatus(status, isConnected) {
         const statusElement = document.getElementById('connectionStatus');
@@ -297,4 +271,89 @@
     });
 </script>
 
-<script src="~/js/MessagePage.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const userData = JSON.parse(document.getElementById('userData').textContent);
+
+        console.log('=== ESCROW DEBUG ===');
+        console.log('Current User:', userData.currentUser);
+        console.log('Other User:', userData.otherUser);
+        console.log('HasActiveTransaction:', userData.hasActiveTransaction);
+        console.log('TransactionStatus:', userData.transactionStatus);
+        console.log('TransactionStatus.Status:', userData.transactionStatus?.Status);
+        console.log('EscrowManager exists:', !!window.escrowManager);
+
+        if (userData.hasActiveTransaction && userData.currentTransactionId && window.escrowManager) {
+            console.log('Initializing EscrowManager...');
+            setTimeout(() => {
+                escrowManager.initialize(
+                    userData.currentUser,
+                    userData.currentTransactionId,
+                    userData.transactionStatus
+                );
+            }, 1000);
+        } else {
+            console.log('Escrow initialization skipped - missing requirements');
+        }
+    });
+</script>
+
+<script>
+    async function confirmTransaction() {
+        const confirmed = confirm('Are you sure you want to confirm this transaction? Tokens will be released once both parties confirm.');
+        if (!confirmed) return;
+
+        try {
+            const response = await fetch('/api/escrow/confirm', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: JSON.stringify({ transactionId: @(Model.CurrentTransactionId ?? 0) })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                if (result.bothConfirmed) {
+                    alert('Transaction completed. Tokens released to Seller.');
+                    location.reload();
+                } else {
+                    alert('Your confirmation recorded. Waiting for other party to confirm.');
+                }
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error confirming transaction:', error);
+            alert('Error confirming transaction');
+        }
+    }
+
+    async function cancelTransaction() {
+        const confirmed = confirm('Are you sure you want to cancel this transaction? Escrowed tokens will be refunded to the Buyer.');
+        if (!confirmed) return;
+
+        try {
+            const response = await fetch('/api/escrow/cancel', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: JSON.stringify({ transactionId: @(Model.CurrentTransactionId ?? 0) })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                alert('Transaction cancelled. Tokens refunded to Buyer.');
+                location.reload();
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error cancelling transaction:', error);
+            alert('Error cancelling transaction');
+        }
+    }
+</script>

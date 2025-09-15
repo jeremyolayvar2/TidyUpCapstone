@@ -16,6 +16,66 @@ namespace TidyUpCapstone.Hubs
             _logger = logger;
         }
 
+        // Join transaction group for real-time updates
+        public async Task JoinTransactionGroup(string transactionId)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"Transaction_{transactionId}");
+            _logger.LogInformation($"User {Context.ConnectionId} joined transaction {transactionId}");
+        }
+        // Leave transaction group
+        public async Task LeaveTransactionGroup(string transactionId)
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"Transaction_{transactionId}");
+            _logger.LogInformation($"User {Context.ConnectionId} left transaction {transactionId}");
+        }
+        // Send transaction method selection
+        public async Task SendTransactionMethodSelected(int transactionId, int userId, string method, object status)
+        {
+            await Clients.Group($"Transaction_{transactionId}").SendAsync("TransactionMethodSelected", new
+            {
+                transactionId,
+                userId,
+                method,
+                status,
+                timestamp = DateTime.UtcNow
+            });
+        }
+
+        // Send transaction confirmation
+        public async Task SendTransactionConfirmed(int transactionId, int userId, object status)
+        {
+            await Clients.Group($"Transaction_{transactionId}").SendAsync("TransactionConfirmed", new
+            {
+                transactionId,
+                userId,
+                status,
+                timestamp = DateTime.UtcNow
+            });
+        }
+
+        // Send transaction cancellation
+        public async Task SendTransactionCancelled(int transactionId, int userId, string reason, object status)
+        {
+            await Clients.Group($"Transaction_{transactionId}").SendAsync("TransactionCancelled", new
+            {
+                transactionId,
+                userId,
+                reason,
+                status,
+                timestamp = DateTime.UtcNow
+            });
+        }
+
+        // Send delivery order created
+        public async Task SendDeliveryOrderCreated(int transactionId, object orderData)
+        {
+            await Clients.Group($"Transaction_{transactionId}").SendAsync("DeliveryOrderCreated", new
+            {
+                transactionId,
+                order = orderData,
+                timestamp = DateTime.UtcNow
+            });
+        }
         // Join a specific chat room
         public async Task JoinChat(string chatId)
         {

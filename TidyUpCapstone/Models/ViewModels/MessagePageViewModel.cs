@@ -1,4 +1,5 @@
-﻿using TidyUpCapstone.Models.Entities.User;
+﻿using TidyUpCapstone.Models.DTOs.Transactions;
+using TidyUpCapstone.Models.Entities.User;
 
 namespace TidyUpCapstone.Models.ViewModels
 {
@@ -6,7 +7,13 @@ namespace TidyUpCapstone.Models.ViewModels
     {
         public AppUser? CurrentUser { get; set; }
         public AppUser? OtherUser { get; set; }
-        public List<AppUser> TestUsers { get; set; } = new List<AppUser>();
-        public bool IsTestMode { get; set; } = true;
+        
+        
+
+        public int? CurrentTransactionId { get; set; }
+        public TransactionStatusDto? TransactionStatus { get; set; }
+        public bool HasActiveTransaction { get; set; }
+        public string? TransactionItemTitle { get; set; }
+        public decimal? TransactionAmount { get; set; }
     }
 }

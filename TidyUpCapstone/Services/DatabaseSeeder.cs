@@ -32,7 +32,7 @@ namespace TidyUpCapstone.Services
                     UserName = "TestUser1",
                     Email = "testuser1@example.com",
                     EmailConfirmed = true,
-                    TokenBalance = 100.00m, // Proper token balance
+                    TokenBalance = 1000.00m,
                     DateCreated = DateTime.UtcNow,
                     Status = "active"
                 };
@@ -51,7 +51,7 @@ namespace TidyUpCapstone.Services
                     UserName = "TestUser2",
                     Email = "testuser2@example.com",
                     EmailConfirmed = true,
-                    TokenBalance = 150.00m, // Proper token balance
+                    TokenBalance = 1500.00m,
                     DateCreated = DateTime.UtcNow,
                     Status = "active"
                 };
@@ -67,10 +67,10 @@ namespace TidyUpCapstone.Services
             testUser1 = await userManager.FindByEmailAsync("testuser1@example.com");
             testUser2 = await userManager.FindByEmailAsync("testuser2@example.com");
 
-            // Seed sample items
+            // Seed sample items for both users
             await SeedSampleItemsAsync(context, testUser1!.Id, testUser2!.Id);
 
-            // Seed sample transaction for chat
+            // Seed sample transaction and chat between the two users
             await SeedSampleTransactionAsync(context, testUser1!.Id, testUser2!.Id);
 
             await context.SaveChangesAsync();
@@ -78,48 +78,34 @@ namespace TidyUpCapstone.Services
 
         private static async Task SeedBasicDataAsync(ApplicationDbContext context)
         {
-            // Check what properties actually exist by looking at the first category
-            var existingCategory = await context.ItemCategories.FirstOrDefaultAsync();
-
-            // Seed Categories - using property names that should exist based on your DTO
+            // Seed Categories
             if (!await context.ItemCategories.AnyAsync())
             {
-                // Since I can't see the exact model, I'll try common property names
-                // You may need to adjust these property names to match your actual ItemCategory model
                 try
                 {
                     var categories = new List<ItemCategory>();
 
-                    // Try to create categories with the most likely property names
-                    for (int i = 1; i <= 5; i++)
+                    var categoryData = new[]
+                    {
+                        new { Name = "Electronics", Description = "Electronic devices and gadgets" },
+                        new { Name = "Furniture", Description = "Home and office furniture" },
+                        new { Name = "Books", Description = "Books and educational materials" },
+                        new { Name = "Clothing", Description = "Clothes and accessories" },
+                        new { Name = "Other", Description = "Miscellaneous items" }
+                    };
+
+                    foreach (var data in categoryData)
                     {
                         var category = new ItemCategory();
-
-                        // Try setting properties that commonly exist
                         var categoryType = typeof(ItemCategory);
+
                         var nameProperty = categoryType.GetProperty("Name") ??
                                          categoryType.GetProperty("CategoryName") ??
                                          categoryType.GetProperty("Title");
-
                         var descProperty = categoryType.GetProperty("Description");
 
-                        if (nameProperty != null)
-                        {
-                            string[] names = { "Electronics", "Furniture", "Books", "Clothing", "Other" };
-                            nameProperty.SetValue(category, names[i - 1]);
-                        }
-
-                        if (descProperty != null)
-                        {
-                            string[] descriptions = {
-                                "Electronic devices and gadgets",
-                                "Home and office furniture",
-                                "Books and educational materials",
-                                "Clothes and accessories",
-                                "Miscellaneous items"
-                            };
-                            descProperty.SetValue(category, descriptions[i - 1]);
-                        }
+                        nameProperty?.SetValue(category, data.Name);
+                        descProperty?.SetValue(category, data.Description);
 
                         categories.Add(category);
                     }
@@ -129,45 +115,38 @@ namespace TidyUpCapstone.Services
                 }
                 catch (Exception ex)
                 {
-                    // If seeding fails, we'll handle it gracefully
                     Console.WriteLine($"Warning: Could not seed categories: {ex.Message}");
                 }
             }
 
-            // Similar approach for Conditions
+            // Seed Conditions
             if (!await context.ItemConditions.AnyAsync())
             {
                 try
                 {
+                    var conditionData = new[]
+                    {
+                        new { Name = "New", Description = "Brand new, unused" },
+                        new { Name = "Like New", Description = "Barely used, excellent condition" },
+                        new { Name = "Good", Description = "Used but in good condition" },
+                        new { Name = "Fair", Description = "Shows signs of wear but functional" },
+                        new { Name = "Poor", Description = "Heavily used, may need repairs" }
+                    };
+
                     var conditions = new List<ItemCondition>();
 
-                    for (int i = 1; i <= 5; i++)
+                    foreach (var data in conditionData)
                     {
                         var condition = new ItemCondition();
                         var conditionType = typeof(ItemCondition);
+
                         var nameProperty = conditionType.GetProperty("Name") ??
                                          conditionType.GetProperty("ConditionName") ??
                                          conditionType.GetProperty("Title");
-
                         var descProperty = conditionType.GetProperty("Description");
 
-                        if (nameProperty != null)
-                        {
-                            string[] names = { "New", "Like New", "Good", "Fair", "Poor" };
-                            nameProperty.SetValue(condition, names[i - 1]);
-                        }
-
-                        if (descProperty != null)
-                        {
-                            string[] descriptions = {
-                                "Brand new, unused",
-                                "Barely used, excellent condition",
-                                "Used but in good condition",
-                                "Shows signs of wear but functional",
-                                "Heavily used, may need repairs"
-                            };
-                            descProperty.SetValue(condition, descriptions[i - 1]);
-                        }
+                        nameProperty?.SetValue(condition, data.Name);
+                        descProperty?.SetValue(condition, data.Description);
 
                         conditions.Add(condition);
                     }
@@ -181,40 +160,34 @@ namespace TidyUpCapstone.Services
                 }
             }
 
-            // Similar approach for Locations
+            // Seed Locations
             if (!await context.ItemLocations.AnyAsync())
             {
                 try
                 {
+                    var locationData = new[]
+                    {
+                        new { Name = "Metro Manila", Description = "National Capital Region" },
+                        new { Name = "Quezon City", Description = "Quezon City area" },
+                        new { Name = "Manila", Description = "Manila City area" },
+                        new { Name = "Makati", Description = "Makati City area" },
+                        new { Name = "Other", Description = "Other locations" }
+                    };
+
                     var locations = new List<ItemLocation>();
 
-                    for (int i = 1; i <= 5; i++)
+                    foreach (var data in locationData)
                     {
                         var location = new ItemLocation();
                         var locationType = typeof(ItemLocation);
+
                         var nameProperty = locationType.GetProperty("Name") ??
                                          locationType.GetProperty("LocationName") ??
                                          locationType.GetProperty("Title");
-
                         var descProperty = locationType.GetProperty("Description");
 
-                        if (nameProperty != null)
-                        {
-                            string[] names = { "Metro Manila", "Quezon City", "Manila", "Makati", "Other" };
-                            nameProperty.SetValue(location, names[i - 1]);
-                        }
-
-                        if (descProperty != null)
-                        {
-                            string[] descriptions = {
-                                "National Capital Region",
-                                "Quezon City area",
-                                "Manila City area",
-                                "Makati City area",
-                                "Other locations"
-                            };
-                            descProperty.SetValue(location, descriptions[i - 1]);
-                        }
+                        nameProperty?.SetValue(location, data.Name);
+                        descProperty?.SetValue(location, data.Description);
 
                         locations.Add(location);
                     }
@@ -240,42 +213,56 @@ namespace TidyUpCapstone.Services
                     var condition = await context.ItemConditions.FirstOrDefaultAsync();
                     var location = await context.ItemLocations.FirstOrDefaultAsync();
 
-                    // If we don't have reference data, create minimal entries
                     if (category == null || condition == null || location == null)
                     {
-                        Console.WriteLine("Warning: Missing reference data for items. Creating minimal entries...");
+                        Console.WriteLine("Warning: Missing reference data for items.");
                         return;
                     }
 
+                    // Create items for both users so they have something to chat about
                     var items = new[]
                     {
                         new Item
                         {
                             UserId = user1Id,
-                            ItemTitle = "Sample Bookshelf",
-                            Description = "A nice wooden bookshelf for testing chat feature",
+                            ItemTitle = "Wooden Bookshelf",
+                            Description = "Beautiful oak bookshelf, perfect condition. Great for organizing books and displaying items.",
                             CategoryId = category.CategoryId,
                             ConditionId = condition.ConditionId,
                             LocationId = location.LocationId,
                             AdjustedTokenPrice = 50.00m,
                             FinalTokenPrice = 45.00m,
                             Status = ItemStatus.Available,
-                            DatePosted = DateTime.UtcNow,
-                            ViewCount = 0
+                            DatePosted = DateTime.UtcNow.AddDays(-2),
+                            ViewCount = 5
                         },
                         new Item
                         {
                             UserId = user2Id,
-                            ItemTitle = "Test Laptop",
-                            Description = "A laptop for testing purposes",
+                            ItemTitle = "Gaming Laptop",
+                            Description = "High-performance gaming laptop. Perfect for work and gaming. Includes charger and mouse.",
                             CategoryId = category.CategoryId,
                             ConditionId = condition.ConditionId,
                             LocationId = location.LocationId,
                             AdjustedTokenPrice = 200.00m,
                             FinalTokenPrice = 180.00m,
                             Status = ItemStatus.Available,
-                            DatePosted = DateTime.UtcNow,
-                            ViewCount = 0
+                            DatePosted = DateTime.UtcNow.AddDays(-1),
+                            ViewCount = 12
+                        },
+                        new Item
+                        {
+                            UserId = user1Id,
+                            ItemTitle = "Office Chair",
+                            Description = "Ergonomic office chair with lumbar support. Black leather, adjustable height.",
+                            CategoryId = category.CategoryId,
+                            ConditionId = condition.ConditionId,
+                            LocationId = location.LocationId,
+                            AdjustedTokenPrice = 75.00m,
+                            FinalTokenPrice = 70.00m,
+                            Status = ItemStatus.Available,
+                            DatePosted = DateTime.UtcNow.AddHours(-6),
+                            ViewCount = 3
                         }
                     };
 
@@ -293,83 +280,8 @@ namespace TidyUpCapstone.Services
         {
             try
             {
-                // Check if sample transaction already exists
-                var existingTransaction = await context.Transactions.FirstOrDefaultAsync();
-                if (existingTransaction != null) return;
-
-                var sampleItem = await context.Items.FirstOrDefaultAsync();
-                if (sampleItem == null)
-                {
-                    Console.WriteLine("Warning: No items available for creating sample transaction");
-                    return;
-                }
-
-                var transaction = new Transaction
-                {
-                    BuyerId = user1Id,
-                    SellerId = user2Id,
-                    ItemId = sampleItem.ItemId,
-                    TokenAmount = 45.00m, // Proper positive token amount
-                    TransactionStatus = TransactionStatus.Pending,
-                    DeliveryMethod = DeliveryMethod.Pickup,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                context.Transactions.Add(transaction);
-                await context.SaveChangesAsync();
-
-                // Create chat for this transaction
-                var chat = new Chat
-                {
-                    TransactionId = transaction.TransactionId,
-                    StartTime = DateTime.UtcNow,
-                    LastMessageTime = DateTime.UtcNow,
-                    EscrowAmount = 45.00m,
-                    EscrowStatus = EscrowStatus.Pending
-                };
-
-                context.Chats.Add(chat);
-                await context.SaveChangesAsync();
-
-                // Add some sample messages
-                var messages = new[]
-                {
-                    new ChatMessage
-                    {
-                        ChatId = chat.ChatId,
-                        SenderId = user2Id,
-                        Message = "Hi! I saw you're interested in the Bookshelf I posted. It's still available!",
-                        MessageType = MessageType.Text,
-                        SentAt = DateTime.UtcNow.AddMinutes(-10)
-                    },
-                    new ChatMessage
-                    {
-                        ChatId = chat.ChatId,
-                        SenderId = user1Id,
-                        Message = "Hello! Yes, I'd love to claim it.",
-                        MessageType = MessageType.Text,
-                        SentAt = DateTime.UtcNow.AddMinutes(-8)
-                    },
-                    new ChatMessage
-                    {
-                        ChatId = chat.ChatId,
-                        SenderId = user1Id,
-                        Message = "Can we meet this Saturday afternoon around 3PM at SM Sta. Mesa?",
-                        MessageType = MessageType.Text,
-                        SentAt = DateTime.UtcNow.AddMinutes(-5)
-                    },
-                    new ChatMessage
-                    {
-                        ChatId = chat.ChatId,
-                        SenderId = user2Id,
-                        Message = "Sure! Saturday at 3PM works for me. Let's meet at the main entrance near Starbucks.",
-                        MessageType = MessageType.Text,
-                        SentAt = DateTime.UtcNow.AddMinutes(-2)
-                    }
-                };
-
-                context.ChatMessages.AddRange(messages);
-                await context.SaveChangesAsync();
+                // Don't create any transactions - let the auto-escrow handle it
+                Console.WriteLine("Transaction seeding skipped - will be handled by auto-escrow");
             }
             catch (Exception ex)
             {

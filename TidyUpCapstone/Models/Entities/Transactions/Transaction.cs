@@ -1,9 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿// Models/Entities/Transactions/Transaction.cs - Enhanced version
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using TidyUpCapstone.Models.Entities.Items;
-using TidyUpCapstone.Models.Entities.Transactions;
 using TidyUpCapstone.Models.Entities.User;
-
 
 namespace TidyUpCapstone.Models.Entities.Transactions
 {
@@ -28,15 +27,19 @@ namespace TidyUpCapstone.Models.Entities.Transactions
         [Required]
         public TransactionStatus TransactionStatus { get; set; } = TransactionStatus.Pending;
 
+        // Original delivery method (keep for compatibility)
         [Required]
         public DeliveryMethod DeliveryMethod { get; set; }
 
+        // NEW: Confirmation tracking
+        public bool BuyerConfirmed { get; set; } = false;
+        public bool SellerConfirmed { get; set; } = false;
+        public DateTime? BuyerConfirmedAt { get; set; }
+        public DateTime? SellerConfirmedAt { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
         public DateTime? CompletedAt { get; set; }
-
         public DateTime? CancelledAt { get; set; }
-
         public string? CancellationReason { get; set; }
 
         // Navigation properties
@@ -50,16 +53,19 @@ namespace TidyUpCapstone.Models.Entities.Transactions
         public virtual Item Item { get; set; } = null!;
 
         public virtual Chat? Chat { get; set; }
+        public virtual ICollection<Escrow> Escrows { get; set; } = new List<Escrow>();
     }
 
+    // Enhanced transaction status
     public enum TransactionStatus
     {
-        Pending,
-        Completed,
-        Cancelled,
-        Disputed
+        Pending = 0,
+        Escrowed = 1,
+        Confirmed = 2,
+        Cancelled = 3
     }
 
+    // Keep existing DeliveryMethod for compatibility
     public enum DeliveryMethod
     {
         Pickup,

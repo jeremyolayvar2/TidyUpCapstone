@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TidyUpCapstone.Data;
 
@@ -11,9 +12,11 @@ using TidyUpCapstone.Data;
 namespace TidyUpCapstone.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250914114319_AddMissingEscrowedBalance")]
+    partial class AddMissingEscrowedBalance
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2163,8 +2166,7 @@ namespace TidyUpCapstone.Migrations
                         .HasColumnType("bit");
 
                     b.Property<decimal>("EscrowedBalance")
-                        .HasColumnType("decimal(10,2)")
-                        .HasColumnName("EscrowedBalance");
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<DateTime?>("LastLogin")
                         .HasColumnType("datetime2")

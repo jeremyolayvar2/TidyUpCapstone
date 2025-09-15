@@ -839,3 +839,54 @@ body.message-page.modal-open {
         max-height: calc(100vh - 2rem) !important;
     }
 }
+
+/* Fix for testuser dropdown positioning - add this to MessagePage.css */
+.test-mode-controls {
+    position: fixed !important;
+    top: 1rem !important;
+    left: 1rem !important;
+    z-index: 9999 !important; /* Higher than sidebar */
+    pointer-events: auto !important;
+    max-width: 280px !important;
+}
+
+    .test-mode-controls button {
+        position: relative !important;
+        z-index: 10000 !important;
+        pointer-events: auto !important;
+    }
+
+/* Ensure main containers don't clip the dropdown */
+.flex.h-\[calc\(100vh-4rem\)\] {
+    overflow: visible !important;
+}
+
+/* Lower sidebar z-index so dropdown appears on top */
+.sidebar {
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .test-mode-controls {
+        top: 0.5rem !important;
+        left: 0.5rem !important;
+        right: 0.5rem !important;
+        max-width: none !important;
+    }
+}
+
+.delivery-options {
+    display: none !important;
+}
+
+    .delivery-options.show,
+    .delivery-options[style*="flex"] {
+        display: flex !important;
+    }
+
+.transaction-method-btn {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
