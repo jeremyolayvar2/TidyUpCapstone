@@ -15,15 +15,18 @@ namespace TidyUpCapstone.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> _signInManager; 
         private readonly ApplicationDbContext _context;
 
         public HomeController(
             ILogger<HomeController> logger,
             UserManager<AppUser> userManager,
+            SignInManager<AppUser> signInManager,
             ApplicationDbContext context)
         {
             _logger = logger;
             _userManager = userManager;
+            _signInManager = signInManager;
             _context = context;
         }
 
@@ -46,15 +49,36 @@ namespace TidyUpCapstone.Controllers
         [Authorize]
         public async Task<IActionResult> Main()
         {
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null)
+            try
             {
-                _logger.LogWarning("User not found in Main action, redirecting to Index");
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    _logger.LogWarning("User not found in Main action, redirecting to Index");
+
+                    // If user is not found but claims to be authenticated, sign them out and redirect to home
+                    if (User.Identity?.IsAuthenticated == true)
+                    {
+                        await _signInManager.SignOutAsync(); // NOW WORKS: _signInManager is available
+                    }
+
+                    return RedirectToAction("Index", "Home");
+                }
+
+                _logger.LogInformation("User {UserId} accessed Main page successfully", currentUser.Id);
+
+                // Set ViewBag properties if needed
+                ViewBag.UserName = currentUser.UserName;
+                ViewBag.FirstName = currentUser.FirstName;
+                ViewBag.LastName = currentUser.LastName;
+
+                return View(); // This will look for Views/Home/Main.cshtml
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in Main action");
                 return RedirectToAction("Index", "Home");
             }
-
-            _logger.LogInformation("User {UserId} accessed Main page successfully", currentUser.Id);
-            return View(); // This will look for Views/Home/Main.cshtml
         }
 
         [Authorize]

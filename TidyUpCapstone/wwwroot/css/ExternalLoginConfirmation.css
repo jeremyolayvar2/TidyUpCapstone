@@ -185,7 +185,7 @@ body {
     position: relative;
 }
 
-/* Fixed floating label styles */
+/* Improved floating label styles with better responsiveness */
 .login-form-label {
     position: absolute;
     left: 1rem;
@@ -200,9 +200,10 @@ body {
     padding: 0 0.5rem;
     font-weight: 400;
     white-space: nowrap;
+    border-radius: 4px;
 }
 
-/* Active/focused label state */
+/* Active/focused label state with improved positioning */
 .login-form-control:not(:placeholder-shown) + .login-form-label,
 .login-form-control:focus + .login-form-label {
     top: 0;
@@ -211,6 +212,8 @@ body {
     color: var(--primary-color);
     font-weight: 500;
     transform: translateY(-50%);
+    background: var(--background);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .login-form-control {
@@ -437,7 +440,7 @@ body {
     font-size: 0.85rem;
     margin-top: 0.5rem;
     display: block;
-    position: absolute;
+    position: relative;
     left: 0;
     width: 100%;
     min-height: 1.2rem;
@@ -556,7 +559,8 @@ a.text-primary {
     animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.9s forwards;
 }
 
-/* Responsive Design */
+/* Improved Responsive Design */
+/* Tablet and small desktop screens */
 @media (max-width: 768px) {
     .card-body {
         padding: 2rem !important;
@@ -572,6 +576,7 @@ a.text-primary {
 
     .login-form-control {
         padding: 1.125rem 0.875rem;
+        font-size: 0.95rem;
     }
 
     .login-form-label {
@@ -583,6 +588,8 @@ a.text-primary {
     .login-form-control:focus + .login-form-label {
         left: 0.875rem;
         font-size: 0.8rem;
+        top: 0;
+        transform: translateY(-50%);
     }
 
     .alert-danger-custom {
@@ -595,6 +602,7 @@ a.text-primary {
     }
 }
 
+/* Mobile phones in portrait mode */
 @media (max-width: 576px) {
     .card-body {
         padding: 1.5rem !important;
@@ -615,6 +623,7 @@ a.text-primary {
 
     .btn-complete-registration {
         padding: 0.875rem 1.25rem;
+        font-size: 0.95rem;
     }
 
     .login-form-control {
@@ -631,6 +640,8 @@ a.text-primary {
     .login-form-control:focus + .login-form-label {
         left: 0.75rem;
         font-size: 0.75rem;
+        top: 0;
+        transform: translateY(-50%);
     }
 
     .provider-icon i {
@@ -642,6 +653,7 @@ a.text-primary {
     }
 }
 
+/* Small mobile phones */
 @media (max-width: 480px) {
     .registration-card {
         width: calc(100vw - 1rem);
@@ -666,6 +678,8 @@ a.text-primary {
     .login-form-control:focus + .login-form-label {
         left: 0.625rem;
         font-size: 0.7rem;
+        top: 0;
+        transform: translateY(-50%);
     }
 
     .custom-checkbox-label {
@@ -676,6 +690,13 @@ a.text-primary {
     .checkbox-checkmark {
         height: 18px;
         width: 18px;
+    }
+
+    .custom-checkbox-label .checkbox-checkmark:after {
+        left: 5px;
+        top: 2px;
+        width: 5px;
+        height: 8px;
     }
 }
 
@@ -699,6 +720,8 @@ a.text-primary {
     .login-form-control:focus + .login-form-label {
         left: 0.5rem;
         font-size: 0.65rem;
+        top: 0;
+        transform: translateY(-50%);
     }
 
     .registration-header {
@@ -713,6 +736,13 @@ a.text-primary {
     .checkbox-checkmark {
         height: 16px;
         width: 16px;
+    }
+
+    .custom-checkbox-label .checkbox-checkmark:after {
+        left: 4px;
+        top: 2px;
+        width: 4px;
+        height: 7px;
     }
 }
 

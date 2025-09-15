@@ -43,6 +43,23 @@
         document.body.style.overflow = '';
     }
 
+    // Individual modal closing functions
+    function closeLoginModalOnly() {
+        console.log('Closing login modal only');
+        if (loginModal) {
+            loginModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    }
+
+    function closeRegisterModalOnly() {
+        console.log('Closing register modal only');
+        if (registerModal) {
+            registerModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    }
+
     // Show error message functions
     function showLoginError(message) {
         console.log('Login error:', message);
@@ -68,15 +85,121 @@
         }
     }
 
+    // FIXED: Success message functions (these were missing)
+    function showLoginSuccess(message) {
+        console.log('Login success:', message);
+        topAlert.success('Login Successful!', message);
+
+        if (loginErrorAlert) {
+            loginErrorAlert.style.display = 'none';
+        }
+    }
+
+    function showRegisterSuccess(message) {
+        console.log('Register success:', message);
+        topAlert.success('Registration Successful!', message);
+
+        if (registerErrorAlert) {
+            registerErrorAlert.style.display = 'none';
+        }
+    }
+
     function showSuccess(message) {
         console.log('Success:', message);
-
-        // Use the custom top alert instead of browser alert
         topAlert.success(
             'Account Created Successfully!',
             'Please check your email to verify your account before signing in.'
         );
     }
+
+    // Handle server-side data and URL parameters
+    function handleServerData() {
+        console.log('Handling server data...');
+
+        if (typeof window.serverData !== 'undefined') {
+            console.log('Server data found:', window.serverData);
+
+            // Handle login errors from OAuth or other server operations
+            if (window.serverData.loginError && window.serverData.loginError.trim() !== '') {
+                console.log('Showing login error from server:', window.serverData.loginError);
+                showLoginError(window.serverData.loginError);
+                openLoginModal();
+            }
+
+            // Handle success messages
+            if (window.serverData.successMessage && window.serverData.successMessage.trim() !== '') {
+                console.log('Showing success message from server:', window.serverData.successMessage);
+                topAlert.success('Success!', window.serverData.successMessage);
+            }
+
+            // Handle URL error parameter (from OAuth failures)
+            if (window.serverData.error && window.serverData.error.trim() !== '') {
+                console.log('Showing error from URL parameter:', window.serverData.error);
+                let errorMessage = 'An error occurred. Please try again.';
+
+                switch (window.serverData.error) {
+                    case 'oauth_failed':
+                        errorMessage = 'There was an error with Google sign-in. Please try again.';
+                        break;
+                    case 'access_denied':
+                        errorMessage = 'Access was denied. Please try signing in again.';
+                        break;
+                    default:
+                        errorMessage = window.serverData.error;
+                }
+
+                showLoginError(errorMessage);
+                openLoginModal();
+            }
+
+            // Handle URL parameters to show specific modals
+            if (window.serverData.showLogin === 'true') {
+                console.log('URL parameter indicates login modal should be shown');
+                setTimeout(() => openLoginModal(), 100);
+            }
+
+            if (window.serverData.showRegister === 'true') {
+                console.log('URL parameter indicates register modal should be shown');
+                setTimeout(() => openRegisterModal(), 100);
+            }
+        } else {
+            console.log('No server data found, checking URL parameters manually');
+
+            // Fallback: Check URL parameters directly
+            const urlParams = new URLSearchParams(window.location.search);
+
+            if (urlParams.get('showLogin') === 'true') {
+                console.log('URL showLogin parameter found');
+                setTimeout(() => openLoginModal(), 100);
+            }
+
+            if (urlParams.get('showRegister') === 'true') {
+                console.log('URL showRegister parameter found');
+                setTimeout(() => openRegisterModal(), 100);
+            }
+
+            // Check for error parameter in URL
+            const errorParam = urlParams.get('error');
+            if (errorParam) {
+                let errorMessage = 'An error occurred. Please try again.';
+
+                switch (errorParam) {
+                    case 'oauth_failed':
+                        errorMessage = 'There was an error with Google sign-in. Please try again.';
+                        break;
+                    case 'access_denied':
+                        errorMessage = 'Access was denied. Please try signing in again.';
+                        break;
+                    default:
+                        errorMessage = errorParam;
+                }
+
+                showLoginError(errorMessage);
+                setTimeout(() => openLoginModal(), 100);
+            }
+        }
+    }
+
     // Event listeners for opening modals
     document.addEventListener('click', function (e) {
         console.log('Click detected on:', e.target);
@@ -136,7 +259,7 @@
         }
     });
 
-    // Handle login form submission
+    // FIXED: Handle login form submission
     if (loginForm) {
         loginForm.addEventListener('submit', async function (e) {
             e.preventDefault();
@@ -154,10 +277,9 @@
             }
 
             try {
-                // Get form data
                 const formData = new FormData(loginForm);
 
-                // Submit form via AJAX
+                console.log('Submitting login request...');
                 const response = await fetch('/Account/ModalLogin', {
                     method: 'POST',
                     body: formData,
@@ -166,27 +288,44 @@
                     }
                 });
 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const result = await response.json();
-                console.log('Login response:', result);
+                console.log('Login response received:', result);
 
                 if (result.success) {
-                    // Success - redirect to main page
-                    window.location.href = result.redirectUrl || '/Home/Main';
+                    console.log('Login successful, redirecting to:', result.redirectUrl);
+
+                    // Show success message
+                    showLoginSuccess('Sign in successful! Redirecting...');
+
+                    // CRITICAL FIX: Immediate redirect
+                    const redirectUrl = result.redirectUrl || '/Home/Main';
+                    console.log('Final redirect URL:', redirectUrl);
+
+                    // Redirect immediately - don't wait
+                    window.location.href = redirectUrl;
+
                 } else {
-                    // Show error
+                    console.log('Login failed:', result.message);
                     showLoginError(result.message || 'An error occurred during login.');
                 }
             } catch (error) {
                 console.error('Login error:', error);
                 showLoginError('An unexpected error occurred. Please try again.');
+            } finally {
+                // Reset button state
+                if (loginSubmitBtn) {
+                    loginSubmitBtn.disabled = false;
+                    loginSubmitBtn.innerHTML = 'Sign In';
+                }
             }
         });
     }
 
-    // Handle register form submission
-    // Replace the register form submission part in your JavaScript with this updated version
-
-    // Handle register form submission
+    // FIXED: Handle register form submission
     if (registerForm) {
         registerForm.addEventListener('submit', async function (e) {
             e.preventDefault();
@@ -204,30 +343,27 @@
             }
 
             try {
-                // Get form data
                 const formData = new FormData(registerForm);
 
-                // Fix checkbox values - convert to proper boolean strings
+                // Fix checkbox values
                 const acceptTermsCheckbox = document.getElementById('acceptTerms');
                 const acceptPrivacyCheckbox = document.getElementById('acceptPrivacy');
                 const marketingEmailsCheckbox = document.getElementById('marketingEmails');
 
-                // Remove existing checkbox values and set proper ones
                 formData.delete('AcceptTerms');
                 formData.delete('AcceptPrivacy');
                 formData.delete('MarketingEmails');
 
-                // Set boolean values as strings
                 formData.append('AcceptTerms', acceptTermsCheckbox.checked ? 'true' : 'false');
                 formData.append('AcceptPrivacy', acceptPrivacyCheckbox.checked ? 'true' : 'false');
                 formData.append('MarketingEmails', marketingEmailsCheckbox.checked ? 'true' : 'false');
 
-                console.log('Form data being sent:');
-                for (let [key, value] of formData.entries()) {
-                    console.log(key + ': ' + value);
-                }
+                console.log('Form data being sent:', {
+                    AcceptTerms: acceptTermsCheckbox.checked,
+                    AcceptPrivacy: acceptPrivacyCheckbox.checked,
+                    MarketingEmails: marketingEmailsCheckbox.checked
+                });
 
-                // Submit form via AJAX
                 const response = await fetch('/Account/ModalRegister', {
                     method: 'POST',
                     body: formData,
@@ -236,28 +372,57 @@
                     }
                 });
 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const result = await response.json();
                 console.log('Register response:', result);
 
                 if (result.success) {
-                    // Success - show message and redirect
-                    closeAllModals();
-                    showSuccess(result.message);
-                    if (result.redirectUrl) {
+                    console.log('Registration successful');
+
+                    // Show success message
+                    showRegisterSuccess(result.message || 'Account created successfully!');
+
+                    // Handle different redirect scenarios
+                    if (result.showLogin) {
+                        // For new registrations that need email verification
+                        setTimeout(() => {
+                            closeRegisterModalOnly();
+                            openLoginModal();
+                            showLoginSuccess('Please check your email to verify your account, then sign in.');
+                        }, 2000);
+                    } else if (result.redirectUrl) {
+                        // For OAuth or auto-verified users
                         setTimeout(() => {
                             window.location.href = result.redirectUrl;
                         }, 2000);
+                    } else {
+                        // Default fallback
+                        setTimeout(() => {
+                            closeRegisterModalOnly();
+                            openLoginModal();
+                        }, 2000);
                     }
+
                 } else {
-                    // Show error
+                    console.log('Registration failed:', result.message);
                     showRegisterError(result.message || 'An error occurred during registration.');
                 }
             } catch (error) {
-                console.error('Registration error:', error);
+                console.error('Register error:', error);
                 showRegisterError('An unexpected error occurred. Please try again.');
+            } finally {
+                // Reset button state
+                if (registerSubmitBtn) {
+                    registerSubmitBtn.disabled = false;
+                    registerSubmitBtn.innerHTML = 'Start Your Journey';
+                }
             }
         });
     }
+
     // Input focus animations
     const formControls = document.querySelectorAll('.login-form-control, .register-form-control');
     formControls.forEach(input => {
@@ -333,13 +498,15 @@
     window.LoginModal = {
         open: openLoginModal,
         close: closeAllModals,
-        showError: showLoginError
+        showError: showLoginError,
+        showSuccess: showLoginSuccess
     };
 
     window.RegisterModal = {
         open: openRegisterModal,
         close: closeAllModals,
-        showError: showRegisterError
+        showError: showRegisterError,
+        showSuccess: showRegisterSuccess
     };
 
     // Prevent form submission on disabled buttons
@@ -350,6 +517,37 @@
         }
     });
 
+    // Initialize modal handling when DOM is ready
+    function initializeModals() {
+        console.log('Initializing modals...');
+        handleServerData();
+
+        // Clean up URL parameters after processing
+        if (window.history && window.history.replaceState) {
+            const url = new URL(window.location);
+            const params = ['error', 'showLogin', 'showRegister'];
+            let hasParams = false;
+
+            params.forEach(param => {
+                if (url.searchParams.has(param)) {
+                    url.searchParams.delete(param);
+                    hasParams = true;
+                }
+            });
+
+            if (hasParams) {
+                window.history.replaceState({}, document.title, url.pathname);
+            }
+        }
+    }
+
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeModals);
+    } else {
+        setTimeout(initializeModals, 100);
+    }
+
     // Debug: Log when DOM is ready
     console.log('Modal script loaded. Elements found:');
     console.log('Login modal:', !!loginModal);
@@ -359,11 +557,7 @@
 
 })();
 
-
-
-
-//Alert for creating an account
-
+// Alert system for creating an account
 class SimpleTopAlert {
     constructor() {
         this.alerts = [];
@@ -492,36 +686,3 @@ class SimpleTopAlert {
 // Initialize and make globally available
 const topAlert = new SimpleTopAlert();
 window.topAlert = topAlert;
-
-// Demo functions
-function showSuccessDemo() {
-    topAlert.success(
-        'Account Created Successfully!',
-        'Please check your email to verify your account before signing in.'
-    );
-}
-
-function showWarningDemo() {
-    topAlert.warning(
-        'Verification Required',
-        'Your email address needs to be verified before you can continue.'
-    );
-}
-
-function showErrorDemo() {
-    topAlert.error(
-        'Registration Failed',
-        'There was an error creating your account. Please try again.'
-    );
-}
-
-// Example of how to use in your registration success handler
-function showSuccess(message) {
-    console.log('Success:', message);
-
-    // Replace the old alert() with this:
-    topAlert.success(
-        'Account Created Successfully!',
-        'Please check your email to verify your account before signing in.'
-    );
-}

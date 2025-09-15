@@ -2263,7 +2263,8 @@ namespace TidyUpCapstone.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("AccessFailedCount");
 
                     b.Property<string>("AdminNotes")
                         .HasColumnType("nvarchar(max)")
@@ -2275,7 +2276,8 @@ namespace TidyUpCapstone.Migrations
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("ConcurrencyStamp");
 
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2")
@@ -2287,7 +2289,8 @@ namespace TidyUpCapstone.Migrations
                         .HasColumnName("email");
 
                     b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("EmailConfirmed");
 
                     b.Property<string>("FirstName")
                         .HasMaxLength(50)
@@ -2328,10 +2331,12 @@ namespace TidyUpCapstone.Migrations
                         .HasColumnName("location");
 
                     b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("LockoutEnabled");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnName("LockoutEnd");
 
                     b.Property<int?>("ManagedByAdminId")
                         .HasColumnType("int")
@@ -2339,11 +2344,13 @@ namespace TidyUpCapstone.Migrations
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("nvarchar(256)")
+                        .HasColumnName("NormalizedEmail");
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("nvarchar(256)")
+                        .HasColumnName("NormalizedUserName");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)")
@@ -2354,7 +2361,8 @@ namespace TidyUpCapstone.Migrations
                         .HasColumnName("PhoneNumber");
 
                     b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("PhoneNumberConfirmed");
 
                     b.Property<string>("ProfilePictureUrl")
                         .HasMaxLength(500)
@@ -2370,7 +2378,8 @@ namespace TidyUpCapstone.Migrations
                         .HasColumnName("screen_reader");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("SecurityStamp");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -2389,7 +2398,8 @@ namespace TidyUpCapstone.Migrations
                         .HasColumnName("token_balance");
 
                     b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("TwoFactorEnabled");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
