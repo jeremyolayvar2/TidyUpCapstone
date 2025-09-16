@@ -12,13 +12,8 @@ using TidyUpCapstone.Data;
 namespace TidyUpCapstone.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-<<<<<<<< HEAD:TidyUpCapstone/Migrations/20250916063447_DBSchema.Designer.cs
-    [Migration("20250916063447_DBSchema")]
+    [Migration("20250916133755_DBSchema")]
     partial class DBSchema
-========
-    [Migration("20250916133038_SchemaMain")]
-    partial class SchemaMain
->>>>>>>> feature/item-management:TidyUpCapstone/Migrations/20250916133038_SchemaMain.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
