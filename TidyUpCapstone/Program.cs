@@ -328,6 +328,27 @@ builder.Services.AddAntiforgery(options =>
 // 9. Build Application
 // -----------------------------------------------------
 var app = builder.Build();
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+    try
+    {
+        // Ensure database is created
+        await context.Database.EnsureCreatedAsync();
+
+        // Run seeding
+        await DatabaseSeeder.SeedAsync(context);
+
+        app.Logger.LogInformation("Database seeding completed successfully");
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogError(ex, "Error occurred while seeding database");
+    }
+}
+
 
 // Get logger for this scope
 var appLogger = app.Services.GetRequiredService<ILogger<Program>>();
@@ -418,6 +439,7 @@ app.Use(async (context, next) =>
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseRouting();
 
 app.UseRouting();
 app.UseCookiePolicy();

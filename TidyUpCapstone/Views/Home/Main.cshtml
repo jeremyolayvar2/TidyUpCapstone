@@ -1,11 +1,837 @@
-﻿@{
-    ViewData["Title"] = "Main";
-}
+﻿<!-- Enhanced Main.cshtml with Community Hub -->
+@model TidyUpCapstone.Models.ViewModels.Items.ItemListViewModel
+@using TidyUpCapstone.Helpers
+
+<link href="https://cdn.jsdelivr.net/npm/iconsax@1.0.0-alpha2/dist/css/iconsax.css" rel="stylesheet">
+<link rel="stylesheet" href="~/css/instagram-animations.css" />
+<link rel="stylesheet" href="~/css/posting-styles.css" />
 
 @{
-    ViewBag.HideNavigation = true;
+    ViewBag.HideNavigation = false;
+    string currentUserId = "";
+    string currentUserName = "";
+
+    if (User.Identity.IsAuthenticated)
+    {
+        // Real authenticated user
+        currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "";
+        currentUserName = User.Identity.Name ?? "";
+    }
+    else
+    {
+        // For production - redirect to login or handle unauthenticated users
+        currentUserId = "";
+        currentUserName = "Anonymous";
+    }
 }
 
-<div class="container mt-5">
-    <h1>Welcome to TidyUp!</h1>
+<script>
+    window.currentUserId = '@currentUserId';
+    window.currentUserName = '@currentUserName';
+
+    function getCurrentUserId() {
+        return window.currentUserId || document.body.dataset.userid || null;
+    }
+
+    function getCurrentUserName() {
+        return window.currentUserName || document.body.dataset.username || "Anonymous";
+    }
+</script>
+
+<form id="antiForgeryForm" style="display:none;">
+    @Html.AntiForgeryToken()
+</form>
+
+<!-- Filter Tabs -->
+<div class="filter-tabs-container">
+    <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">
+            <i class='bx bx-apps-alt'></i>
+            All Posts
+        </button>
+        <button class="filter-tab" data-filter="items">
+            <i class='bx bx-shopping-bag'></i>
+            Items
+        </button>
+        <button class="filter-tab" data-filter="community">
+            <i class='bx bx-community'></i>
+            Community
+        </button>
+    </div>
 </div>
+
+<!-- Community Post Creation Section -->
+@if (User.Identity.IsAuthenticated)
+{
+    <div class="community-post-section" id="communityPostSection">
+        <div class="post-creator">
+            <div class="post-creator-header">
+                <div class="user-avatar">
+                    <img src="@(ViewBag.CurrentUserAvatar ?? "~/assets/default-avatar.svg")" alt="Your avatar" />
+                </div>
+                <div class="post-input-container">
+                    <textarea class="post-input"
+                              placeholder="Share your clutter story..."
+                              id="communityPostInput"
+                              maxlength="1000"
+                              rows="1"></textarea>
+                    <div class="post-actions">
+                        <div class="post-options">
+                            <button type="button" class="post-option-btn" id="addImageBtn">
+                                <i class='bx bx-image text-xl'></i>
+                                Photo
+                            </button>
+                            <input type="file" id="communityImageInput" accept="image/*" style="display: none;">
+                        </div>
+                        <button type="button" class="post-btn-community" id="postCommunityBtn" disabled>
+                            Post
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Preview -->
+            <div class="community-image-preview" id="communityImagePreview" style="display: none;">
+                <img id="communityPreviewImg" src="" alt="Preview" />
+                <button type="button" class="remove-community-image" id="removeCommunityImage">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- POST CONTAINER -->
+<div class="main-container-main">
+    @if (User.Identity.IsAuthenticated)
+    {
+        <button class="floating-add-btn" id="openCreateModal" title="Post an Item">
+            <i class='bx bx-plus'></i>
+        </button>
+    }
+
+    <div class="posts-container" id="postsContainer">
+        <!-- Regular Item Posts -->
+        @if (Model?.Items != null && Model.Items.Any())
+        {
+            @foreach (var item in Model.Items)
+            {
+                <div class="item-post" data-type="item" id="item-@item.ItemId">
+                    <div class="mid-container-child">
+                        <div class="listing-container1">
+                            <div class="listing-container1-child1">
+                                <img src="@item.UserAvatarUrl" alt="person" />
+                                <span>@item.Username</span>
+                                <img src="~/assets/verified-icon.svg" alt="verified" />
+                                <span class="date-span">@item.DatePosted.ToTimeAgo()</span>
+                            </div>
+
+                            @{
+                                bool isItemOwner = false;
+                                if (User.Identity.IsAuthenticated)
+                                {
+                                    isItemOwner = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == item.UserId.ToString();
+                                }
+                                // For production, non-authenticated users cannot own items
+                            }
+
+                            <!-- Show dropdown for everyone, but different options based on ownership -->
+                            <div class="dropdown-menu">
+                                <button class="dropdown-btn" onclick="toggleDropdown(this)">
+                                    <img src="~/assets/dot-horiz.svg" alt="dot-horiz" />
+                                </button>
+                                <div class="dropdown-content">
+                                    @if (isItemOwner)
+                                    {
+                                        <button class="dropdown-item" onclick="if(typeof openEditModal !== 'undefined') openEditModal(@item.ItemId)">Edit</button>
+                                        <button class="dropdown-item delete" onclick="deleteItem(@item.ItemId)">Delete</button>
+                                    }
+                                    else
+                                    {
+                                        <button class="dropdown-item report" onclick="reportItem(@item.ItemId)">Report</button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="listing-container2">
+                            @if (!string.IsNullOrEmpty(item.ImageFileName))
+                            {
+                                <img src="@item.ImageUrl" alt="@item.ItemTitle" />
+                            }
+                            else
+                            {
+                                <div class="no-image-placeholder">No Image Available</div>
+                            }
+                        </div>
+
+                        <div class="listing-container3">
+                            <div class="listing-container3-child1">
+                                <span class="material-symbols-outlined">category</span>
+                                <span>@item.CategoryName</span>
+                            </div>
+
+                            <div class="listing-container3-child2">
+                                <span class="material-symbols-outlined">action_key</span>
+                                <span>@item.ConditionName</span>
+                            </div>
+
+                            <div class="listing-container3-child3">
+                                <span class="material-symbols-outlined">location_on</span>
+                                <span>@item.LocationName</span>
+                            </div>
+                        </div>
+
+                        <div class="listing-container4">
+                            <h3>@item.ItemTitle</h3>
+                            <p>@item.Description</p>
+                        </div>
+
+                        <div class="listing-container5">
+                            <div class="listing-container5-child1">
+                                <span>
+                                    @{
+                                        string currentUserIdForPrice = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+                                        if (string.IsNullOrEmpty(currentUserIdForPrice) || !User.Identity.IsAuthenticated)
+                                        {
+                                            @item.AdjustedTokenPrice.ToString("0.##")
+                                        }
+                                        else if (currentUserIdForPrice == item.UserId.ToString())
+                                        {
+                                            @item.FinalTokenPrice.ToString("0.##")
+                                        }
+                                        else
+                                        {
+                                            @item.AdjustedTokenPrice.ToString("0.##")
+                                        }
+                                    }
+                                </span>
+                                <img src="~/assets/game-icons_token.svg" alt="token" />
+                            </div>
+
+                            @if (item.Status != TidyUpCapstone.Models.Entities.Items.ItemStatus.Available)
+                            {
+                                <div class="status-badge @item.StatusDisplayName.ToLower()">
+                                    @item.StatusDisplayName
+                                </div>
+                            }
+                            else if (item.IsExpired)
+                            {
+                                <div class="status-badge expired">
+                                    Expired
+                                </div>
+                            }
+                            else if (User.Identity.IsAuthenticated)
+                            {
+                                <button class="interested-btn" onclick="createChatBubble('@item.UserId', '@item.Username', @item.ItemId, '@item.ItemTitle')">
+                                    <span>Interested</span>
+                                </button>
+                            }
+
+                            @if (item.IsAiProcessed && item.AiConfidenceLevel.HasValue)
+                            {
+                                <div class="ai-confidence" title="AI Confidence Level">
+                                    <span class="material-symbols-outlined">psychology</span>
+                                    <span>@((item.AiConfidenceLevel.Value * 100).ToString("0"))%</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state-container" id="emptyState" style="display: none;">
+        <div class="empty-state">
+            <img src="~/assets/empty-items.svg" alt="No items" class="empty-state-icon" />
+            <h3>No posts found</h3>
+            <p>Be the first to post in this community!</p>
+            @if (User.Identity.IsAuthenticated)
+            {
+                <button class="btn btn-primary" id="openCreateModal">Post Your First Item</button>
+            }
+            else
+            {
+                <p><a href="/Account/Login">Login</a> to start posting items!</p>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- CHAT -->
+@if (User.Identity.IsAuthenticated)
+{
+    <button class="new-message-btn" id="newMessageBtn" aria-label="New Message" title="New Message">
+        <span>Messages</span>
+    </button>
+
+    <div class="messaging-overlay">
+        <!-- App Container (Messages Panel) -->
+        <div class="app-container" role="application" aria-label="Instagram Messages Panel">
+            <header>
+                <h1>Messages</h1>
+                <div class="header-controls">
+                    <button class="icon-btn" id="expandBtn" title="Expand">
+                        <span class="material-symbols-outlined">open_in_full</span>
+                    </button>
+                    <button class="icon-btn" id="closeAppBtn" title="Close">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+            </header>
+            <main>
+                <div class="messages-list" tabindex="0" aria-label="Messages list" role="list">
+                </div>
+            </main>
+        </div>
+
+        <div class="chat-window">
+            <div class="header-chat">
+                <div class="header-chat-child1">
+                    <h2>Item Owner</h2>
+                    <p>Active 24m ago</p>
+                </div>
+                <button class="icon-btn" id="closeChatBtn" title="Back to Messages">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </button>
+            </div>
+            <div class="message-log">
+                @* Messages will be loaded dynamically *@
+            </div>
+
+            <div class="message-input">
+                <input type="text" id="chatMessageInput" placeholder="Message..." />
+                <button type="button" id="sendMessage" class="send-btn" aria-label="Send message">
+                    <span class="material-symbols-outlined">send</span>
+                </button>
+            </div>
+
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+            <script src="~/js/SignalRConnection.js"></script>
+        </div>
+    </div>
+}
+
+<!-- Token wallet modal -->
+@if (User.Identity.IsAuthenticated)
+{
+    <div class="card-spotlight" id="tokenModal">
+        <div class="card-spotlight-child1">
+            <h2>@(ViewBag.CurrentUserTokenBalance ?? 0)</h2>
+            <img src="~/assets/token-symbol.svg" alt="Token" />
+        </div>
+        <div class="card-spotlight-child2">
+            <p>This is your current token balance</p>
+        </div>
+    </div>
+}
+
+<!-- Modal for Posting an Item -->
+@if (User.Identity.IsAuthenticated)
+{
+    <div id="createPostModal" class="modal" enctype="multipart/form-data">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Post an Item</h2>
+                <button type="button" class="close-modal" onclick="closeCreateModal()">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="modal-content-child1">
+                <div class="upload-section">
+                    <label for="imageInput" class="upload-label">
+                        <img src="~/assets/upload-image-input.svg" alt="Upload" class="upload-image-btn">
+                        <span class="upload-text">Click to upload image</span>
+                    </label>
+                    <input type="file" id="imageInput" name="ImageFile" accept="image/*" required>
+
+                    <!-- Image Preview Container -->
+                    <div class="image-preview" id="imagePreview" style="display: none;">
+                        <img id="previewImg" src="" alt="Preview" />
+                        <button type="button" class="remove-image" onclick="removeImage()">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="cat-con-price">
+                    <!-- Category Dropdown - AI will silently set this -->
+                    <div id="categoryContainer">
+                        <select id="categoryInput" name="CategoryId" required>
+                            <option value="" disabled selected hidden>Select a category</option>
+                            @foreach (var category in Model?.Categories ?? new List<TidyUpCapstone.Models.DTOs.Items.ItemCategoryDto>())
+                            {
+                                <option value="@category.CategoryId">@category.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Condition Dropdown - AI will silently set this -->
+                    <div id="conditionContainer">
+                        <select id="conditionInput" name="ConditionId" required>
+                            <option value="" disabled selected hidden>Select condition</option>
+                            @foreach (var condition in Model?.Conditions ?? new List<TidyUpCapstone.Models.DTOs.Items.ItemConditionDto>())
+                            {
+                                <option value="@condition.ConditionId">@condition.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="input-wrapper">
+                        <input class="input-form" type="text" id="locationInput" name="LocationName" placeholder=" " required />
+                        <label class="input-label" for="locationInput">Location</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-content-child2">
+                <div class="item-info">
+                    <!-- Title -->
+                    <div class="input-wrapper">
+                        <input class="input-form" type="text" id="titleInput" name="ItemTitle" placeholder=" " required maxlength="100" />
+                        <label class="input-label" for="titleInput">Item</label>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="input-wrapper">
+                        <textarea class="input-form" id="descriptionInput" name="Description" placeholder=" " required maxlength="1000"></textarea>
+                        <label class="input-label" for="descriptionInput">Description</label>
+                    </div>
+
+                    <!-- Hidden fields for location data -->
+                    <input type="hidden" id="LocationName" name="LocationName" />
+                    <input type="hidden" name="Latitude" id="Latitude" />
+                    <input type="hidden" name="Longitude" id="Longitude" />
+
+                    <!-- Hidden fields for AI data (backend tracking only - no UI) -->
+                    <input type="hidden" id="aiCategoryId" name="AiCategoryId" />
+                    <input type="hidden" id="aiConditionId" name="AiConditionId" />
+                    <input type="hidden" id="aiConfidenceScore" name="AiConfidenceScore" />
+                </div>
+
+                <div class="token-post">
+                    <div class="price-display">
+                        <span class="token-count" id="finalPrice">0.00</span>
+                        <img src="~/assets/game-icons_token.svg" alt="token" />
+                        <div class="price-breakdown" id="priceBreakdown" style="display: none;">
+                            <small id="priceDetails"></small>
+                        </div>
+                    </div>
+                    <button type="submit" class="post-btn" id="submitPost" disabled>
+                        <span class="loading-spinner" style="display: none;"></span>
+                        <span class="btn-text">Post</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal for Posting an Item -->
+    <div id="editPostModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Item</h2>
+                <button type="button" class="close-modal" onclick="closeEditModal()">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="modal-content-child1">
+                <!-- Show current image as read-only -->
+                <div class="current-image-display">
+                    <img id="currentImageDisplay" src="" alt="Current image" style="width: 100%; max-width: 300px; border-radius: 8px;" />
+                </div>
+
+                <div class="cat-con-price">
+                    <!-- READ-ONLY Category Display -->
+                    <div id="editCategoryContainer">
+                        <label>Category</label>
+                        <div class="read-only-field" id="editCategoryDisplay" style="
+            padding: 12px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            color: #6c757d;
+            font-weight: 500;">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                        <input type="hidden" id="editCategoryInput" name="CategoryId" />
+                    </div>
+
+                    <!-- READ-ONLY Condition Display -->
+                    <div id="editConditionContainer">
+                        <label>Condition</label>
+                        <div class="read-only-field" id="editConditionDisplay" style="
+            padding: 12px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            color: #6c757d;
+            font-weight: 500;">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                        <input type="hidden" id="editConditionInput" name="ConditionId" />
+                    </div>
+
+                    <!-- EDITABLE Location -->
+                    <div class="input-wrapper">
+                        <input class="input-form" type="text" id="editLocationInput" name="LocationName" placeholder=" " required />
+                        <label class="input-label" for="editLocationInput">Location</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-content-child2">
+                <div class="item-info">
+                    <!-- EDITABLE Title -->
+                    <div class="input-wrapper">
+                        <input class="input-form" type="text" id="editTitleInput" name="ItemTitle" placeholder=" " required maxlength="100" />
+                        <label class="input-label" for="editTitleInput">Item</label>
+                    </div>
+
+                    <!-- EDITABLE Description -->
+                    <div class="input-wrapper">
+                        <textarea class="input-form" id="editDescriptionInput" name="Description" placeholder=" " required maxlength="1000"></textarea>
+                        <label class="input-label" for="editDescriptionInput">Description</label>
+                    </div>
+
+                    <!-- Hidden fields -->
+                    <input type="hidden" id="editLatitude" name="Latitude" />
+                    <input type="hidden" id="editLongitude" name="Longitude" />
+                </div>
+
+                <div class="token-post">
+                    <div class="price-display">
+                        <span class="token-count" id="editFinalPrice"></span>
+                        <img src="~/assets/game-icons_token.svg" alt="token" />
+                    </div>
+                    <button class="post-btn" id="submitEdit" type="button">
+                        <span class="loading-spinner" style="display: none;"></span>
+                        <span class="btn-text">Save Changes</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Comments Modal -->
+<div class="comments-modal" id="commentsModal">
+    <div class="comments-modal-content">
+        <!-- Modal Header -->
+        <div class="comments-modal-header">
+            <div class="comments-header-content">
+                <div class="comments-modal-title">
+                    <i class='bx bx-message-circle'></i>
+                    Comments
+                    <span class="comments-count-badge" id="modalCommentsCount">0</span>
+                </div>
+                <button class="close-comments-modal" onclick="closeCommentsModal()">
+                    <i class='bx bx-x'></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Comments List -->
+        <div class="comments-list-container" id="commentsListContainer">
+            <div class="loading-comments" id="commentsLoading" style="display: none;">
+                <div class="loading-spinner-comments"></div>
+            </div>
+
+            <!-- Empty State (default state for production) -->
+            <div class="comments-empty-state">
+                <i class='bx bx-message-circle'></i>
+                <h3>No comments yet</h3>
+                <p>Be the first to comment on this post!</p>
+            </div>
+        </div>
+
+        <!-- New Comment Input -->
+        @if (User.Identity.IsAuthenticated)
+        {
+            <div class="new-comment-section">
+                <div class="new-comment-container">
+                    <img src="@(ViewBag.CurrentUserAvatar ?? "~/assets/default-avatar.svg")"
+                         alt="Your avatar" class="new-comment-avatar">
+                    <div class="new-comment-input-wrapper">
+                        <textarea class="new-comment-input"
+                                  placeholder="Write a comment..."
+                                  rows="1"
+                                  id="newCommentInput"
+                                  maxlength="500"></textarea>
+                        <button class="send-comment-btn" id="sendCommentBtn" disabled>
+                            <i class='bx bx-send'></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="login-prompt-comments">
+                <p><a href="/Account/Login">Login</a> to join the conversation</p>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="~/js/toggleEditDelete.js"></script>
+<script src="~/js/afterTax.js"></script>
+<script src="~/js/openModal.js?v=1.0.14"></script>
+<script src="~/js/editingPost.js?v=1.0.19"></script>
+<script src="~/js/deletePost.js"></script>
+<script src="~/js/tokenModal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="~/js/messageScript.js"></script>
+<script src="~/js/createChatBubble.js"></script>
+
+<!-- Enhanced posting system scripts -->
+<script src="~/js/uiUpdateSystem.js"></script>
+<script src="~/js/filterTabSystem.js"></script>
+
+<!-- Enhanced JavaScript for image preview and form validation -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Only initialize form elements if user is authenticated
+        if (!@(User.Identity.IsAuthenticated.ToString().ToLower())) {
+            return;
+        }
+
+        // Image preview functionality - Enhanced version
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+        const uploadSection = document.querySelector('.upload-section .upload-label');
+
+        // Character count for text inputs
+        const titleInput = document.getElementById('titleInput');
+        const descriptionInput = document.getElementById('descriptionInput');
+
+        if (titleInput) {
+            titleInput.addEventListener('input', function() {
+                const remaining = 100 - this.value.length;
+                // Character counter handled by openModal.js
+            });
+        }
+
+        if (descriptionInput) {
+            descriptionInput.addEventListener('input', function() {
+                const remaining = 1000 - this.value.length;
+                // Character counter handled by openModal.js
+            });
+        }
+
+        // Form validation - Enhanced version
+        function validateForm() {
+            const title = titleInput?.value.trim();
+            const description = descriptionInput?.value.trim();
+            const category = document.getElementById('categoryInput')?.value;
+            const condition = document.getElementById('conditionInput')?.value;
+            const location = document.getElementById('locationInput')?.value.trim();
+            const image = imageInput?.files?.length > 0;
+            const latitude = document.getElementById('Latitude')?.value;
+            const longitude = document.getElementById('Longitude')?.value;
+
+            const isValid = title && description && category && condition && location && image && latitude && longitude;
+
+            const submitBtn = document.getElementById('submitPost');
+            if (submitBtn) {
+                submitBtn.disabled = !isValid;
+
+                // Add visual feedback classes
+                if (isValid) {
+                    submitBtn.classList.add('valid');
+                    submitBtn.classList.remove('invalid');
+                } else {
+                    submitBtn.classList.remove('valid');
+                    submitBtn.classList.add('invalid');
+                }
+            }
+
+            return isValid;
+        }
+
+        // Add validation listeners to all form inputs
+        [titleInput, descriptionInput, document.getElementById('categoryInput'),
+         document.getElementById('conditionInput'), document.getElementById('locationInput'), imageInput]
+        .forEach(input => {
+            if (input) {
+                input.addEventListener('change', validateForm);
+                input.addEventListener('input', validateForm);
+            }
+        });
+
+        // Initial validation
+        validateForm();
+    });
+
+    function closeCreateModal() {
+        const modal = document.getElementById('createPostModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        // Reset form handled by openModal.js
+        if (typeof resetCreateForm === 'function') {
+            resetCreateForm();
+        }
+    }
+
+    function closeEditModal() {
+        const modal = document.getElementById('editPostModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+</script>
+
+<!-- Community Page Scripts -->
+<script src="~/js/CommunityPage.js?v=20241114g"></script>
+
+<!-- Google Places API Configuration -->
+<script>
+    // Only load Google Maps API if user is authenticated
+    if (@(User.Identity.IsAuthenticated.ToString().ToLower())) {
+        function loadGoogleMapsAPI() {
+            console.log('Loading Google Maps API...');
+
+            const API_KEY = 'AIzaSyAajNvSCpxo_QwyPwsRmrmr2-MlApf6Qkw';
+
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=places&callback=initializeGooglePlaces&loading=async`;
+            script.async = true;
+            script.defer = true;
+
+            script.onerror = function(error) {
+                console.error('Failed to load Google Maps API:', error);
+                console.error('Check: API key, Places API enabled, billing enabled');
+                initializeManualLocationFallback();
+            };
+
+            script.onload = function() {
+                console.log('Google Maps script loaded successfully');
+            };
+
+            document.head.appendChild(script);
+        }
+
+        window.initializeGooglePlaces = function() {
+            console.log('Google Places API callback triggered');
+
+            if (typeof google === 'undefined' || !google.maps || !google.maps.places) {
+                console.error('Google Maps/Places API not properly initialized');
+                initializeManualLocationFallback();
+                return;
+            }
+
+            console.log('Initializing autocomplete...');
+            initializeAutocomplete();
+        };
+
+        function initializeAutocomplete() {
+            const locationInput = document.getElementById('locationInput');
+            const editLocationInput = document.getElementById('editLocationInput');
+
+            if (!locationInput) {
+                console.error('Location input not found');
+                return;
+            }
+
+            try {
+                // Create autocomplete for create modal
+                const autocomplete = new google.maps.places.Autocomplete(locationInput, {
+                    types: ['geocode'],
+                    componentRestrictions: { country: 'ph' },
+                    fields: ['formatted_address', 'geometry', 'place_id']
+                });
+
+                autocomplete.addListener('place_changed', function() {
+                    const place = autocomplete.getPlace();
+
+                    if (!place.geometry) {
+                        console.log('No geometry for selected place');
+                        return;
+                    }
+
+                    const lat = place.geometry.location.lat();
+                    const lng = place.geometry.location.lng();
+
+                    document.getElementById('Latitude').value = lat;
+                    document.getElementById('Longitude').value = lng;
+                    document.getElementById('LocationName').value = place.formatted_address;
+
+                    console.log('Location selected:', { lat, lng, address: place.formatted_address });
+
+                    if (typeof triggerFormValidation === 'function') {
+                        triggerFormValidation();
+                    }
+                });
+
+                // Initialize for edit modal
+                if (editLocationInput) {
+                    const editAutocomplete = new google.maps.places.Autocomplete(editLocationInput, {
+                        types: ['geocode'],
+                        componentRestrictions: { country: 'ph' },
+                        fields: ['formatted_address', 'geometry', 'place_id']
+                    });
+
+                    editAutocomplete.addListener('place_changed', function() {
+                        const place = editAutocomplete.getPlace();
+                        if (place.geometry) {
+                            document.getElementById('editLatitude').value = place.geometry.location.lat();
+                            document.getElementById('editLongitude').value = place.geometry.location.lng();
+                        }
+                    });
+                }
+
+                console.log('Autocomplete initialized successfully');
+
+            } catch (error) {
+                console.error('Error initializing autocomplete:', error);
+                initializeManualLocationFallback();
+            }
+        }
+
+        function initializeManualLocationFallback() {
+            console.log('Initializing manual location entry fallback');
+
+            const locationInput = document.getElementById('locationInput');
+            if (locationInput) {
+                locationInput.placeholder = 'Enter location manually (e.g., Manila, Philippines)';
+
+                locationInput.addEventListener('blur', function() {
+                    const location = this.value.trim();
+                    if (location && location.length > 3) {
+                        document.getElementById('Latitude').value = '14.5995';
+                        document.getElementById('Longitude').value = '120.9842';
+                        document.getElementById('LocationName').value = location;
+
+                        console.log('Manual location set:', location);
+
+                        if (typeof triggerFormValidation === 'function') {
+                            triggerFormValidation();
+                        }
+                    }
+                });
+            }
+        }
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+                    console.log('Google API already loaded');
+                    initializeAutocomplete();
+                } else {
+                    loadGoogleMapsAPI();
+                }
+            }, 500);
+        });
+    }
+</script>
+
+<script src="https://cdn.tailwindcss.com"></script>

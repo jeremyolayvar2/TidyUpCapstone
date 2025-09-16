@@ -6,7 +6,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TidyUpCapstone.Migrations
 {
     /// <inheritdoc />
+<<<<<<<< HEAD:TidyUpCapstone/Migrations/20250915134015_DBSchema.cs
     public partial class DBSchema : Migration
+========
+    public partial class InitSchemaMain : Migration
+>>>>>>>> feature/item-management:TidyUpCapstone/Migrations/20250915164446_InitSchemaMain.cs
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -535,7 +539,8 @@ namespace TidyUpCapstone.Migrations
                     ImageUrl = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     IsPinned = table.Column<bool>(type: "bit", nullable: false),
                     DatePosted = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LastEdited = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    LastEdited = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1254,6 +1259,9 @@ namespace TidyUpCapstone.Migrations
                     AnalysisId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ItemId = table.Column<int>(type: "int", nullable: false),
+                    AnalysisResult = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ProcessedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DetectedObjects = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DetectedCategories = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ImageDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),

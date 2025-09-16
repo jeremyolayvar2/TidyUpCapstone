@@ -49,6 +49,8 @@ namespace TidyUpCapstone.Models.DTOs.Community
         public string Username { get; set; } = string.Empty;
         public string UserAvatarUrl { get; set; } = string.Empty;
         public int? ParentCommentId { get; set; }
+        public string? ParentCommenterName { get; set; }
+        public int? ParentCommenterId { get; set; }
         public string Content { get; set; } = string.Empty;
         public DateTime DateCommented { get; set; }
         public DateTime? LastEdited { get; set; }

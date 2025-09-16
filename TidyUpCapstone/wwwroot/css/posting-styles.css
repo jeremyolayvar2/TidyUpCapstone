@@ -1,0 +1,871 @@
+﻿/* Improved posting-styles.css - Enhanced UI Components */
+
+/* ============================================================================
+   ENHANCED FORM VALIDATION STATES
+   ============================================================================ */
+
+.post-btn .loading-spinner {
+    display: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #ffffff;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Enhanced button states */
+.post-btn.valid {
+    background: linear-gradient(135deg, var(--success-color), #20a744) !important;
+    cursor: pointer;
+    opacity: 1;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.post-btn.invalid {
+    background: #e9ecef !important;
+    color: #6c757d !important;
+    cursor: not-allowed;
+    opacity: 0.7;
+    box-shadow: none;
+}
+
+.post-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: #e9ecef !important;
+}
+
+/* ============================================================================
+   ENHANCED CHARACTER COUNTER
+   ============================================================================ */
+
+.character-counter {
+    font-size: 12px;
+    text-align: right;
+    margin-top: 6px;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+    color: #6c757d;
+}
+
+    .character-counter.warning {
+        color: #ffc107;
+        font-weight: 600;
+    }
+
+    .character-counter.danger {
+        color: #dc3545;
+        font-weight: 700;
+    }
+
+/* ============================================================================
+   ENHANCED POST ANIMATIONS
+   ============================================================================ */
+
+.item-post.new-post {
+    animation: slideInFromTop 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInFromTop {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.post-success {
+    animation: successPulse 0.8s ease-in-out;
+}
+
+@keyframes successPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.02);
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.2);
+    }
+}
+
+/* ============================================================================
+   ENHANCED FILTER SYSTEM
+   ============================================================================ */
+
+.filter-tabs-container {
+    position: sticky;
+    top: 0;
+    background: var(--background);
+    z-index: 100;
+    border-bottom: 1px solid rgba(107, 144, 128, 0.1);
+    margin-bottom: 24px;
+    padding: 16px 0;
+    backdrop-filter: blur(10px);
+}
+
+.filter-tab {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    border: none;
+    background: none;
+    padding: 14px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    font-weight: 500;
+    border-radius: 12px;
+}
+
+    .filter-tab:hover {
+        background-color: rgba(107, 144, 128, 0.08);
+        color: var(--primary-color);
+    }
+
+    .filter-tab.active {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(107, 144, 128, 0.3);
+    }
+
+    .filter-tab .material-symbols-outlined,
+    .filter-tab i {
+        font-size: 20px;
+        transition: transform 0.3s ease;
+    }
+
+    .filter-tab:hover .material-symbols-outlined,
+    .filter-tab:hover i {
+        transform: scale(1.1);
+    }
+
+/* ============================================================================
+   ENHANCED EMPTY STATE
+   ============================================================================ */
+
+.empty-state-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    padding: 40px 20px;
+    opacity: 0;
+    animation: fadeIn 0.6s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+.empty-state {
+    text-align: center;
+    max-width: 450px;
+    padding: 60px 30px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(107, 144, 128, 0.1);
+}
+
+.empty-state-icon {
+    width: 120px;
+    height: 120px;
+    opacity: 0.4;
+    margin: 0 auto 24px;
+    filter: drop-shadow(0 4px 8px rgba(107, 144, 128, 0.1));
+}
+
+.empty-state h3 {
+    color: var(--text-color);
+    margin-bottom: 12px;
+    font-size: 1.6rem;
+    font-weight: 600;
+}
+
+.empty-state p {
+    color: #6c757d;
+    margin-bottom: 24px;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.empty-state .btn {
+    padding: 14px 28px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(107, 144, 128, 0.3);
+}
+
+    .empty-state .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(107, 144, 128, 0.4);
+    }
+
+/* ============================================================================
+   ENHANCED IMAGE PREVIEW
+   ============================================================================ */
+
+.image-preview {
+    position: relative;
+    display: inline-block;
+    margin-top: 16px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+    .image-preview:hover {
+        transform: scale(1.02);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .image-preview img {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 12px;
+        display: block;
+        object-fit: cover;
+    }
+
+.remove-image {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(220, 53, 69, 0.9);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+}
+
+    .remove-image:hover {
+        background: #dc3545;
+        transform: scale(1.1);
+    }
+
+/* ============================================================================
+   ENHANCED COMMUNITY POST SECTION
+   ============================================================================ */
+
+.community-post-section {
+    transition: all 0.3s ease;
+    margin-bottom: 24px;
+}
+
+    .community-post-section.hidden {
+        opacity: 0;
+        transform: translateY(-20px);
+        pointer-events: none;
+    }
+
+.post-creator {
+    position: relative;
+    overflow: hidden;
+}
+
+    .post-creator::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(107, 144, 128, 0.05), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .post-creator:hover::before {
+        left: 100%;
+    }
+
+/* ============================================================================
+   ENHANCED MODAL SYSTEM
+   ============================================================================ */
+
+.modal {
+    backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+    .modal.show {
+        opacity: 1;
+    }
+
+.modal-content {
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    transform: scale(0.9) translateY(20px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal.show .modal-content {
+    transform: scale(1) translateY(0);
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.3s ease;
+    border-radius: 50%;
+    padding: 8px;
+}
+
+    .close-modal:hover {
+        color: var(--error-color);
+        background: rgba(220, 53, 69, 0.1);
+        transform: rotate(90deg);
+    }
+
+/* ============================================================================
+   ENHANCED UPLOAD SECTION
+   ============================================================================ */
+
+.upload-label {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px dashed #ddd;
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    background: linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%);
+}
+
+    .upload-label:hover {
+        border-color: var(--primary-color);
+        background: linear-gradient(135deg, rgba(107, 144, 128, 0.05) 0%, rgba(164, 195, 178, 0.08) 100%);
+        transform: scale(1.02);
+    }
+
+    .upload-label::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(107, 144, 128, 0.1), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .upload-label:hover::before {
+        left: 100%;
+    }
+
+.upload-text {
+    color: var(--text-color);
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.upload-label:hover .upload-text {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* ============================================================================
+   ENHANCED PRICE BREAKDOWN
+   ============================================================================ */
+
+.price-breakdown {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 12px;
+    font-size: 12px;
+    line-height: 1.5;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+    .price-breakdown small {
+        color: #495057;
+        font-weight: 500;
+    }
+
+/* ============================================================================
+   ENHANCED INTERACTION BUTTONS
+   ============================================================================ */
+
+.interaction-buttons {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    padding: 12px 0;
+}
+
+.interaction-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 10px 16px;
+    border-radius: 20px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 14px;
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+}
+
+    .interaction-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(107, 144, 128, 0.1), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .interaction-btn:hover::before {
+        left: 100%;
+    }
+
+    .interaction-btn:hover {
+        background: rgba(107, 144, 128, 0.08);
+        color: var(--primary-color);
+        transform: translateY(-1px);
+    }
+
+    .interaction-btn.liked {
+        color: #e74c3c;
+        background: rgba(231, 76, 60, 0.1);
+    }
+
+    .interaction-btn i {
+        font-size: 18px;
+        transition: transform 0.3s ease;
+    }
+
+    .interaction-btn:hover i {
+        transform: scale(1.1);
+    }
+
+/* ============================================================================
+   ENHANCED FORM INPUTS
+   ============================================================================ */
+
+.input-wrapper {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.input-form {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid #e1e5e9;
+    border-radius: 12px;
+    font-size: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
+    color: var(--text-color);
+}
+
+    .input-form:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(107, 144, 128, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .input-form.valid {
+        border-color: var(--success-color);
+        box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.1);
+    }
+
+    .input-form.invalid {
+        border-color: var(--error-color);
+        box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
+    }
+
+.input-label {
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    color: #6c757d;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    background: white;
+    padding: 0 4px;
+}
+
+.input-form:focus + .input-label,
+.input-form:not(:placeholder-shown) + .input-label {
+    top: -8px;
+    left: 12px;
+    font-size: 12px;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Enhanced select styling */
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 40px;
+    cursor: pointer;
+}
+
+    select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(107, 144, 128, 0.1);
+    }
+
+    select.valid {
+        border-color: var(--success-color);
+        box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.1);
+    }
+
+    select.invalid {
+        border-color: var(--error-color);
+        box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
+    }
+
+/* ============================================================================
+   ENHANCED LOADING STATES
+   ============================================================================ */
+
+.loading-state {
+    opacity: 0.6;
+    pointer-events: none;
+    position: relative;
+}
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: inherit;
+    backdrop-filter: blur(2px);
+}
+
+    .loading-overlay .spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid rgba(107, 144, 128, 0.3);
+        border-top: 3px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+/* ============================================================================
+   ENHANCED FLOATING ADD BUTTON
+   ============================================================================ */
+
+.floating-add-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(107, 144, 128, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .floating-add-btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 12px 35px rgba(107, 144, 128, 0.4);
+    }
+
+    .floating-add-btn:active {
+        transform: translateY(-1px) scale(1.02);
+    }
+
+/* ============================================================================
+   ENHANCED RESPONSIVE DESIGN
+   ============================================================================ */
+
+@media (max-width: 768px) {
+    .filter-tabs {
+        gap: 2px;
+        padding: 6px;
+    }
+
+    .filter-tab {
+        padding: 12px 8px;
+        font-size: 13px;
+        gap: 4px;
+        min-height: 44px;
+    }
+
+    .filter-tab-text {
+        display: none;
+    }
+
+    .modal {
+        padding: 8px;
+        align-items: flex-start;
+        padding-top: 10vh;
+    }
+
+    .modal-content {
+        max-height: 85vh;
+        overflow-y: auto;
+        border-radius: 16px;
+    }
+
+    .modal-header {
+        padding: 16px;
+    }
+
+        .modal-header h2 {
+            font-size: 24px;
+        }
+
+    .modal-content-child1 {
+        flex-direction: column;
+        padding: 16px;
+        gap: 16px;
+    }
+
+    .upload-section {
+        min-height: 140px;
+    }
+
+    .upload-label {
+        padding: 20px;
+    }
+
+    .cat-con-price {
+        min-width: auto;
+        gap: 12px;
+    }
+
+    .modal-content-child2 {
+        flex-direction: column;
+        padding: 0 16px 16px;
+        gap: 16px;
+    }
+
+    .token-post {
+        min-width: auto;
+        padding: 12px 0;
+        gap: 12px;
+    }
+
+    .price-display .token-count {
+        font-size: 2rem;
+    }
+
+    .interaction-buttons {
+        justify-content: space-around;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .interaction-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 8px 12px;
+        font-size: 13px;
+        min-width: 80px;
+    }
+
+    .floating-add-btn {
+        bottom: 16px;
+        right: 16px;
+        width: 52px;
+        height: 52px;
+        font-size: 20px;
+    }
+
+    .empty-state {
+        padding: 40px 20px;
+    }
+
+    .empty-state-icon {
+        width: 80px;
+        height: 80px;
+    }
+
+    .empty-state h3 {
+        font-size: 1.3rem;
+    }
+
+    .empty-state p {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .filter-tab {
+        padding: 10px 6px;
+        min-width: 44px;
+        gap: 0;
+    }
+
+    .modal-header h2 {
+        font-size: 20px;
+    }
+
+    .upload-section {
+        min-height: 120px;
+    }
+
+    .upload-label {
+        padding: 16px;
+    }
+
+    .token-post .token-count {
+        font-size: 1.8rem;
+    }
+
+    .interaction-btn {
+        padding: 6px 8px;
+        font-size: 12px;
+        gap: 4px;
+    }
+
+    .floating-add-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 18px;
+    }
+}
+
+/* ============================================================================
+   ENHANCED NOTIFICATION SYSTEM
+   ============================================================================ */
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    max-width: 300px;
+    border-left: 4px solid var(--primary-color);
+}
+
+    .notification.show {
+        transform: translateX(0);
+    }
+
+    .notification.success {
+        border-left-color: var(--success-color);
+    }
+
+    .notification.error {
+        border-left-color: var(--error-color);
+    }
+
+/* ============================================================================
+   ACCESSIBILITY ENHANCEMENTS
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Focus indicators */
+.filter-tab:focus,
+.post-option-btn:focus,
+.interaction-btn:focus,
+.post-btn:focus,
+.floating-add-btn:focus,
+.input-form:focus,
+select:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .filter-tab.active,
+    .post-btn,
+    .floating-add-btn {
+        border: 2px solid currentColor;
+    }
+}
+
+/* Dark mode enhancements */
+@media (prefers-color-scheme: dark) {
+    .upload-label {
+        background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
+        border-color: #555;
+    }
+
+    .price-breakdown {
+        background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
+        border-color: #555;
+    }
+
+    .notification {
+        background: #2d2d2d;
+        color: white;
+    }
+}

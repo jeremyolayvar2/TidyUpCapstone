@@ -269,6 +269,9 @@ namespace TidyUpCapstone.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AnalysisId"));
 
+                    b.Property<string>("AnalysisResult")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ApiRequestId")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
@@ -295,8 +298,15 @@ namespace TidyUpCapstone.Migrations
                     b.Property<int>("ItemId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("ProcessedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int?>("ProcessingTimeMs")
                         .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("AnalysisId");
 
@@ -411,6 +421,9 @@ namespace TidyUpCapstone.Migrations
                     b.Property<string>("ImageUrl")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsPinned")
                         .HasColumnType("bit");
