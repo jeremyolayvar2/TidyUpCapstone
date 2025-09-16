@@ -1,18 +1,16 @@
-﻿// Fixed openModal.js - Completely Silent AI Integration with PROPER FIXES
+﻿// FIXED openModal.js - Resolves Modal Display Issue & Improves UI Consistency
 // ============================================================================
-// AI SUGGESTION SYSTEM - Fully Silent Version (No UI Elements)
+// AI SUGGESTION SYSTEM - Fully Silent Version
 // ============================================================================
 const aiSuggestion = {
     isAnalyzing: false,
     detectedCategory: null,
     detectedCondition: null,
 
-    // Initialize AI system (no UI elements needed)
     initialize() {
         console.log("🤖 Silent AI detection system initialized");
     },
 
-    // Analyze image for both category and condition (COMPLETELY SILENT)
     async analyzeImageForCategory(imageFile) {
         if (this.isAnalyzing) return;
 
@@ -20,7 +18,6 @@ const aiSuggestion = {
         this.isAnalyzing = true;
 
         try {
-            // Run both detections in parallel
             const [categoryResult, conditionResult] = await Promise.all([
                 this.detectCategory(imageFile),
                 this.detectCondition(imageFile)
@@ -36,12 +33,10 @@ const aiSuggestion = {
         }
     },
 
-    // Google Vision API category detection
     async detectCategory(file) {
         const formData = new FormData();
         formData.append('imageFile', file);
 
-        // Add anti-forgery token
         const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
         if (token) {
             formData.append('__RequestVerificationToken', token);
@@ -71,13 +66,10 @@ const aiSuggestion = {
         }
     },
 
-    // FIXED: Use the actual VertexAI backend results instead of hardcoded values
     async detectCondition(file) {
-        console.log("Using backend VertexAI integration (no frontend endpoint needed)");
+        console.log("Using backend VertexAI integration");
 
         try {
-            // Since VertexAI runs in your ItemService during creation, 
-            // we'll use a direct API call to get the condition prediction
             const formData = new FormData();
             formData.append('imageFile', file);
 
@@ -91,7 +83,7 @@ const aiSuggestion = {
                 if (result.success) {
                     return {
                         success: true,
-                        conditionId: result.conditionId, // Use the actual result from VertexAI
+                        conditionId: result.conditionId,
                         conditionName: result.conditionName,
                         confidence: result.confidence
                     };
@@ -101,17 +93,14 @@ const aiSuggestion = {
             console.warn('Condition detection failed:', error);
         }
 
-        // Fallback: return null to avoid setting incorrect values
         return { success: false };
     },
 
-    // Apply AI results COMPLETELY SILENTLY - just set dropdown values
     applySilentAIResults(categoryResult, conditionResult) {
         console.log('AI Results received:', { categoryResult, conditionResult });
 
         let aiApplied = false;
 
-        // Apply category if detected successfully
         if (categoryResult.success && categoryResult.categoryId) {
             this.detectedCategory = categoryResult;
             this.setSilentCategory(categoryResult);
@@ -119,7 +108,6 @@ const aiSuggestion = {
             console.log(`✅ Category automatically set: ${categoryResult.categoryName} (${(categoryResult.confidence * 100).toFixed(0)}% confidence)`);
         }
 
-        // Apply condition if detected successfully
         if (conditionResult.success && conditionResult.conditionId) {
             this.detectedCondition = conditionResult;
             this.setSilentCondition(conditionResult);
@@ -127,14 +115,11 @@ const aiSuggestion = {
             console.log(`✅ Condition automatically set: ${conditionResult.conditionName} (${(conditionResult.confidence * 100).toFixed(0)}% confidence)`);
         }
 
-        // HIDE any AI suggestion UI elements that might exist
         this.hideAllAISuggestionElements();
 
-        // LOCK the dropdowns after AI detection
         if (aiApplied) {
             this.lockDropdowns();
 
-            // Trigger form validation and price update after setting values
             setTimeout(() => {
                 if (typeof checkFormValidity === 'function') {
                     checkFormValidity();
@@ -149,9 +134,7 @@ const aiSuggestion = {
         }
     },
 
-    // FIXED: Properly handle NodeList by converting to Array
     hideAllAISuggestionElements() {
-        // Hide any elements with "AI Suggestion" or similar text
         const suggestionSelectors = [
             '.ai-suggestion',
             '.ai-suggestion-container',
@@ -159,7 +142,6 @@ const aiSuggestion = {
             '[data-ai-suggestion]'
         ];
 
-        // Hide elements by selectors
         suggestionSelectors.forEach(selector => {
             const elements = document.querySelectorAll(selector);
             elements.forEach(el => {
@@ -169,7 +151,6 @@ const aiSuggestion = {
             });
         });
 
-        // FIXED: Convert NodeList to Array before using filter
         const allElements = Array.from(document.querySelectorAll('*'));
         const textBasedElements = allElements.filter(el =>
             el.textContent &&
@@ -187,7 +168,6 @@ const aiSuggestion = {
         console.log("🔇 AI suggestion UI elements hidden");
     },
 
-    // NEW: Lock dropdowns after AI detection
     lockDropdowns() {
         const categorySelect = document.getElementById('categoryInput');
         const conditionSelect = document.getElementById('conditionInput');
@@ -196,8 +176,6 @@ const aiSuggestion = {
             categorySelect.disabled = true;
             categorySelect.style.background = '#f0f8ff';
             categorySelect.style.cursor = 'not-allowed';
-
-            // Add visual indicator
             this.addAIDetectedLabel(categorySelect, 'Category detected by AI');
         }
 
@@ -205,17 +183,13 @@ const aiSuggestion = {
             conditionSelect.disabled = true;
             conditionSelect.style.background = '#f0f8ff';
             conditionSelect.style.cursor = 'not-allowed';
-
-            // Add visual indicator  
             this.addAIDetectedLabel(conditionSelect, 'Condition detected by AI');
         }
 
         console.log("🔒 Dropdowns locked after AI detection");
     },
 
-    // NEW: Add visual indicator that AI has set the value
     addAIDetectedLabel(element, text) {
-        // Check if label already exists
         const existingLabel = element.parentNode.querySelector('.ai-detected-label');
         if (existingLabel) return;
 
@@ -232,7 +206,6 @@ const aiSuggestion = {
             gap: 4px;
         `;
 
-        // Add AI icon
         const icon = document.createElement('span');
         icon.innerHTML = '🤖';
         icon.style.fontSize = '14px';
@@ -241,7 +214,6 @@ const aiSuggestion = {
         element.parentNode.insertBefore(label, element.nextSibling);
     },
 
-    // NEW: Unlock dropdowns (for when image is removed)
     unlockDropdowns() {
         const categorySelect = document.getElementById('categoryInput');
         const conditionSelect = document.getElementById('conditionInput');
@@ -254,7 +226,6 @@ const aiSuggestion = {
             }
         });
 
-        // Remove AI labels
         document.querySelectorAll('.ai-detected-label').forEach(label => {
             label.remove();
         });
@@ -262,18 +233,14 @@ const aiSuggestion = {
         console.log("🔓 Dropdowns unlocked");
     },
 
-    // Set category dropdown value silently (no visual indicators)
     setSilentCategory(result) {
         const categorySelect = document.getElementById('categoryInput');
         if (categorySelect && result.categoryId) {
-            // Set the dropdown value
             categorySelect.value = result.categoryId;
 
-            // Trigger change event to update dependent systems
             const changeEvent = new Event('change', { bubbles: true });
             categorySelect.dispatchEvent(changeEvent);
 
-            // Store AI values in hidden fields for backend
             const aiCategoryId = document.getElementById('aiCategoryId');
             if (aiCategoryId) {
                 aiCategoryId.value = result.categoryId;
@@ -283,18 +250,14 @@ const aiSuggestion = {
         }
     },
 
-    // Set condition dropdown value silently (no visual indicators)
     setSilentCondition(result) {
         const conditionSelect = document.getElementById('conditionInput');
         if (conditionSelect && result.conditionId) {
-            // Set the dropdown value
             conditionSelect.value = result.conditionId;
 
-            // Trigger change event to update dependent systems
             const changeEvent = new Event('change', { bubbles: true });
             conditionSelect.dispatchEvent(changeEvent);
 
-            // Store AI values in hidden fields for backend
             const aiConditionId = document.getElementById('aiConditionId');
             const aiConfidenceScore = document.getElementById('aiConfidenceScore');
 
@@ -309,7 +272,6 @@ const aiSuggestion = {
         }
     },
 
-    // Utility functions
     getCategoryName(categoryId) {
         const categories = {
             1: 'Books & Stationery',
@@ -328,26 +290,22 @@ const aiSuggestion = {
         return categories[categoryId] || 'Unknown';
     },
 
-    // FIXED: Updated to match your actual database condition IDs
     getConditionName(conditionId) {
         const conditions = {
             1: 'Excellent',
-            3: 'Good',        // Your Vertex AI maps "good" to condition ID 3
-            4: 'Fair'         // Your Vertex AI maps "fair" to condition ID 4
+            3: 'Good',
+            4: 'Fair'
         };
         return conditions[conditionId] || 'Unknown';
     },
 
-    // Reset function (clear stored values only)
     reset() {
         this.isAnalyzing = false;
         this.detectedCategory = null;
         this.detectedCondition = null;
 
-        // Unlock dropdowns when resetting
         this.unlockDropdowns();
 
-        // Clear AI hidden fields
         const aiFields = ['aiCategoryId', 'aiConditionId', 'aiConfidenceScore'];
         aiFields.forEach(fieldId => {
             const field = document.getElementById(fieldId);
@@ -359,57 +317,107 @@ const aiSuggestion = {
 };
 
 // ============================================================================
-// MODAL INITIALIZATION - Enhanced Version (Rest of your code remains the same)
+// MODAL INITIALIZATION - FIXED VERSION
 // ============================================================================
 document.addEventListener("DOMContentLoaded", function () {
+    console.log("📝 Modal system initializing...");
+
     const modal = document.getElementById("createPostModal");
-    if (!modal) return;
+    if (!modal) {
+        console.warn("Create post modal not found");
+        return;
+    }
 
     // Initialize AI system
     aiSuggestion.initialize();
 
-    // [Rest of your existing modal initialization code stays exactly the same...]
-    // Open modal functionality - FIXED: Handle all trigger selectors properly
-    const openModalSelectors = [
+    // FIXED: Enhanced modal opening functionality
+    function openCreateModal(event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+
+        console.log("📝 Opening create modal...");
+
+        // CRITICAL FIX: Use display: flex instead of block for proper centering
+        modal.style.display = "flex";
+
+        // Add show class with slight delay for animation
+        setTimeout(() => {
+            modal.classList.add("show");
+        }, 10);
+
+        // Prevent body scroll on mobile
+        document.body.style.overflow = 'hidden';
+
+        // Focus management for accessibility
+        const firstInput = modal.querySelector('input, textarea, select');
+        if (firstInput) {
+            setTimeout(() => firstInput.focus(), 300);
+        }
+
+        console.log("✅ Modal opened successfully");
+    }
+
+    function closeCreateModal() {
+        console.log("📝 Closing create modal...");
+
+        modal.classList.remove("show");
+
+        setTimeout(() => {
+            modal.style.display = "none";
+            document.body.style.overflow = '';
+            resetCreateForm();
+        }, 300);
+
+        console.log("✅ Modal closed");
+    }
+
+    // FIXED: Comprehensive modal trigger handling
+    const modalTriggers = [
         "#openCreateModal",
         ".floating-add-btn",
-        ".dock-item[data-label='Create']",
-        ".open-create-modal",
-        // Handle sidebar navigation
         "a#openCreateModal",
-        // Handle dock items
-        ".dock-item:nth-child(5)" // Create is usually 5th item in dock
+        ".open-create-modal",
+        ".dock-item[data-label='Create']",
+        ".dock-item:nth-child(5)"
     ];
 
-    openModalSelectors.forEach(selector => {
+    modalTriggers.forEach(selector => {
         const elements = document.querySelectorAll(selector);
-        elements.forEach(element => {
+        console.log(`Found ${elements.length} elements for selector: ${selector}`);
+
+        elements.forEach((element, index) => {
             if (element) {
-                element.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    modal.style.display = "flex"; // Use flex to center modal
-                    console.log("📝 Modal opened via:", selector);
-                });
+                // Remove existing listeners to prevent duplicates
+                element.removeEventListener("click", openCreateModal);
+                element.addEventListener("click", openCreateModal);
+                console.log(`✅ Event listener added to trigger ${index + 1}: ${selector}`);
             }
         });
     });
 
-    // Close modal when clicking outside
-    window.addEventListener("click", (e) => {
+    // FIXED: Enhanced close functionality
+    const closeBtn = modal.querySelector('.close-modal');
+    if (closeBtn) {
+        closeBtn.addEventListener("click", closeCreateModal);
+        console.log("✅ Close button event listener added");
+    }
+
+    // Close modal on outside click
+    modal.addEventListener("click", (e) => {
         if (e.target === modal) {
-            modal.style.display = "none";
-            resetForm();
+            closeCreateModal();
         }
     });
 
-    // Add close button functionality
-    const closeBtn = document.querySelector('#createPostModal .close-modal');
-    if (closeBtn) {
-        closeBtn.addEventListener("click", () => {
-            modal.style.display = "none";
-            resetForm();
-        });
-    }
+    // Close modal on Escape key
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && modal.style.display === "flex") {
+            closeCreateModal();
+        }
+    });
 
     // Get form elements
     const categoryInput = document.getElementById("categoryInput");
@@ -420,39 +428,42 @@ document.addEventListener("DOMContentLoaded", function () {
     const imageInput = document.getElementById("imageInput");
     const descriptionInput = document.getElementById("descriptionInput");
 
-    // Add event listeners for price calculation
+    // Add price calculation listeners
     if (categoryInput && conditionInput) {
         categoryInput.addEventListener("change", updateCreateFinalPrice);
         conditionInput.addEventListener("change", updateCreateFinalPrice);
     }
 
-    // Enhanced image input handling with SILENT AI detection
+    // ENHANCED: Image input handling with better error handling
     if (imageInput) {
         imageInput.addEventListener('change', function (e) {
             const file = e.target.files[0];
-            if (file) {
-                // Validate file
-                if (!validateImageFile(file)) {
-                    imageInput.value = '';
-                    return;
-                }
+            if (!file) return;
 
-                // Show preview
-                showImagePreview(file);
+            console.log("🖼️ Image selected:", file.name);
 
-                // Trigger SILENT AI analysis (no UI changes, just dropdown updates)
-                if (aiSuggestion) {
-                    console.log("🚀 Starting AI analysis for uploaded image...");
-                    aiSuggestion.analyzeImageForCategory(file);
-                }
-
-                // Update form validation
-                checkFormValidity();
+            // Validate file
+            if (!validateImageFile(file)) {
+                imageInput.value = '';
+                showNotification('Please select a valid image file', 'error');
+                return;
             }
+
+            // Show preview
+            showImagePreview(file);
+
+            // Trigger AI analysis
+            if (aiSuggestion) {
+                console.log("🚀 Starting AI analysis...");
+                aiSuggestion.analyzeImageForCategory(file);
+            }
+
+            // Update form validation
+            checkFormValidity();
         });
     }
 
-    // Add event listeners to all required fields for validation
+    // Form validation listeners
     const requiredFields = [titleInput, descriptionInput, locationInput, imageInput, categoryInput, conditionInput];
     requiredFields.forEach(field => {
         if (field) {
@@ -466,76 +477,71 @@ document.addEventListener("DOMContentLoaded", function () {
         submitBtn.addEventListener("click", handleFormSubmission);
     }
 
-    // Initial form validation check
+    // Initial form validation
     checkFormValidity();
+
+    // Make functions globally available
+    window.openCreateModal = openCreateModal;
+    window.closeCreateModal = closeCreateModal;
+
+    console.log("✅ Modal system initialized successfully");
 });
 
-// [Rest of your existing functions remain exactly the same...]
-// Just updating the removeImage function to unlock dropdowns:
-
-function removeImage() {
-    const imageInput = document.getElementById('imageInput');
-    const imagePreview = document.getElementById('imagePreview');
-    // FIXED: Look for the correct upload label structure
-    const uploadLabel = document.querySelector('.upload-label') || document.querySelector('label[for="imageInput"]');
-
-    if (imageInput) imageInput.value = '';
-    if (imagePreview) imagePreview.style.display = 'none';
-
-    // FIXED: Show the upload label correctly
-    if (uploadLabel) {
-        uploadLabel.style.display = 'block';
-    }
-
-    // Reset dropdowns to default when image is removed
-    const categoryInput = document.getElementById('categoryInput');
-    const conditionInput = document.getElementById('conditionInput');
-    if (categoryInput) categoryInput.selectedIndex = 0;
-    if (conditionInput) conditionInput.selectedIndex = 0;
-
-    // Reset AI suggestions and UNLOCK dropdowns
-    if (aiSuggestion) {
-        aiSuggestion.reset(); // This now includes unlocking dropdowns
-    }
-
-    checkFormValidity();
-}
-
 // ============================================================================
-// IMAGE PREVIEW FUNCTIONS (Existing functionality preserved)
+// IMAGE PREVIEW FUNCTIONS
 // ============================================================================
 function showImagePreview(file) {
     const reader = new FileReader();
     reader.onload = function (e) {
-        // Use the existing HTML elements
         const previewImg = document.getElementById('previewImg');
         const imagePreview = document.getElementById('imagePreview');
         const uploadLabel = document.querySelector('.upload-label');
 
         if (previewImg && imagePreview && uploadLabel) {
-            // Set the image source
             previewImg.src = e.target.result;
-
-            // Show preview, hide upload button
-            imagePreview.style.display = 'block';
+            imagePreview.style.display = 'flex';
             uploadLabel.style.display = 'none';
 
-            console.log('✅ Image preview displayed successfully');
+            console.log('✅ Image preview displayed');
+        } else {
+            console.error('Image preview elements not found');
         }
     };
     reader.readAsDataURL(file);
 }
 
+function removeImage() {
+    const imageInput = document.getElementById('imageInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const uploadLabel = document.querySelector('.upload-label');
+
+    if (imageInput) imageInput.value = '';
+    if (imagePreview) imagePreview.style.display = 'none';
+    if (uploadLabel) uploadLabel.style.display = 'flex';
+
+    // Reset dropdowns
+    const categoryInput = document.getElementById('categoryInput');
+    const conditionInput = document.getElementById('conditionInput');
+    if (categoryInput) categoryInput.selectedIndex = 0;
+    if (conditionInput) conditionInput.selectedIndex = 0;
+
+    // Reset AI suggestions
+    if (aiSuggestion) {
+        aiSuggestion.reset();
+    }
+
+    checkFormValidity();
+    console.log('🗑️ Image removed and form reset');
+}
+
 function validateImageFile(file) {
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
-        alert('Image size must be less than 10MB');
         return false;
     }
 
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type.toLowerCase())) {
-        alert('Please select a valid image file (JPEG, PNG, or WebP)');
         return false;
     }
 
@@ -543,7 +549,7 @@ function validateImageFile(file) {
 }
 
 // ============================================================================
-// FORM VALIDATION (Enhanced to work with AI)
+// FORM VALIDATION - Enhanced Version
 // ============================================================================
 function checkFormValidity() {
     const categoryInput = document.getElementById("categoryInput");
@@ -556,24 +562,30 @@ function checkFormValidity() {
     const latitudeInput = document.getElementById("Latitude");
     const longitudeInput = document.getElementById("Longitude");
 
-    if (!categoryInput || !conditionInput || !titleInput || !descriptionInput ||
-        !locationInput || !imageInput || !submitBtn) {
-        return;
-    }
+    if (!submitBtn) return false;
 
     const isValid =
-        titleInput.value.trim() !== "" &&
-        descriptionInput.value.trim() !== "" &&
-        locationInput.value.trim() !== "" &&
-        categoryInput.value !== "" &&
-        conditionInput.value !== "" &&
-        imageInput.files.length > 0 &&
-        latitudeInput && latitudeInput.value !== "" &&
-        longitudeInput && longitudeInput.value !== "";
+        titleInput?.value.trim() !== "" &&
+        descriptionInput?.value.trim() !== "" &&
+        locationInput?.value.trim() !== "" &&
+        categoryInput?.value !== "" &&
+        conditionInput?.value !== "" &&
+        imageInput?.files?.length > 0 &&
+        latitudeInput?.value !== "" &&
+        longitudeInput?.value !== "";
 
+    // Enhanced button state management
     submitBtn.disabled = !isValid;
 
-    // Update final price when form is valid
+    if (isValid) {
+        submitBtn.classList.add('valid');
+        submitBtn.classList.remove('invalid');
+    } else {
+        submitBtn.classList.remove('valid');
+        submitBtn.classList.add('invalid');
+    }
+
+    // Update price calculation
     if (isValid && typeof updateCreateFinalPrice === 'function') {
         updateCreateFinalPrice();
     }
@@ -582,42 +594,51 @@ function checkFormValidity() {
 }
 
 // ============================================================================
-// FORM SUBMISSION (Enhanced to include AI data)
+// FORM SUBMISSION - Enhanced Error Handling
 // ============================================================================
 async function handleFormSubmission() {
     const submitBtn = document.getElementById("submitPost");
     if (!submitBtn || submitBtn.disabled) return;
 
-    // Get form data
+    // Validate form before submission
+    if (!checkFormValidity()) {
+        showNotification('Please fill in all required fields', 'error');
+        return;
+    }
+
     const formData = new FormData();
 
-    // Add form fields with correct names that match your ItemController
-    const titleInput = document.getElementById("titleInput");
-    const descriptionInput = document.getElementById("descriptionInput");
-    const locationInput = document.getElementById("locationInput");
-    const categoryInput = document.getElementById("categoryInput");
-    const conditionInput = document.getElementById("conditionInput");
-    const imageInput = document.getElementById("imageInput");
+    // Collect form data
+    const formFields = {
+        'ItemTitle': document.getElementById("titleInput"),
+        'Description': document.getElementById("descriptionInput"),
+        'LocationName': document.getElementById("locationInput"),
+        'CategoryId': document.getElementById("categoryInput"),
+        'ConditionId': document.getElementById("conditionInput"),
+        'Latitude': document.getElementById("Latitude"),
+        'Longitude': document.getElementById("Longitude")
+    };
 
-    if (titleInput) formData.append('ItemTitle', titleInput.value);
-    if (descriptionInput) formData.append('Description', descriptionInput.value);
-    if (locationInput) formData.append('LocationName', locationInput.value);
-    if (categoryInput) formData.append('CategoryId', categoryInput.value);
-    if (conditionInput) formData.append('ConditionId', conditionInput.value);
+    // Add form field data
+    Object.entries(formFields).forEach(([name, element]) => {
+        if (element && element.value) {
+            formData.append(name, element.value);
+        }
+    });
+
+    // Add image file
+    const imageInput = document.getElementById("imageInput");
     if (imageInput && imageInput.files[0]) {
         formData.append('ImageFile', imageInput.files[0]);
     }
 
-    // Add hidden location data
-    const latitudeInput = document.getElementById("Latitude");
-    const longitudeInput = document.getElementById("Longitude");
+    // Add location name to hidden field
     const locationNameInput = document.getElementById("LocationName");
+    if (locationNameInput && locationNameInput.value) {
+        formData.append('LocationName', locationNameInput.value);
+    }
 
-    if (latitudeInput && latitudeInput.value) formData.append('Latitude', latitudeInput.value);
-    if (longitudeInput && longitudeInput.value) formData.append('Longitude', longitudeInput.value);
-    if (locationNameInput && locationNameInput.value) formData.append('LocationName', locationNameInput.value);
-
-    // Add AI detection data if available
+    // Add AI detection data
     const aiFields = ['aiCategoryId', 'aiConditionId', 'aiConfidenceScore'];
     aiFields.forEach(fieldId => {
         const field = document.getElementById(fieldId);
@@ -638,7 +659,8 @@ async function handleFormSubmission() {
     submitBtn.innerHTML = '<span class="loading-spinner"></span><span class="btn-text">Posting...</span>';
 
     try {
-        // FIXED: Use correct endpoint that matches your working controller
+        console.log("📤 Submitting form data...");
+
         const response = await fetch('/Item/Create', {
             method: 'POST',
             body: formData
@@ -647,39 +669,31 @@ async function handleFormSubmission() {
         const result = await response.json();
 
         if (response.ok && result.success) {
-            // Success - close modal and refresh
-            document.getElementById("createPostModal").style.display = "none";
-            resetForm();
+            console.log("✅ Item posted successfully");
 
-            // Show success message
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    title: 'Success!',
-                    text: 'Your item has been posted successfully.',
-                    icon: 'success',
-                    confirmButtonText: 'OK'
-                });
-            } else {
-                alert('Item posted successfully!');
+            // Close modal and reset form
+            const modal = document.getElementById("createPostModal");
+            if (modal) {
+                modal.classList.remove("show");
+                setTimeout(() => {
+                    modal.style.display = "none";
+                    document.body.style.overflow = '';
+                }, 300);
             }
 
-            // Refresh the page to show new item
+            resetCreateForm();
+
+            // Show success message
+            showNotification('Item posted successfully! 🎉', 'success');
+
+            // Refresh page to show new item
             setTimeout(() => window.location.reload(), 1500);
         } else {
             throw new Error(result.message || 'Failed to post item');
         }
     } catch (err) {
-        console.error('Error submitting form:', err);
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({
-                title: 'Error',
-                text: err.message || 'Failed to post item. Please try again.',
-                icon: 'error',
-                confirmButtonText: 'OK'
-            });
-        } else {
-            alert('Failed to post: ' + err.message);
-        }
+        console.error('❌ Error submitting form:', err);
+        showNotification(err.message || 'Failed to post item. Please try again.', 'error');
     } finally {
         // Reset button state
         submitBtn.disabled = false;
@@ -688,9 +702,11 @@ async function handleFormSubmission() {
 }
 
 // ============================================================================
-// UTILITY FUNCTIONS
+// UTILITY FUNCTIONS - Enhanced
 // ============================================================================
-function resetForm() {
+function resetCreateForm() {
+    console.log("🔄 Resetting create form...");
+
     const form = document.getElementById('createPostModal');
     if (form) {
         const inputs = form.querySelectorAll('input, select, textarea');
@@ -721,10 +737,73 @@ function resetForm() {
 
     // Reset form validation
     checkFormValidity();
+
+    console.log("✅ Form reset completed");
+}
+
+function showNotification(message, type = 'info') {
+    // Remove existing notifications
+    const existingNotifications = document.querySelectorAll('.notification-toast');
+    existingNotifications.forEach(n => n.remove());
+
+    const notification = document.createElement('div');
+    notification.className = `notification-toast ${type}`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 16px 24px;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        z-index: 20000;
+        max-width: 400px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+        transform: translateX(100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-family: 'Montserrat', sans-serif;
+    `;
+
+    // Set background based on type
+    const backgrounds = {
+        success: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        error: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+        info: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
+    };
+
+    const icons = {
+        success: '<i class="bx bx-check-circle"></i>',
+        error: '<i class="bx bx-error-circle"></i>',
+        info: '<i class="bx bx-info-circle"></i>'
+    };
+
+    notification.style.background = backgrounds[type] || backgrounds.info;
+    notification.innerHTML = `${icons[type] || icons.info}<span>${message}</span>`;
+
+    document.body.appendChild(notification);
+
+    // Animate in
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+
+    // Auto-remove after 4 seconds
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                document.body.removeChild(notification);
+            }
+        }, 300);
+    }, 4000);
 }
 
 // ============================================================================
-// GOOGLE PLACES INTEGRATION (Preserved existing functionality)
+// GOOGLE PLACES INTEGRATION
 // ============================================================================
 function triggerFormValidation() {
     if (typeof checkFormValidity === 'function') {
@@ -732,47 +811,39 @@ function triggerFormValidation() {
     }
 }
 
-// Make sure Google Places integration works
-document.addEventListener("DOMContentLoaded", function () {
-    // Add delay to ensure Google Maps API is loaded
-    setTimeout(() => {
-        if (typeof google !== 'undefined' && google.maps && google.maps.places) {
-            initGoogleAutocomplete();
-            console.log("Google Places API initialized");
-        } else {
-            console.warn("Google Places API not available, using manual location input");
-            initManualLocationFallback();
-        }
-    }, 1000);
-});
-
+// Initialize Google Places when ready
 function initGoogleAutocomplete() {
     const input = document.getElementById("locationInput");
     if (!input) return;
 
-    const autocomplete = new google.maps.places.Autocomplete(input, {
-        types: ['geocode'],
-        componentRestrictions: { country: 'ph' },
-        fields: ['formatted_address', 'geometry', 'place_id']
-    });
+    try {
+        const autocomplete = new google.maps.places.Autocomplete(input, {
+            types: ['geocode'],
+            componentRestrictions: { country: 'ph' },
+            fields: ['formatted_address', 'geometry', 'place_id']
+        });
 
-    autocomplete.addListener("place_changed", () => {
-        const place = autocomplete.getPlace();
-        if (place.geometry && place.geometry.location) {
-            const latField = document.getElementById("Latitude");
-            const lngField = document.getElementById("Longitude");
-            const locationNameField = document.getElementById("LocationName");
+        autocomplete.addListener("place_changed", () => {
+            const place = autocomplete.getPlace();
+            if (place.geometry && place.geometry.location) {
+                const latField = document.getElementById("Latitude");
+                const lngField = document.getElementById("Longitude");
+                const locationNameField = document.getElementById("LocationName");
 
-            if (latField) latField.value = place.geometry.location.lat();
-            if (lngField) lngField.value = place.geometry.location.lng();
-            if (locationNameField) locationNameField.value = place.formatted_address;
+                if (latField) latField.value = place.geometry.location.lat();
+                if (lngField) lngField.value = place.geometry.location.lng();
+                if (locationNameField) locationNameField.value = place.formatted_address;
 
-            console.log("Location selected:", place.formatted_address);
+                console.log("📍 Location selected:", place.formatted_address);
+                triggerFormValidation();
+            }
+        });
 
-            // Trigger form validation
-            triggerFormValidation();
-        }
-    });
+        console.log("✅ Google Places autocomplete initialized");
+    } catch (error) {
+        console.error("❌ Google Places initialization failed:", error);
+        initManualLocationFallback();
+    }
 }
 
 function initManualLocationFallback() {
@@ -783,7 +854,6 @@ function initManualLocationFallback() {
         locationInput.addEventListener('blur', function () {
             const location = this.value.trim();
             if (location && location.length > 3) {
-                // Set default Philippines coordinates
                 const latField = document.getElementById("Latitude");
                 const lngField = document.getElementById("Longitude");
                 const locationNameField = document.getElementById("LocationName");
@@ -792,23 +862,36 @@ function initManualLocationFallback() {
                 if (lngField) lngField.value = '120.9842';
                 if (locationNameField) locationNameField.value = location;
 
-                console.log("Manual location set:", location);
+                console.log("📍 Manual location set:", location);
                 triggerFormValidation();
             }
         });
+
+        console.log("✅ Manual location fallback initialized");
     }
 }
 
+// Initialize Google Places when DOM is ready
+document.addEventListener("DOMContentLoaded", function () {
+    setTimeout(() => {
+        if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+            console.log("Google Places API detected");
+            initGoogleAutocomplete();
+        } else {
+            console.warn("Google Places API not available, using fallback");
+            initManualLocationFallback();
+        }
+    }, 1000);
+});
+
 // ============================================================================
-// GLOBAL FUNCTIONS
+// GLOBAL EXPORTS
 // ============================================================================
 window.removeImage = removeImage;
 window.aiSuggestion = aiSuggestion;
 window.checkFormValidity = checkFormValidity;
-window.closeCreateModal = function () {
-    const modal = document.getElementById('createPostModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-    resetForm();
-};
+window.resetCreateForm = resetCreateForm;
+window.showNotification = showNotification;
+window.handleFormSubmission = handleFormSubmission;
+
+console.log("✅ Enhanced openModal.js loaded successfully");
