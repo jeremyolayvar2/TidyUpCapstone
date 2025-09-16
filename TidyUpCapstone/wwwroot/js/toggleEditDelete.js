@@ -820,4 +820,4 @@ window.showPremiumConfirmDialog = showPremiumConfirmDialog;
 window.showPremiumLoader = showPremiumLoader;
 window.hidePremiumLoader = hidePremiumLoader;
 
-console.log('Premium toggleEditDelete.js loaded with enhanced UI consistency and animations');
+console.log('✅ Premium toggleEditDelete.js loaded with enhanced UI consistency and animations');

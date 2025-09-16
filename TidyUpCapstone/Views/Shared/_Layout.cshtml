@@ -11,37 +11,18 @@
     <link rel="stylesheet" href="~/TidyUp.styles.css" asp-append-version="true" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <link href="~/assets/logo-tidyup.png" rel="shortcut icon" type="image/svg" />
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
-
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-    <link href="~/assets/logo-tidyup.png" rel="shortcut icon" type="image/svg" />
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
     
-    <script src="https://cdn.tailwindcss.com"></script>
-
-
     @await RenderSectionAsync("Styles", required: false)
 
-    <link rel="stylesheet" href="~/css/main.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/style1.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/TidyUp.styles.css" asp-append-version="true" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-    <link href="~/assets/logo-tidyup.png" rel="shortcut icon" type="image/svg" />
-    <link href='https://cdn.boxicons.com/fonts/basic/boxicons.min.css' rel='stylesheet'>
-    <link href='https://cdn.boxicons.com/fonts/brands/boxicons-brands.min.css' rel='stylesheet'>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
-
     <style>
-        /* Enhanced Navigation Styles */
+        /* FIXED: Enhanced Navigation Styles with proper event handling */
         .nav-link {
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            cursor: pointer;
         }
 
         .nav-link::before {
@@ -135,11 +116,11 @@
 
             @if (ViewBag.HideNavigation == null || ViewBag.HideNavigation == false) 
             {
-                <!-- Enhanced Sidebar Navigation -->
+                <!-- FIXED: Enhanced Sidebar Navigation with proper structure -->
                 <nav id="sidebar" class="close">
                     <ul>
                         <li class="toggle-container">
-                            <button onclick="toggleSidebar()" id="icon-toggle">
+                            <button onclick="toggleSidebar()" id="icon-toggle" type="button" aria-label="Toggle sidebar">
                                 <img class="toggle" alt="Toggle" src="~/assets/Toggle.svg" />
                             </button>
                         </li>
@@ -176,13 +157,13 @@
                             </a>
                         </li>
                         <li>
-                            <a id="openCreateModal" class="nav-link" data-page="create">
+                            <a id="openCreateModal" class="nav-link" data-page="create" style="cursor: pointer;">
                                 <img class="icon" alt="Create" src="~/assets/VectorCreate.svg" />
                                 <span>Create</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="open-token nav-link" data-page="token">
+                            <a href="#" class="open-token nav-link" data-page="token" style="cursor: pointer;">
                                 <img class="icon" alt="Token" src="~/assets/VectorToken.svg" />
                                 <span>Token Balance</span>
                             </a>
@@ -226,7 +207,7 @@
                     </ul>
                 </nav>
 
-                <!-- Enhanced Mobile Dock -->
+                <!-- FIXED: Enhanced Mobile Dock with proper event handlers -->
                 <div class="dock-outer">
                     <div class="dock-panel" id="dockPanel">
                         <div class="dock-item" data-label="Home" data-page="home" onclick="navigateToPage('/Home/Main')">
@@ -259,7 +240,7 @@
                             </div>
                             <div class="dock-label">Create</div>
                         </div>
-                        <div class="dock-item open-token" data-label="Token" data-page="token">
+                        <div class="dock-item open-token" data-label="Token" data-page="token" onclick="showTokenModal()">
                             <div class="dock-icon">
                                 <img src="~/assets/VectorToken.svg" />
                             </div>
@@ -307,7 +288,7 @@
 
             <!-- Main Content -->
             <div class="main-content">
-                <main role="main" class=" w-screen">
+                <main role="main" class="pb-3">
                     @RenderBody()
                 </main>
 
@@ -318,8 +299,6 @@
                 </footer>
             </div>
         </div>
-
-    <script src="~/js/global-accessibility.js" asp-append-version="true"></script>
         <script src="~/lib/jquery/dist/jquery.min.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
         <script src="~/js/site.js" asp-append-version="true"></script>
@@ -329,14 +308,18 @@
         <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAajNvSCpxo_QwyPwsRmrmr2-MlApf6Qkw&libraries=places"></script>
         <script src="https://cdn.jsdelivr.net/npm/motion@12.16.0/dist/motion.umd.min.js"></script>
 
-        <!-- Enhanced Navigation Scripts -->
+        <!-- FIXED: Enhanced Navigation Scripts with proper function definitions -->
         <script>
-            // Navigation functionality
+            // FIXED: Navigation functionality with proper error handling
             function navigateToPage(url) {
-                window.location.href = url;
+                if (url && url !== '#') {
+                    window.location.href = url;
+                } else {
+                    console.warn('Invalid navigation URL:', url);
+                }
             }
 
-            // Enhanced active state management
+            // FIXED: Enhanced active state management
             function setActiveNavItem(pageName) {
                 // Desktop sidebar
                 document.querySelectorAll('.nav-link').forEach(link => {
@@ -355,8 +338,102 @@
                 });
             }
 
-            // Set active state based on current page
+            // FIXED: Enhanced sidebar toggle functionality
+            function toggleSidebar() {
+                console.log('toggleSidebar function called from layout');
+                
+                const sidebar = document.getElementById('sidebar');
+                const toggleIcon = document.querySelector('#icon-toggle .toggle, #icon-toggle img');
+
+                if (!sidebar) {
+                    console.error('Sidebar element not found in layout');
+                    return false;
+                }
+
+                if (!toggleIcon) {
+                    console.error('Toggle icon not found in layout');
+                    return false;
+                }
+
+                console.log('Toggling sidebar from layout...');
+
+                // Toggle sidebar class
+                sidebar.classList.toggle('close');
+
+                // Toggle icon rotation
+                toggleIcon.classList.toggle('rotate');
+
+                // Add smooth transition
+                sidebar.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+
+                // Update main content margins
+                const mainContent = document.querySelector('.main-content');
+                if (mainContent) {
+                    if (sidebar.classList.contains('close')) {
+                        mainContent.style.marginLeft = '82px';
+                        mainContent.style.width = 'calc(100vw - 82px)';
+                    } else {
+                        mainContent.style.marginLeft = '250px';
+                        mainContent.style.width = 'calc(100vw - 250px)';
+                    }
+                }
+
+                console.log('Sidebar toggled successfully from layout');
+                return true;
+            }
+
+            // FIXED: Token modal functions
+            function showTokenModal() {
+                console.log('showTokenModal called from layout');
+                
+                // Try to find token modal in current page
+                let tokenModal = document.getElementById('tokenModal');
+                
+                if (!tokenModal) {
+                    console.error('Token modal not found in layout');
+                    return false;
+                }
+
+                tokenModal.classList.add('show');
+                console.log('Token modal shown from layout');
+
+                // Auto-close after 5 seconds
+                setTimeout(() => {
+                    hideTokenModal();
+                }, 5000);
+
+                return true;
+            }
+
+            function hideTokenModal() {
+                const tokenModal = document.getElementById('tokenModal');
+                if (tokenModal) {
+                    tokenModal.classList.remove('show');
+                }
+            }
+
+            // FIXED: Modal functions - will be overridden by page-specific ones if they exist
+            function openCreateModal() {
+                console.log('openCreateModal called from layout');
+                
+                // Check if page-specific function exists
+                if (typeof window.openCreateModal === 'function' && window.openCreateModal !== openCreateModal) {
+                    return window.openCreateModal();
+                }
+                
+                const modal = document.getElementById('createPostModal');
+                if (modal) {
+                    modal.style.display = 'flex';
+                    console.log('Create modal opened from layout');
+                } else {
+                    console.warn('Create modal not found in layout');
+                }
+            }
+
+            // FIXED: Set active state based on current page
             document.addEventListener('DOMContentLoaded', function() {
+                console.log('Layout DOM loaded');
+                
                 const currentPath = window.location.pathname.toLowerCase();
                 
                 if (currentPath.includes('/home/main') || currentPath === '/') {
@@ -365,17 +442,69 @@
                     setActiveNavItem('settings');
                 }
 
-                // Token modal functionality
-                document.addEventListener('click', function(e) {
-                    if (e.target.closest('.open-token')) {
+                // FIXED: Token modal click handlers from layout
+                document.querySelectorAll('.open-token').forEach(trigger => {
+                    trigger.addEventListener('click', function(e) {
                         e.preventDefault();
-                        const tokenModal = document.getElementById('tokenModal');
-                        if (tokenModal) {
-                            tokenModal.classList.add('show');
+                        e.stopPropagation();
+                        console.log('Token trigger clicked from layout');
+                        showTokenModal();
+                    });
+                });
+
+                // FIXED: Create modal click handlers from layout
+                document.querySelectorAll('#openCreateModal, .floating-add-btn').forEach(trigger => {
+                    trigger.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Create modal trigger clicked from layout');
+                        openCreateModal();
+                    });
+                });
+
+                // FIXED: Sidebar toggle click handler from layout
+                const toggleButton = document.getElementById('icon-toggle');
+                if (toggleButton) {
+                    toggleButton.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Sidebar toggle clicked from layout');
+                        toggleSidebar();
+                    });
+                } else {
+                    console.warn('Toggle button not found in layout');
+                }
+
+                // FIXED: Close token modal on outside click
+                document.addEventListener('click', function(e) {
+                    const tokenModal = document.getElementById('tokenModal');
+                    if (tokenModal && tokenModal.classList.contains('show')) {
+                        if (!tokenModal.contains(e.target) && !e.target.closest('.open-token')) {
+                            hideTokenModal();
                         }
                     }
                 });
+
+                // FIXED: Close token modal on escape key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        const tokenModal = document.getElementById('tokenModal');
+                        if (tokenModal && tokenModal.classList.contains('show')) {
+                            hideTokenModal();
+                        }
+                    }
+                });
+
+                console.log('Layout event handlers initialized');
             });
+
+            // FIXED: Export functions globally so they can be used by other scripts
+            window.toggleSidebar = toggleSidebar;
+            window.showTokenModal = showTokenModal;
+            window.hideTokenModal = hideTokenModal;
+            window.openCreateModal = openCreateModal;
+            window.navigateToPage = navigateToPage;
+            window.setActiveNavItem = setActiveNavItem;
         </script>
 </body>
 </html>

@@ -1,21 +1,50 @@
-﻿// Enhanced site.js with improved navigation and UI consistency
+﻿// FIXED site.js with improved navigation and UI consistency
 
-// Sidebar toggle functionality
-const toggleButton = document.getElementById('icon-toggle');
-const sidebar = document.getElementById('sidebar');
-const toggleIcon = toggleButton?.querySelector('img');
-
+// FIXED: Enhanced sidebar toggle functionality with proper error handling
 function toggleSidebar() {
-    if (sidebar && toggleIcon) {
-        sidebar.classList.toggle('close');
-        toggleIcon.classList.toggle('rotate');
+    console.log('toggleSidebar called from site.js');
 
-        // Add smooth animation
-        sidebar.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+    const sidebar = document.getElementById('sidebar');
+    const toggleIcon = document.querySelector('#icon-toggle .toggle, #icon-toggle img');
 
-        // Update body class for responsive layouts
-        document.body.classList.toggle('sidebar-collapsed');
+    if (!sidebar) {
+        console.error('Sidebar element not found');
+        return false;
     }
+
+    if (!toggleIcon) {
+        console.error('Toggle icon not found');
+        return false;
+    }
+
+    console.log('Toggling sidebar...');
+
+    // Toggle sidebar class
+    sidebar.classList.toggle('close');
+
+    // Toggle icon rotation
+    toggleIcon.classList.toggle('rotate');
+
+    // Add smooth transition
+    sidebar.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+
+    // Update main content margins
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+        if (sidebar.classList.contains('close')) {
+            mainContent.style.marginLeft = '82px';
+            mainContent.style.width = 'calc(100vw - 82px)';
+        } else {
+            mainContent.style.marginLeft = '250px';
+            mainContent.style.width = 'calc(100vw - 250px)';
+        }
+    }
+
+    // Update body class for responsive layouts
+    document.body.classList.toggle('sidebar-collapsed');
+
+    console.log('Sidebar toggled successfully');
+    return true;
 }
 
 // Enhanced Mobile Dock with Premium Interactions
@@ -185,12 +214,17 @@ class NavigationManager {
     }
 
     openCreateModal() {
-        if (typeof openCreateModal === 'function') {
-            openCreateModal();
-        } else if (typeof window.openCreateModal === 'function') {
-            window.openCreateModal();
+        // Check if page-specific function exists
+        if (typeof window.openCreateModal === 'function' && window.openCreateModal !== this.openCreateModal) {
+            return window.openCreateModal();
+        }
+
+        const modal = document.getElementById('createPostModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            console.log('Create modal opened from NavigationManager');
         } else {
-            console.warn('Create modal function not found');
+            console.warn('Create modal not found');
         }
     }
 
@@ -198,6 +232,11 @@ class NavigationManager {
         const tokenModal = document.getElementById('tokenModal');
         if (tokenModal) {
             tokenModal.classList.add('show');
+
+            // Auto-close after 5 seconds
+            setTimeout(() => {
+                this.hideTokenModal();
+            }, 5000);
 
             // Add backdrop click to close
             const closeModal = (e) => {
@@ -210,6 +249,15 @@ class NavigationManager {
             setTimeout(() => {
                 document.addEventListener('click', closeModal);
             }, 100);
+        } else {
+            console.warn('Token modal not found');
+        }
+    }
+
+    hideTokenModal() {
+        const tokenModal = document.getElementById('tokenModal');
+        if (tokenModal) {
+            tokenModal.classList.remove('show');
         }
     }
 
@@ -244,6 +292,8 @@ class NavigationManager {
 
 // Enhanced Messaging System
 document.addEventListener('DOMContentLoaded', function () {
+    console.log('Site.js DOM loaded');
+
     // Initialize navigation manager
     window.navigationManager = new NavigationManager();
 
@@ -454,8 +504,12 @@ function hideButtonLoading(button, originalText = 'Submit') {
     }
 }
 
-// Enhanced notification system
+// FIXED: Enhanced notification system
 function showNotification(message, type = 'info', duration = 3000) {
+    // Remove existing notifications
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(n => n.remove());
+
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.style.cssText = `
@@ -515,6 +569,75 @@ function showNotification(message, type = 'info', duration = 3000) {
     return notification;
 }
 
+// Navigation functions
+function navigateToPage(url) {
+    if (url && url !== '#') {
+        window.location.href = url;
+    } else {
+        console.warn('Invalid navigation URL:', url);
+    }
+}
+
+function setActiveNavItem(pageName) {
+    // Desktop sidebar
+    document.querySelectorAll('#sidebar .nav-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('data-page') === pageName) {
+            link.classList.add('active');
+        }
+    });
+
+    // Mobile dock
+    document.querySelectorAll('.dock-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('data-page') === pageName) {
+            item.classList.add('active');
+        }
+    });
+}
+
+// FIXED: Token modal functions
+function showTokenModal() {
+    console.log('showTokenModal called from site.js');
+
+    const tokenModal = document.getElementById('tokenModal');
+    if (!tokenModal) {
+        console.error('Token modal not found');
+        return false;
+    }
+
+    tokenModal.classList.add('show');
+    console.log('Token modal shown');
+
+    // Auto-close after 5 seconds
+    setTimeout(() => {
+        hideTokenModal();
+    }, 5000);
+
+    return true;
+}
+
+function hideTokenModal() {
+    const tokenModal = document.getElementById('tokenModal');
+    if (tokenModal) {
+        tokenModal.classList.remove('show');
+    }
+}
+
+// FIXED: Create modal function
+function openCreateModal() {
+    console.log('openCreateModal called from site.js');
+
+    const modal = document.getElementById('createPostModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('show'), 10);
+        console.log('Create modal opened');
+    } else {
+        console.warn('Create modal not found');
+    }
+}
+
 // Performance optimizations
 function debounce(func, wait) {
     let timeout;
@@ -570,9 +693,17 @@ function smoothScrollTo(target, duration = 1000) {
 }
 
 // Export functions for global use
+window.toggleSidebar = toggleSidebar;
+window.showTokenModal = showTokenModal;
+window.hideTokenModal = hideTokenModal;
+window.openCreateModal = openCreateModal;
 window.showNotification = showNotification;
 window.showButtonLoading = showButtonLoading;
 window.hideButtonLoading = hideButtonLoading;
 window.smoothScrollTo = smoothScrollTo;
 window.debounce = debounce;
 window.throttle = throttle;
+window.navigateToPage = navigateToPage;
+window.setActiveNavItem = setActiveNavItem;
+
+console.log('Site.js loaded successfully');

@@ -23,376 +23,126 @@
 }
 
 <style>
-    /* Enhanced Dropdown Animations & Interactions */
-    .dropdown-menu {
-        position: relative;
-        display: inline-block;
+    /* FIXED: Token Modal Styles - Added proper z-index and positioning */
+    .card-spotlight {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.8);
+        background: linear-gradient(135deg, #6B9080 0%, #A4C3B2 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(15px);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        z-index: 10001; /* FIXED: Higher z-index */
+        display: none;
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        min-width: 300px;
+        color: white;
+        text-align: center;
     }
 
-    .dropdown-btn {
-        background: rgba(255, 255, 255, 0.9);
-        border: 2px solid transparent;
-        cursor: pointer;
-        padding: 10px;
-        border-radius: 12px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        width: 44px;
-        height: 44px;
+        .card-spotlight.show {
+            display: block;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+    .card-spotlight-child1 {
         display: flex;
         align-items: center;
         justify-content: center;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        gap: 1rem;
+        margin-bottom: 1rem;
     }
 
-        .dropdown-btn:hover {
-            background: rgba(107, 144, 128, 0.1);
-            border-color: rgba(107, 144, 128, 0.3);
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(107, 144, 128, 0.15);
+        .card-spotlight-child1 h2 {
+            font-family: "Righteous", sans-serif;
+            font-size: 2.5rem;
+            margin: 0;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
-        .dropdown-btn:active {
-            transform: scale(0.95);
+        .card-spotlight-child1 img {
+            width: 40px;
+            height: 40px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
 
-        .dropdown-btn img {
-            width: 20px;
-            height: 20px;
-            transition: transform 0.3s ease;
-            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
-        }
-
-    .dropdown-menu.active .dropdown-btn {
-        background: var(--primary-color);
-        border-color: var(--primary-color);
-        transform: scale(1.05);
-    }
-
-        .dropdown-menu.active .dropdown-btn img {
-            filter: brightness(0) invert(1);
-            transform: rotate(90deg);
-        }
-
-    .dropdown-content {
-        display: none;
-        position: absolute;
-        right: 0;
-        top: calc(100% + 8px);
-        z-index: 1000;
-        background: white;
-        min-width: 180px;
-        border-radius: 16px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        border: 1px solid rgba(107, 144, 128, 0.1);
-        overflow: hidden;
-        backdrop-filter: blur(20px);
-        transform: scale(0.95) translateY(-10px);
-        opacity: 0;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .dropdown-menu.active .dropdown-content {
-        display: block;
-        transform: scale(1) translateY(0);
-        opacity: 1;
-        animation: dropdownSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    @@keyframes dropdownSlideIn {
-        0%
-
-    {
-        opacity: 0;
-        transform: scale(0.9) translateY(-15px);
-    }
-
-    50% {
-        opacity: 0.8;
-        transform: scale(1.02) translateY(-2px);
-    }
-
-    100% {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
-
-    }
-
-    .dropdown-item {
-        color: var(--text-color);
-        padding: 16px 20px;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        font-size: 14px;
+    .card-spotlight-child2 p {
+        margin: 0;
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.9);
         font-weight: 500;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border: none;
-        background: none;
-        width: 100%;
-        text-align: left;
+    }
+
+    /* FIXED: Sidebar Toggle Styles */
+    .toggle {
         cursor: pointer;
-        position: relative;
-        overflow: hidden;
+        transition: transform 0.3s ease;
     }
 
-        .dropdown-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(107, 144, 128, 0.1), transparent);
-            transition: left 0.6s ease;
+        .toggle.rotate {
+            transform: rotate(180deg);
         }
 
-        .dropdown-item:hover::before {
-            left: 100%;
-        }
-
-        .dropdown-item:hover {
-            background: rgba(107, 144, 128, 0.08);
-            color: var(--primary-color);
-            transform: translateX(4px);
-        }
-
-        .dropdown-item.delete:hover {
-            background: rgba(244, 67, 54, 0.08);
-            color: #f44336;
-        }
-
-        .dropdown-item:not(:last-child) {
-            border-bottom: 1px solid rgba(107, 144, 128, 0.05);
-        }
-
-        .dropdown-item i {
-            font-size: 16px;
-            width: 20px;
-            text-align: center;
-            transition: transform 0.3s ease;
-        }
-
-        .dropdown-item:hover i {
-            transform: scale(1.1);
-        }
-
-    /* Enhanced Post Cards */
-    .item-post {
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
+    /* Enhanced hover states */
+    .dropdown-btn:hover,
+    .nav-link:hover {
+        transform: translateY(-1px);
     }
 
-        .item-post::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(107, 144, 128, 0.05), transparent);
-            transition: left 0.8s ease;
-            z-index: 1;
-        }
-
-        .item-post:hover::before {
-            left: 100%;
-        }
-
-        .item-post:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(107, 144, 128, 0.15);
-        }
-
-    /* Enhanced Status Badges */
-    .status-badge {
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        position: relative;
-        overflow: hidden;
-        border: 2px solid transparent;
-        backdrop-filter: blur(10px);
-    }
-
-        .status-badge::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.8s ease;
-        }
-
-        .status-badge:hover::before {
-            left: 100%;
-        }
-
-        .status-badge.available {
-            background: linear-gradient(135deg, #d4edda, #c3e6cb);
-            color: #155724;
-            border-color: #28a745;
-        }
-
-        .status-badge.claimed {
-            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
-            color: #856404;
-            border-color: #ffc107;
-        }
-
-        .status-badge.expired {
-            background: linear-gradient(135deg, #f8d7da, #f1aeb5);
-            color: #721c24;
-            border-color: #dc3545;
-        }
-
-    /* Enhanced Interested Button */
-    .interested-btn {
+    /* Modern button styling */
+    .btn-modern {
         background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
         border: none;
-        border-radius: 16px;
+        border-radius: 12px;
         color: white;
         font-weight: 600;
-        padding: 14px 24px;
+        padding: 12px 24px;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 8px 24px rgba(107, 144, 128, 0.3);
+        box-shadow: 0 4px 12px rgba(107, 144, 128, 0.3);
     }
 
-        .interested-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.6s ease;
+        .btn-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(107, 144, 128, 0.4);
         }
 
-        .interested-btn:hover::before {
-            left: 100%;
-        }
-
-        .interested-btn:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 12px 36px rgba(107, 144, 128, 0.4);
-        }
-
-        .interested-btn:active {
-            transform: translateY(-1px) scale(1.02);
-        }
-
-    /* Enhanced Filter Tabs */
-    .filter-tab {
-        position: relative;
-        overflow: hidden;
-    }
-
-        .filter-tab::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            width: 0;
-            height: 3px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            border-radius: 3px;
-            transform: translateX(-50%);
-            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .filter-tab.active::after {
-            width: 80%;
-        }
-
-    /* Enhanced Avatar Styling */
-    .listing-container1-child1 img[alt="person"] {
-        border: 3px solid var(--primary-color);
-        box-shadow: 0 4px 12px rgba(107, 144, 128, 0.2);
-        transition: all 0.3s ease;
-    }
-
-        .listing-container1-child1 img[alt="person"]:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(107, 144, 128, 0.3);
-        }
-
-    /* Enhanced Loading States */
-    .loading-state {
-        position: relative;
-        overflow: hidden;
-    }
-
-        .loading-state::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
-            animation: shimmer 1.5s infinite;
-            z-index: 1;
-        }
-
-    @@keyframes shimmer {
-        0%
-
-    {
-        left: -100%;
-    }
-
-    100% {
-        left: 100%;
-    }
-
-    }
-
-    /* Mobile Responsiveness */
+    /* Enhanced mobile menu */
     @@media (max-width: 768px) {
-        .dropdown-btn
+        .dock-item
 
     {
-        width: 40px;
-        height: 40px;
-        padding: 8px;
+        position: relative;
     }
 
-    .dropdown-content {
-        min-width: 160px;
-        right: 5px;
+    .dock-item::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 3px;
+        background: var(--accent-color);
+        border-radius: 3px;
+        transform: translateX(-50%);
+        transition: width 0.3s ease;
     }
 
-    .dropdown-item {
-        padding: 14px 16px;
-        font-size: 14px;
-    }
-
-    .status-badge {
-        padding: 6px 12px;
-        font-size: 11px;
-    }
-
-    .interested-btn {
-        padding: 12px 20px;
-        font-size: 14px;
+    .dock-item.active::after,
+    .dock-item:hover::after {
+        width: 60%;
     }
 
     }
 </style>
 
 <script>
+    // FIXED: Global variable initialization
     window.currentUserId = '@currentUserId';
     window.currentUserName = '@currentUserName';
 
@@ -403,6 +153,91 @@
     function getCurrentUserName() {
         return window.currentUserName || document.body.dataset.username || "Anonymous";
     }
+
+    // FIXED: Enhanced sidebar toggle function - Properly defined
+    function toggleSidebar() {
+        console.log('toggleSidebar called');
+
+        const sidebar = document.getElementById('sidebar');
+        const toggleIcon = document.querySelector('#icon-toggle .toggle, #icon-toggle img');
+
+        if (!sidebar) {
+            console.error('Sidebar element not found');
+            return;
+        }
+
+        if (!toggleIcon) {
+            console.error('Toggle icon not found');
+            return;
+        }
+
+        console.log('Toggling sidebar...');
+
+        // Toggle sidebar class
+        sidebar.classList.toggle('close');
+
+        // Toggle icon rotation
+        toggleIcon.classList.toggle('rotate');
+
+        // Add smooth transition
+        sidebar.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+
+        // Update main content margins
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            if (sidebar.classList.contains('close')) {
+                mainContent.style.marginLeft = '82px';
+                mainContent.style.width = 'calc(100vw - 82px)';
+            } else {
+                mainContent.style.marginLeft = '250px';
+                mainContent.style.width = 'calc(100vw - 250px)';
+            }
+        }
+
+        console.log('Sidebar toggled successfully');
+    }
+
+    // FIXED: Enhanced token modal functionality - Properly defined
+    function showTokenModal() {
+        console.log('showTokenModal called');
+        const tokenModal = document.getElementById('tokenModal');
+
+        if (!tokenModal) {
+            console.error('Token modal not found');
+            return;
+        }
+
+        tokenModal.classList.add('show');
+
+        // Auto-close after 5 seconds
+        setTimeout(() => {
+            hideTokenModal();
+        }, 5000);
+
+        console.log('Token modal shown');
+    }
+
+    function hideTokenModal() {
+        const tokenModal = document.getElementById('tokenModal');
+        if (tokenModal) {
+            tokenModal.classList.remove('show');
+        }
+    }
+
+    // FIXED: Close modal on outside click
+    document.addEventListener('click', function(e) {
+        const tokenModal = document.getElementById('tokenModal');
+        if (tokenModal && tokenModal.classList.contains('show')) {
+            if (!tokenModal.contains(e.target) && !e.target.closest('.open-token')) {
+                hideTokenModal();
+            }
+        }
+    });
+
+    // Global function exports
+    window.toggleSidebar = toggleSidebar;
+    window.showTokenModal = showTokenModal;
+    window.hideTokenModal = hideTokenModal;
 </script>
 
 <form id="antiForgeryForm" style="display:none;">
@@ -427,46 +262,46 @@
     </div>
 </div>
 
-    <!-- Community Post Creation Section -->
-    @if (User.Identity.IsAuthenticated)
-    {
-        <div class="community-post-section" id="communityPostSection">
-            <div class="post-creator">
-                <div class="post-creator-header">
-                    <div class="user-avatar">
-                        <img src="@(ViewBag.CurrentUserAvatar ?? "~/assets/default-avatar.svg")" alt="Your avatar" />
-                    </div>
-                    <div class="post-input-container">
-                        <textarea class="post-input"
-                              placeholder="Share your clutter story..."
-                              id="communityPostInput"
-                              maxlength="1000"
-                              rows="1"></textarea>
-                        <div class="post-actions">
-                            <div class="post-options">
-                                <button type="button" class="post-option-btn" id="addImageBtn">
-                                    <i class='bx bx-image'></i>
-                                    <span>Photo</span>
-                                </button>
-                                <input type="file" id="communityImageInput" accept="image/*" style="display: none;">
-                            </div>
-                            <button type="button" class="post-btn-community" id="postCommunityBtn" disabled>
-                                Post
-                            </button>
-                        </div>
-                    </div>
+<!-- Community Post Creation Section -->
+@if (User.Identity.IsAuthenticated)
+{
+    <div class="community-post-section" id="communityPostSection">
+        <div class="post-creator">
+            <div class="post-creator-header">
+                <div class="user-avatar">
+                    <img src="@(ViewBag.CurrentUserAvatar ?? "~/assets/default-avatar.svg")" alt="Your avatar" />
                 </div>
-
-                <!-- Image Preview -->
-                <div class="community-image-preview" id="communityImagePreview" style="display: none;">
-                    <img id="communityPreviewImg" src="" alt="Preview" />
-                    <button type="button" class="remove-community-image" id="removeCommunityImage">
-                        <i class='bx bx-x'></i>
-                    </button>
+                <div class="post-input-container">
+                    <textarea class="post-input"
+                          placeholder="Share your clutter story..."
+                          id="communityPostInput"
+                          maxlength="1000"
+                          rows="1"></textarea>
+                    <div class="post-actions">
+                        <div class="post-options">
+                            <button type="button" class="post-option-btn" id="addImageBtn">
+                                <i class='bx bx-image text-xl'></i>
+                                Photo
+                            </button>
+                            <input type="file" id="communityImageInput" accept="image/*" style="display: none;">
+                        </div>
+                        <button type="button" class="post-btn-community" id="postCommunityBtn" disabled>
+                            Post
+                        </button>
+                    </div>
                 </div>
             </div>
+
+            <!-- Image Preview -->
+            <div class="community-image-preview" id="communityImagePreview" style="display: none;">
+                <img id="communityPreviewImg" src="" alt="Preview" />
+                <button type="button" class="remove-community-image" id="removeCommunityImage">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
         </div>
-    }
+    </div>
+}
 
 <!-- Enhanced POST CONTAINER -->
 <div class="main-container-main">
@@ -477,21 +312,21 @@
         </button>
     }
 
-        <div class="posts-container" id="postsContainer">
-            <!-- Regular Item Posts -->
-            @if (Model?.Items != null && Model.Items.Any())
+    <div class="posts-container" id="postsContainer">
+        <!-- Regular Item Posts -->
+        @if (Model?.Items != null && Model.Items.Any())
+        {
+            @foreach (var item in Model.Items)
             {
-                @foreach (var item in Model.Items)
-                {
-                    <div class="item-post" data-type="item" id="item-@item.ItemId">
-                        <div class="mid-container-child">
-                            <div class="listing-container1">
-                                <div class="listing-container1-child1">
-                                    <img src="@item.UserAvatarUrl" alt="person" />
-                                    <span>@item.Username</span>
-                                    <img src="~/assets/verified-icon.svg" alt="verified" />
-                                    <span class="date-span">@item.DatePosted.ToTimeAgo()</span>
-                                </div>
+                <div class="item-post" data-type="item" id="item-@item.ItemId">
+                    <div class="mid-container-child">
+                        <div class="listing-container1">
+                            <div class="listing-container1-child1">
+                                <img src="@item.UserAvatarUrl" alt="person" />
+                                <span>@item.Username</span>
+                                <img src="~/assets/verified-icon.svg" alt="verified" />
+                                <span class="date-span">@item.DatePosted.ToTimeAgo()</span>
+                            </div>
 
                             @{
                                 bool isItemOwner = false;
@@ -543,83 +378,83 @@
                             }
                         </div>
 
-                            <div class="listing-container3">
-                                <div class="listing-container3-child1">
-                                    <i class='bx bx-category'></i>
-                                    <span>@item.CategoryName</span>
-                                </div>
-
-                                <div class="listing-container3-child2">
-                                    <i class='bx bx-info-circle'></i>
-                                    <span>@item.ConditionName</span>
-                                </div>
-
-                                <div class="listing-container3-child3">
-                                    <i class='bx bx-map'></i>
-                                    <span>@item.LocationName</span>
-                                </div>
+                        <div class="listing-container3">
+                            <div class="listing-container3-child1">
+                                <span class="material-symbols-outlined">category</span>
+                                <span>@item.CategoryName</span>
                             </div>
 
-                            <div class="listing-container4">
-                                <h3>@item.ItemTitle</h3>
-                                <p>@item.Description</p>
+                            <div class="listing-container3-child2">
+                                <span class="material-symbols-outlined">action_key</span>
+                                <span>@item.ConditionName</span>
                             </div>
 
-                            <div class="listing-container5">
-                                <div class="listing-container5-child1">
-                                    <span>
-                                        @{
-                                            string currentUserIdForPrice = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-                                            if (string.IsNullOrEmpty(currentUserIdForPrice) || !User.Identity.IsAuthenticated)
-                                            {
-                                                @item.AdjustedTokenPrice.ToString("0.##")
-                                            }
-                                            else if (currentUserIdForPrice == item.UserId.ToString())
-                                            {
-                                                @item.FinalTokenPrice.ToString("0.##")
-                                            }
-                                            else
-                                            {
-                                                @item.AdjustedTokenPrice.ToString("0.##")
-                                            }
-                                        }
-                                    </span>
-                                    <img src="~/assets/game-icons_token.svg" alt="token" />
-                                </div>
-
-                                @if (item.Status != TidyUpCapstone.Models.Entities.Items.ItemStatus.Available)
-                                {
-                                    <div class="status-badge @item.StatusDisplayName.ToLower()">
-                                        @item.StatusDisplayName
-                                    </div>
-                                }
-                                else if (item.IsExpired)
-                                {
-                                    <div class="status-badge expired">
-                                        Expired
-                                    </div>
-                                }
-                                else if (User.Identity.IsAuthenticated)
-                                {
-                                    <button class="interested-btn" onclick="createChatBubble('@item.UserId', '@item.Username', @item.ItemId, '@item.ItemTitle')">
-                                        <span>Interested</span>
-                                    </button>
-                                }
-
-                                @if (item.IsAiProcessed && item.AiConfidenceLevel.HasValue)
-                                {
-                                    <div class="ai-confidence" title="AI Confidence Level">
-                                        <i class='bx bx-bot'></i>
-                                        <span>@((item.AiConfidenceLevel.Value * 100).ToString("0"))%</span>
-                                    </div>
-                                }
+                            <div class="listing-container3-child3">
+                                <span class="material-symbols-outlined">location_on</span>
+                                <span>@item.LocationName</span>
                             </div>
                         </div>
+
+                        <div class="listing-container4">
+                            <h3>@item.ItemTitle</h3>
+                            <p>@item.Description</p>
+                        </div>
+
+                        <div class="listing-container5">
+                            <div class="listing-container5-child1">
+                                <span>
+                                    @{
+                                        string currentUserIdForPrice = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+                                        if (string.IsNullOrEmpty(currentUserIdForPrice) || !User.Identity.IsAuthenticated)
+                                        {
+                                            @item.AdjustedTokenPrice.ToString("0.##")
+                                        }
+                                        else if (currentUserIdForPrice == item.UserId.ToString())
+                                        {
+                                            @item.FinalTokenPrice.ToString("0.##")
+                                        }
+                                        else
+                                        {
+                                            @item.AdjustedTokenPrice.ToString("0.##")
+                                        }
+                                    }
+                                </span>
+                                <img src="~/assets/game-icons_token.svg" alt="token" />
+                            </div>
+
+                            @if (item.Status != TidyUpCapstone.Models.Entities.Items.ItemStatus.Available)
+                            {
+                                <div class="status-badge @item.StatusDisplayName.ToLower()">
+                                    @item.StatusDisplayName
+                                </div>
+                            }
+                            else if (item.IsExpired)
+                            {
+                                <div class="status-badge expired">
+                                    Expired
+                                </div>
+                            }
+                            else if (User.Identity.IsAuthenticated)
+                            {
+                                <button class="interested-btn" onclick="createChatBubble('@item.UserId', '@item.Username', @item.ItemId, '@item.ItemTitle')">
+                                    <span>Interested</span>
+                                </button>
+                            }
+
+                            @if (item.IsAiProcessed && item.AiConfidenceLevel.HasValue)
+                            {
+                                <div class="ai-confidence" title="AI Confidence Level">
+                                    <span class="material-symbols-outlined">psychology</span>
+                                    <span>@((item.AiConfidenceLevel.Value * 100).ToString("0"))%</span>
+                                </div>
+                            }
+                        </div>
                     </div>
-                }
+                </div>
             }
-        </div>
+        }
+    </div>
 
     <!-- Enhanced Empty State -->
     <div class="empty-state-container" id="emptyState" style="display: none;">
@@ -639,65 +474,13 @@
     </div>
 </div>
 
-<!-- CHAT -->
-@if (User.Identity.IsAuthenticated)
-{
-    <button class="new-message-btn" id="newMessageBtn" aria-label="New Message" title="New Message">
-        <i class='bx bx-message-detail'></i>
-        <span>Messages</span>
-    </button>
-
-    <div class="messaging-overlay">
-        <!-- App Container (Messages Panel) -->
-        <div class="app-container" role="application" aria-label="Messages Panel">
-            <header>
-                <h1>Messages</h1>
-                <div class="header-controls">
-                    <button class="icon-btn" id="expandBtn" title="Expand">
-                        <i class='bx bx-expand'></i>
-                    </button>
-                    <button class="icon-btn" id="closeAppBtn" title="Close">
-                        <i class='bx bx-x'></i>
-                    </button>
-                </div>
-            </header>
-            <main>
-                <div class="messages-list" tabindex="0" aria-label="Messages list" role="list">
-                </div>
-            </main>
-        </div>
-
-        <div class="chat-window">
-            <div class="header-chat">
-                <div class="header-chat-child1">
-                    <h2>Item Owner</h2>
-                    <p>Active 24m ago</p>
-                </div>
-                <button class="icon-btn" id="closeChatBtn" title="Back to Messages">
-                    <i class='bx bx-arrow-back'></i>
-                </button>
-            </div>
-            <div class="message-log">
-                @* Messages will be loaded dynamically *@
-            </div>
-
-            <div class="message-input">
-                <input type="text" id="chatMessageInput" placeholder="Message..." />
-                <button type="button" id="sendMessage" class="send-btn" aria-label="Send message">
-                    <i class='bx bx-send'></i>
-                </button>
-            </div>
-        </div>
-    </div>
-}
-
-<!-- Token wallet modal -->
+<!-- FIXED: Token wallet modal - PROPERLY ADDED -->
 @if (User.Identity.IsAuthenticated)
 {
     <div class="card-spotlight" id="tokenModal">
         <div class="card-spotlight-child1">
             <h2>@(ViewBag.CurrentUserTokenBalance ?? 0)</h2>
-            <img src="~/assets/token-symbol.svg" alt="Token" />
+            <img src="~/assets/game-icons_token.svg" alt="Token" />
         </div>
         <div class="card-spotlight-child2">
             <p>This is your current token balance</p>
@@ -705,15 +488,15 @@
     </div>
 }
 
-<!-- FIXED: Modal for Posting an Item -->
+<!-- Modal for Posting an Item -->
 @if (User.Identity.IsAuthenticated)
 {
-    <div id="createPostModal" class="modal">
+    <div id="createPostModal" class="modal" enctype="multipart/form-data">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Post an Item</h2>
                 <button type="button" class="close-modal" onclick="closeCreateModal()">
-                    <i class='bx bx-x'></i>
+                    <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
 
@@ -729,13 +512,13 @@
                     <div class="image-preview" id="imagePreview" style="display: none;">
                         <img id="previewImg" src="" alt="Preview" />
                         <button type="button" class="remove-image" onclick="removeImage()">
-                            <i class='bx bx-x'></i>
+                            <span class="material-symbols-outlined">close</span>
                         </button>
                     </div>
                 </div>
 
                 <div class="cat-con-price">
-                    <!-- Category Dropdown -->
+                    <!-- Category Dropdown - AI will silently set this -->
                     <div id="categoryContainer">
                         <select id="categoryInput" name="CategoryId" required>
                             <option value="" disabled selected hidden>Select a category</option>
@@ -746,7 +529,7 @@
                         </select>
                     </div>
 
-                    <!-- Condition Dropdown -->
+                    <!-- Condition Dropdown - AI will silently set this -->
                     <div id="conditionContainer">
                         <select id="conditionInput" name="ConditionId" required>
                             <option value="" disabled selected hidden>Select condition</option>
@@ -769,7 +552,7 @@
                     <!-- Title -->
                     <div class="input-wrapper">
                         <input class="input-form" type="text" id="titleInput" name="ItemTitle" placeholder=" " required maxlength="100" />
-                        <label class="input-label" for="titleInput">Item Title</label>
+                        <label class="input-label" for="titleInput">Item</label>
                     </div>
 
                     <!-- Description -->
@@ -783,7 +566,7 @@
                     <input type="hidden" name="Latitude" id="Latitude" />
                     <input type="hidden" name="Longitude" id="Longitude" />
 
-                    <!-- Hidden fields for AI data -->
+                    <!-- Hidden fields for AI data (backend tracking only - no UI) -->
                     <input type="hidden" id="aiCategoryId" name="AiCategoryId" />
                     <input type="hidden" id="aiConditionId" name="AiConditionId" />
                     <input type="hidden" id="aiConfidenceScore" name="AiConfidenceScore" />
@@ -806,19 +589,19 @@
         </div>
     </div>
 
-    <!-- Edit Modal -->
+    <!-- Edit Modal for Posting an Item -->
     <div id="editPostModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Edit Item</h2>
                 <button type="button" class="close-modal" onclick="closeEditModal()">
-                    <i class='bx bx-x'></i>
+                    <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
 
             <div class="modal-content-child1">
-                <!-- Current image display -->
-                <div class="current-image-display" id="currentImageContainer">
+                <!-- Show current image as read-only -->
+                <div class="current-image-display">
                     <img id="currentImageDisplay" src="" alt="Current image" style="width: 100%; max-width: 300px; border-radius: 8px;" />
                 </div>
 
@@ -827,12 +610,12 @@
                     <div id="editCategoryContainer">
                         <label>Category</label>
                         <div class="read-only-field" id="editCategoryDisplay" style="
-                    padding: 12px;
-                    background: #f8f9fa;
-                    border: 1px solid #dee2e6;
-                    border-radius: 4px;
-                    color: #6c757d;
-                    font-weight: 500;">
+                            padding: 12px;
+                            background: #f8f9fa;
+                            border: 1px solid #dee2e6;
+                            border-radius: 4px;
+                            color: #6c757d;
+                            font-weight: 500;">
                             <!-- Will be populated by JavaScript -->
                         </div>
                         <input type="hidden" id="editCategoryInput" name="CategoryId" />
@@ -842,12 +625,12 @@
                     <div id="editConditionContainer">
                         <label>Condition</label>
                         <div class="read-only-field" id="editConditionDisplay" style="
-                    padding: 12px;
-                    background: #f8f9fa;
-                    border: 1px solid #dee2e6;
-                    border-radius: 4px;
-                    color: #6c757d;
-                    font-weight: 500;">
+                            padding: 12px;
+                            background: #f8f9fa;
+                            border: 1px solid #dee2e6;
+                            border-radius: 4px;
+                            color: #6c757d;
+                            font-weight: 500;">
                             <!-- Will be populated by JavaScript -->
                         </div>
                         <input type="hidden" id="editConditionInput" name="ConditionId" />
@@ -866,7 +649,7 @@
                     <!-- EDITABLE Title -->
                     <div class="input-wrapper">
                         <input class="input-form" type="text" id="editTitleInput" name="ItemTitle" placeholder=" " required maxlength="100" />
-                        <label class="input-label" for="editTitleInput">Item Title</label>
+                        <label class="input-label" for="editTitleInput">Item</label>
                     </div>
 
                     <!-- EDITABLE Description -->
@@ -882,7 +665,7 @@
 
                 <div class="token-post">
                     <div class="price-display">
-                        <span class="token-count" id="editFinalPrice">0.00</span>
+                        <span class="token-count" id="editFinalPrice"></span>
                         <img src="~/assets/game-icons_token.svg" alt="token" />
                     </div>
                     <button class="post-btn" id="submitEdit" type="button">
@@ -895,8 +678,67 @@
     </div>
 }
 
+<!-- Comments Modal -->
+<div class="comments-modal" id="commentsModal">
+    <div class="comments-modal-content">
+        <!-- Modal Header -->
+        <div class="comments-modal-header">
+            <div class="comments-header-content">
+                <div class="comments-modal-title">
+                    <i class='bx bx-message-circle'></i>
+                    Comments
+                    <span class="comments-count-badge" id="modalCommentsCount">0</span>
+                </div>
+                <button class="close-comments-modal" onclick="closeCommentsModal()">
+                    <i class='bx bx-x'></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Comments List -->
+        <div class="comments-list-container" id="commentsListContainer">
+            <div class="loading-comments" id="commentsLoading" style="display: none;">
+                <div class="loading-spinner-comments"></div>
+            </div>
+
+            <!-- Empty State (default state for production) -->
+            <div class="comments-empty-state">
+                <i class='bx bx-message-circle'></i>
+                <h3>No comments yet</h3>
+                <p>Be the first to comment on this post!</p>
+            </div>
+        </div>
+
+        <!-- New Comment Input -->
+        @if (User.Identity.IsAuthenticated)
+        {
+            <div class="new-comment-section">
+                <div class="new-comment-container">
+                    <img src="@(ViewBag.CurrentUserAvatar ?? "~/assets/default-avatar.svg")"
+                         alt="Your avatar" class="new-comment-avatar">
+                    <div class="new-comment-input-wrapper">
+                        <textarea class="new-comment-input"
+                              placeholder="Write a comment..."
+                              rows="1"
+                              id="newCommentInput"
+                              maxlength="500"></textarea>
+                        <button class="send-comment-btn" id="sendCommentBtn" disabled>
+                            <i class='bx bx-send'></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="login-prompt-comments">
+                <p><a href="/Account/Login">Login</a> to join the conversation</p>
+            </div>
+        }
+    </div>
+</div>
+
 <!-- Scripts -->
-<script src="~/js/sidebar-toggle.js"></script>
 <script src="~/js/toggleEditDelete.js"></script>
 <script src="~/js/afterTax.js"></script>
 <script src="~/js/openModal.js?v=1.0.14"></script>
@@ -911,10 +753,34 @@
 <script src="~/js/uiUpdateSystem.js"></script>
 <script src="~/js/filterTabSystem.js"></script>
 
-<!-- Enhanced JavaScript for image preview and form validation -->
+<!-- FIXED: Enhanced JavaScript for initialization -->
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Only initialize form elements if user is authenticated
+        console.log('Main.cshtml DOM loaded');
+
+        // FIXED: Initialize token modal click handlers
+        document.querySelectorAll('.open-token').forEach(el => {
+            el.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Token modal trigger clicked');
+                showTokenModal();
+            });
+        });
+
+        // FIXED: Initialize sidebar toggle
+        const toggleButton = document.getElementById('icon-toggle');
+        if (toggleButton) {
+            toggleButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Sidebar toggle clicked');
+                toggleSidebar();
+            });
+        } else {
+            console.error('Toggle button not found');
+        }
+
+        // Initialize other functionality only if user is authenticated
         if (!@(User.Identity.IsAuthenticated.ToString().ToLower())) {
             return;
         }
@@ -965,6 +831,9 @@
                         button.focus();
                     }
                 });
+
+                // Also close token modal on escape
+                hideTokenModal();
             }
         });
 
@@ -992,6 +861,69 @@
             });
         }
 
+        // Form validation - Enhanced version
+        function validateForm() {
+            const title = titleInput?.value.trim();
+            const description = descriptionInput?.value.trim();
+            const category = document.getElementById('categoryInput')?.value;
+            const condition = document.getElementById('conditionInput')?.value;
+            const location = document.getElementById('locationInput')?.value.trim();
+            const image = imageInput?.files?.length > 0;
+            const latitude = document.getElementById('Latitude')?.value;
+            const longitude = document.getElementById('Longitude')?.value;
+
+            const isValid = title && description && category && condition && location && image && latitude && longitude;
+
+            const submitBtn = document.getElementById('submitPost');
+            if (submitBtn) {
+                submitBtn.disabled = !isValid;
+
+                // Add visual feedback classes
+                if (isValid) {
+                    submitBtn.classList.add('valid');
+                    submitBtn.classList.remove('invalid');
+                } else {
+                    submitBtn.classList.remove('valid');
+                    submitBtn.classList.add('invalid');
+                }
+            }
+
+            return isValid;
+        }
+
+        // Add validation listeners to all form inputs
+        [titleInput, descriptionInput, document.getElementById('categoryInput'),
+         document.getElementById('conditionInput'), document.getElementById('locationInput'), imageInput]
+        .forEach(input => {
+            if (input) {
+                input.addEventListener('change', validateForm);
+                input.addEventListener('input', validateForm);
+            }
+        });
+
+        // Initial validation
+        validateForm();
+    });
+
+    function closeCreateModal() {
+        const modal = document.getElementById('createPostModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        // Reset form handled by openModal.js
+        if (typeof resetCreateForm === 'function') {
+            resetCreateForm();
+        }
+    }
+
+    function closeEditModal() {
+        const modal = document.getElementById('editPostModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+</script>
+
 <!-- Community Page Scripts -->
 <script src="~/js/CommunityPage.js?v=20241114g"></script>
 
@@ -1011,7 +943,12 @@
 
             script.onerror = function(error) {
                 console.error('Failed to load Google Maps API:', error);
+                console.error('Check: API key, Places API enabled, billing enabled');
                 initializeManualLocationFallback();
+            };
+
+            script.onload = function() {
+                console.log('Google Maps script loaded successfully');
             };
 
             document.head.appendChild(script);
@@ -1026,6 +963,7 @@
                 return;
             }
 
+            console.log('Initializing autocomplete...');
             initializeAutocomplete();
         };
 
@@ -1039,6 +977,7 @@
             }
 
             try {
+                // Create autocomplete for create modal
                 const autocomplete = new google.maps.places.Autocomplete(locationInput, {
                     types: ['geocode'],
                     componentRestrictions: { country: 'ph' },
@@ -1067,6 +1006,7 @@
                     }
                 });
 
+                // Initialize for edit modal
                 if (editLocationInput) {
                     const editAutocomplete = new google.maps.places.Autocomplete(editLocationInput, {
                         types: ['geocode'],
@@ -1115,6 +1055,7 @@
             }
         }
 
+        // Initialize when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 if (typeof google !== 'undefined' && google.maps && google.maps.places) {
@@ -1127,3 +1068,5 @@
         });
     }
 </script>
+
+<script src="https://cdn.tailwindcss.com"></script>
