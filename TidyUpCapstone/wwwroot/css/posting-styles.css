@@ -1,4 +1,4 @@
-﻿/* Improved posting-styles.css - Enhanced UI Components */
+﻿/* Enhanced posting-styles.css - Improved UI Components & Consistency */
 
 /* ============================================================================
    ENHANCED FORM VALIDATION STATES
@@ -27,10 +27,11 @@
 
 /* Enhanced button states */
 .post-btn.valid {
-    background: linear-gradient(135deg, var(--success-color), #20a744) !important;
+    background: linear-gradient(135deg, #28a745, #20a744) !important;
     cursor: pointer;
     opacity: 1;
     box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    transform: translateY(0);
 }
 
 .post-btn.invalid {
@@ -39,12 +40,16 @@
     cursor: not-allowed;
     opacity: 0.7;
     box-shadow: none;
+    transform: none;
 }
 
 .post-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     background: #e9ecef !important;
+    color: #999 !important;
+    transform: none;
+    box-shadow: none;
 }
 
 /* ============================================================================
@@ -58,6 +63,7 @@
     opacity: 0.8;
     transition: all 0.3s ease;
     color: #6c757d;
+    font-weight: 500;
 }
 
     .character-counter.warning {
@@ -74,7 +80,8 @@
    ENHANCED POST ANIMATIONS
    ============================================================================ */
 
-.item-post.new-post {
+.item-post.new-post,
+.community-post.new-post {
     animation: slideInFromTop 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -106,7 +113,7 @@
 }
 
 /* ============================================================================
-   ENHANCED FILTER SYSTEM
+   ENHANCED FILTER SYSTEM - Mobile First
    ============================================================================ */
 
 .filter-tabs-container {
@@ -115,8 +122,8 @@
     background: var(--background);
     z-index: 100;
     border-bottom: 1px solid rgba(107, 144, 128, 0.1);
-    margin-bottom: 24px;
-    padding: 16px 0;
+    margin-bottom: 20px;
+    padding: 16px 10px;
     backdrop-filter: blur(10px);
 }
 
@@ -125,7 +132,7 @@
     position: relative;
     border: none;
     background: none;
-    padding: 14px 20px;
+    padding: 12px 16px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -133,11 +140,14 @@
     color: #666;
     font-weight: 500;
     border-radius: 12px;
+    min-height: 44px;
+    font-size: 14px;
 }
 
     .filter-tab:hover {
         background-color: rgba(107, 144, 128, 0.08);
         color: var(--primary-color);
+        transform: translateY(-1px);
     }
 
     .filter-tab.active {
@@ -151,6 +161,7 @@
     .filter-tab i {
         font-size: 20px;
         transition: transform 0.3s ease;
+        flex-shrink: 0;
     }
 
     .filter-tab:hover .material-symbols-outlined,
@@ -159,7 +170,7 @@
     }
 
 /* ============================================================================
-   ENHANCED EMPTY STATE
+   ENHANCED EMPTY STATE - Better Visual Design
    ============================================================================ */
 
 .empty-state-container {
@@ -182,17 +193,25 @@
     text-align: center;
     max-width: 450px;
     padding: 60px 30px;
-    background: white;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 250, 0.9) 100%);
     border-radius: 20px;
     box-shadow: 0 8px 25px rgba(107, 144, 128, 0.1);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(107, 144, 128, 0.1);
 }
 
 .empty-state-icon {
     width: 120px;
     height: 120px;
-    opacity: 0.4;
+    opacity: 0.5;
     margin: 0 auto 24px;
     filter: drop-shadow(0 4px 8px rgba(107, 144, 128, 0.1));
+    transition: all 0.3s ease;
+}
+
+.empty-state:hover .empty-state-icon {
+    opacity: 0.7;
+    transform: scale(1.05);
 }
 
 .empty-state h3 {
@@ -200,6 +219,7 @@
     margin-bottom: 12px;
     font-size: 1.6rem;
     font-weight: 600;
+    line-height: 1.3;
 }
 
 .empty-state p {
@@ -207,6 +227,7 @@
     margin-bottom: 24px;
     font-size: 1.1rem;
     line-height: 1.6;
+    opacity: 0.8;
 }
 
 .empty-state .btn {
@@ -220,6 +241,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 4px 12px rgba(107, 144, 128, 0.3);
+    font-family: inherit;
 }
 
     .empty-state .btn:hover {
@@ -228,37 +250,43 @@
     }
 
 /* ============================================================================
-   ENHANCED IMAGE PREVIEW
+   ENHANCED IMAGE PREVIEW - Better UX
    ============================================================================ */
 
-.image-preview {
+.image-preview,
+.community-image-preview {
     position: relative;
     display: inline-block;
     margin-top: 16px;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    max-width: 100%;
 }
 
-    .image-preview:hover {
+    .image-preview:hover,
+    .community-image-preview:hover {
         transform: scale(1.02);
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     }
 
-    .image-preview img {
+    .image-preview img,
+    .community-image-preview img {
         max-width: 100%;
         max-height: 300px;
         border-radius: 12px;
         display: block;
         object-fit: cover;
+        width: 100%;
     }
 
-.remove-image {
+.remove-image,
+.remove-community-image {
     position: absolute;
     top: 8px;
     right: 8px;
-    background: rgba(220, 53, 69, 0.9);
+    background: rgba(244, 67, 54, 0.9);
     color: white;
     border: none;
     border-radius: 50%;
@@ -271,15 +299,22 @@
     justify-content: center;
     transition: all 0.3s ease;
     backdrop-filter: blur(4px);
+    z-index: 10;
 }
 
-    .remove-image:hover {
+    .remove-image:hover,
+    .remove-community-image:hover {
         background: #dc3545;
         transform: scale(1.1);
     }
 
+    .remove-image i,
+    .remove-community-image i {
+        font-size: 14px;
+    }
+
 /* ============================================================================
-   ENHANCED COMMUNITY POST SECTION
+   ENHANCED COMMUNITY POST SECTION - Better Mobile Experience
    ============================================================================ */
 
 .community-post-section {
@@ -296,6 +331,7 @@
 .post-creator {
     position: relative;
     overflow: hidden;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 249, 250, 0.9) 100%);
 }
 
     .post-creator::before {
@@ -314,7 +350,7 @@
     }
 
 /* ============================================================================
-   ENHANCED MODAL SYSTEM
+   ENHANCED MODAL SYSTEM - Improved Responsiveness
    ============================================================================ */
 
 .modal {
@@ -329,10 +365,11 @@
     }
 
 .modal-content {
-    border-radius: 16px;
+    border-radius: 20px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     transform: scale(0.9) translateY(20px);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid var(--primary-color);
 }
 
 .modal.show .modal-content {
@@ -348,33 +385,44 @@
     transition: all 0.3s ease;
     border-radius: 50%;
     padding: 8px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
     .close-modal:hover {
         color: var(--error-color);
-        background: rgba(220, 53, 69, 0.1);
+        background: rgba(244, 67, 54, 0.1);
         transform: rotate(90deg);
     }
 
+    .close-modal i {
+        font-size: 20px;
+    }
+
 /* ============================================================================
-   ENHANCED UPLOAD SECTION
+   ENHANCED UPLOAD SECTION - Better Visual Feedback
    ============================================================================ */
 
 .upload-label {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 2px dashed #ddd;
-    border-radius: 12px;
+    border: 2px dashed rgba(107, 144, 128, 0.4);
+    border-radius: 16px;
     padding: 24px;
     text-align: center;
     cursor: pointer;
     position: relative;
     background: linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%);
+    min-height: 180px;
 }
 
     .upload-label:hover {
         border-color: var(--primary-color);
         background: linear-gradient(135deg, rgba(107, 144, 128, 0.05) 0%, rgba(164, 195, 178, 0.08) 100%);
         transform: scale(1.02);
+        box-shadow: 0 8px 25px rgba(107, 144, 128, 0.1);
     }
 
     .upload-label::before {
@@ -396,35 +444,49 @@
     color: var(--text-color);
     font-weight: 500;
     transition: all 0.3s ease;
+    font-size: 14px;
+    margin-top: 12px;
 }
 
 .upload-label:hover .upload-text {
     color: var(--primary-color);
     font-weight: 600;
+    transform: translateY(-2px);
 }
 
 /* ============================================================================
-   ENHANCED PRICE BREAKDOWN
+   ENHANCED PRICE BREAKDOWN - Better Information Display
    ============================================================================ */
 
 .price-breakdown {
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border: 1px solid #dee2e6;
-    border-radius: 8px;
-    padding: 12px;
+    border-radius: 10px;
+    padding: 12px 16px;
     margin-top: 12px;
     font-size: 12px;
     line-height: 1.5;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
 }
+
+    .price-breakdown:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
 
     .price-breakdown small {
         color: #495057;
         font-weight: 500;
+        display: block;
+        margin-bottom: 4px;
     }
 
+        .price-breakdown small:last-child {
+            margin-bottom: 0;
+        }
+
 /* ============================================================================
-   ENHANCED INTERACTION BUTTONS
+   ENHANCED INTERACTION BUTTONS - Better Touch Targets
    ============================================================================ */
 
 .interaction-buttons {
@@ -432,6 +494,7 @@
     gap: 16px;
     align-items: center;
     padding: 12px 0;
+    flex-wrap: wrap;
 }
 
 .interaction-btn {
@@ -449,6 +512,8 @@
     font-weight: 500;
     position: relative;
     overflow: hidden;
+    min-height: 44px;
+    font-family: inherit;
 }
 
     .interaction-btn::before {
@@ -487,7 +552,7 @@
     }
 
 /* ============================================================================
-   ENHANCED FORM INPUTS
+   ENHANCED FORM INPUTS - Better User Experience
    ============================================================================ */
 
 .input-wrapper {
@@ -498,28 +563,29 @@
 .input-form {
     width: 100%;
     padding: 14px;
-    border: 2px solid #e1e5e9;
+    border: 2px solid rgba(107, 144, 128, 0.3);
     border-radius: 12px;
     font-size: 16px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     background: white;
     color: var(--text-color);
+    font-family: inherit;
+    outline: none;
 }
 
     .input-form:focus {
-        outline: none;
         border-color: var(--primary-color);
         box-shadow: 0 0 0 4px rgba(107, 144, 128, 0.1);
         transform: translateY(-1px);
     }
 
     .input-form.valid {
-        border-color: var(--success-color);
+        border-color: #28a745;
         box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.1);
     }
 
     .input-form.invalid {
-        border-color: var(--error-color);
+        border-color: #dc3545;
         box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
     }
 
@@ -532,6 +598,7 @@
     pointer-events: none;
     background: white;
     padding: 0 4px;
+    font-size: 16px;
 }
 
 .input-form:focus + .input-label,
@@ -552,6 +619,7 @@ select {
     background-size: 16px;
     padding-right: 40px;
     cursor: pointer;
+    font-family: inherit;
 }
 
     select:focus {
@@ -560,17 +628,17 @@ select {
     }
 
     select.valid {
-        border-color: var(--success-color);
+        border-color: #28a745;
         box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.1);
     }
 
     select.invalid {
-        border-color: var(--error-color);
+        border-color: #dc3545;
         box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
     }
 
 /* ============================================================================
-   ENHANCED LOADING STATES
+   ENHANCED LOADING STATES - Better Visual Feedback
    ============================================================================ */
 
 .loading-state {
@@ -603,8 +671,13 @@ select {
         animation: spin 1s linear infinite;
     }
 
+.modal-loader {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+}
+
 /* ============================================================================
-   ENHANCED FLOATING ADD BUTTON
+   ENHANCED FLOATING ADD BUTTON - Better Mobile Support
    ============================================================================ */
 
 .floating-add-btn {
@@ -636,27 +709,178 @@ select {
         transform: translateY(-1px) scale(1.02);
     }
 
+    .floating-add-btn i {
+        font-size: 24px;
+        transition: transform 0.3s ease;
+    }
+
+    .floating-add-btn:hover i {
+        transform: rotate(180deg);
+    }
+
 /* ============================================================================
-   ENHANCED RESPONSIVE DESIGN
+   ENHANCED DROPDOWN SYSTEM - Better Mobile Experience
+   ============================================================================ */
+
+.dropdown-content {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(107, 144, 128, 0.1);
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    min-width: 160px;
+}
+
+.dropdown-item {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+}
+
+    .dropdown-item:hover {
+        background: rgba(107, 144, 128, 0.1);
+        color: var(--primary-color);
+    }
+
+    .dropdown-item.delete:hover {
+        background: rgba(244, 67, 54, 0.1);
+        color: var(--error-color);
+    }
+
+    .dropdown-item:not(:last-child) {
+        border-bottom: 1px solid rgba(107, 144, 128, 0.05);
+    }
+
+    .dropdown-item i {
+        font-size: 16px;
+        width: 16px;
+        text-align: center;
+    }
+
+/* ============================================================================
+   ENHANCED NOTIFICATION SYSTEM - Toast Notifications
+   ============================================================================ */
+
+.notification-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 16px 24px;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    z-index: 20000;
+    max-width: 400px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Montserrat', sans-serif;
+}
+
+    .notification-toast.success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .notification-toast.error {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    .notification-toast.info {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    }
+
+    .notification-toast i {
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+/* ============================================================================
+   ENHANCED AI PROTECTION STYLING - Visual Consistency
+   ============================================================================ */
+
+.ai-protection-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.ai-protection-notice {
+    background: linear-gradient(135deg, #e8eaff 0%, #f0f2ff 100%);
+    border: 2px solid #667eea;
+    border-radius: 12px;
+    padding: 15px;
+    margin-top: 8px;
+    font-size: 13px;
+    color: #4a5568;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.read-only-field-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+    .read-only-field-content i {
+        font-size: 16px;
+        color: var(--primary-color);
+    }
+
+/* ============================================================================
+   RESPONSIVE DESIGN IMPROVEMENTS
    ============================================================================ */
 
 @media (max-width: 768px) {
+    /* Filter tabs responsive */
+    .filter-tabs-container {
+        padding: 12px 5px;
+    }
+
     .filter-tabs {
         gap: 2px;
-        padding: 6px;
+        padding: 4px;
     }
 
     .filter-tab {
-        padding: 12px 8px;
-        font-size: 13px;
+        padding: 10px 8px;
         gap: 4px;
-        min-height: 44px;
+        font-size: 13px;
+        min-width: 44px;
     }
 
-    .filter-tab-text {
-        display: none;
-    }
+        .filter-tab i {
+            font-size: 18px;
+        }
 
+    /* Modal improvements */
     .modal {
         padding: 8px;
         align-items: flex-start;
@@ -667,15 +891,28 @@ select {
         max-height: 85vh;
         overflow-y: auto;
         border-radius: 16px;
+        width: 100%;
+        max-width: none;
     }
 
     .modal-header {
         padding: 16px;
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
     }
 
         .modal-header h2 {
             font-size: 24px;
+            order: 1;
         }
+
+    .close-modal {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        order: 2;
+    }
 
     .modal-content-child1 {
         flex-direction: column;
@@ -684,16 +921,19 @@ select {
     }
 
     .upload-section {
+        width: 100%;
         min-height: 140px;
     }
 
     .upload-label {
         padding: 20px;
+        min-height: 120px;
     }
 
     .cat-con-price {
-        min-width: auto;
+        width: 100%;
         gap: 12px;
+        min-width: auto;
     }
 
     .modal-content-child2 {
@@ -703,6 +943,7 @@ select {
     }
 
     .token-post {
+        width: 100%;
         min-width: auto;
         padding: 12px 0;
         gap: 12px;
@@ -712,6 +953,7 @@ select {
         font-size: 2rem;
     }
 
+    /* Interaction buttons mobile */
     .interaction-buttons {
         justify-content: space-around;
         gap: 8px;
@@ -724,16 +966,22 @@ select {
         padding: 8px 12px;
         font-size: 13px;
         min-width: 80px;
+        min-height: 44px;
     }
 
+    /* Floating button mobile */
     .floating-add-btn {
         bottom: 16px;
         right: 16px;
         width: 52px;
         height: 52px;
-        font-size: 20px;
     }
 
+        .floating-add-btn i {
+            font-size: 20px;
+        }
+
+    /* Empty state mobile */
     .empty-state {
         padding: 40px 20px;
     }
@@ -750,13 +998,38 @@ select {
     .empty-state p {
         font-size: 1rem;
     }
+
+    /* Notification mobile */
+    .notification-toast {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        padding: 14px 20px;
+    }
+
+    /* Dropdown mobile */
+    .dropdown-content {
+        right: 5px;
+        min-width: 140px;
+    }
+
+    .dropdown-item {
+        padding: 14px 16px;
+        font-size: 14px;
+        min-height: 44px;
+    }
 }
 
 @media (max-width: 480px) {
     .filter-tab {
-        padding: 10px 6px;
+        padding: 8px 6px;
         min-width: 44px;
         gap: 0;
+    }
+
+    .filter-tab-text {
+        display: none !important;
     }
 
     .modal-header h2 {
@@ -769,9 +1042,10 @@ select {
 
     .upload-label {
         padding: 16px;
+        min-height: 100px;
     }
 
-    .token-post .token-count {
+    .price-display .token-count {
         font-size: 1.8rem;
     }
 
@@ -779,45 +1053,18 @@ select {
         padding: 6px 8px;
         font-size: 12px;
         gap: 4px;
+        min-height: 44px;
     }
 
     .floating-add-btn {
         width: 48px;
         height: 48px;
-        font-size: 18px;
     }
+
+        .floating-add-btn i {
+            font-size: 18px;
+        }
 }
-
-/* ============================================================================
-   ENHANCED NOTIFICATION SYSTEM
-   ============================================================================ */
-
-.notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: white;
-    border-radius: 12px;
-    padding: 16px 20px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    z-index: 10000;
-    transform: translateX(100%);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    max-width: 300px;
-    border-left: 4px solid var(--primary-color);
-}
-
-    .notification.show {
-        transform: translateX(0);
-    }
-
-    .notification.success {
-        border-left-color: var(--success-color);
-    }
-
-    .notification.error {
-        border-left-color: var(--error-color);
-    }
 
 /* ============================================================================
    ACCESSIBILITY ENHANCEMENTS
@@ -838,7 +1085,8 @@ select {
 .post-btn:focus,
 .floating-add-btn:focus,
 .input-form:focus,
-select:focus {
+select:focus,
+.dropdown-item:focus {
     outline: 2px solid var(--primary-color);
     outline-offset: 2px;
 }
@@ -847,25 +1095,101 @@ select:focus {
 @media (prefers-contrast: high) {
     .filter-tab.active,
     .post-btn,
-    .floating-add-btn {
+    .floating-add-btn,
+    .interested-btn {
         border: 2px solid currentColor;
+    }
+
+    .dropdown-item:hover {
+        outline: 2px solid currentColor;
     }
 }
 
-/* Dark mode enhancements */
-@media (prefers-color-scheme: dark) {
-    .upload-label {
-        background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
-        border-color: #555;
+/* Touch improvements */
+@media (hover: none) {
+    .filter-tab:hover,
+    .post-option-btn:hover,
+    .interaction-btn:hover,
+    .dropdown-item:hover {
+        transform: none;
+    }
+}
+
+/* ============================================================================
+   ENHANCED ANIMATIONS & TRANSITIONS
+   ============================================================================ */
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
     }
 
-    .price-breakdown {
-        background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
-        border-color: #555;
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        opacity: 1;
+        transform: translateX(0);
     }
 
-    .notification {
-        background: #2d2d2d;
-        color: white;
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+@keyframes dropdownSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.fade-out {
+    animation: fadeOut 0.3s ease-in-out;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+/* ============================================================================
+   PRINT STYLES
+   ============================================================================ */
+
+@media print {
+    .floating-add-btn,
+    .modal,
+    .notification-toast,
+    .dropdown-content {
+        display: none !important;
+    }
+
+    .item-post,
+    .community-post {
+        break-inside: avoid;
+        margin-bottom: 20px;
     }
 }
