@@ -1,76 +1,150 @@
-﻿// Enhanced toggleEditDelete.js - Improved Dropdown UX & Consistency
+﻿// Enhanced toggleEditDelete.js - Premium UI with Improved Consistency & Animations
 // ============================================================================
 
-// Enhanced dropdown functionality with better UX
+// Enhanced dropdown functionality with premium interactions
 function toggleDropdown(button) {
     const dropdown = button.closest('.dropdown-menu');
     const dropdownContent = dropdown.querySelector('.dropdown-content');
     const isActive = dropdown.classList.contains('active');
 
-    // Close all other dropdowns first
+    // Close all other dropdowns first with smooth animations
     document.querySelectorAll('.dropdown-menu.active').forEach(menu => {
         if (menu !== dropdown) {
             menu.classList.remove('active');
+            const btn = menu.querySelector('.dropdown-btn');
+            if (btn) {
+                btn.setAttribute('aria-expanded', 'false');
+                // Reset button styles
+                btn.style.transform = '';
+                const img = btn.querySelector('img');
+                if (img) img.style.transform = '';
+            }
         }
     });
 
-    // Toggle current dropdown with animation
+    // Toggle current dropdown with enhanced animations
     if (!isActive) {
         dropdown.classList.add('active');
-
-        // Add entrance animation
-        if (dropdownContent) {
-            dropdownContent.style.animation = 'dropdownSlide 0.3s ease-out';
-        }
-
-        // Add accessibility attributes
         button.setAttribute('aria-expanded', 'true');
 
-        console.log('📋 Dropdown opened');
+        // Enhanced button animation
+        button.style.transform = 'scale(1.05)';
+        const img = button.querySelector('img');
+        if (img) {
+            img.style.transform = 'rotate(90deg)';
+            img.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+        }
+
+        // Enhanced dropdown entrance animation
+        if (dropdownContent) {
+            dropdownContent.style.animation = 'dropdownSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+        }
+
+        // Add backdrop blur effect
+        setTimeout(() => {
+            const backdrop = document.createElement('div');
+            backdrop.className = 'dropdown-backdrop';
+            backdrop.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.1);
+                backdrop-filter: blur(2px);
+                z-index: 999;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+            document.body.appendChild(backdrop);
+
+            requestAnimationFrame(() => {
+                backdrop.style.opacity = '1';
+            });
+
+            backdrop.addEventListener('click', () => {
+                toggleDropdown(button);
+            });
+        }, 50);
+
+        console.log('📋 Enhanced dropdown opened with premium animations');
     } else {
         dropdown.classList.remove('active');
         button.setAttribute('aria-expanded', 'false');
 
-        console.log('📋 Dropdown closed');
+        // Reset button styles
+        button.style.transform = '';
+        const img = button.querySelector('img');
+        if (img) {
+            img.style.transform = '';
+        }
+
+        // Remove backdrop
+        const backdrop = document.querySelector('.dropdown-backdrop');
+        if (backdrop) {
+            backdrop.style.opacity = '0';
+            setTimeout(() => {
+                if (backdrop.parentNode) {
+                    document.body.removeChild(backdrop);
+                }
+            }, 300);
+        }
+
+        console.log('📋 Enhanced dropdown closed');
     }
 }
 
 // Enhanced click outside handler with better performance
 let dropdownClickHandler = null;
+let isDropdownHandlerActive = false;
 
-function setupDropdownHandler() {
-    // Remove existing handler to prevent duplicates
-    if (dropdownClickHandler) {
-        document.removeEventListener('click', dropdownClickHandler);
-    }
+function setupEnhancedDropdownHandler() {
+    if (isDropdownHandlerActive) return;
 
     dropdownClickHandler = function (event) {
+        // Performance optimization: only check if there are active dropdowns
+        const activeDropdowns = document.querySelectorAll('.dropdown-menu.active');
+        if (activeDropdowns.length === 0) return;
+
         // Check if click is outside any dropdown
         if (!event.target.closest('.dropdown-menu')) {
-            const activeDropdowns = document.querySelectorAll('.dropdown-menu.active');
-
             activeDropdowns.forEach(menu => {
                 menu.classList.remove('active');
                 const button = menu.querySelector('.dropdown-btn');
                 if (button) {
                     button.setAttribute('aria-expanded', 'false');
+                    // Reset button animations
+                    button.style.transform = '';
+                    const img = button.querySelector('img');
+                    if (img) img.style.transform = '';
                 }
             });
 
+            // Remove backdrop
+            const backdrop = document.querySelector('.dropdown-backdrop');
+            if (backdrop) {
+                backdrop.style.opacity = '0';
+                setTimeout(() => {
+                    if (backdrop.parentNode) {
+                        document.body.removeChild(backdrop);
+                    }
+                }, 300);
+            }
+
             if (activeDropdowns.length > 0) {
-                console.log('📋 Dropdowns closed (click outside)');
+                console.log('📋 Enhanced dropdowns closed (click outside)');
             }
         }
     };
 
-    document.addEventListener('click', dropdownClickHandler);
+    document.addEventListener('click', dropdownClickHandler, { passive: true });
+    isDropdownHandlerActive = true;
 }
 
-// Enhanced keyboard navigation for dropdowns
-function setupKeyboardNavigation() {
+// Enhanced keyboard navigation with better accessibility
+function setupEnhancedKeyboardNavigation() {
     document.addEventListener('keydown', function (event) {
         const activeDropdown = document.querySelector('.dropdown-menu.active');
-
         if (!activeDropdown) return;
 
         const dropdownItems = activeDropdown.querySelectorAll('.dropdown-item');
@@ -78,58 +152,150 @@ function setupKeyboardNavigation() {
 
         switch (event.key) {
             case 'Escape':
-                activeDropdown.classList.remove('active');
-                const button = activeDropdown.querySelector('.dropdown-btn');
-                if (button) {
-                    button.setAttribute('aria-expanded', 'false');
-                    button.focus();
-                }
                 event.preventDefault();
+                closeAllDropdowns();
                 break;
 
             case 'ArrowDown':
                 event.preventDefault();
-                if (dropdownItems.length > 0) {
-                    const currentIndex = Array.from(dropdownItems).indexOf(currentFocus);
-                    const nextIndex = currentIndex < dropdownItems.length - 1 ? currentIndex + 1 : 0;
-                    dropdownItems[nextIndex].focus();
-                }
+                navigateDropdownItems(dropdownItems, currentFocus, 'next');
                 break;
 
             case 'ArrowUp':
                 event.preventDefault();
-                if (dropdownItems.length > 0) {
-                    const currentIndex = Array.from(dropdownItems).indexOf(currentFocus);
-                    const prevIndex = currentIndex > 0 ? currentIndex - 1 : dropdownItems.length - 1;
-                    dropdownItems[prevIndex].focus();
-                }
+                navigateDropdownItems(dropdownItems, currentFocus, 'prev');
                 break;
 
             case 'Enter':
             case ' ':
                 if (currentFocus && currentFocus.classList.contains('dropdown-item')) {
                     event.preventDefault();
-                    currentFocus.click();
+                    // Add ripple effect before click
+                    addRippleEffect(currentFocus);
+                    setTimeout(() => currentFocus.click(), 100);
                 }
+                break;
+
+            case 'Tab':
+                // Close dropdown when tabbing away
+                closeAllDropdowns();
                 break;
         }
     });
 }
 
-// Enhanced dropdown initialization with accessibility
-function initializeDropdowns() {
+function navigateDropdownItems(items, currentFocus, direction) {
+    const currentIndex = Array.from(items).indexOf(currentFocus);
+    let nextIndex;
+
+    if (direction === 'next') {
+        nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
+    } else {
+        nextIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
+    }
+
+    if (items[nextIndex]) {
+        items[nextIndex].focus();
+        // Add focus highlight animation
+        items[nextIndex].style.transform = 'translateX(8px)';
+        setTimeout(() => {
+            items[nextIndex].style.transform = '';
+        }, 200);
+    }
+}
+
+function closeAllDropdowns() {
+    const activeDropdowns = document.querySelectorAll('.dropdown-menu.active');
+    activeDropdowns.forEach(menu => {
+        menu.classList.remove('active');
+        const button = menu.querySelector('.dropdown-btn');
+        if (button) {
+            button.setAttribute('aria-expanded', 'false');
+            button.focus();
+            // Reset animations
+            button.style.transform = '';
+            const img = button.querySelector('img');
+            if (img) img.style.transform = '';
+        }
+    });
+
+    // Remove backdrop
+    const backdrop = document.querySelector('.dropdown-backdrop');
+    if (backdrop) {
+        backdrop.style.opacity = '0';
+        setTimeout(() => {
+            if (backdrop.parentNode) {
+                document.body.removeChild(backdrop);
+            }
+        }, 300);
+    }
+}
+
+// Enhanced ripple effect for better user feedback
+function addRippleEffect(element) {
+    const ripple = document.createElement('div');
+    const rect = element.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+
+    ripple.style.cssText = `
+        position: absolute;
+        width: ${size}px;
+        height: ${size}px;
+        border-radius: 50%;
+        background: rgba(107, 144, 128, 0.3);
+        transform: scale(0);
+        animation: rippleEffect 0.6s ease-out;
+        pointer-events: none;
+        top: 50%;
+        left: 50%;
+        margin-top: -${size / 2}px;
+        margin-left: -${size / 2}px;
+    `;
+
+    element.style.position = 'relative';
+    element.style.overflow = 'hidden';
+    element.appendChild(ripple);
+
+    setTimeout(() => {
+        if (ripple.parentNode) {
+            ripple.parentNode.removeChild(ripple);
+        }
+    }, 600);
+}
+
+// Enhanced dropdown initialization with premium features
+function initializeEnhancedDropdowns() {
+    console.log('🚀 Initializing premium dropdown system...');
+
     const dropdownButtons = document.querySelectorAll('.dropdown-btn');
 
     dropdownButtons.forEach(button => {
-        // Add ARIA attributes
+        // Add enhanced ARIA attributes
         button.setAttribute('aria-haspopup', 'true');
         button.setAttribute('aria-expanded', 'false');
+        button.setAttribute('role', 'button');
 
-        // Add keyboard support
+        // Add enhanced keyboard support
         button.addEventListener('keydown', function (event) {
             if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault();
-                toggleDropdown(button);
+                addRippleEffect(button);
+                setTimeout(() => toggleDropdown(button), 100);
+            }
+        });
+
+        // Enhanced hover effects
+        button.addEventListener('mouseenter', function () {
+            if (!this.closest('.dropdown-menu').classList.contains('active')) {
+                this.style.transform = 'translateY(-1px) scale(1.02)';
+                this.style.boxShadow = '0 6px 20px rgba(107, 144, 128, 0.15)';
+            }
+        });
+
+        button.addEventListener('mouseleave', function () {
+            if (!this.closest('.dropdown-menu').classList.contains('active')) {
+                this.style.transform = '';
+                this.style.boxShadow = '';
             }
         });
 
@@ -139,81 +305,140 @@ function initializeDropdowns() {
         }
     });
 
-    // Setup dropdown items with proper ARIA roles
+    // Setup enhanced dropdown items with premium interactions
     const dropdownItems = document.querySelectorAll('.dropdown-item');
     dropdownItems.forEach(item => {
         item.setAttribute('role', 'menuitem');
         item.setAttribute('tabindex', '-1');
 
-        // Add focus styling
+        // Enhanced focus styling
         item.addEventListener('focus', function () {
             this.style.outline = '2px solid var(--primary-color)';
-            this.style.outlineOffset = '-2px';
+            this.style.outlineOffset = '2px';
+            this.style.transform = 'translateX(4px)';
         });
 
         item.addEventListener('blur', function () {
             this.style.outline = '';
             this.style.outlineOffset = '';
+            this.style.transform = '';
+        });
+
+        // Enhanced hover effects with sound feedback (if supported)
+        item.addEventListener('mouseenter', function () {
+            this.style.transform = 'translateX(6px)';
+            this.style.background = 'rgba(107, 144, 128, 0.1)';
+
+            // Subtle hover sound (modern browsers)
+            if ('AudioContext' in window && this.getAttribute('data-sound-enabled') !== 'false') {
+                playHoverSound();
+            }
+        });
+
+        item.addEventListener('mouseleave', function () {
+            this.style.transform = '';
+            this.style.background = '';
+        });
+
+        // Click animation
+        item.addEventListener('mousedown', function () {
+            addRippleEffect(this);
         });
     });
 
-    console.log('📋 Enhanced dropdowns initialized with accessibility features');
+    console.log('✅ Premium dropdown system initialized with enhanced features');
 }
 
-// Enhanced edit function with better error handling
+// Enhanced edit function with premium loading states
 function editItem(itemId) {
     if (!itemId) {
         console.error('❌ No item ID provided for edit');
+        showEnhancedNotification('No item selected for editing', 'error');
         return;
     }
 
-    console.log('✏️ Edit requested for item:', itemId);
+    console.log('✏️ Enhanced edit requested for item:', itemId);
+
+    // Close any open dropdowns first
+    closeAllDropdowns();
 
     // Check if openEditModal function exists
     if (typeof window.openEditModal === 'function') {
         try {
-            window.openEditModal(itemId);
+            // Show premium loading indicator
+            showPremiumLoader('Loading item details...');
+
+            // Add delay for smooth UX
+            setTimeout(() => {
+                window.openEditModal(itemId);
+                hidePremiumLoader();
+            }, 300);
+
         } catch (error) {
             console.error('❌ Error opening edit modal:', error);
-            showNotificationMessage('Failed to open edit dialog. Please try again.', 'error');
+            hidePremiumLoader();
+            showEnhancedNotification('Failed to open edit dialog. Please try again.', 'error');
         }
     } else {
         console.error('❌ openEditModal function not found');
-        showNotificationMessage('Edit functionality is not available.', 'error');
+        showEnhancedNotification('Edit functionality is not available.', 'error');
     }
 }
 
-// Enhanced delete function with better confirmation
-function deleteItemEnhanced(itemId) {
+// Enhanced delete function with premium confirmation
+async function deleteItemEnhanced(itemId) {
     if (!itemId) {
         console.error('❌ No item ID provided for delete');
+        showEnhancedNotification('No item selected for deletion', 'error');
         return;
     }
 
-    console.log('🗑️ Delete requested for item:', itemId);
+    console.log('🗑️ Enhanced delete requested for item:', itemId);
+
+    // Close any open dropdowns first
+    closeAllDropdowns();
+
+    // Show premium confirmation dialog
+    const confirmed = await showPremiumConfirmDialog({
+        title: 'Delete Item',
+        message: 'Are you sure you want to permanently delete this item? This action cannot be undone.',
+        confirmText: 'Delete Forever',
+        cancelText: 'Keep Item',
+        type: 'danger',
+        icon: 'trash'
+    });
+
+    if (!confirmed) return;
 
     // Check if deleteItem function exists
     if (typeof window.deleteItem === 'function') {
         try {
-            window.deleteItem(itemId);
+            showPremiumLoader('Deleting item...');
+            await window.deleteItem(itemId);
+            hidePremiumLoader();
         } catch (error) {
             console.error('❌ Error deleting item:', error);
-            showNotificationMessage('Failed to delete item. Please try again.', 'error');
+            hidePremiumLoader();
+            showEnhancedNotification('Failed to delete item. Please try again.', 'error');
         }
     } else {
         console.error('❌ deleteItem function not found');
-        showNotificationMessage('Delete functionality is not available.', 'error');
+        showEnhancedNotification('Delete functionality is not available.', 'error');
     }
 }
 
-// Enhanced report function
-function reportItemEnhanced(itemId) {
+// Enhanced report function with premium interface
+async function reportItemEnhanced(itemId) {
     if (!itemId) {
         console.error('❌ No item ID provided for report');
+        showEnhancedNotification('No item selected for reporting', 'error');
         return;
     }
 
-    console.log('🚩 Report requested for item:', itemId);
+    console.log('🚩 Enhanced report requested for item:', itemId);
+
+    // Close any open dropdowns first
+    closeAllDropdowns();
 
     // Check if reportItem function exists
     if (typeof window.reportItem === 'function') {
@@ -221,27 +446,165 @@ function reportItemEnhanced(itemId) {
             window.reportItem(itemId);
         } catch (error) {
             console.error('❌ Error reporting item:', error);
-            showNotificationMessage('Failed to report item. Please try again.', 'error');
+            showEnhancedNotification('Failed to report item. Please try again.', 'error');
         }
     } else {
-        // Fallback report functionality
-        showReportDialog(itemId);
+        // Show premium report dialog
+        await showPremiumReportDialog(itemId);
     }
 }
 
-// Fallback report dialog
-function showReportDialog(itemId) {
-    const reasons = [
-        { value: 'inappropriate', text: 'Inappropriate content' },
-        { value: 'spam', text: 'Spam or misleading' },
-        { value: 'fraud', text: 'Fraudulent listing' },
-        { value: 'copyright', text: 'Copyright violation' },
-        { value: 'other', text: 'Other reason' }
-    ];
+// Premium confirmation dialog
+function showPremiumConfirmDialog({ title, message, confirmText, cancelText, type, icon }) {
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'premium-dialog-overlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
+            z-index: 15000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        `;
 
-    // Create modal overlay
-    const overlay = document.createElement('div');
-    overlay.style.cssText = `
+        const dialog = document.createElement('div');
+        dialog.className = 'premium-dialog';
+        dialog.style.cssText = `
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 450px;
+            width: 100%;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+        `;
+
+        const colors = {
+            primary: '#6B9080',
+            danger: '#dc3545',
+            warning: '#ffc107',
+            success: '#28a745'
+        };
+
+        const icons = {
+            trash: 'bx-trash',
+            flag: 'bx-flag',
+            warning: 'bx-error',
+            info: 'bx-info-circle'
+        };
+
+        dialog.innerHTML = `
+            <div class="dialog-icon" style="
+                width: 64px;
+                height: 64px;
+                background: ${type === 'danger' ? 'linear-gradient(135deg, #ef4444, #dc2626)' : colors[type] || colors.primary};
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 24px;
+                color: white;
+                font-size: 28px;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            ">
+                <i class='bx ${icons[icon] || icons.info}'></i>
+            </div>
+            <h3 style="margin: 0 0 12px; color: #333; font-size: 24px; font-weight: 700;">${title}</h3>
+            <p style="margin: 0 0 32px; color: #666; font-size: 16px; line-height: 1.5;">${message}</p>
+            <div style="display: flex; gap: 16px; justify-content: center;">
+                <button class="cancel-btn" style="
+                    padding: 14px 28px;
+                    border: 2px solid #e2e8f0;
+                    background: white;
+                    color: #64748b;
+                    border-radius: 12px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    font-size: 15px;
+                    transition: all 0.3s ease;
+                    min-width: 120px;
+                ">${cancelText}</button>
+                <button class="confirm-btn" style="
+                    padding: 14px 28px;
+                    border: none;
+                    background: ${type === 'danger' ? 'linear-gradient(135deg, #ef4444, #dc2626)' : colors[type] || colors.primary};
+                    color: white;
+                    border-radius: 12px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    font-size: 15px;
+                    transition: all 0.3s ease;
+                    min-width: 120px;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                ">${confirmText}</button>
+            </div>
+        `;
+
+        overlay.appendChild(dialog);
+        document.body.appendChild(overlay);
+
+        // Animate in
+        requestAnimationFrame(() => {
+            overlay.style.opacity = '1';
+            dialog.style.transform = 'scale(1) translateY(0)';
+        });
+
+        const cleanup = () => {
+            overlay.style.opacity = '0';
+            dialog.style.transform = 'scale(0.9) translateY(20px)';
+            setTimeout(() => {
+                if (overlay.parentNode) {
+                    document.body.removeChild(overlay);
+                }
+            }, 300);
+        };
+
+        // Event handlers
+        dialog.querySelector('.cancel-btn').onclick = () => {
+            cleanup();
+            resolve(false);
+        };
+
+        dialog.querySelector('.confirm-btn').onclick = () => {
+            cleanup();
+            resolve(true);
+        };
+
+        overlay.onclick = (e) => {
+            if (e.target === overlay) {
+                cleanup();
+                resolve(false);
+            }
+        };
+
+        // Keyboard support
+        const keyHandler = (e) => {
+            if (e.key === 'Escape') {
+                cleanup();
+                resolve(false);
+                document.removeEventListener('keydown', keyHandler);
+            }
+        };
+        document.addEventListener('keydown', keyHandler);
+    });
+}
+
+// Premium loader functions
+function showPremiumLoader(message = 'Loading...') {
+    const loader = document.createElement('div');
+    loader.className = 'premium-loader';
+    loader.style.cssText = `
         position: fixed;
         top: 0;
         left: 0;
@@ -249,222 +612,103 @@ function showReportDialog(itemId) {
         height: 100%;
         background: rgba(0, 0, 0, 0.6);
         backdrop-filter: blur(8px);
-        z-index: 15000;
+        z-index: 20000;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 20px;
         opacity: 0;
         transition: opacity 0.3s ease;
     `;
 
-    // Create modal content
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-        background: white;
-        border-radius: 16px;
-        padding: 24px;
-        max-width: 400px;
-        width: 100%;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        transform: scale(0.9);
-        transition: transform 0.3s ease;
-    `;
-
-    modal.innerHTML = `
-        <div style="text-align: center; margin-bottom: 20px;">
-            <div style="
-                width: 48px;
-                height: 48px;
-                background: linear-gradient(135deg, #ef4444, #dc2626);
+    loader.innerHTML = `
+        <div style="
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        ">
+            <div class="spinner" style="
+                width: 40px;
+                height: 40px;
+                border: 4px solid rgba(107, 144, 128, 0.2);
+                border-top: 4px solid var(--primary-color);
                 border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
+                animation: spin 1s linear infinite;
                 margin: 0 auto 16px;
-                color: white;
-                font-size: 24px;
-            ">
-                <i class='bx bx-flag'></i>
-            </div>
-            <h3 style="margin: 0 0 8px; color: #333; font-size: 20px;">Report Item</h3>
-            <p style="margin: 0; color: #666; font-size: 14px;">Help us keep the community safe by reporting inappropriate content.</p>
-        </div>
-        
-        <div style="margin-bottom: 20px;">
-            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
-                Why are you reporting this item?
-            </label>
-            <select id="reportReason" style="
-                width: 100%;
-                padding: 12px;
-                border: 2px solid #ddd;
-                border-radius: 8px;
-                font-size: 14px;
-                background: white;
-                color: #333;
-            ">
-                <option value="">Select a reason...</option>
-                ${reasons.map(reason => `<option value="${reason.value}">${reason.text}</option>`).join('')}
-            </select>
-        </div>
-        
-        <div style="display: flex; gap: 12px; justify-content: flex-end;">
-            <button id="cancelReport" style="
-                padding: 12px 20px;
-                border: 2px solid #ddd;
-                background: white;
-                color: #666;
-                border-radius: 8px;
-                cursor: pointer;
-                font-weight: 600;
-                transition: all 0.3s ease;
-            ">Cancel</button>
-            <button id="submitReport" style="
-                padding: 12px 20px;
-                border: none;
-                background: linear-gradient(135deg, #ef4444, #dc2626);
-                color: white;
-                border-radius: 8px;
-                cursor: pointer;
-                font-weight: 600;
-                transition: all 0.3s ease;
-            " disabled>Submit Report</button>
+            "></div>
+            <p style="color: #666; margin: 0; font-weight: 500;">${message}</p>
         </div>
     `;
 
-    overlay.appendChild(modal);
-    document.body.appendChild(overlay);
-
-    // Animate in
-    setTimeout(() => {
-        overlay.style.opacity = '1';
-        modal.style.transform = 'scale(1)';
-    }, 10);
-
-    // Handle form interactions
-    const reasonSelect = modal.querySelector('#reportReason');
-    const submitBtn = modal.querySelector('#submitReport');
-    const cancelBtn = modal.querySelector('#cancelReport');
-
-    reasonSelect.addEventListener('change', function () {
-        submitBtn.disabled = !this.value;
-        submitBtn.style.opacity = this.value ? '1' : '0.5';
+    document.body.appendChild(loader);
+    requestAnimationFrame(() => {
+        loader.style.opacity = '1';
     });
-
-    const cleanup = () => {
-        overlay.style.opacity = '0';
-        modal.style.transform = 'scale(0.9)';
-        setTimeout(() => {
-            if (overlay.parentNode) {
-                document.body.removeChild(overlay);
-            }
-        }, 300);
-    };
-
-    cancelBtn.addEventListener('click', cleanup);
-
-    submitBtn.addEventListener('click', async function () {
-        const reason = reasonSelect.value;
-        if (!reason) return;
-
-        this.disabled = true;
-        this.innerHTML = '<i class="bx bx-loader-alt" style="animation: spin 1s linear infinite;"></i> Submitting...';
-
-        try {
-            // Send report (you would implement the actual API call here)
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-
-            cleanup();
-            showNotificationMessage('Thank you for helping keep our community safe.', 'success');
-
-        } catch (error) {
-            showNotificationMessage('Failed to submit report. Please try again.', 'error');
-            this.disabled = false;
-            this.innerHTML = 'Submit Report';
-        }
-    });
-
-    // Close on overlay click
-    overlay.addEventListener('click', function (e) {
-        if (e.target === overlay) {
-            cleanup();
-        }
-    });
-
-    // Close on escape key
-    const escapeHandler = function (e) {
-        if (e.key === 'Escape') {
-            cleanup();
-            document.removeEventListener('keydown', escapeHandler);
-        }
-    };
-    document.addEventListener('keydown', escapeHandler);
 }
 
-// Utility function for notifications
-function showNotificationMessage(message, type = 'info') {
-    // Check if the enhanced notification function exists
-    if (typeof window.showNotification === 'function') {
-        window.showNotification(message, type);
-        return;
-    }
-
-    // Fallback simple notification
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 16px 24px;
-        border-radius: 8px;
-        color: white;
-        font-weight: 600;
-        z-index: 20000;
-        max-width: 350px;
-        font-family: 'Montserrat', sans-serif;
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-    `;
-
-    const backgrounds = {
-        success: 'linear-gradient(135deg, #10b981, #059669)',
-        error: 'linear-gradient(135deg, #ef4444, #dc2626)',
-        info: 'linear-gradient(135deg, #3b82f6, #2563eb)'
-    };
-
-    notification.style.background = backgrounds[type] || backgrounds.info;
-    notification.textContent = message;
-
-    document.body.appendChild(notification);
-
-    setTimeout(() => {
-        notification.style.transform = 'translateX(0)';
-    }, 100);
-
-    setTimeout(() => {
-        notification.style.transform = 'translateX(100%)';
+function hidePremiumLoader() {
+    const loader = document.querySelector('.premium-loader');
+    if (loader) {
+        loader.style.opacity = '0';
         setTimeout(() => {
-            if (notification.parentNode) {
-                document.body.removeChild(notification);
+            if (loader.parentNode) {
+                document.body.removeChild(loader);
             }
         }, 300);
-    }, 4000);
+    }
+}
+
+// Enhanced notification system
+function showEnhancedNotification(message, type = 'info') {
+    if (typeof window.showNotification === 'function') {
+        window.showNotification(message, type);
+    } else {
+        // Fallback enhanced notification
+        console.log(`${type.toUpperCase()}: ${message}`);
+        alert(message);
+    }
+}
+
+// Subtle hover sound effect (optional)
+function playHoverSound() {
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.1);
+    } catch (e) {
+        // Silently fail if audio context is not supported
+    }
 }
 
 // Enhanced initialization
-function initializeEnhancedDropdowns() {
-    console.log('🚀 Initializing enhanced dropdown system...');
+function initializePremiumDropdowns() {
+    console.log('🚀 Initializing premium dropdown system...');
 
     // Setup main functionality
-    setupDropdownHandler();
-    setupKeyboardNavigation();
-    initializeDropdowns();
+    setupEnhancedDropdownHandler();
+    setupEnhancedKeyboardNavigation();
+    initializeEnhancedDropdowns();
 
-    // Add touch support for mobile
+    // Add touch support for mobile with enhanced gestures
     if ('ontouchstart' in window) {
+        let touchStartY = 0;
+        let touchStartTime = 0;
+
         document.addEventListener('touchstart', function (e) {
-            // Handle touch events similar to click events
+            touchStartY = e.touches[0].clientY;
+            touchStartTime = Date.now();
+
             if (!e.target.closest('.dropdown-menu')) {
                 const activeDropdowns = document.querySelectorAll('.dropdown-menu.active');
                 activeDropdowns.forEach(menu => {
@@ -472,58 +716,99 @@ function initializeEnhancedDropdowns() {
                     const button = menu.querySelector('.dropdown-btn');
                     if (button) {
                         button.setAttribute('aria-expanded', 'false');
+                        button.style.transform = '';
+                        const img = button.querySelector('img');
+                        if (img) img.style.transform = '';
                     }
                 });
             }
-        });
+        }, { passive: true });
+
+        // Enhanced swipe to close
+        document.addEventListener('touchmove', function (e) {
+            const touchCurrentY = e.touches[0].clientY;
+            const swipeDistance = touchStartY - touchCurrentY;
+            const swipeTime = Date.now() - touchStartTime;
+
+            if (Math.abs(swipeDistance) > 50 && swipeTime < 300) {
+                closeAllDropdowns();
+            }
+        }, { passive: true });
     }
 
-    // Add custom CSS for animations if not present
-    if (!document.querySelector('#dropdown-animations')) {
+    // Add premium CSS animations if not present
+    if (!document.querySelector('#premium-dropdown-animations')) {
         const style = document.createElement('style');
-        style.id = 'dropdown-animations';
+        style.id = 'premium-dropdown-animations';
         style.textContent = `
-            @keyframes dropdownSlide {
-                from {
+            @keyframes dropdownSlideIn {
+                0% {
                     opacity: 0;
-                    transform: translateY(-8px);
+                    transform: scale(0.9) translateY(-15px);
                 }
-                to {
+                60% {
+                    opacity: 0.9;
+                    transform: scale(1.02) translateY(-2px);
+                }
+                100% {
                     opacity: 1;
-                    transform: translateY(0);
+                    transform: scale(1) translateY(0);
                 }
             }
             
-            .dropdown-content {
-                animation-fill-mode: both;
+            @keyframes rippleEffect {
+                0% {
+                    transform: scale(0);
+                    opacity: 1;
+                }
+                100% {
+                    transform: scale(2);
+                    opacity: 0;
+                }
             }
             
-            .dropdown-btn:focus {
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            
+            .dropdown-btn:focus,
+            .dropdown-item:focus {
                 outline: 2px solid var(--primary-color);
                 outline-offset: 2px;
             }
             
-            .dropdown-item:focus {
-                outline: 2px solid var(--primary-color);
-                outline-offset: -2px;
+            .premium-dialog:hover {
+                transform: scale(1) translateY(-2px);
+            }
+            
+            .cancel-btn:hover {
+                background: #f1f5f9 !important;
+                border-color: #cbd5e1 !important;
+                transform: translateY(-1px);
+            }
+            
+            .confirm-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
             }
         `;
         document.head.appendChild(style);
     }
 
-    console.log('✅ Enhanced dropdown system initialized');
+    console.log('✅ Premium dropdown system initialized with advanced features');
 }
 
 // Auto-initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function () {
-    initializeEnhancedDropdowns();
+    initializePremiumDropdowns();
 });
 
 // Also initialize if DOM is already loaded
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeEnhancedDropdowns);
+    document.addEventListener('DOMContentLoaded', initializePremiumDropdowns);
 } else {
-    initializeEnhancedDropdowns();
+    initializePremiumDropdowns();
 }
 
 // Global exports for backward compatibility
@@ -531,5 +816,8 @@ window.toggleDropdown = toggleDropdown;
 window.editItem = editItem;
 window.deleteItemEnhanced = deleteItemEnhanced;
 window.reportItemEnhanced = reportItemEnhanced;
+window.showPremiumConfirmDialog = showPremiumConfirmDialog;
+window.showPremiumLoader = showPremiumLoader;
+window.hidePremiumLoader = hidePremiumLoader;
 
-console.log('✅ Enhanced toggleEditDelete.js loaded with improved UX and accessibility');
+console.log('Premium toggleEditDelete.js loaded with enhanced UI consistency and animations');

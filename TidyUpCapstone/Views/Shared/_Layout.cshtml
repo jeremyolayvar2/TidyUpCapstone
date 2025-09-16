@@ -14,8 +14,99 @@
     <link href='https://cdn.boxicons.com/fonts/basic/boxicons.min.css' rel='stylesheet'>
     <link href='https://cdn.boxicons.com/fonts/brands/boxicons-brands.min.css' rel='stylesheet'>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
-   
 
+    <style>
+        /* Enhanced Navigation Styles */
+        .nav-link {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        /* Enhanced dropdown animations */
+        .dropdown-content {
+            animation: slideDown 0.3s ease;
+        }
+
+        @@keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Better hover states */
+        .dropdown-btn:hover,
+        .nav-link:hover {
+            transform: translateY(-1px);
+        }
+
+        /* Modern button styling */
+        .btn-modern {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            padding: 12px 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(107, 144, 128, 0.3);
+        }
+
+        .btn-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(107, 144, 128, 0.4);
+        }
+
+        /* Enhanced mobile menu */
+        @@media (max-width: 768px) {
+            .dock-item {
+                position: relative;
+            }
+            
+            .dock-item::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                width: 0;
+                height: 3px;
+                background: var(--accent-color);
+                border-radius: 3px;
+                transform: translateX(-50%);
+                transition: width 0.3s ease;
+            }
+            
+            .dock-item.active::after,
+            .dock-item:hover::after {
+                width: 60%;
+            }
+        }
+    </style>
 </head>
 <body data-userid="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value"
       data-username="@User.Identity?.Name">
@@ -23,190 +114,180 @@
 
             @if (ViewBag.HideNavigation == null || ViewBag.HideNavigation == false) 
             {
-
-                
-            <!-- Sidebar Navigation - Default -->
-
+                <!-- Enhanced Sidebar Navigation -->
                 <nav id="sidebar" class="close">
-               
-                <ul>
-                    <li class="toggle-container">
-                        <button onclick="toggleSidebar()" id="icon-toggle">
-                            <img class="toggle" alt="Toggle" src="~/assets/Toggle.svg" />
-                        </button>
-                    </li>
-                </ul>
+                    <ul>
+                        <li class="toggle-container">
+                            <button onclick="toggleSidebar()" id="icon-toggle">
+                                <img class="toggle" alt="Toggle" src="~/assets/Toggle.svg" />
+                            </button>
+                        </li>
+                    </ul>
 
-                
-                <div class="nav-profile-container">
-                    <div class="property-1default-child" id="rectangle2"> </div>
-                    <img id="verification-v2" alt="Verified" src="~/assets/verified-icon.svg" />
-                </div>
+                    <div class="nav-profile-container">
+                        <div class="property-1default-child" id="rectangle2"> </div>
+                        <img id="verification-v2" alt="Verified" src="~/assets/verified-icon.svg" />
+                    </div>
 
-          
-                <ul id="tab-container">
-                    <li>
-                        <a href="#">
-                            <img class="icon" alt="Home" src="~/assets/VectorHome.svg" />
-                            <span>Home</span>
-                        </a>
-                    </li>
+                    <ul id="tab-container">
                         <li>
-                        <a href="#">
-                            <img class="icon" alt="Browse" src="~/assets/VectorBrowse.svg" />
-                            <span>Browse Items</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#">
-                            <img class="icon" alt="Claimed" src="~/assets/VectorClaimed.svg" />
-                            <span>Claimed Items</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#">
-                            <img class="icon" alt="Community" src="~/assets/VectorComm.svg" />
-                            <span>Community</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a id="openCreateModal">
-                            <img class="icon" alt="Create" src="~/assets/VectorCreate.svg" />
-                            <span>Create</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="open-token">
-                            <img class="icon" alt="Token" src="~/assets/VectorToken.svg" />
-                            <span>Token Balance</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#">
-                            <img class="icon" alt="Shop" src="~/assets/VectorShop.svg" />
-                            <span>Shop</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#">
-                            <img class="icon" alt="Message" src="~/assets/VectorMsg.svg" />
-                            <span>Messages</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#">
-                            <img class="icon" alt="Notifications" src="~/assets/VectorNotif.svg" />
-                            <span>Notifications</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#">
-                            <img class="icon" alt="Leaderboard" src="~/assets/VectorLB.svg" />
-                            <span>Leaderboards</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#">
-                            <img class="icon" alt="Quest/Milestone" src="~/assets/VectorQuests.svg" />
-                            <span>Quest & Milestones</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#">
-                            <img class="icon" alt="Settings" src="~/assets/VectorSettings.svg" />
-                            <span>Settings</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
+                            <a href="/Home/Main" class="nav-link" data-page="home">
+                                <img class="icon" alt="Home" src="~/assets/VectorHome.svg" />
+                                <span>Home</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-link" data-page="browse">
+                                <img class="icon" alt="Browse" src="~/assets/VectorBrowse.svg" />
+                                <span>Browse Items</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-link" data-page="claimed">
+                                <img class="icon" alt="Claimed" src="~/assets/VectorClaimed.svg" />
+                                <span>Claimed Items</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-link" data-page="community">
+                                <img class="icon" alt="Community" src="~/assets/VectorComm.svg" />
+                                <span>Community</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a id="openCreateModal" class="nav-link" data-page="create">
+                                <img class="icon" alt="Create" src="~/assets/VectorCreate.svg" />
+                                <span>Create</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="open-token nav-link" data-page="token">
+                                <img class="icon" alt="Token" src="~/assets/VectorToken.svg" />
+                                <span>Token Balance</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-link" data-page="shop">
+                                <img class="icon" alt="Shop" src="~/assets/VectorShop.svg" />
+                                <span>Shop</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-link" data-page="message">
+                                <img class="icon" alt="Message" src="~/assets/VectorMsg.svg" />
+                                <span>Messages</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-link" data-page="notifications">
+                                <img class="icon" alt="Notifications" src="~/assets/VectorNotif.svg" />
+                                <span>Notifications</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-link" data-page="leaderboard">
+                                <img class="icon" alt="Leaderboard" src="~/assets/VectorLB.svg" />
+                                <span>Leaderboards</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-link" data-page="quests">
+                                <img class="icon" alt="Quest/Milestone" src="~/assets/VectorQuests.svg" />
+                                <span>Quest & Milestones</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/Home/Settings" class="nav-link" data-page="settings">
+                                <img class="icon" alt="Settings" src="~/assets/VectorSettings.svg" />
+                                <span>Settings</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
 
-
-            <div class="dock-outer">
-                <div class="dock-panel" id="dockPanel">
-                    <div class="dock-item" data-label="Home">
-                        <div class="dock-icon">
-                            <img src="~/assets/VectorHome.svg" />
+                <!-- Enhanced Mobile Dock -->
+                <div class="dock-outer">
+                    <div class="dock-panel" id="dockPanel">
+                        <div class="dock-item" data-label="Home" data-page="home" onclick="navigateToPage('/Home/Main')">
+                            <div class="dock-icon">
+                                <img src="~/assets/VectorHome.svg" />
+                            </div>
+                            <div class="dock-label">Home</div>
                         </div>
-                        <div class="dock-label">Home</div>
-                    </div>
-                    <div class="dock-item" data-label="Browse">
-                        <div class="dock-icon">
-                            <img src="~/assets/VectorBrowse.svg" />
+                        <div class="dock-item" data-label="Browse" data-page="browse">
+                            <div class="dock-icon">
+                                <img src="~/assets/VectorBrowse.svg" />
+                            </div>
+                            <div class="dock-label">Browse Item</div>
                         </div>
-                        <div class="dock-label">Browse Item</div>
-                    </div>
-                    <div class="dock-item" data-label="Claimed">
-                        <div class="dock-icon">
-                            <img src="~/assets/VectorClaimed.svg" />
+                        <div class="dock-item" data-label="Claimed" data-page="claimed">
+                            <div class="dock-icon">
+                                <img src="~/assets/VectorClaimed.svg" />
+                            </div>
+                            <div class="dock-label">Claimed</div>
                         </div>
-                        <div class="dock-label">Claimed</div>
-                    </div>
-                    <div class="dock-item" data-label="Community">
-                        <div class="dock-icon">
-                            <img src="~/assets/VectorComm.svg" />
+                        <div class="dock-item" data-label="Community" data-page="community">
+                            <div class="dock-icon">
+                                <img src="~/assets/VectorComm.svg" />
+                            </div>
+                            <div class="dock-label">Community</div>
                         </div>
-                        <div class="dock-label">Community</div>
-                    </div>
-                    <div class="dock-item" data-label="Create">
-                        <div class="dock-icon">
-                            <img src="~/assets/VectorCreate.svg" />
+                        <div class="dock-item" data-label="Create" data-page="create" onclick="openCreateModal()">
+                            <div class="dock-icon">
+                                <img src="~/assets/VectorCreate.svg" />
+                            </div>
+                            <div class="dock-label">Create</div>
                         </div>
-                        <div class="dock-label">Create</div>
-                    </div>
-                    <div class="dock-item open-token" data-label="Token">
-                        <div class="dock-icon">
-                            <img src="~/assets/VectorToken.svg" />
+                        <div class="dock-item open-token" data-label="Token" data-page="token">
+                            <div class="dock-icon">
+                                <img src="~/assets/VectorToken.svg" />
+                            </div>
+                            <div class="dock-label">Token</div>
                         </div>
-                        <div class="dock-label">Token</div>
-                    </div>
-                    <div class="dock-item" data-label="Shop">
-                        <div class="dock-icon">
-                            <img src="~/assets/VectorShop.svg" />
+                        <div class="dock-item" data-label="Shop" data-page="shop">
+                            <div class="dock-icon">
+                                <img src="~/assets/VectorShop.svg" />
+                            </div>
+                            <div class="dock-label">Shop</div>
                         </div>
-                        <div class="dock-label">Shop</div>
-                    </div>
-                    <div class="dock-item" data-label="Message">
-                        <div class="dock-icon">
-                            <img src="~/assets/VectorMsg.svg" />
+                        <div class="dock-item" data-label="Message" data-page="message">
+                            <div class="dock-icon">
+                                <img src="~/assets/VectorMsg.svg" />
+                            </div>
+                            <div class="dock-label">Message</div>
                         </div>
-                        <div class="dock-label">Message</div>
-                    </div>
-                    <div class="dock-item" data-label="Notification">
-                        <div class="dock-icon">
-                            <img src="~/assets/VectorNotif.svg" />
+                        <div class="dock-item" data-label="Notification" data-page="notifications">
+                            <div class="dock-icon">
+                                <img src="~/assets/VectorNotif.svg" />
+                            </div>
+                            <div class="dock-label">Notification</div>
                         </div>
-                        <div class="dock-label">Notification</div>
-                    </div>
-                    <div class="dock-item" data-label="Leaderboards">
-                        <div class="dock-icon">
-                            <img src="~/assets/VectorLB.svg" />
+                        <div class="dock-item" data-label="Leaderboards" data-page="leaderboard">
+                            <div class="dock-icon">
+                                <img src="~/assets/VectorLB.svg" />
+                            </div>
+                            <div class="dock-label">Leaderboards</div>
                         </div>
-                        <div class="dock-label">Leaderboards</div>
-                    </div>
-                    <div class="dock-item" data-label="Quests/Milestone">
-                        <div class="dock-icon">
-                            <img src="~/assets/VectorQuests.svg" />
+                        <div class="dock-item" data-label="Quests/Milestone" data-page="quests">
+                            <div class="dock-icon">
+                                <img src="~/assets/VectorQuests.svg" />
+                            </div>
+                            <div class="dock-label">Quests & Milestone</div>
                         </div>
-                        <div class="dock-label">Quests & Milestone</div>
-                    </div>
-                    <div class="dock-item" data-label="Settings">
-                        <div class="dock-icon">
-                            <img src="~/assets/VectorSettings.svg" />
+                        <div class="dock-item" data-label="Settings" data-page="settings" onclick="navigateToPage('/Home/Settings')">
+                            <div class="dock-icon">
+                                <img src="~/assets/VectorSettings.svg" />
+                            </div>
+                            <div class="dock-label">Settings</div>
                         </div>
-                        <div class="dock-label">Settings</div>
                     </div>
                 </div>
-            </div>
-
             }
-
-
 
             <!-- Main Content -->
             <div class="main-content">
                 <main role="main" class="pb-3">
                     @RenderBody()
-                    <script src="~/js/openModal.js"></script>
                 </main>
 
                 <footer class="border-top footer text-muted mt-5">
@@ -222,11 +303,56 @@
         
 
         @await RenderSectionAsync("Scripts", required: false)
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAajNvSCpxo_QwyPwsRmrmr2-MlApf6Qkw&libraries=places"></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAajNvSCpxo_QwyPwsRmrmr2-MlApf6Qkw&libraries=places"></script>
         <script src="https://cdn.jsdelivr.net/npm/motion@12.16.0/dist/motion.umd.min.js"></script>
-        
-        <!--Open a modal for posting-->
-      
 
-    </body>
+        <!-- Enhanced Navigation Scripts -->
+        <script>
+            // Navigation functionality
+            function navigateToPage(url) {
+                window.location.href = url;
+            }
+
+            // Enhanced active state management
+            function setActiveNavItem(pageName) {
+                // Desktop sidebar
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('data-page') === pageName) {
+                        link.classList.add('active');
+                    }
+                });
+
+                // Mobile dock
+                document.querySelectorAll('.dock-item').forEach(item => {
+                    item.classList.remove('active');
+                    if (item.getAttribute('data-page') === pageName) {
+                        item.classList.add('active');
+                    }
+                });
+            }
+
+            // Set active state based on current page
+            document.addEventListener('DOMContentLoaded', function() {
+                const currentPath = window.location.pathname.toLowerCase();
+                
+                if (currentPath.includes('/home/main') || currentPath === '/') {
+                    setActiveNavItem('home');
+                } else if (currentPath.includes('/home/settings')) {
+                    setActiveNavItem('settings');
+                }
+
+                // Token modal functionality
+                document.addEventListener('click', function(e) {
+                    if (e.target.closest('.open-token')) {
+                        e.preventDefault();
+                        const tokenModal = document.getElementById('tokenModal');
+                        if (tokenModal) {
+                            tokenModal.classList.add('show');
+                        }
+                    }
+                });
+            });
+        </script>
+</body>
 </html>
