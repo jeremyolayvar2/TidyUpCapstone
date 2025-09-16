@@ -12,7 +12,11 @@ using TidyUpCapstone.Data;
 namespace TidyUpCapstone.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
+<<<<<<<< HEAD:TidyUpCapstone/Migrations/20250916133755_DBSchema.Designer.cs
     [Migration("20250916133755_DBSchema")]
+========
+    [Migration("20250916151426_DBSchema")]
+>>>>>>>> feature/item-management:TidyUpCapstone/Migrations/20250916151426_DBSchema.Designer.cs
     partial class DBSchema
     {
         /// <inheritdoc />
