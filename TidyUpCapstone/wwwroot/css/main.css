@@ -625,101 +625,61 @@ body {
 }
 
 /* Dropdown Menu (Edit/Delete) ------------------------------------------------------------------- */
-.dropdown-menu {
-    background: var(--background);
-    display: flex;
-    position: relative;
-    justify-content: flex-end;
-    outline: none;
-    background: none;
-    border: none;
-}
-
-.dropdown-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 50%;
-    transition: background-color 0.2s ease;
-}
-
-    .dropdown-btn:hover {
-        background-color: rgba(0, 0, 0, 0.05);
-    }
-
-    .dropdown-btn img {
-        width: 20px;
-        height: 20px;
-    }
-
-    .dropdown-btn:focus {
-        outline: none;
-        background: var(--background);
-    }
+/* Replace your existing dropdown CSS with these enhanced overlay styles */
 
 .dropdown-content {
     display: none;
-    position: absolute;
+    position: absolute; /* Will be changed to fixed by JavaScript */
     right: 0;
-    left: auto;
-    transform: translateX(50%);
-    top: 32px;
-    z-index: 100;
-    background-color: var(--primary-color);
-    min-width: 120px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    border-radius: 8px;
-    border: 1px solid var(--primary-color);
+    top: calc(100% + 8px);
+    z-index: 1500; /* High z-index for overlay effect */
+    background: white;
+    min-width: 200px;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(107, 144, 128, 0.1);
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+    transform: scale(0.95) translateY(-10px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.dropdown-menu.active .dropdown-content {
-    display: block;
+.dropdown-menu.active .dropdown-btn {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    transform: scale(1.05);
+    z-index: 1501; /* Above the dropdown content */
 }
 
-.dropdown-menu.active {
-    background-color: var(--background);
-}
-
-.dropdown-menu img {
-    background: none;
-    outline: none;
-    border: none;
-}
-
-    .dropdown-menu img:focus {
-        background: none;
-        outline: none;
-    }
-
-.dropdown-item {
-    border-radius: 8px;
-    color: var(--background);
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-    font-size: 14px;
-    transition: background-color 0.2s ease;
-    border: none;
-    background: none;
+/* Backdrop for overlay effect */
+.dropdown-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    text-align: left;
-    cursor: pointer;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(2px);
+    z-index: 1400;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: auto;
 }
 
-    .dropdown-item:hover {
-        background-color: var(--hover-effect);
+/* Mobile adjustments for overlay */
+@media (max-width: 768px) {
+    .dropdown-content {
+        min-width: 180px;
+        border-radius: 12px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
     }
 
-    .dropdown-item.delete:hover {
-        background-color: #fee;
-        color: #d32f2f;
+    .dropdown-backdrop {
+        background: rgba(0, 0, 0, 0.15);
+        backdrop-filter: blur(4px);
     }
-
-    .dropdown-item.edit:hover {
-        background-color: #e3f2fd;
-        color: #1976d2;
-    }
+}
 
 /* Three Dots Icon ------------------------------------------------------------------------------- */
 .dots-icon {
