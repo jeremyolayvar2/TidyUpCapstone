@@ -1,7 +1,4 @@
-﻿// Add this to your database initialization/seeding code
-// This should go in your DbContext OnModelCreating method or a separate seeding class
-
-using TidyUpCapstone.Data;
+﻿using TidyUpCapstone.Data;
 using TidyUpCapstone.Models.Entities.Items;
 
 public static class DatabaseSeeder
@@ -15,7 +12,7 @@ public static class DatabaseSeeder
             {
                 new ItemCategory
                 {
-                    CategoryId = 1,
+                   
                     Name = "Books & Stationery",
                     Description = "Books, notebooks, pens, and office supplies",
                     IsActive = true,
@@ -23,7 +20,7 @@ public static class DatabaseSeeder
                 },
                 new ItemCategory
                 {
-                    CategoryId = 2,
+                    
                     Name = "Electronics & Gadgets",
                     Description = "Phones, computers, headphones, and electronic devices",
                     IsActive = true,
@@ -31,7 +28,7 @@ public static class DatabaseSeeder
                 },
                 new ItemCategory
                 {
-                    CategoryId = 3,
+                  
                     Name = "Toys & Games",
                     Description = "Board games, toys, puzzles, and gaming items",
                     IsActive = true,
@@ -39,7 +36,7 @@ public static class DatabaseSeeder
                 },
                 new ItemCategory
                 {
-                    CategoryId = 4,
+                  
                     Name = "Home & Kitchen",
                     Description = "Kitchen utensils, home decor, and household items",
                     IsActive = true,
@@ -47,7 +44,7 @@ public static class DatabaseSeeder
                 },
                 new ItemCategory
                 {
-                    CategoryId = 5,
+                  
                     Name = "Furniture",
                     Description = "Tables, chairs, beds, and other furniture",
                     IsActive = true,
@@ -55,7 +52,7 @@ public static class DatabaseSeeder
                 },
                 new ItemCategory
                 {
-                    CategoryId = 6,
+                 
                     Name = "Appliances",
                     Description = "Kitchen appliances, fans, and electrical appliances",
                     IsActive = true,
@@ -63,7 +60,7 @@ public static class DatabaseSeeder
                 },
                 new ItemCategory
                 {
-                    CategoryId = 7,
+           
                     Name = "Health & Beauty",
                     Description = "Cosmetics, skincare, and health products",
                     IsActive = true,
@@ -71,7 +68,7 @@ public static class DatabaseSeeder
                 },
                 new ItemCategory
                 {
-                    CategoryId = 8,
+                   
                     Name = "Crafts & DIY",
                     Description = "Art supplies, craft materials, and DIY tools",
                     IsActive = true,
@@ -79,7 +76,7 @@ public static class DatabaseSeeder
                 },
                 new ItemCategory
                 {
-                    CategoryId = 9,
+             
                     Name = "School & Office",
                     Description = "School supplies, office equipment, and educational materials",
                     IsActive = true,
@@ -87,7 +84,7 @@ public static class DatabaseSeeder
                 },
                 new ItemCategory
                 {
-                    CategoryId = 10,
+                    
                     Name = "Sentimental Items",
                     Description = "Personal items with emotional value",
                     IsActive = true,
@@ -95,20 +92,20 @@ public static class DatabaseSeeder
                 },
                 new ItemCategory
                 {
-                    CategoryId = 11,
+                    
                     Name = "Miscellaneous",
                     Description = "Other items not fitting specific categories",
                     IsActive = true,
                     SortOrder = 11
                 },
                 new ItemCategory
-{
-    CategoryId = 12,
-    Name = "Clothing",
-    Description = "Apparel, shoes, accessories, and fashion items",
-    IsActive = true,
-    SortOrder = 12
-}
+                {
+                    
+                    Name = "Clothing",
+                    Description = "Apparel, shoes, accessories, and fashion items",
+                    IsActive = true,
+                    SortOrder = 12
+                }
             };
 
             context.ItemCategories.AddRange(categories);
@@ -120,35 +117,52 @@ public static class DatabaseSeeder
         {
             var conditions = new[]
             {
-    new ItemCondition
-    {
-        ConditionId = 1,
-        Name = "Excellent",
-        Description = "Item is in perfect or near-perfect condition",
-        ConditionMultiplier = 1.25m, // +25% (same as Brand New)
-        IsActive = true
-    },
-    new ItemCondition
-    {
-        ConditionId = 3,
-        Name = "Good",
-        Description = "Item shows minimal signs of use but functions perfectly",
-        ConditionMultiplier = 1.05m, // +5% (same as Gently Used)
-        IsActive = true
-    },
-    new ItemCondition
-    {
-        ConditionId = 4,
-        Name = "Fair",
-        Description = "Item shows noticeable signs of use but still functional",
-        ConditionMultiplier = 0.90m, // -10% (same as Visible Wear)
-        IsActive = true
-    }
+                new ItemCondition
+                {
+                    
+                    Name = "Excellent",
+                    Description = "Item is in perfect or near-perfect condition",
+                    ConditionMultiplier = 1.25m, // +25% (same as Brand New)
+                    IsActive = true
+                },
+                new ItemCondition
+                {
+                   
+                    Name = "Very Good",
+                    Description = "Item shows minimal signs of use but functions perfectly",
+                    ConditionMultiplier = 1.15m, // +15%
+                    IsActive = true
+                },
+                new ItemCondition
+                {
+                    
+                    Name = "Good",
+                    Description = "Item shows minimal signs of use but functions perfectly",
+                    ConditionMultiplier = 1.05m, // +5% (same as Gently Used)
+                    IsActive = true
+                },
+                new ItemCondition
+                {
+                    
+                    Name = "Fair",
+                    Description = "Item shows noticeable signs of use but still functional",
+                    ConditionMultiplier = 0.90m, // -10% (same as Visible Wear)
+                    IsActive = true
+                },
+                new ItemCondition
+                {
+               
+                    Name = "Poor",
+                    Description = "Item has significant wear but still usable",
+                    ConditionMultiplier = 0.75m, // -25%
+                    IsActive = true
+                }
             };
 
             context.ItemConditions.AddRange(conditions);
             await context.SaveChangesAsync();
         }
+
+       
     }
 }
-

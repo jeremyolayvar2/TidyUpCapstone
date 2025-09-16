@@ -5,41 +5,36 @@ using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using TidyUpCapstone.Data;
 using TidyUpCapstone.Filters;
-using TidyUpCapstone.Data;
 using TidyUpCapstone.Models;
 using TidyUpCapstone.Models.DTOs.Items;
 using TidyUpCapstone.Models.Entities.Items;
 using TidyUpCapstone.Models.Entities.User;
+using TidyUpCapstone.Models.ViewModels;
 using TidyUpCapstone.Models.ViewModels.Items;
 using TidyUpCapstone.Services.Interfaces;
-using TidyUpCapstone.Models.Entities.User;
-using TidyUpCapstone.Models.ViewModels;
 
 namespace TidyUpCapstone.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly UserManager<AppUser> _userManager;
-        private readonly SignInManager<AppUser> _signInManager; 
-        private readonly ApplicationDbContext _context;
         private readonly IItemService _itemService;
         private readonly ApplicationDbContext _context;
         private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> _signInManager;
 
         public HomeController(
             ILogger<HomeController> logger,
             IItemService itemService,
             ApplicationDbContext context,
-            UserManager<AppUser> userManager)
             UserManager<AppUser> userManager,
-            SignInManager<AppUser> signInManager,
-            ApplicationDbContext context)
+            SignInManager<AppUser> signInManager)
         {
             _logger = logger;
+            _itemService = itemService;
+            _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
-            _context = context;
         }
 
         public IActionResult Index(string? error = null, string? success = null)
@@ -58,10 +53,26 @@ namespace TidyUpCapstone.Controllers
             return View();
         }
 
+        [Authorize]
         public async Task<IActionResult> Main()
         {
             try
             {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    _logger.LogWarning("User not found in Main action, redirecting to Index");
+
+                    // Sign out if user claims to be authenticated but doesn't exist
+                    if (User.Identity?.IsAuthenticated == true)
+                    {
+                        await _signInManager.SignOutAsync();
+                    }
+
+                    return RedirectToAction("Index", "Home", new { showLogin = true });
+                }
+
+                _logger.LogInformation("User {UserId} accessed Main page successfully", currentUser.Id);
                 _logger.LogInformation("Loading main page data...");
 
                 // Load categories from database
@@ -143,31 +154,13 @@ namespace TidyUpCapstone.Controllers
                     Conditions = conditions,
                     TotalItems = items.Count,
                 };
-        [Authorize]
-        [Authorize]
-        public async Task<IActionResult> Main()
-        {
-            try
-            {
-                var currentUser = await _userManager.GetUserAsync(User);
-                if (currentUser == null)
-                {
-                    _logger.LogWarning("User not found in Main action, redirecting to Index");
-
-                    // Sign out if user claims to be authenticated but doesn't exist
-                    if (User.Identity?.IsAuthenticated == true)
-                    {
-                        await _signInManager.SignOutAsync();
-                    }
-
-                    return RedirectToAction("Index", "Home", new { showLogin = true });
-                }
-
-                _logger.LogInformation("User {UserId} accessed Main page successfully", currentUser.Id);
 
                 // Set ViewBag data for the view
                 ViewBag.CurrentUserTokenBalance = 0; // Replace with actual logic
                 ViewBag.CurrentUserAvatar = "/assets/default-avatar.svg";
+                ViewBag.UserName = currentUser.UserName;
+                ViewBag.FirstName = currentUser.FirstName;
+                ViewBag.LastName = currentUser.LastName;
 
                 return View(viewModel);
             }
@@ -182,17 +175,8 @@ namespace TidyUpCapstone.Controllers
                     Categories = GetFallbackCategories(),
                     Conditions = GetFallbackConditions()
                 };
-                // Set ViewBag properties if needed
-                ViewBag.UserName = currentUser.UserName;
-                ViewBag.FirstName = currentUser.FirstName;
-                ViewBag.LastName = currentUser.LastName;
 
-                return View(); // This will look for Views/Home/Main.cshtml
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error in Main action");
-                return RedirectToAction("Index", "Home");
+                return View(fallbackViewModel);
             }
         }
 
@@ -203,12 +187,18 @@ namespace TidyUpCapstone.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "Account");
 
-                return View(fallbackViewModel);
-            }
-        }
             // Load notification settings
             var settings = await _context.NotificationSettings
                 .FirstOrDefaultAsync(ns => ns.UserId == user.Id);
+
+            // Pass settings to view
+            ViewBag.EmailNewMessages = settings?.EmailNewMessages ?? true;
+            ViewBag.EmailItemUpdates = settings?.EmailItemUpdates ?? true;
+            ViewBag.EmailWeeklySummary = settings?.EmailWeeklySummary ?? false;
+            ViewBag.DesktopNotifications = settings?.DesktopNotifications ?? true;
+
+            return View();
+        }
 
         private List<ItemCategoryDto> GetFallbackCategories()
         {
@@ -228,22 +218,15 @@ namespace TidyUpCapstone.Controllers
                 new() { CategoryId = 12, Name = "Clothing", IsActive = true, SortOrder = 12 }
             };
         }
-            // Pass settings to view
-            ViewBag.EmailNewMessages = settings?.EmailNewMessages ?? true;
-            ViewBag.EmailItemUpdates = settings?.EmailItemUpdates ?? true;
-            ViewBag.EmailWeeklySummary = settings?.EmailWeeklySummary ?? false;
-            ViewBag.DesktopNotifications = settings?.DesktopNotifications ?? true;
 
         private List<ItemConditionDto> GetFallbackConditions()
         {
             return new List<ItemConditionDto>
             {
-             new() { ConditionId = 1, Name = "Excellent", ConditionMultiplier = 1.25m, IsActive = true },
-             new() { ConditionId = 3, Name = "Good", ConditionMultiplier = 1.05m, IsActive = true },
-             new() { ConditionId = 4, Name = "Fair", ConditionMultiplier = 0.90m, IsActive = true }
+                new() { ConditionId = 1, Name = "Excellent", ConditionMultiplier = 1.25m, IsActive = true },
+                new() { ConditionId = 3, Name = "Good", ConditionMultiplier = 1.05m, IsActive = true },
+                new() { ConditionId = 4, Name = "Fair", ConditionMultiplier = 0.90m, IsActive = true }
             };
-        }
-            return View();
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

@@ -6,11 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TidyUpCapstone.Migrations
 {
     /// <inheritdoc />
-<<<<<<<< HEAD:TidyUpCapstone/Migrations/20250915134015_DBSchema.cs
     public partial class DBSchema : Migration
-========
-    public partial class InitSchemaMain : Migration
->>>>>>>> feature/item-management:TidyUpCapstone/Migrations/20250915164446_InitSchemaMain.cs
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
