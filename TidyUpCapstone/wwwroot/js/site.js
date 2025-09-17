@@ -692,6 +692,113 @@ function smoothScrollTo(target, duration = 1000) {
     requestAnimationFrame(animation);
 }
 
+
+// Enhanced navigation system - Add this to your existing site.js
+document.addEventListener('DOMContentLoaded', function () {
+    initializeNavigation();
+    setCurrentPageActive();
+});
+
+function initializeNavigation() {
+    // Desktop sidebar navigation
+    document.querySelectorAll('#sidebar .nav-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            const href = link.getAttribute('href');
+            const dataPage = link.getAttribute('data-page');
+
+            // Handle special cases that need to prevent default
+            if (dataPage === 'create') {
+                e.preventDefault();
+                openCreateModal();
+                return;
+            } else if (dataPage === 'token') {
+                e.preventDefault();
+                showTokenModal();
+                return;
+            }
+
+            // For Home and Settings, allow normal navigation
+            if (dataPage === 'home' || dataPage === 'settings') {
+                // Let the browser handle normal navigation
+                setActiveNavItem(dataPage);
+                return;
+            }
+
+            // For other navigation items without specific hrefs
+            if (href === '#') {
+                e.preventDefault();
+                // Handle other navigation logic here
+                console.log(`Navigation to ${dataPage} not yet implemented`);
+                setActiveNavItem(dataPage);
+            }
+        });
+    });
+
+    // Mobile dock navigation enhancement
+    document.querySelectorAll('.dock-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            const dataPage = item.getAttribute('data-page');
+            const dataLabel = item.getAttribute('data-label');
+
+            // Handle navigation based on data-page or data-label
+            if (dataPage === 'home' || dataLabel === 'Home') {
+                window.location.href = '/Home/Main';
+            } else if (dataPage === 'settings' || dataLabel === 'Settings') {
+                window.location.href = '/Home/SettingsPage';
+            } else if (dataPage === 'create' || dataLabel === 'Create') {
+                e.preventDefault();
+                openCreateModal();
+            } else if (dataPage === 'token' || dataLabel === 'Token') {
+                e.preventDefault();
+                showTokenModal();
+            }
+
+            // Set active state
+            const pageToActivate = dataPage || dataLabel?.toLowerCase();
+            if (pageToActivate) {
+                setActiveNavItem(pageToActivate);
+            }
+        });
+    });
+}
+
+function setCurrentPageActive() {
+    const currentPath = window.location.pathname.toLowerCase();
+    let currentPage = '';
+
+    // Determine current page based on URL
+    if (currentPath.includes('/home/main')) {
+        currentPage = 'home';
+    } else if (currentPath.includes('/home/settingspage')) {
+        currentPage = 'settings';
+    } else if (currentPath.includes('/home/index') || currentPath === '/') {
+        currentPage = 'home';
+    }
+    // Add other page mappings as needed
+
+    if (currentPage) {
+        setActiveNavItem(currentPage);
+    }
+}
+
+function setActiveNavItem(pageName) {
+    // Desktop sidebar
+    document.querySelectorAll('#sidebar .nav-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('data-page') === pageName.toLowerCase()) {
+            link.classList.add('active');
+        }
+    });
+
+    // Mobile dock
+    document.querySelectorAll('.dock-item').forEach(item => {
+        item.classList.remove('active');
+        const itemPage = item.getAttribute('data-page') || item.getAttribute('data-label')?.toLowerCase();
+        if (itemPage === pageName.toLowerCase()) {
+            item.classList.add('active');
+        }
+    });
+}
 // Export functions for global use
 window.toggleSidebar = toggleSidebar;
 window.showTokenModal = showTokenModal;
