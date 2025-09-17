@@ -11,21 +11,10 @@
     <link rel="stylesheet" href="~/TidyUp.styles.css" asp-append-version="true" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <link href="~/assets/logo-tidyup.png" rel="shortcut icon" type="image/svg" />
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href='https://cdn.boxicons.com/fonts/basic/boxicons.min.css' rel='stylesheet'>
+    <link href='https://cdn.boxicons.com/fonts/brands/boxicons-brands.min.css' rel='stylesheet'>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
-
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-    <link href="~/assets/logo-tidyup.png" rel="shortcut icon" type="image/svg" />
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-
-
-    @await RenderSectionAsync("Styles", required: false)
+   
 
 </head>
 <body data-userid="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value"
@@ -215,7 +204,7 @@
 
             <!-- Main Content -->
             <div class="main-content">
-                <main role="main" class=" w-screen">
+                <main role="main" class="pb-3">
                     @RenderBody()
                     <script src="~/js/openModal.js"></script>
                 </main>
@@ -227,15 +216,13 @@
                 </footer>
             </div>
         </div>
-
-    <script src="~/js/global-accessibility.js" asp-append-version="true"></script>
         <script src="~/lib/jquery/dist/jquery.min.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
         <script src="~/js/site.js" asp-append-version="true"></script>
         
 
         @await RenderSectionAsync("Scripts", required: false)
-        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAF_C-FLyLhoGKOAmfQH5sB6ySBQffrvdo&libraries=places"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAajNvSCpxo_QwyPwsRmrmr2-MlApf6Qkw&libraries=places"></script>
         <script src="https://cdn.jsdelivr.net/npm/motion@12.16.0/dist/motion.umd.min.js"></script>
         
         <!--Open a modal for posting-->

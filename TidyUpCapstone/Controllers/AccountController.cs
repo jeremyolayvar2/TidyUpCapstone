@@ -10,6 +10,7 @@ using TidyUpCapstone.Models.DTOs.User;
 using TidyUpCapstone.Models.Entities.User;
 using TidyUpCapstone.Models.ViewModels.Account;
 using TidyUpCapstone.Services.Interfaces;
+using Microsoft.AspNetCore.Routing;
 
 namespace TidyUpCapstone.Controllers
 {
@@ -169,23 +170,22 @@ namespace TidyUpCapstone.Controllers
         [AllowAnonymous]
         public IActionResult Login(string? returnUrl = null, string? error = null)
         {
-            ViewBag.HideNavigation = true;
-            ViewData["ReturnUrl"] = returnUrl;
+            // FIXED: Since you don't have Login.cshtml and use modals, redirect to home with modal trigger
+            _logger.LogInformation("Login GET requested, redirecting to home with modal trigger. Error: {Error}", error);
 
-            var model = new LoginViewModel
+            var routeValues = new RouteValueDictionary { { "showLogin", "true" } };
+
+            if (!string.IsNullOrEmpty(returnUrl))
             {
-                ReturnUrl = returnUrl,
-                ErrorMessage = error switch
-                {
-                    "oauth_failed" => "There was an error with the external login provider. Please try again.",
-                    "access_denied" => "Access was denied by the external provider.",
-                    _ => error
-                },
-                GoogleEnabled = true,
-                FacebookEnabled = false
-            };
+                routeValues.Add("returnUrl", returnUrl);
+            }
 
-            return View(model);
+            if (!string.IsNullOrEmpty(error))
+            {
+                routeValues.Add("error", error);
+            }
+
+            return RedirectToAction("Index", "Home", routeValues);
         }
 
         [HttpPost]

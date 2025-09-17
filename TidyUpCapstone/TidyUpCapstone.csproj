@@ -7,6 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Migrations\" />
+    <Folder Include="Models\DTOs\NewFolder\" />
+    <Folder Include="Views\Home\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Cloud.AIPlatform.V1" Version="3.45.0" />
+    <PackageReference Include="Google.Cloud.Vision.V1" Version="3.7.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="9.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.7" />

@@ -6,6 +6,9 @@ using SendGrid;
 using SendGrid.Helpers.Mail;
 using System.Security.Claims;
 using TidyUpCapstone.Data;
+using TidyUpCapstone.Extensions;
+using TidyUpCapstone.Helpers;
+using TidyUpCapstone.Models.Configuration;
 using TidyUpCapstone.Models.DTOs.Configuration;
 using TidyUpCapstone.Models.Entities.Core;
 using TidyUpCapstone.Models.Entities.User;
@@ -36,63 +39,56 @@ builder.Services.AddLogging(logging =>
 });
 
 // -----------------------------------------------------
-// 2. Database Configuration with Better Error Handling
+// 2. Configure Core Services using Extension Methods (from feature/item-management)
 // -----------------------------------------------------
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services
+    .AddDatabaseServices(builder.Configuration)
+    .AddIdentityServices()  // This already configures Identity - don't duplicate
+    .AddTidyUpServices()
+    .AddFileUploadConfiguration()
+    .AddApiConfiguration()
+    .AddLoggingConfiguration(builder.Environment)
+    .AddCachingServices()
+    .AddAIServices(builder.Configuration)
+    .AddBackgroundServices();
+
+// -----------------------------------------------------
+// 3. Register Item Management Services (from feature/item-management)
+// -----------------------------------------------------
+builder.Services.AddScoped<IImageUploadService, ImageUploadService>();
+builder.Services.AddScoped<ICommunityService, CommunityService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<IReactionService, ReactionService>();
+builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IViewModelService, ViewModelService>();
+builder.Services.AddScoped<IVisionService, VisionService>();
+builder.Services.AddScoped<IVertexAiService, VertexAiService>();
+
+// Register ILanguageService if it exists
+try
 {
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
-        "Server=OLAYVAR\\SQLEXPRESS;Database=TidyUpdb;Trusted_Connection=true;TrustServerCertificate=true;Encrypt=false;MultipleActiveResultSets=true";
-
-    options.UseSqlServer(connectionString);
-
-    if (builder.Environment.IsDevelopment())
-    {
-        options.EnableSensitiveDataLogging();
-        options.EnableDetailedErrors();
-    }
-});
-
-// -----------------------------------------------------
-// 3. Enhanced Identity Configuration for Modal System
-// -----------------------------------------------------
-builder.Services.AddIdentity<AppUser, IdentityRole<int>>(options =>
+    builder.Services.AddScoped<ILanguageService, LanguageService>();
+}
+catch
 {
-    // User settings
-    options.User.RequireUniqueEmail = true;
-    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+ ";
-
-    // Password settings - more secure for production, relaxed for development
-    options.Password.RequireDigit = builder.Environment.IsDevelopment() ? false : true;
-    options.Password.RequireLowercase = builder.Environment.IsDevelopment() ? false : true;
-    options.Password.RequireUppercase = builder.Environment.IsDevelopment() ? false : true;
-    options.Password.RequireNonAlphanumeric = builder.Environment.IsDevelopment() ? false : true;
-    options.Password.RequiredLength = builder.Environment.IsDevelopment() ? 3 : 8;
-    options.Password.RequiredUniqueChars = builder.Environment.IsDevelopment() ? 1 : 4;
-
-    // Sign-in settings
-    options.SignIn.RequireConfirmedEmail = false; // Set to true when email service is fully configured
-    options.SignIn.RequireConfirmedPhoneNumber = false;
-
-    // Lockout settings
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
-    options.Lockout.MaxFailedAccessAttempts = 5;
-    options.Lockout.AllowedForNewUsers = true;
-})
-.AddEntityFrameworkStores<ApplicationDbContext>()
-.AddDefaultTokenProviders();
+    // Service might not exist yet - ignore for now
+}
 
 // -----------------------------------------------------
-// 4. FIXED: Application Cookie Configuration FOR MODAL SYSTEM
+// 4. REMOVED: Duplicate Identity Configuration
+// -----------------------------------------------------
+// This section was removed because .AddIdentityServices() already handles it
+// Keeping this would cause "Scheme already exists: Identity.Application" error
+
+// -----------------------------------------------------
+// 5. Application Cookie Configuration FOR MODAL SYSTEM (from dev)
 // -----------------------------------------------------
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    // FIXED: For modal-based authentication, keep these paths pointed to the home page
-    // The modals will handle the UI, and we'll pass query parameters to trigger them
-    options.LoginPath = "/"; // User goes to home page, modals handle login UI
+    options.LoginPath = "/";
     options.LogoutPath = "/Account/Logout";
     options.AccessDeniedPath = "/";
 
-    // Cookie settings
     options.ExpireTimeSpan = TimeSpan.FromDays(30);
     options.SlidingExpiration = true;
     options.Cookie.HttpOnly = true;
@@ -101,10 +97,8 @@ builder.Services.ConfigureApplicationCookie(options =>
         : CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.Lax;
 
-    // FIXED: Add custom logic to handle unauthorized requests properly
     options.Events.OnRedirectToLogin = context =>
     {
-        // If this is an AJAX request (from modals), return JSON instead of redirecting
         if (context.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
         {
             context.Response.StatusCode = 401;
@@ -118,7 +112,6 @@ builder.Services.ConfigureApplicationCookie(options =>
             return context.Response.WriteAsync(jsonResponse);
         }
 
-        // For regular requests, redirect to home page with login modal trigger
         var returnUrl = context.RedirectUri;
         if (!string.IsNullOrEmpty(returnUrl))
         {
@@ -131,10 +124,8 @@ builder.Services.ConfigureApplicationCookie(options =>
         return Task.CompletedTask;
     };
 
-    // FIXED: Handle access denied scenarios
     options.Events.OnRedirectToAccessDenied = context =>
     {
-        // If this is an AJAX request, return JSON
         if (context.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
         {
             context.Response.StatusCode = 403;
@@ -148,14 +139,13 @@ builder.Services.ConfigureApplicationCookie(options =>
             return context.Response.WriteAsync(jsonResponse);
         }
 
-        // For regular requests, redirect to home page
         context.Response.Redirect("/?error=access_denied");
         return Task.CompletedTask;
     };
 });
 
 // -----------------------------------------------------
-// 5. Enhanced External Authentication Configuration
+// 6. Enhanced External Authentication Configuration (from dev)
 // -----------------------------------------------------
 builder.Services.AddAuthentication(options =>
 {
@@ -181,7 +171,6 @@ builder.Services.AddAuthentication(options =>
         googleOptions.Scope.Add("email");
         googleOptions.Scope.Add("profile");
 
-        // FIXED: OAuth event handlers for modal system with enhanced error handling
         googleOptions.Events.OnCreatingTicket = context =>
         {
             var contextLogger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
@@ -201,7 +190,6 @@ builder.Services.AddAuthentication(options =>
                 errorMessage = "access_denied";
             }
 
-            // FIXED: Redirect to home with modal parameters for modal system
             context.Response.Redirect($"/?error={errorMessage}&showLogin=true");
             context.HandleResponse();
             return Task.CompletedTask;
@@ -226,50 +214,12 @@ builder.Services.AddAuthentication(options =>
     }
 });
 
-/* Facebook Configuration - Uncomment when ready
-.AddFacebook(facebookOptions =>
-{
-    var appId = builder.Configuration["Authentication:Facebook:AppId"];
-    var appSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
-    
-    if (!string.IsNullOrEmpty(appId) && !string.IsNullOrEmpty(appSecret))
-    {
-        facebookOptions.AppId = appId;
-        facebookOptions.AppSecret = appSecret;
-        facebookOptions.Scope.Add("email");
-        facebookOptions.Fields.Add("email");
-        facebookOptions.Fields.Add("name");
-        facebookOptions.Fields.Add("first_name");
-        facebookOptions.Fields.Add("last_name");
-        facebookOptions.Fields.Add("picture");
-        
-        facebookOptions.Events.OnCreatingTicket = context =>
-        {
-            var contextLogger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-            contextLogger.LogInformation("Facebook OAuth ticket created");
-            return Task.CompletedTask;
-        };
-        
-        facebookOptions.Events.OnRemoteFailure = context =>
-        {
-            var contextLogger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-            contextLogger.LogError("Facebook OAuth remote failure: {Error}", context.Failure?.Message ?? "Unknown error");
-            
-            context.Response.Redirect("/?error=oauth_failed&showLogin=true");
-            context.HandleResponse();
-            return Task.CompletedTask;
-        };
-    }
-});
-*/
-
 // -----------------------------------------------------
-// 6. Email Service Configuration (SendGrid)
+// 7. Email Service Configuration (SendGrid) (from dev)
 // -----------------------------------------------------
 builder.Services.Configure<SendGridSettingsDto>(builder.Configuration.GetSection("SendGrid"));
 builder.Services.Configure<EmailSettingsDto>(builder.Configuration.GetSection("EmailSettings"));
 
-// Register SendGrid client with validation
 builder.Services.AddSingleton<ISendGridClient>(provider =>
 {
     var settings = provider.GetRequiredService<IOptions<SendGridSettingsDto>>().Value;
@@ -287,24 +237,35 @@ builder.Services.AddSingleton<ISendGridClient>(provider =>
     return new SendGridClient(settings.ApiKey ?? "");
 });
 
-// Register email service
 builder.Services.AddScoped<IEmailService, EmailService>();
 
 // -----------------------------------------------------
-// 7. Add Additional Services
+// 8. Google Cloud and Vision Services Configuration (from feature/item-management)
 // -----------------------------------------------------
-// Register ILanguageService if it exists
-try
+builder.Services.Configure<GoogleCloudSetting>(
+    builder.Configuration.GetSection("GoogleCloud"));
+builder.Services.Configure<VisionSettings>(
+    builder.Configuration.GetSection("VisionSettings"));
+
+// Set Google Cloud credentials environment variable
+var googleCloudSettings = builder.Configuration.GetSection("GoogleCloud").Get<GoogleCloudSetting>();
+if (!string.IsNullOrEmpty(googleCloudSettings?.CredentialsPath))
 {
-    builder.Services.AddScoped<ILanguageService, LanguageService>();
-}
-catch
-{
-    // Service might not exist yet - ignore for now
+    Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", googleCloudSettings.CredentialsPath);
 }
 
 // -----------------------------------------------------
-// 8. MVC Configuration
+// 9. Session Support (from feature/item-management)
+// -----------------------------------------------------
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+// -----------------------------------------------------
+// 10. MVC Configuration (combined)
 // -----------------------------------------------------
 builder.Services.AddControllersWithViews(options =>
 {
@@ -314,6 +275,8 @@ builder.Services.AddControllersWithViews(options =>
     }
 });
 
+builder.Services.AddControllers(); // For API controllers
+
 // Add antiforgery token configuration
 builder.Services.AddAntiforgery(options =>
 {
@@ -321,11 +284,11 @@ builder.Services.AddAntiforgery(options =>
     options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
         ? CookieSecurePolicy.SameAsRequest
         : CookieSecurePolicy.Always;
-    options.Cookie.SameSite = SameSiteMode.Lax; // Changed from Strict to Lax for better OAuth compatibility
+    options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
 // -----------------------------------------------------
-// 9. Build Application
+// 11. Build Application
 // -----------------------------------------------------
 var app = builder.Build();
 
@@ -333,7 +296,7 @@ var app = builder.Build();
 var appLogger = app.Services.GetRequiredService<ILogger<Program>>();
 
 // -----------------------------------------------------
-// 10. Database Initialization with Better Error Handling
+// 12. Database Initialization with Enhanced Error Handling (merged approach)
 // -----------------------------------------------------
 using (var scope = app.Services.CreateScope())
 {
@@ -355,16 +318,22 @@ using (var scope = app.Services.CreateScope())
         }
         else
         {
-            // Apply pending migrations or create database
-            var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
-            if (pendingMigrations.Any())
+            if (app.Environment.IsDevelopment())
             {
-                scopeLogger.LogInformation("Applying {Count} pending migrations", pendingMigrations.Count());
-                await context.Database.MigrateAsync();
+                // In development, ensure database is created and seed data
+                await context.Database.EnsureCreatedAsync();
+                await DatabaseSeeder.SeedAsync(context);
+                scopeLogger.LogInformation("Database seeding completed successfully");
             }
             else
             {
-                await context.Database.EnsureCreatedAsync();
+                // In production, apply pending migrations
+                var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+                if (pendingMigrations.Any())
+                {
+                    scopeLogger.LogInformation("Applying {Count} pending migrations", pendingMigrations.Count());
+                    await context.Database.MigrateAsync();
+                }
             }
 
             scopeLogger.LogInformation("Database initialized successfully");
@@ -379,19 +348,17 @@ using (var scope = app.Services.CreateScope())
 
         if (app.Environment.IsDevelopment())
         {
-            // In development, we can continue without database for some features
             scopeLogger.LogWarning("Continuing in development mode despite database error");
         }
         else
         {
-            // In production, database is critical
             throw;
         }
     }
 }
 
 // -----------------------------------------------------
-// 11. Configure HTTP Request Pipeline
+// 13. Configure HTTP Request Pipeline (merged)
 // -----------------------------------------------------
 if (!app.Environment.IsDevelopment())
 {
@@ -418,32 +385,34 @@ app.Use(async (context, next) =>
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
+
+// Session middleware (must be after UseRouting and before UseAuthentication)
+app.UseSession();
+
 app.UseCookiePolicy();
 app.UseAuthentication();
 app.UseAuthorization();
 
 // -----------------------------------------------------
-// 12. Configure Routes
+// 14. Configure Routes (merged)
 // -----------------------------------------------------
+app.MapControllers(); // For API controllers
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// FIXED: Account routes - simplified since we're using modals primarily
 app.MapControllerRoute(
     name: "account",
     pattern: "Account/{action=Index}",
     defaults: new { controller = "Account", action = "Index" });
 
-// FIXED: Add specific route for Main page
 app.MapControllerRoute(
     name: "main",
     pattern: "Main",
     defaults: new { controller = "Home", action = "Main" });
 
-// FIXED: Add specific routes for authentication actions
 app.MapControllerRoute(
     name: "login",
     pattern: "Login",
@@ -473,34 +442,14 @@ app.MapGet("/health", async (ApplicationDbContext context) =>
     }
 });
 
-// FIXED: Add status endpoint for debugging authentication
-//app.MapGet("/auth-status", async (HttpContext context, UserManager<AppUser> userManager) =>
-//{
-//    try
-//    {
-//        var isAuthenticated = context.User?.Identity?.IsAuthenticated ?? false;
-//        var userId = userManager.GetUserId(context.User);
-//        var userName = context.User?.Identity?.Name;
-
-//        var claimsList = context.User?.Claims?.Select(c => new { c.Type, c.Value }).ToList();
-
-//        return Results.Ok(new
-//        {
-//            isAuthenticated,
-//            userId,
-//            userName,
-//            timestamp = DateTime.UtcNow,
-//            claims = claimsList ?? new List<object>()
-//        });
-//    }
-//    catch (Exception ex)
-//    {
-//        return Results.Problem($"Auth status check failed: {ex.Message}");
-//    }
-//});
+// Initialize database in development using extension method (from feature/item-management)
+if (app.Environment.IsDevelopment())
+{
+    await app.InitializeDatabaseAsync();
+}
 
 // -----------------------------------------------------
-// 13. Helper Methods
+// 15. Helper Methods (from dev)
 // -----------------------------------------------------
 static async Task SeedInitialData(IServiceProvider services, ILogger logger)
 {
@@ -529,10 +478,11 @@ static async Task SeedInitialData(IServiceProvider services, ILogger logger)
 }
 
 // -----------------------------------------------------
-// 14. Start Application
+// 16. Start Application
 // -----------------------------------------------------
 appLogger.LogInformation("TidyUp application starting...");
 appLogger.LogInformation("Environment: {Environment}", app.Environment.EnvironmentName);
 appLogger.LogInformation("Authentication configured with modal system");
+appLogger.LogInformation("Item management features enabled");
 
 app.Run();

@@ -13,6 +13,10 @@ namespace TidyUpCapstone.Models.Entities.AI
         [Required]
         public int ItemId { get; set; }
 
+        public string? AnalysisResult { get; set; }
+        public DateTime ProcessedAt { get; set; }
+        public string Status { get; set; } = "pending";
+
         public string? DetectedObjects { get; set; }
 
         public string? DetectedCategories { get; set; }

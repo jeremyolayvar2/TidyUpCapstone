@@ -24,22 +24,25 @@ body {
     line-height: normal;
     min-height: 100vh;
     min-height: 100dvh;
-    display: flex;
-    width: 100vw;
-    overflow-x: hidden;
+    display: grid;
+    grid-template-columns: auto 1fr 1fr;
+    justify-content: center;
 }
 
-.main {
-    width: 100vw;
-}
+
 
 .layout-wrapper {
-    width: 100vw;
+    width: 100%;
     display: flex;
-    position: relative;
-
+    flex-direction: row;
+    min-height: 100vh;
 }
 
+.main-content {
+    flex: 1;
+    transition: margin-left 0.3s ease-in-out;
+    width: 100vw;
+}
 
 /*SideBar - Default -----------------------------*/
 #sidebar {
