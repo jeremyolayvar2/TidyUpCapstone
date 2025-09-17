@@ -692,6 +692,111 @@ function smoothScrollTo(target, duration = 1000) {
     requestAnimationFrame(animation);
 }
 
+
+// Enhanced navigation system with proper Home and Settings routing
+document.addEventListener('DOMContentLoaded', function () {
+    initializeNavigation();
+    setCurrentPageActive();
+});
+
+function initializeNavigation() {
+    // Desktop sidebar navigation
+    document.querySelectorAll('#sidebar .nav-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            const href = link.getAttribute('href');
+            const dataPage = link.getAttribute('data-page');
+
+            // Handle special cases that need to prevent default
+            if (dataPage === 'create') {
+                e.preventDefault();
+                openCreateModal();
+                return;
+            } else if (dataPage === 'token') {
+                e.preventDefault();
+                showTokenModal();
+                return;
+            }
+
+            // For Home and Settings, allow normal navigation
+            if (dataPage === 'home' || dataPage === 'settings') {
+                // Let the browser handle normal navigation
+                setActiveNavItem(dataPage);
+                return;
+            }
+
+            // For other navigation items without specific hrefs
+            if (href === '#') {
+                e.preventDefault();
+                // Handle other navigation logic here
+                console.log(`Navigation to ${dataPage} not yet implemented`);
+            }
+
+            setActiveNavItem(dataPage);
+        });
+    });
+
+    // Mobile dock navigation (if you have it)
+    document.querySelectorAll('.dock-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            const dataPage = item.getAttribute('data-page');
+            const onclickAttr = item.getAttribute('onclick');
+
+            // Handle special cases
+            if (dataPage === 'home') {
+                window.location.href = '/Home/Main';
+            } else if (dataPage === 'settings') {
+                window.location.href = '/Home/SettingsPage';
+            } else if (dataPage === 'create') {
+                e.preventDefault();
+                openCreateModal();
+            } else if (dataPage === 'token') {
+                e.preventDefault();
+                showTokenModal();
+            } else if (onclickAttr) {
+                // Execute existing onclick if present
+                return;
+            }
+
+            setActiveNavItem(dataPage);
+        });
+    });
+}
+
+function setCurrentPageActive() {
+    const currentPath = window.location.pathname.toLowerCase();
+    let currentPage = '';
+
+    // Determine current page based on URL
+    if (currentPath.includes('/home/main')) {
+        currentPage = 'home';
+    } else if (currentPath.includes('/home/settingspage')) {
+        currentPage = 'settings';
+    }
+    // Add other page mappings as needed
+
+    if (currentPage) {
+        setActiveNavItem(currentPage);
+    }
+}
+
+function setActiveNavItem(pageName) {
+    // Desktop sidebar
+    document.querySelectorAll('#sidebar .nav-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('data-page') === pageName) {
+            link.classList.add('active');
+        }
+    });
+
+    // Mobile dock
+    document.querySelectorAll('.dock-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('data-page') === pageName) {
+            item.classList.add('active');
+        }
+    });
+}
+
 // Export functions for global use
 window.toggleSidebar = toggleSidebar;
 window.showTokenModal = showTokenModal;
@@ -707,3 +812,7 @@ window.navigateToPage = navigateToPage;
 window.setActiveNavItem = setActiveNavItem;
 
 console.log('Site.js loaded successfully');
+
+
+
+

@@ -200,6 +200,7 @@ namespace TidyUpCapstone.Controllers
             return View();
         }
 
+
         private List<ItemCategoryDto> GetFallbackCategories()
         {
             return new List<ItemCategoryDto>
