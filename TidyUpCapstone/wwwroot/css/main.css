@@ -29,6 +29,7 @@ body {
     align-items: center;
     flex-direction: column;
     min-height: 60vh;
+    overflow: visible !important; /* CRITICAL: Don't clip dropdowns */
 }
 
 #mid-container {
@@ -108,10 +109,32 @@ body {
         flex-shrink: 0;
     }
 
-
 .filter-tab-text {
     display: inline;
 }
+
+/* Enhanced Filter Tabs */
+.filter-tab {
+    position: relative;
+    overflow: hidden;
+}
+
+    .filter-tab::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 3px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-radius: 3px;
+        transform: translateX(-50%);
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .filter-tab.active::after {
+        width: 80%;
+    }
 
 /* Mobile styles for filter tabs - Better approach */
 @media (max-width: 768px) {
@@ -323,7 +346,7 @@ body {
     backdrop-filter: blur(15px);
     border: 1px solid var(--primary-color);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
+    overflow: visible !important; /* CRITICAL: Don't clip dropdowns */
 }
 
     .community-post:hover {
@@ -442,8 +465,26 @@ body {
     box-shadow: 0 8px 25px rgba(107, 144, 128, 0.1);
     backdrop-filter: blur(15px);
     border: 1px solid rgba(107, 144, 128, 0.1);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: visible !important; /* CRITICAL: Must be visible for dropdown */
 }
+
+    .item-post::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(107, 144, 128, 0.05), transparent);
+        transition: left 0.8s ease;
+        z-index: 1;
+    }
+
+    .item-post:hover::before {
+        left: 100%;
+    }
 
     .item-post:hover {
         box-shadow: 0 12px 35px rgba(107, 144, 128, 0.15);
@@ -457,6 +498,9 @@ body {
     padding: 8px 0;
     margin-bottom: 10px;
     background-color: transparent;
+    position: relative;
+    overflow: visible !important; /* CRITICAL: Ensure dropdown isn't clipped */
+    z-index: auto;
 }
 
 .listing-container1-child1 {
@@ -479,6 +523,18 @@ body {
         font-style: italic;
         white-space: nowrap;
     }
+
+    /* Enhanced Avatar Styling */
+    .listing-container1-child1 img[alt="person"] {
+        border: 3px solid var(--primary-color);
+        box-shadow: 0 4px 12px rgba(107, 144, 128, 0.2);
+        transition: all 0.3s ease;
+    }
+
+        .listing-container1-child1 img[alt="person"]:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(107, 144, 128, 0.3);
+        }
 
 .listing-container2 {
     display: flex;
@@ -578,16 +634,42 @@ body {
     }
 
 .interested-btn {
-    padding: 10px 30px;
-    background-color: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     border: none;
-    border-radius: 8px;
-    transition: all 0.3s ease;
+    border-radius: 16px;
+    color: white;
+    font-weight: 600;
+    padding: 14px 24px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(107, 144, 128, 0.3);
 }
+
+    .interested-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .interested-btn:hover::before {
+        left: 100%;
+    }
 
     .interested-btn:hover {
         background-color: var(--secondary-color);
-        transform: translateY(-1px);
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 12px 36px rgba(107, 144, 128, 0.4);
+    }
+
+    .interested-btn:active {
+        transform: translateY(-1px) scale(1.02);
     }
 
     .interested-btn span {
@@ -602,6 +684,9 @@ body {
     flex-direction: column;
     align-items: center;
     scroll-behavior: smooth;
+    position: relative;
+    z-index: auto;
+    overflow: visible !important; /* CRITICAL: Don't clip dropdowns */
 }
 
 /* Post interactions for item posts */
@@ -624,35 +709,62 @@ body {
     gap: 15px;
 }
 
-/* Dropdown Menu (Edit/Delete) ------------------------------------------------------------------- */
-/* Replace your existing dropdown CSS with these enhanced overlay styles */
+/* External Dropdown System - Completely Outside Layout */
+#external-dropdown-system {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2000;
+}
 
-.dropdown-content {
-    display: none;
-    position: absolute; /* Will be changed to fixed by JavaScript */
-    right: 0;
-    top: calc(100% + 8px);
-    z-index: 1500; /* High z-index for overlay effect */
-    background: white;
-    min-width: 200px;
-    border-radius: 16px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(107, 144, 128, 0.1);
-    overflow: hidden;
-    backdrop-filter: blur(20px);
-    transform: scale(0.95) translateY(-10px);
-    opacity: 0;
+.external-dropdown-btn {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid transparent;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 12px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.dropdown-menu.active .dropdown-btn {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
-    transform: scale(1.05);
-    z-index: 1501; /* Above the dropdown content */
-}
+    .external-dropdown-btn:hover {
+        background: rgba(107, 144, 128, 0.1);
+        border-color: rgba(107, 144, 128, 0.3);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(107, 144, 128, 0.15);
+    }
 
-/* Backdrop for overlay effect */
+    .external-dropdown-btn:active {
+        transform: scale(0.95);
+    }
+
+    .external-dropdown-btn img {
+        width: 20px;
+        height: 20px;
+        transition: transform 0.3s ease;
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+    }
+
+    .external-dropdown-btn.active {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        transform: scale(1.05);
+    }
+
+        .external-dropdown-btn.active img {
+            filter: brightness(0) invert(1);
+            transform: rotate(90deg);
+        }
+
 .dropdown-backdrop {
     position: fixed;
     top: 0;
@@ -661,25 +773,172 @@ body {
     height: 100%;
     background: rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(2px);
-    z-index: 1400;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    z-index: 2000;
     pointer-events: auto;
+    display: none;
 }
 
-/* Mobile adjustments for overlay */
-@media (max-width: 768px) {
-    .dropdown-content {
-        min-width: 180px;
-        border-radius: 12px;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+.external-dropdown-container {
+    position: fixed;
+    z-index: 2100;
+    pointer-events: auto;
+    display: none;
+}
+
+.external-dropdown-content {
+    background: white;
+    min-width: 200px;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(107, 144, 128, 0.1);
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+}
+
+    .external-dropdown-content .dropdown-item {
+        color: var(--text-color);
+        padding: 16px 20px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
     }
+
+        .external-dropdown-content .dropdown-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(107, 144, 128, 0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .external-dropdown-content .dropdown-item:hover::before {
+            left: 100%;
+        }
+
+        .external-dropdown-content .dropdown-item:hover {
+            background: rgba(107, 144, 128, 0.08);
+            color: var(--primary-color);
+            transform: translateX(4px);
+        }
+
+        .external-dropdown-content .dropdown-item.delete:hover {
+            background: rgba(244, 67, 54, 0.08);
+            color: #f44336;
+        }
+
+        .external-dropdown-content .dropdown-item:not(:last-child) {
+            border-bottom: 1px solid rgba(107, 144, 128, 0.05);
+        }
+
+        .external-dropdown-content .dropdown-item i {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .external-dropdown-content .dropdown-item:hover i {
+            transform: scale(1.1);
+        }
+
+/* Mobile adjustments for external dropdown */
+@media (max-width: 768px) {
+    .external-dropdown-btn {
+        width: 40px;
+        height: 40px;
+        padding: 8px;
+    }
+
+    .external-dropdown-content {
+        min-width: 160px;
+    }
+
+        .external-dropdown-content .dropdown-item {
+            padding: 14px 16px;
+            font-size: 14px;
+        }
 
     .dropdown-backdrop {
         background: rgba(0, 0, 0, 0.15);
         backdrop-filter: blur(4px);
     }
 }
+
+/* Enhanced Dropdown Animations & Interactions - LEGACY SYSTEM REMOVED */
+/* All the old dropdown CSS can be removed since we're using external system */
+
+/* Enhanced Status Badges */
+.status-badge {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid transparent;
+    backdrop-filter: blur(10px);
+}
+
+    .status-badge::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.8s ease;
+    }
+
+    .status-badge:hover::before {
+        left: 100%;
+    }
+
+    .status-badge.available {
+        background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        color: #155724;
+        border-color: #28a745;
+    }
+
+    .status-badge.claimed {
+        background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+        color: #856404;
+        border-color: #ffc107;
+    }
+
+    .status-badge.completed {
+        background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+        color: #0c5460;
+        border-color: #17a2b8;
+    }
+
+    .status-badge.removed {
+        background: linear-gradient(135deg, #f8d7da, #f1aeb5);
+        color: #721c24;
+        border-color: #dc3545;
+    }
+
+    .status-badge.expired {
+        background: linear-gradient(135deg, #f8d7da, #f1aeb5);
+        color: #721c24;
+        border-color: #dc3545;
+    }
 
 /* Three Dots Icon ------------------------------------------------------------------------------- */
 .dots-icon {
@@ -1395,6 +1654,34 @@ input[type="number"] {
     animation: spin 1s linear infinite;
 }
 
+/* Enhanced Loading States */
+.loading-state {
+    position: relative;
+    overflow: hidden;
+}
+
+    .loading-state::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+        animation: shimmer 1.5s infinite;
+        z-index: 1;
+    }
+
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+
+    100% {
+        left: 100%;
+    }
+}
+
 /* Tablet Responsive Design (768px - 1024px) */
 @media (max-width: 1024px) and (min-width: 769px) {
     .modal-content {
@@ -1558,6 +1845,27 @@ input[type="number"] {
         min-height: 48px; /* Better touch target */
         touch-action: manipulation;
     }
+
+    /* Mobile dropdown adjustments */
+    .dropdown-btn {
+        width: 40px;
+        height: 40px;
+        padding: 8px;
+    }
+
+    .dropdown-content {
+        min-width: 160px;
+    }
+
+    .dropdown-item {
+        padding: 14px 16px;
+        font-size: 14px;
+    }
+
+    .dropdown-backdrop {
+        background: rgba(0, 0, 0, 0.15);
+        backdrop-filter: blur(4px);
+    }
 }
 
 /* Small Mobile Responsive Design (max-width: 480px) */
@@ -1668,6 +1976,34 @@ input[type="number"] {
         .price-breakdown small {
             font-size: 10px;
         }
+
+    /* Filter tabs for small mobile */
+    .filter-tabs-container {
+        padding: 0 5px;
+    }
+
+    .filter-tab {
+        padding: 10px 6px;
+        min-width: 44px;
+        gap: 0;
+    }
+
+        .filter-tab .material-symbols-outlined,
+        .filter-tab i {
+            font-size: 22px;
+        }
+
+    /* Hide text on small mobile, show only icons */
+    .filter-tab-text {
+        display: none !important;
+    }
+
+    /* Ensure proper centering for icons only */
+    .filter-tab {
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
 }
 
 /* Extra Small Mobile (max-width: 360px) */
@@ -1816,41 +2152,6 @@ input[type="number"] {
         transform: scale(1);
     }
 }
-
-/* Status Badges --------------------------------------------------------------------------------- */
-.status-badge {
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-    .status-badge.available {
-        background: #d4edda;
-        color: #155724;
-    }
-
-    .status-badge.claimed {
-        background: #fff3cd;
-        color: #856404;
-    }
-
-    .status-badge.completed {
-        background: #d1ecf1;
-        color: #0c5460;
-    }
-
-    .status-badge.removed {
-        background: #f8d7da;
-        color: #721c24;
-    }
-
-    .status-badge.expired {
-        background: #e2e3e5;
-        color: #383d41;
-    }
 
 /* Character Counter & AI Confidence ------------------------------------------------------------- */
 .character-counter {
@@ -2362,7 +2663,6 @@ button.icon-btn {
     padding: 10px 12px;
     border-radius: 8px;
     word-wrap: break-word;
-    /*    max-width: 485px;*/
 }
 
 .comment-header {
@@ -2579,7 +2879,7 @@ button.icon-btn {
     background: var(--background);
     max-height: 400px;
     overflow-y: auto;
-    overflow-x: hidden; /* Prevent horizontal overflow */
+    overflow-x: hidden;
     padding: 20px 24px;
     scrollbar-width: thin;
     scrollbar-color: var(--primary-color) transparent;
@@ -2615,7 +2915,7 @@ button.icon-btn {
     border-radius: 8px;
     width: 100%;
     max-width: 100%;
-    overflow: hidden; /* Prevent any overflow */
+    overflow: hidden;
 }
 
     .comment-item:nth-child(1) {
@@ -2669,11 +2969,11 @@ button.icon-btn {
     position: relative;
     transition: all 0.3s ease;
     border: 1px solid var(--primary-color);
-    max-width: calc(100% - 60px); /* Account for avatar width + gap */
+    max-width: calc(100% - 60px);
     word-wrap: break-word;
     word-break: break-word;
     overflow-wrap: break-word;
-    min-width: 0; /* Allow flex item to shrink below content size */
+    min-width: 0;
 }
 
     .comment-item .comment-content:hover {
@@ -2718,9 +3018,9 @@ button.icon-btn {
 }
 
 .comment-item .comment-text {
-    word-break: break-all; /* Break long words/URLs */
-    overflow-wrap: anywhere; /* More aggressive wrapping */
-    hyphens: auto; /* Add hyphens for better readability */
+    word-break: break-all;
+    overflow-wrap: anywhere;
+    hyphens: auto;
 }
 
 .comment-actions {
@@ -2782,8 +3082,8 @@ button.icon-btn {
 .new-comment-input-wrapper {
     flex: 1;
     position: relative;
-    min-width: 0; /* Allow flex item to shrink */
-    max-width: calc(100% - 52px); /* Account for avatar width + gap */
+    min-width: 0;
+    max-width: calc(100% - 52px);
 }
 
 .new-comment-input {
@@ -2833,8 +3133,8 @@ button.icon-btn {
     cursor: pointer;
     transition: all 0.3s ease;
     color: white;
-    flex-shrink: 0; /* Prevent button from shrinking */
-    z-index: 2; /* Ensure button stays on top */
+    flex-shrink: 0;
+    z-index: 2;
 }
 
     .send-comment-btn:hover:not(:disabled) {
@@ -2860,7 +3160,7 @@ button.icon-btn {
     object-fit: cover;
     border: 2px solid var(--primary-color);
     transition: all 0.3s ease;
-    flex-shrink: 0; /* Prevent avatar from shrinking */
+    flex-shrink: 0;
 }
 
 /* Comments Empty State ---------------------------------------------------------------------- */
@@ -3087,505 +3387,6 @@ select.invalid {
     font-family: Arial, sans-serif;
 }
 
-/* Tablet and Mobile styles */
-@media (max-width: 768px) {
-    /* Community Post Section Mobile */
-    .community-post-section {
-        padding: 0 10px;
-    }
-
-    .post-creator {
-        padding: 15px;
-        border-radius: 16px;
-        margin-bottom: 15px;
-    }
-
-    .post-creator-header {
-        gap: 10px;
-    }
-
-    .user-avatar img {
-        width: 40px;
-        height: 40px;
-    }
-
-    .post-input {
-        font-size: 15px;
-        min-height: 40px;
-    }
-
-    .post-actions {
-        margin-top: 10px;
-        padding-top: 10px;
-        gap: 8px;
-    }
-
-    .post-options {
-        gap: 6px;
-    }
-
-    .post-option-btn {
-        padding: 6px 10px;
-        font-size: 13px;
-    }
-
-        .post-option-btn .material-symbols-outlined,
-        .post-option-btn i {
-            font-size: 16px;
-        }
-
-    .post-btn-community {
-        padding: 8px 16px;
-        font-size: 14px;
-        border-radius: 10px;
-    }
-
-    /* Community Post Mobile */
-    .community-post {
-        margin: 0 auto 10px auto;
-        border-radius: 16px;
-    }
-
-    .post-header {
-        padding: 15px;
-    }
-
-    .post-user-info {
-        gap: 10px;
-    }
-
-    .post-avatar {
-        width: 40px;
-        height: 40px;
-    }
-
-    .post-username {
-        font-size: 15px;
-    }
-
-    .post-content {
-        padding: 0 15px 12px;
-        font-size: 15px;
-    }
-
-    .post-interactions {
-        padding: 12px 15px;
-    }
-
-    .interaction-buttons {
-        gap: 15px;
-        /* Keep horizontal as requested */
-    }
-
-    .interaction-btn {
-        padding: 6px 12px;
-        font-size: 14px;
-    }
-
-        .interaction-btn .material-symbols-outlined,
-        .interaction-btn i {
-            font-size: 18px;
-        }
-
-    /* Item Post Mobile */
-    .item-post {
-        margin: 0 10px 15px 10px;
-        padding: 12px;
-        border-radius: 16px;
-    }
-
-    .listing-container1 {
-        padding: 6px 0;
-        margin-bottom: 8px;
-    }
-
-    .listing-container1-child1 {
-        gap: 10px;
-    }
-
-        .listing-container1-child1 img {
-            width: 28px;
-            height: 28px;
-        }
-
-    .listing-container2 {
-        margin-bottom: 12px;
-    }
-
-        .listing-container2 img {
-            border-radius: 12px;
-            max-height: 300px;
-        }
-
-    .listing-container3 {
-        flex-direction: column;
-        gap: 8px;
-        align-items: flex-start;
-    }
-
-    .listing-container3-child1,
-    .listing-container3-child2,
-    .listing-container3-child3 {
-        min-width: auto;
-        flex: none;
-        width: 100%;
-        justify-content: flex-start;
-    }
-
-    .listing-container4 h3 {
-        font-size: 1.2em;
-    }
-
-    .listing-container4 p {
-        font-size: 0.9em;
-    }
-
-    .listing-container5 {
-        gap: 10px;
-        align-items: flex-start;
-    }
-
-    .listing-container5-child1 span {
-        font-size: 26px;
-    }
-
-    .listing-container5-child1 img {
-        width: 26px;
-        height: 26px;
-    }
-
-    .interested-btn {
-        padding: 8px 20px;
-        font-size: 14px;
-    }
-
-    .status-badge {
-        padding: 4px 10px;
-        font-size: 11px;
-    }
-
-    .ai-confidence {
-        padding: 3px 6px;
-        font-size: 11px;
-    }
-
-    /* Item post interactions mobile */
-    .item-post .post-interactions {
-        padding: 10px 0 0;
-        margin-top: 10px;
-    }
-
-    .item-post .interaction-stats {
-        font-size: 12px;
-        margin-bottom: 8px;
-    }
-
-    .item-post .interaction-buttons {
-        gap: 12px;
-    }
-
-    .item-post .interaction-btn {
-        padding: 6px 10px;
-        font-size: 13px;
-    }
-
-    /* Comments modal mobile */
-    .comments-modal-content {
-        width: 95%;
-        max-height: 90vh;
-        margin: 20px;
-    }
-
-    .comments-modal-header {
-        padding: 20px 16px 12px;
-    }
-
-    .comments-modal-title {
-        font-size: 18px;
-    }
-
-    .comments-list-container {
-        padding: 16px;
-        max-height: 350px;
-    }
-
-    .new-comment-section {
-        padding: 16px;
-    }
-
-    .comment-item {
-        margin-bottom: 16px;
-    }
-
-        .comment-item .comment-content {
-            padding: 12px 14px;
-            max-width: calc(100% - 52px);
-        }
-
-    .new-comment-input-wrapper {
-        max-width: calc(100% - 48px);
-    }
-
-    .comment-item .comment-avatar,
-    .new-comment-avatar {
-        width: 40px;
-        height: 40px;
-    }
-
-    /* Chat system mobile */
-    .app-container {
-        max-width: 100%;
-        height: 100vh;
-    }
-
-    header {
-        padding: 1rem;
-    }
-
-    .messages-list {
-        padding: 0.75rem;
-    }
-
-    .message-item {
-        margin-bottom: 1rem;
-        padding: 6px;
-    }
-
-    .avatar-wrapper {
-        width: 44px;
-        height: 44px;
-        margin-right: 10px;
-    }
-
-    .message-sender {
-        font-size: 0.9rem;
-    }
-
-    .message-status {
-        font-size: 0.8rem;
-    }
-
-    .new-message-btn {
-        bottom: 16px;
-        right: 16px;
-        width: 48px;
-        height: 48px;
-    }
-
-        .new-message-btn .material-icons {
-            font-size: 24px;
-        }
-}
-
-@media (max-width: 480px) {
-    .filter-tabs-container {
-        padding: 0 5px;
-    }
-
-    .filter-tab {
-        padding: 10px 6px;
-        min-width: 44px;
-        gap: 0; /* Remove gap when text is hidden */
-    }
-
-        .filter-tab .material-symbols-outlined,
-        .filter-tab i {
-            font-size: 22px;
-        }
-
-    /* Hide text on small mobile, show only icons */
-    .filter-tab-text {
-        display: none !important;
-    }
-
-    /* Ensure proper centering for icons only */
-    .filter-tab {
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-    }
-
-    /* Community post section small mobile */
-    .community-post-section {
-        padding: 0 5px;
-    }
-
-    .post-creator {
-        padding: 12px;
-        border-radius: 12px;
-    }
-
-    .post-actions {
-        gap: 10px;
-        align-items: stretch;
-    }
-
-    .post-options {
-        justify-content: center;
-    }
-
-    .post-btn-community {
-        width: 30%;
-        justify-content: center;
-    }
-
-    /* Community post small mobile */
-    .community-post {
-        margin: 0 auto 12px auto;
-        border-radius: 12px;
-    }
-
-    .post-header {
-        padding: 12px;
-    }
-
-    .post-content {
-        padding: 0 12px 10px;
-        font-size: 14px;
-    }
-
-    .post-interactions {
-        padding: 10px 12px;
-    }
-
-    .interaction-buttons {
-        gap: 12px;
-        /* Keep horizontal layout as requested */
-        flex-wrap: nowrap;
-    }
-
-    .interaction-btn {
-        padding: 6px 10px;
-        font-size: 13px;
-        min-width: 0;
-        flex: 1;
-        justify-content: center;
-    }
-
-    /* Item post small mobile */
-    .item-post {
-        margin: 0 5px 12px 5px;
-        padding: 10px;
-        border-radius: 12px;
-    }
-
-    .listing-container1-child1 {
-        gap: 8px;
-    }
-
-        .listing-container1-child1 span {
-            font-size: 14px;
-        }
-
-        .listing-container1-child1 .date-span {
-            font-size: 11px;
-        }
-
-    .listing-container2 img {
-        border-radius: 10px;
-        max-height: 250px;
-    }
-
-    .listing-container3 {
-        gap: 6px;
-    }
-
-    .listing-container3-child1 span,
-    .listing-container3-child2 span,
-    .listing-container3-child3 span {
-        font-size: 11px;
-    }
-
-    .listing-container4 h3 {
-        font-size: 1.1em;
-    }
-
-    .listing-container4 p {
-        font-size: 0.85em;
-    }
-
-    .listing-container5 {
-        flex-direction: column;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .listing-container5-child1 {
-        order: 2;
-    }
-
-    .interested-btn,
-    .status-badge {
-        order: 1;
-        width: 100%;
-        text-align: center;
-        justify-content: center;
-    }
-
-    .interested-btn {
-        padding: 10px;
-    }
-
-    .ai-confidence {
-        order: 3;
-        align-self: center;
-    }
-
-    .item-post .interaction-buttons {
-        gap: 8px;
-        justify-content: space-around;
-    }
-
-    .item-post .interaction-btn {
-        padding: 6px 8px;
-        font-size: 12px;
-        flex: 1;
-        justify-content: center;
-    }
-
-        .item-post .interaction-btn .material-symbols-outlined,
-        .item-post .interaction-btn i {
-            font-size: 16px;
-        }
-
-    /* Dropdown menu small mobile */
-    .dropdown-content {
-        transform: none;
-        right: 5px;
-        min-width: 100px;
-    }
-
-    .dropdown-item {
-        padding: 10px 12px;
-        font-size: 13px;
-    }
-}
-
-/* Desktop Optimizations --------------------------------------------------------------------- */
-@media (min-width: 769px) {
-    .app-container {
-        max-width: 1024px;
-        height: 100vh;
-        border-radius: 20px;
-        overflow: hidden;
-    }
-
-    .upload-section.loading::after {
-        content: "Processing image...";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: rgba(255, 255, 255, 0.95);
-        padding: 15px 25px;
-        border-radius: 8px;
-        font-size: 14px;
-        color: var(--text-color);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        z-index: 10;
-    }
-}
-
 /* AI Suggestion Styles - Add this to your main.css or create ai-suggestions.css */
 
 .ai-suggestion-container {
@@ -3784,26 +3585,6 @@ select.invalid {
     }
 }
 
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-@keyframes pulse {
-    0%, 100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.7;
-    }
-}
-
 /* Loading states */
 .loading-spinner {
     width: 16px;
@@ -3832,29 +3613,6 @@ select.invalid {
     .confidence-badge {
         align-self: flex-end;
     }
-}
-
-/* Image Preview Styles */
-.image-preview {
-    position: relative;
-    border-radius: 8px;
-    overflow: hidden;
-    max-width: 100%;
-    margin-top: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-    .image-preview img {
-        width: 100%;
-        height: auto;
-        max-height: 300px;
-        object-fit: cover;
-        display: block;
-    }
-
-.remove-image {
-    position: absolute;
-    top: 8;
 }
 
 /* ===== AI PROTECTION STYLES FOR EXISTING MODAL ===== */
@@ -3913,31 +3671,3 @@ select.invalid {
         font-size: 12px;
         font-weight: bold;
     }
-
-/* ===== ENHANCED DROPDOWN STYLES ===== */
-.dropdown-content {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    min-width: 160px;
-    z-index: 1000;
-    border: 1px solid #e1e5e9;
-    overflow: hidden;
-}
-
-.dropdown-item:hover {
-    background: #f3f4f6;
-    color: #1f2937;
-}
-
-.dropdown-item.delete:hover {
-    background: #fee2e2;
-    color: #dc2626;
-}
-
-.dropdown-item:not(:last-child) {
-    border-bottom: 1px solid #f3f4f6;
-}
