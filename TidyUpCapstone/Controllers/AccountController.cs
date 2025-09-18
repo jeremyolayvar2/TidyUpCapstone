@@ -38,7 +38,8 @@ namespace TidyUpCapstone.Controllers
 
         // ===== UTILITY METHODS =====
 
-        /// <summary>
+        /// 
+        /// 
         /// Get current Philippines time
         /// </summary>
         private DateTime GetPhilippinesTime()
