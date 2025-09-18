@@ -380,7 +380,7 @@ app.Use(async (context, next) =>
     // FIXED: Add referrer policy for better OAuth compatibility
     context.Response.Headers.Add("Referrer-Policy", "strict-origin-when-cross-origin");
 
-    await next();
+    await next.Invoke();
 });
 
 app.UseHttpsRedirection();

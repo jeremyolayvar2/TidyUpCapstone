@@ -4,6 +4,7 @@
 <link href="https://cdn.jsdelivr.net/npm/iconsax@1.0.0-alpha2/dist/css/iconsax.css" rel="stylesheet">
 <link rel="stylesheet" href="~/css/instagram-animations.css" />
 <link rel="stylesheet" href="~/css/posting-styles.css" />
+<link rel="stylesheet" href="~/css/EditCommunityPost.css" />
 
 @{
     ViewBag.HideNavigation = false;
@@ -142,14 +143,16 @@
                                 }
                             }
 
-                            <!-- COMPLETELY EXTERNAL: Just the trigger button, no dropdown container -->
                             <button class="external-dropdown-btn"
                                     data-item-id="@item.ItemId"
                                     data-is-owner="@isItemOwner.ToString().ToLower()"
-                                    onclick="showExternalDropdown(this)"
-                                    aria-label="More options">
+                                    onclick="showExternalDropdown(this, event)"
+                                    aria-label="More options"
+                                    role="button"
+                                    tabindex="0">
                                 <img src="~/assets/dot-horiz.svg" alt="more options" />
                             </button>
+
 
                         </div>
 

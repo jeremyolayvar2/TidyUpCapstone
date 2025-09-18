@@ -693,7 +693,7 @@ function smoothScrollTo(target, duration = 1000) {
 }
 
 
-// Enhanced navigation system with proper Home and Settings routing
+// Enhanced navigation system - Add this to your existing site.js
 document.addEventListener('DOMContentLoaded', function () {
     initializeNavigation();
     setCurrentPageActive();
@@ -729,35 +729,35 @@ function initializeNavigation() {
                 e.preventDefault();
                 // Handle other navigation logic here
                 console.log(`Navigation to ${dataPage} not yet implemented`);
+                setActiveNavItem(dataPage);
             }
-
-            setActiveNavItem(dataPage);
         });
     });
 
-    // Mobile dock navigation (if you have it)
+    // Mobile dock navigation enhancement
     document.querySelectorAll('.dock-item').forEach(item => {
         item.addEventListener('click', (e) => {
             const dataPage = item.getAttribute('data-page');
-            const onclickAttr = item.getAttribute('onclick');
+            const dataLabel = item.getAttribute('data-label');
 
-            // Handle special cases
-            if (dataPage === 'home') {
+            // Handle navigation based on data-page or data-label
+            if (dataPage === 'home' || dataLabel === 'Home') {
                 window.location.href = '/Home/Main';
-            } else if (dataPage === 'settings') {
+            } else if (dataPage === 'settings' || dataLabel === 'Settings') {
                 window.location.href = '/Home/SettingsPage';
-            } else if (dataPage === 'create') {
+            } else if (dataPage === 'create' || dataLabel === 'Create') {
                 e.preventDefault();
                 openCreateModal();
-            } else if (dataPage === 'token') {
+            } else if (dataPage === 'token' || dataLabel === 'Token') {
                 e.preventDefault();
                 showTokenModal();
-            } else if (onclickAttr) {
-                // Execute existing onclick if present
-                return;
             }
 
-            setActiveNavItem(dataPage);
+            // Set active state
+            const pageToActivate = dataPage || dataLabel?.toLowerCase();
+            if (pageToActivate) {
+                setActiveNavItem(pageToActivate);
+            }
         });
     });
 }
@@ -771,6 +771,8 @@ function setCurrentPageActive() {
         currentPage = 'home';
     } else if (currentPath.includes('/home/settingspage')) {
         currentPage = 'settings';
+    } else if (currentPath.includes('/home/index') || currentPath === '/') {
+        currentPage = 'home';
     }
     // Add other page mappings as needed
 
@@ -783,7 +785,7 @@ function setActiveNavItem(pageName) {
     // Desktop sidebar
     document.querySelectorAll('#sidebar .nav-link').forEach(link => {
         link.classList.remove('active');
-        if (link.getAttribute('data-page') === pageName) {
+        if (link.getAttribute('data-page') === pageName.toLowerCase()) {
             link.classList.add('active');
         }
     });
@@ -791,12 +793,12 @@ function setActiveNavItem(pageName) {
     // Mobile dock
     document.querySelectorAll('.dock-item').forEach(item => {
         item.classList.remove('active');
-        if (item.getAttribute('data-page') === pageName) {
+        const itemPage = item.getAttribute('data-page') || item.getAttribute('data-label')?.toLowerCase();
+        if (itemPage === pageName.toLowerCase()) {
             item.classList.add('active');
         }
     });
 }
-
 // Export functions for global use
 window.toggleSidebar = toggleSidebar;
 window.showTokenModal = showTokenModal;
