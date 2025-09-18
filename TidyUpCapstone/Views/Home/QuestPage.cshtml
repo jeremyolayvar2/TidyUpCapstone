@@ -1,0 +1,393 @@
+﻿@model TidyUpCapstone.Models.ViewModels.Gamification.GamificationDashboardViewModel
+@using TidyUpCapstone.Models.Entities.Gamification
+
+@{
+    ViewData["Title"] = "Quest Dashboard";
+    ViewData["PageType"] = "quest";
+}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Righteous&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="~/css/QuestPage.css" asp-append-version="true" />
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.classList.add('quest-page');
+    });
+</script>
+
+<div class="quest-dashboard">
+    <!-- Header Section -->
+    <header class="quest-header">
+        <h1 class="quest-title righteous-font">QUEST DASHBOARD</h1>
+        <div class="header-stats">
+            <div class="stat-item">
+                <span class="stat-value">@(Model?.Stats?.TotalQuestsCompleted ?? 0)</span>
+                <span class="stat-label">Completed</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">@((Model?.Stats?.TokenBalance ?? 0).ToString("N0"))</span>
+                <span class="stat-label">Tokens</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">@(Model?.Stats?.ActiveStreaksCount ?? 0)</span>
+                <span class="stat-label">Streaks</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Bento Grid Layout -->
+    <div class="bento-grid">
+        <!-- Level Progress Card -->
+        @if (Model?.LevelProgress != null)
+        {
+            <div class="bento-card level-card">
+                <div class="level-info">
+                    <div class="level-display">
+                        <span class="level-number">@Model.LevelProgress.CurrentLevel</span>
+                        <span class="level-name">@(Model.LevelProgress.CurrentLevelName ?? "Beginner")</span>
+                    </div>
+                    <div class="xp-display">
+                        <span class="current-xp">@Model.LevelProgress.CurrentXp XP</span>
+                        <span class="xp-separator">/</span>
+                        <span class="next-level-xp">@(Model.LevelProgress.CurrentXp + Model.LevelProgress.XpToNextLevel) XP</span>
+                    </div>
+                </div>
+                <div class="level-progress-bar">
+                    <div class="level-progress-fill" style="width: @(Model.LevelProgress.XpProgress)%"></div>
+                    <div class="level-progress-text">@(Model.LevelProgress.XpProgress)% to @(Model.LevelProgress.NextLevelName ?? "Next Level")</div>
+                </div>
+            </div>
+        }
+
+        <!-- Daily Check-in Card -->
+        <div class="bento-card checkin-card">
+            <div class="checkin-content">
+                <div class="checkin-header">
+                    <h3 class="righteous-font">Daily Check-in</h3>
+                    <div class="streak-display">
+                        <span id="streakCount">0</span> day streak
+                    </div>
+                </div>
+                <div id="nextCheckInTimer" class="check-in-timer" style="display: none;">
+                    Next check-in in: <span id="timerDisplay">--:--:--</span>
+                </div>
+                <button id="checkInBtn" class="checkin-button">
+                    Check In
+                </button>
+            </div>
+        </div>
+
+        <!-- Daily Quests Section -->
+        <div class="bento-card quests-card daily-quests">
+            <div class="quests-header">
+                <h2 class="righteous-font">Daily Quests</h2>
+                <span class="quest-count">@Model.ActiveQuests.Count(q => q.QuestType == QuestType.Daily)</span>
+            </div>
+            <div class="quests-container">
+                @if (Model.ActiveQuests.Any(q => q.QuestType == QuestType.Daily))
+                {
+                    @foreach (var quest in Model.ActiveQuests.Where(q => q.QuestType == QuestType.Daily))
+                    {
+                        <div class="quest-item" data-quest-id="@quest.QuestId" data-quest-type="@((int)quest.QuestType)">
+                            <div class="quest-content">
+                                <div class="quest-timer">
+                                    @{
+                                        var remaining = quest.EndDate.HasValue
+                                        ? TimeSpan.FromTicks(Math.Max(0, quest.EndDate.Value.Ticks - DateTime.UtcNow.Ticks))
+                                        : TimeSpan.Zero;
+                                    }
+                                    @remaining.Hours h @remaining.Minutes m remaining
+                                </div>
+                                <h4 class="quest-name">@quest.QuestTitle</h4>
+                                <p class="quest-description">@quest.QuestObjective</p>
+                                <div class="quest-meta">
+                                    <div class="quest-badges">
+                                        <span class="difficulty-badge difficulty-@quest.Difficulty.ToString().ToLower()">
+                                            @quest.Difficulty
+                                        </span>
+                                        <span class="type-badge type-daily">Daily</span>
+                                    </div>
+                                    <div class="quest-rewards">
+                                        <span class="reward-tokens">@quest.TokenReward T</span>
+                                        <span class="reward-xp">@quest.XpReward XP</span>
+                                    </div>
+                                </div>
+                                <div class="quest-progress">
+                                    <div class="progress-info">
+                                        <span>@quest.CurrentProgress / @quest.TargetValue</span>
+                                        <span>@quest.ProgressPercentage%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: @quest.ProgressPercentage%"></div>
+                                    </div>
+                                </div>
+                                @if (quest.IsCompleted && !quest.IsClaimed)
+                                {
+                                    <button class="claim-button active claim-reward-btn" data-quest-id="@quest.QuestId">
+                                        Claim Reward
+                                    </button>
+                                }
+                                else if (quest.IsClaimed)
+                                {
+                                    <button class="claim-button completed" disabled>
+                                        Claimed
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="claim-button disabled" disabled>
+                                        In Progress
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="no-quests">
+                        <p>No active daily quests</p>
+                        <button class="generate-quest-btn" onclick="generateDailyQuests()">Generate Daily Quests</button>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Weekly Quests Section -->
+        <div class="bento-card quests-card weekly-quests">
+            <div class="quests-header">
+                <h2 class="righteous-font">Weekly Quests</h2>
+                <span class="quest-count">@Model.ActiveQuests.Count(q => q.QuestType == QuestType.Weekly)</span>
+            </div>
+            <div class="quests-container">
+                @if (Model.ActiveQuests.Any(q => q.QuestType == QuestType.Weekly))
+                {
+                    @foreach (var quest in Model.ActiveQuests.Where(q => q.QuestType == QuestType.Weekly))
+                    {
+                        <div class="quest-item" data-quest-id="@quest.QuestId" data-quest-type="@((int)quest.QuestType)">
+                            <div class="quest-content">
+                                <div class="quest-timer">
+                                    @{
+                                        var weeklyRemaining = quest.EndDate.HasValue
+                                        ? TimeSpan.FromTicks(Math.Max(0, quest.EndDate.Value.Ticks - DateTime.UtcNow.Ticks))
+                                        : TimeSpan.Zero;
+                                    }
+                                    @weeklyRemaining.Days d @weeklyRemaining.Hours h remaining
+                                </div>
+                                <h4 class="quest-name">@quest.QuestTitle</h4>
+                                <p class="quest-description">@quest.QuestObjective</p>
+                                <div class="quest-meta">
+                                    <div class="quest-badges">
+                                        <span class="difficulty-badge difficulty-@quest.Difficulty.ToString().ToLower()">
+                                            @quest.Difficulty
+                                        </span>
+                                        <span class="type-badge type-weekly">Weekly</span>
+                                    </div>
+                                    <div class="quest-rewards">
+                                        <span class="reward-tokens">@quest.TokenReward T</span>
+                                        <span class="reward-xp">@quest.XpReward XP</span>
+                                    </div>
+                                </div>
+                                <div class="quest-progress">
+                                    <div class="progress-info">
+                                        <span>@quest.CurrentProgress / @quest.TargetValue</span>
+                                        <span>@quest.ProgressPercentage%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: @quest.ProgressPercentage%"></div>
+                                    </div>
+                                </div>
+                                @if (quest.IsCompleted && !quest.IsClaimed)
+                                {
+                                    <button class="claim-button active claim-reward-btn" data-quest-id="@quest.QuestId">
+                                        Claim Reward
+                                    </button>
+                                }
+                                else if (quest.IsClaimed)
+                                {
+                                    <button class="claim-button completed" disabled>
+                                        Claimed
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="claim-button disabled" disabled>
+                                        In Progress
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="no-quests">
+                        <p>No active weekly quests</p>
+                        <button class="generate-quest-btn" onclick="generateWeeklyQuest()">Generate Weekly Quest</button>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Special Quests Section -->
+        <div class="bento-card quests-card special-quests">
+            <div class="quests-header">
+                <h2 class="righteous-font">Special Quests</h2>
+                <span class="quest-count">@Model.ActiveQuests.Count(q => q.QuestType == QuestType.Special)</span>
+            </div>
+            <div class="quests-container">
+                @if (Model.ActiveQuests.Any(q => q.QuestType == QuestType.Special))
+                {
+                    @foreach (var quest in Model.ActiveQuests.Where(q => q.QuestType == QuestType.Special))
+                    {
+                        <div class="quest-item" data-quest-id="@quest.QuestId" data-quest-type="@((int)quest.QuestType)">
+                            <div class="quest-content">
+                                <h4 class="quest-name">@quest.QuestTitle</h4>
+                                <p class="quest-description">@quest.QuestObjective</p>
+                                <div class="quest-meta">
+                                    <div class="quest-badges">
+                                        <span class="difficulty-badge difficulty-@quest.Difficulty.ToString().ToLower()">
+                                            @quest.Difficulty
+                                        </span>
+                                        <span class="type-badge type-special">Special</span>
+                                    </div>
+                                    <div class="quest-rewards">
+                                        <span class="reward-tokens">@quest.TokenReward T</span>
+                                        <span class="reward-xp">@quest.XpReward XP</span>
+                                    </div>
+                                </div>
+                                <div class="quest-progress">
+                                    <div class="progress-info">
+                                        <span>@quest.CurrentProgress / @quest.TargetValue</span>
+                                        <span>@quest.ProgressPercentage%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: @quest.ProgressPercentage%"></div>
+                                    </div>
+                                </div>
+                                @if (quest.IsCompleted && !quest.IsClaimed)
+                                {
+                                    <button class="claim-button active claim-reward-btn" data-quest-id="@quest.QuestId">
+                                        Claim Reward
+                                    </button>
+                                }
+                                else if (quest.IsClaimed)
+                                {
+                                    <button class="claim-button completed" disabled>
+                                        Claimed
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="claim-button disabled" disabled>
+                                        In Progress
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="no-quests">
+                        <p>No active special quests</p>
+                        <button class="generate-quest-btn" onclick="generateSpecialQuest()">Generate Special Quest</button>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Achievement Card -->
+        <div class="bento-card achievement-card">
+            <div class="achievement-content">
+                <div class="profile-section">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
+                         alt="Profile"
+                         class="profile-avatar">
+                    <div class="achievement-info">
+                        @if (Model.RecentAchievements.Any())
+                        {
+                            var latestAchievement = Model.RecentAchievements.First();
+                            <h3 class="achievement-title righteous-font">@latestAchievement.Name</h3>
+                            <p class="achievement-subtitle">@latestAchievement.Description</p>
+                        }
+                        else
+                        {
+                            <h3 class="achievement-title righteous-font">Getting Started</h3>
+                            <p class="achievement-subtitle">Complete your first quest to earn achievements!</p>
+                        }
+                    </div>
+                </div>
+
+                <div class="achievement-icon">
+                    <img src="~/items/first_uploaded.png" alt="Achievement Icon" />
+                </div>
+
+                <div class="streak-info">
+                    @if (Model.ActiveStreaks.Any())
+                    {
+                        var longestStreak = Model.ActiveStreaks.OrderByDescending(s => s.CurrentStreak).First();
+                        <h4 class="streak-title righteous-font">@longestStreak.StreakName</h4>
+                        <p class="streak-description">@longestStreak.CurrentStreak @longestStreak.StreakUnit streak!</p>
+                    }
+                    else
+                    {
+                        <h4 class="streak-title righteous-font">Start Your Streak</h4>
+                        <p class="streak-description">Check in daily to build your streak!</p>
+                    }
+                </div>
+
+                <div class="achievement-stats">
+                    <div class="stat-item">
+                        <span class="stat-value">@((Model?.Stats?.TokenBalance ?? 0).ToString("N0"))</span>
+                        <span class="stat-label">Tokens</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">@(Model?.Stats?.AchievementsEarned ?? 0)/@(Model?.Stats?.TotalAchievements ?? 0)</span>
+                        <span class="stat-label">Achievements</span>
+                    </div>
+                </div>
+
+                <div class="achievement-links">
+                    <a href="@Url.Action("ViewAllAchievements", "Quest")" class="achievement-link">
+                        <span>View All Achievements</span>
+                        <span>→</span>
+                    </a>
+                    <a href="@Url.Action("ViewAllStreaks", "Quest")" class="achievement-link">
+                        <span>View Streaks</span>
+                        <span>→</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Browse More Quests Card -->
+        <div class="bento-card browse-card">
+            <a href="@Url.Action("Available", "Quest")" class="browse-link">
+                <div class="browse-content">
+                    <div class="browse-icon">
+                        <i class='bx bx-search-alt-2 bx-lg'></i>
+                    </div>
+                    <h3 class="righteous-font">Browse More Quests</h3>
+                    <p>Discover weekly and special quests</p>
+                    <div class="browse-arrow">
+                        <i class='bx bx-right-arrow-alt bx-md'></i>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="~/js/QuestPage.js"></script>
+
+@if (Model != null)
+{
+    <script>
+        window.questModel = @Html.Raw(Json.Serialize(Model));
+        console.log("QuestModel loaded:", window.questModel);
+    </script>
+}

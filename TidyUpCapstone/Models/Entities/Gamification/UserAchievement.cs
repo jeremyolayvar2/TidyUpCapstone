@@ -13,8 +13,7 @@ namespace TidyUpCapstone.Models.Entities.Gamification
         [Required]
         public int AchievementId { get; set; }
 
-        public DateTime EarnedDate { get; set; } = DateTime.UtcNow;
-
+        public DateTime? EarnedDate { get; set; } = null;
         public int Progress { get; set; } = 0;
 
         public bool IsNotified { get; set; } = false;
@@ -22,6 +21,10 @@ namespace TidyUpCapstone.Models.Entities.Gamification
         // Navigation properties
         [ForeignKey("UserId")]
         public virtual AppUser User { get; set; } = null!;
+
+        // Add this property to your existing UserAchievement class
+        public bool IsUnlocked { get; set; } = false;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         [ForeignKey("AchievementId")]
         public virtual Achievement Achievement { get; set; } = null!;
