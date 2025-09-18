@@ -44,7 +44,7 @@
 
                     <ul id="tab-container">
                         <li>
-                            <a href="/Home/Main" class="nav-link" data-page="home">
+                            <a href="@Url.Action("Main", "Home")" class="nav-link" data-page="home">
                                 <img class="icon" alt="Home" src="~/assets/VectorHome.svg" />
                                 <span>Home</span>
                             </a>
@@ -104,13 +104,13 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="nav-link" data-page="quests">
+                            <a href="@Url.Action("QuestPage", "Home")" class="nav-link" data-page="quests">
                                 <img class="icon" alt="Quest/Milestone" src="~/assets/VectorQuests.svg" />
                                 <span>Quest & Milestones</span>
                             </a>
                         </li>
                         <li>
-                            <a href="/Home/SettingsPage" class="nav-link" data-page="settings">
+                            <a href="@Url.Action("SettingsPage", "Home")" class="nav-link" data-page="settings">
                                 <img class="icon" alt="Settings" src="~/assets/VectorSettings.svg" />
                                 <span>Settings</span>
                             </a>
@@ -121,12 +121,12 @@
 
             <div class="dock-outer">
                 <div class="dock-panel" id="dockPanel">
-                    <div class="dock-item" data-page="home" data-label="Home">
+                    <a href="@Url.Action("Main", "Home")" class="dock-item" data-page="home" data-label="Home" style="text-decoration: none; color: inherit;">
                         <div class="dock-icon">
                             <img src="~/assets/VectorHome.svg" />
                         </div>
                         <div class="dock-label">Home</div>
-                    </div>
+                    </a>
                     <div class="dock-item" data-label="Browse">
                         <div class="dock-icon">
                             <img src="~/assets/VectorBrowse.svg" />
@@ -181,7 +181,7 @@
                         </div>
                         <div class="dock-label">Leaderboards</div>
                     </div>
-                    <div class="dock-item" data-label="Quests/Milestone">
+                   <div class="dock-item" data-label="Quests & Milestone" onclick="window.location.href='/Home/QuestPage'">
                         <div class="dock-icon">
                             <img src="~/assets/VectorQuests.svg" />
                         </div>
@@ -207,11 +207,11 @@
                     <script src="~/js/openModal.js"></script>
                 </main>
 
-                <footer class="border-top footer text-muted mt-5">
+                @* <footer class="border-top footer text-muted mt-5">
                     <div class="container">
                         &copy; 2025 - Tidy Up - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                     </div>
-                </footer>
+                </footer> *@
             </div>
         </div>
         <script src="~/lib/jquery/dist/jquery.min.js"></script>
