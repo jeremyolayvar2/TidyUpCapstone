@@ -394,7 +394,7 @@ namespace TidyUpCapstone.Services.Implementations
                                q.IsActive)
                     .CountAsync();
 
-                if (existingDailyQuests >= 3)
+                if (existingDailyQuests >= 5)
                 {
                     _logger.LogInformation("Daily quests already exist for today");
                     return;
