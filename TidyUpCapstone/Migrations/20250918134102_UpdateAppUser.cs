@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TidyUpCapstone.Migrations
 {
     /// <inheritdoc />
-    public partial class DBSchema : Migration
+    public partial class UpdateAppUser : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -41,12 +41,26 @@ namespace TidyUpCapstone.Migrations
                 {
                     user_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    first_name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    last_name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    location = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    birthday = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    gender = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    profile_picture_url = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    verification_code = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: true),
+                    verification_code_expiry = table.Column<DateTime>(type: "datetime2", nullable: true),
                     token_balance = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
                     date_created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     managed_by_admin_id = table.Column<int>(type: "int", nullable: true),
                     admin_notes = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     last_login = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    language = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    timezone = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    high_contrast = table.Column<bool>(type: "bit", nullable: false),
+                    large_text = table.Column<bool>(type: "bit", nullable: false),
+                    reduce_motion = table.Column<bool>(type: "bit", nullable: false),
+                    screen_reader = table.Column<bool>(type: "bit", nullable: false),
                     username = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),

@@ -101,6 +101,8 @@ namespace TidyUpCapstone.Data
                 entity.Property(e => e.AdminNotes).HasColumnName("admin_notes");
                 entity.Property(e => e.Status).HasColumnName("status");
                 entity.Property(e => e.LastLogin).HasColumnName("last_login");
+                entity.Property(e => e.FirstName).HasColumnName("first_name");
+                entity.Property(e => e.LastName).HasColumnName("last_name");
             });
 
             builder.Entity<IdentityRole<int>>().ToTable("AspNetRoles");

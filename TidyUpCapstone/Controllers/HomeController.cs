@@ -37,10 +37,25 @@ namespace TidyUpCapstone.Controllers
             return View();
         }
 
+        [AllowAnonymous]
+        //[Authorize]
+        //[Authorize]
         public async Task<IActionResult> Main()
         {
             try
             {
+                var currentUser = await _userManager.GetUserAsync(User);
+
+                // Handle null user case properly
+                if (currentUser != null)
+                {
+                    _logger.LogInformation("User {UserId} accessed Main page successfully", currentUser.Id);
+                }
+                else
+                {
+                    _logger.LogInformation("Anonymous user accessed Main page");
+                }
+
                 _logger.LogInformation("Loading main page data...");
 
                 // Load categories from database
@@ -123,9 +138,12 @@ namespace TidyUpCapstone.Controllers
                     TotalItems = items.Count,
                 };
 
-                // Set ViewBag data for the view
-                ViewBag.CurrentUserTokenBalance = 0; // Replace with actual logic
+                // Set ViewBag data for the view - Handle null user case
+                ViewBag.CurrentUserTokenBalance = currentUser?.TokenBalance ?? 0;
                 ViewBag.CurrentUserAvatar = "/assets/default-avatar.svg";
+                ViewBag.UserName = currentUser?.UserName ?? "Anonymous";
+                ViewBag.FirstName = currentUser?.FirstName ?? "Guest";
+                ViewBag.LastName = currentUser?.LastName ?? "";
 
                 return View(viewModel);
             }
@@ -140,6 +158,13 @@ namespace TidyUpCapstone.Controllers
                     Categories = GetFallbackCategories(),
                     Conditions = GetFallbackConditions()
                 };
+
+                // Set fallback ViewBag data
+                ViewBag.CurrentUserTokenBalance = 0;
+                ViewBag.CurrentUserAvatar = "/assets/default-avatar.svg";
+                ViewBag.UserName = "Anonymous";
+                ViewBag.FirstName = "Guest";
+                ViewBag.LastName = "";
 
                 return View(fallbackViewModel);
             }

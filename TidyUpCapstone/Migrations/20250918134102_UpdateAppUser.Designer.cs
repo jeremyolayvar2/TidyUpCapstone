@@ -12,8 +12,8 @@ using TidyUpCapstone.Data;
 namespace TidyUpCapstone.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250916151426_DBSchema")]
-    partial class DBSchema
+    [Migration("20250918134102_UpdateAppUser")]
+    partial class UpdateAppUser
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2123,6 +2123,10 @@ namespace TidyUpCapstone.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("admin_notes");
 
+                    b.Property<DateTime?>("Birthday")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("birthday");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -2139,9 +2143,43 @@ namespace TidyUpCapstone.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<string>("FirstName")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("first_name");
+
+                    b.Property<string>("Gender")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("gender");
+
+                    b.Property<bool>("HighContrast")
+                        .HasColumnType("bit")
+                        .HasColumnName("high_contrast");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)")
+                        .HasColumnName("language");
+
+                    b.Property<bool>("LargeText")
+                        .HasColumnType("bit")
+                        .HasColumnName("large_text");
+
                     b.Property<DateTime?>("LastLogin")
                         .HasColumnType("datetime2")
                         .HasColumnName("last_login");
+
+                    b.Property<string>("LastName")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("last_name");
+
+                    b.Property<string>("Location")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("location");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -2171,6 +2209,19 @@ namespace TidyUpCapstone.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<string>("ProfilePictureUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("profile_picture_url");
+
+                    b.Property<bool>("ReduceMotion")
+                        .HasColumnType("bit")
+                        .HasColumnName("reduce_motion");
+
+                    b.Property<bool>("ScreenReader")
+                        .HasColumnType("bit")
+                        .HasColumnName("screen_reader");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -2179,6 +2230,12 @@ namespace TidyUpCapstone.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("status");
+
+                    b.Property<string>("Timezone")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("timezone");
 
                     b.Property<decimal>("TokenBalance")
                         .HasColumnType("decimal(10,2)")
@@ -2191,6 +2248,15 @@ namespace TidyUpCapstone.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)")
                         .HasColumnName("username");
+
+                    b.Property<string>("VerificationCode")
+                        .HasMaxLength(6)
+                        .HasColumnType("nvarchar(6)")
+                        .HasColumnName("verification_code");
+
+                    b.Property<DateTime?>("VerificationCodeExpiry")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("verification_code_expiry");
 
                     b.HasKey("Id");
 

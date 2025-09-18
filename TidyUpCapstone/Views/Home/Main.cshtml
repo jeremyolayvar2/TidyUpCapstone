@@ -4,6 +4,7 @@
 <link href="https://cdn.jsdelivr.net/npm/iconsax@1.0.0-alpha2/dist/css/iconsax.css" rel="stylesheet">
 <link rel="stylesheet" href="~/css/instagram-animations.css" />
 <link rel="stylesheet" href="~/css/posting-styles.css" />
+<link rel="stylesheet" href="~/css/EditCommunityPost.css" />
 
 @{
     ViewBag.HideNavigation = false;
@@ -22,376 +23,6 @@
     }
 }
 
-<style>
-    /* Enhanced Dropdown Animations & Interactions */
-    .dropdown-menu {
-        position: relative;
-        display: inline-block;
-    }
-
-    .dropdown-btn {
-        background: rgba(255, 255, 255, 0.9);
-        border: 2px solid transparent;
-        cursor: pointer;
-        padding: 10px;
-        border-radius: 12px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        width: 44px;
-        height: 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-        .dropdown-btn:hover {
-            background: rgba(107, 144, 128, 0.1);
-            border-color: rgba(107, 144, 128, 0.3);
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(107, 144, 128, 0.15);
-        }
-
-        .dropdown-btn:active {
-            transform: scale(0.95);
-        }
-
-        .dropdown-btn img {
-            width: 20px;
-            height: 20px;
-            transition: transform 0.3s ease;
-            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
-        }
-
-    .dropdown-menu.active .dropdown-btn {
-        background: var(--primary-color);
-        border-color: var(--primary-color);
-        transform: scale(1.05);
-    }
-
-        .dropdown-menu.active .dropdown-btn img {
-            filter: brightness(0) invert(1);
-            transform: rotate(90deg);
-        }
-
-    .dropdown-content {
-        display: none;
-        position: absolute;
-        right: 0;
-        top: calc(100% + 8px);
-        z-index: 1000;
-        background: white;
-        min-width: 180px;
-        border-radius: 16px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        border: 1px solid rgba(107, 144, 128, 0.1);
-        overflow: hidden;
-        backdrop-filter: blur(20px);
-        transform: scale(0.95) translateY(-10px);
-        opacity: 0;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .dropdown-menu.active .dropdown-content {
-        display: block;
-        transform: scale(1) translateY(0);
-        opacity: 1;
-        animation: dropdownSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    @@keyframes dropdownSlideIn {
-        0%
-
-    {
-        opacity: 0;
-        transform: scale(0.9) translateY(-15px);
-    }
-
-    50% {
-        opacity: 0.8;
-        transform: scale(1.02) translateY(-2px);
-    }
-
-    100% {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
-
-    }
-
-    .dropdown-item {
-        color: var(--text-color);
-        padding: 16px 20px;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        font-size: 14px;
-        font-weight: 500;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border: none;
-        background: none;
-        width: 100%;
-        text-align: left;
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
-    }
-
-        .dropdown-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(107, 144, 128, 0.1), transparent);
-            transition: left 0.6s ease;
-        }
-
-        .dropdown-item:hover::before {
-            left: 100%;
-        }
-
-        .dropdown-item:hover {
-            background: rgba(107, 144, 128, 0.08);
-            color: var(--primary-color);
-            transform: translateX(4px);
-        }
-
-        .dropdown-item.delete:hover {
-            background: rgba(244, 67, 54, 0.08);
-            color: #f44336;
-        }
-
-        .dropdown-item:not(:last-child) {
-            border-bottom: 1px solid rgba(107, 144, 128, 0.05);
-        }
-
-        .dropdown-item i {
-            font-size: 16px;
-            width: 20px;
-            text-align: center;
-            transition: transform 0.3s ease;
-        }
-
-        .dropdown-item:hover i {
-            transform: scale(1.1);
-        }
-
-    /* Enhanced Post Cards */
-    .item-post {
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
-    }
-
-        .item-post::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(107, 144, 128, 0.05), transparent);
-            transition: left 0.8s ease;
-            z-index: 1;
-        }
-
-        .item-post:hover::before {
-            left: 100%;
-        }
-
-        .item-post:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(107, 144, 128, 0.15);
-        }
-
-    /* Enhanced Status Badges */
-    .status-badge {
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        position: relative;
-        overflow: hidden;
-        border: 2px solid transparent;
-        backdrop-filter: blur(10px);
-    }
-
-        .status-badge::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.8s ease;
-        }
-
-        .status-badge:hover::before {
-            left: 100%;
-        }
-
-        .status-badge.available {
-            background: linear-gradient(135deg, #d4edda, #c3e6cb);
-            color: #155724;
-            border-color: #28a745;
-        }
-
-        .status-badge.claimed {
-            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
-            color: #856404;
-            border-color: #ffc107;
-        }
-
-        .status-badge.expired {
-            background: linear-gradient(135deg, #f8d7da, #f1aeb5);
-            color: #721c24;
-            border-color: #dc3545;
-        }
-
-    /* Enhanced Interested Button */
-    .interested-btn {
-        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-        border: none;
-        border-radius: 16px;
-        color: white;
-        font-weight: 600;
-        padding: 14px 24px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 8px 24px rgba(107, 144, 128, 0.3);
-    }
-
-        .interested-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.6s ease;
-        }
-
-        .interested-btn:hover::before {
-            left: 100%;
-        }
-
-        .interested-btn:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 12px 36px rgba(107, 144, 128, 0.4);
-        }
-
-        .interested-btn:active {
-            transform: translateY(-1px) scale(1.02);
-        }
-
-    /* Enhanced Filter Tabs */
-    .filter-tab {
-        position: relative;
-        overflow: hidden;
-    }
-
-        .filter-tab::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            width: 0;
-            height: 3px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            border-radius: 3px;
-            transform: translateX(-50%);
-            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .filter-tab.active::after {
-            width: 80%;
-        }
-
-    /* Enhanced Avatar Styling */
-    .listing-container1-child1 img[alt="person"] {
-        border: 3px solid var(--primary-color);
-        box-shadow: 0 4px 12px rgba(107, 144, 128, 0.2);
-        transition: all 0.3s ease;
-    }
-
-        .listing-container1-child1 img[alt="person"]:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(107, 144, 128, 0.3);
-        }
-
-    /* Enhanced Loading States */
-    .loading-state {
-        position: relative;
-        overflow: hidden;
-    }
-
-        .loading-state::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
-            animation: shimmer 1.5s infinite;
-            z-index: 1;
-        }
-
-    @@keyframes shimmer {
-        0%
-
-    {
-        left: -100%;
-    }
-
-    100% {
-        left: 100%;
-    }
-
-    }
-
-    /* Mobile Responsiveness */
-    @@media (max-width: 768px) {
-        .dropdown-btn
-
-    {
-        width: 40px;
-        height: 40px;
-        padding: 8px;
-    }
-
-    .dropdown-content {
-        min-width: 160px;
-        right: 5px;
-    }
-
-    .dropdown-item {
-        padding: 14px 16px;
-        font-size: 14px;
-    }
-
-    .status-badge {
-        padding: 6px 12px;
-        font-size: 11px;
-    }
-
-    .interested-btn {
-        padding: 12px 20px;
-        font-size: 14px;
-    }
-
-    }
-</style>
-
 <script>
     window.currentUserId = '@currentUserId';
     window.currentUserName = '@currentUserName';
@@ -408,6 +39,17 @@
 <form id="antiForgeryForm" style="display:none;">
     @Html.AntiForgeryToken()
 </form>
+
+<!-- EXTERNAL DROPDOWN SYSTEM - Completely outside the layout -->
+<div id="external-dropdown-system">
+    <!-- Backdrop -->
+    <div id="dropdown-backdrop" class="dropdown-backdrop" style="display: none;"></div>
+
+    <!-- Dropdown Container -->
+    <div id="dropdown-container" class="external-dropdown-container" style="display: none;">
+        <!-- Content will be dynamically populated -->
+    </div>
+</div>
 
 <!-- Enhanced Filter Tabs -->
 <div class="filter-tabs-container">
@@ -438,10 +80,10 @@
                 </div>
                 <div class="post-input-container">
                     <textarea class="post-input"
-                          placeholder="Share your clutter story..."
-                          id="communityPostInput"
-                          maxlength="1000"
-                          rows="1"></textarea>
+                              placeholder="Share your clutter story..."
+                              id="communityPostInput"
+                              maxlength="1000"
+                              rows="1"></textarea>
                     <div class="post-actions">
                         <div class="post-options">
                             <button type="button" class="post-option-btn" id="addImageBtn">
@@ -501,32 +143,17 @@
                                 }
                             }
 
-                            <!-- Enhanced Dropdown Menu -->
-                            <div class="dropdown-menu">
-                                <button class="dropdown-btn" onclick="toggleDropdown(this)" aria-label="More options">
-                                    <img src="~/assets/dot-horiz.svg" alt="more options" />
-                                </button>
-                                <div class="dropdown-content">
-                                    @if (isItemOwner)
-                                    {
-                                        <button class="dropdown-item" onclick="if(typeof openEditModal !== 'undefined') openEditModal(@item.ItemId)">
-                                            <i class='bx bx-edit'></i>
-                                            Edit
-                                        </button>
-                                        <button class="dropdown-item delete" onclick="deleteItem(@item.ItemId)">
-                                            <i class='bx bx-trash'></i>
-                                            Delete
-                                        </button>
-                                    }
-                                    else
-                                    {
-                                        <button class="dropdown-item report" onclick="reportItem(@item.ItemId)">
-                                            <i class='bx bx-flag'></i>
-                                            Report
-                                        </button>
-                                    }
-                                </div>
-                            </div>
+                            <button class="external-dropdown-btn"
+                                    data-item-id="@item.ItemId"
+                                    data-is-owner="@isItemOwner.ToString().ToLower()"
+                                    onclick="showExternalDropdown(this, event)"
+                                    aria-label="More options"
+                                    role="button"
+                                    tabindex="0">
+                                <img src="~/assets/dot-horiz.svg" alt="more options" />
+                            </button>
+
+
                         </div>
 
                         <div class="listing-container2">
@@ -638,60 +265,6 @@
         </div>
     </div>
 </div>
-
-<!-- CHAT -->
-@if (User.Identity.IsAuthenticated)
-{
-    <button class="new-message-btn" id="newMessageBtn" aria-label="New Message" title="New Message">
-        <span>Messages</span>
-    </button>
-
-    <div class="messaging-overlay">
-        <!-- App Container (Messages Panel) -->
-        <div class="app-container" role="application" aria-label="Instagram Messages Panel">
-            <header>
-                <h1>Messages</h1>
-                <div class="header-controls">
-                    <button class="icon-btn" id="expandBtn" title="Expand">
-                        <span class="material-symbols-outlined">open_in_full</span>
-                    </button>
-                    <button class="icon-btn" id="closeAppBtn" title="Close">
-                        <span class="material-symbols-outlined">close</span>
-                    </button>
-                </div>
-            </header>
-            <main>
-                <div class="messages-list" tabindex="0" aria-label="Messages list" role="list">
-                </div>
-            </main>
-        </div>
-
-        <div class="chat-window">
-            <div class="header-chat">
-                <div class="header-chat-child1">
-                    <h2>Item Owner</h2>
-                    <p>Active 24m ago</p>
-                </div>
-                <button class="icon-btn" id="closeChatBtn" title="Back to Messages">
-                    <span class="material-symbols-outlined">arrow_back</span>
-                </button>
-            </div>
-            <div class="message-log">
-                @* Messages will be loaded dynamically *@
-            </div>
-
-            <div class="message-input">
-                <input type="text" id="chatMessageInput" placeholder="Message..." />
-                <button type="button" id="sendMessage" class="send-btn" aria-label="Send message">
-                    <span class="material-symbols-outlined">send</span>
-                </button>
-            </div>
-
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
-            <script src="~/js/SignalRConnection.js"></script>
-        </div>
-    </div>
-}
 
 <!-- Token wallet modal -->
 @if (User.Identity.IsAuthenticated)
@@ -829,12 +402,12 @@
                     <div id="editCategoryContainer">
                         <label>Category</label>
                         <div class="read-only-field" id="editCategoryDisplay" style="
-                    padding: 12px;
-                    background: #f8f9fa;
-                    border: 1px solid #dee2e6;
-                    border-radius: 4px;
-                    color: #6c757d;
-                    font-weight: 500;">
+                            padding: 12px;
+                            background: #f8f9fa;
+                            border: 1px solid #dee2e6;
+                            border-radius: 4px;
+                            color: #6c757d;
+                            font-weight: 500;">
                             <!-- Will be populated by JavaScript -->
                         </div>
                         <input type="hidden" id="editCategoryInput" name="CategoryId" />
@@ -844,12 +417,12 @@
                     <div id="editConditionContainer">
                         <label>Condition</label>
                         <div class="read-only-field" id="editConditionDisplay" style="
-                    padding: 12px;
-                    background: #f8f9fa;
-                    border: 1px solid #dee2e6;
-                    border-radius: 4px;
-                    color: #6c757d;
-                    font-weight: 500;">
+                            padding: 12px;
+                            background: #f8f9fa;
+                            border: 1px solid #dee2e6;
+                            border-radius: 4px;
+                            color: #6c757d;
+                            font-weight: 500;">
                             <!-- Will be populated by JavaScript -->
                         </div>
                         <input type="hidden" id="editConditionInput" name="ConditionId" />
@@ -937,10 +510,10 @@
                          alt="Your avatar" class="new-comment-avatar">
                     <div class="new-comment-input-wrapper">
                         <textarea class="new-comment-input"
-                              placeholder="Write a comment..."
-                              rows="1"
-                              id="newCommentInput"
-                              maxlength="500"></textarea>
+                                  placeholder="Write a comment..."
+                                  rows="1"
+                                  id="newCommentInput"
+                                  maxlength="500"></textarea>
                         <button class="send-comment-btn" id="sendCommentBtn" disabled>
                             <i class='bx bx-send'></i>
                         </button>
@@ -980,61 +553,6 @@
             return;
         }
 
-        // Enhanced dropdown functionality
-        window.toggleDropdown = function(button) {
-            const dropdown = button.closest('.dropdown-menu');
-            const isActive = dropdown.classList.contains('active');
-
-            // Close all other dropdowns first
-            document.querySelectorAll('.dropdown-menu.active').forEach(menu => {
-                if (menu !== dropdown) {
-                    menu.classList.remove('active');
-                }
-            });
-
-            // Toggle current dropdown
-            if (!isActive) {
-                dropdown.classList.add('active');
-                button.setAttribute('aria-expanded', 'true');
-            } else {
-                dropdown.classList.remove('active');
-                button.setAttribute('aria-expanded', 'false');
-            }
-        };
-
-        // Enhanced click outside handler
-        document.addEventListener('click', function(event) {
-            if (!event.target.closest('.dropdown-menu')) {
-                document.querySelectorAll('.dropdown-menu.active').forEach(menu => {
-                    menu.classList.remove('active');
-                    const button = menu.querySelector('.dropdown-btn');
-                    if (button) {
-                        button.setAttribute('aria-expanded', 'false');
-                    }
-                });
-            }
-        });
-
-        // Enhanced keyboard navigation
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                document.querySelectorAll('.dropdown-menu.active').forEach(menu => {
-                    menu.classList.remove('active');
-                    const button = menu.querySelector('.dropdown-btn');
-                    if (button) {
-                        button.setAttribute('aria-expanded', 'false');
-                        button.focus();
-                    }
-                });
-            }
-        });
-
-        // Image preview functionality - Enhanced version
-        const imageInput = document.getElementById('imageInput');
-        const imagePreview = document.getElementById('imagePreview');
-        const previewImg = document.getElementById('previewImg');
-        const uploadSection = document.querySelector('.upload-section .upload-label');
-
         // Character count for text inputs
         const titleInput = document.getElementById('titleInput');
         const descriptionInput = document.getElementById('descriptionInput');
@@ -1060,7 +578,7 @@
             const category = document.getElementById('categoryInput')?.value;
             const condition = document.getElementById('conditionInput')?.value;
             const location = document.getElementById('locationInput')?.value.trim();
-            const image = imageInput?.files?.length > 0;
+            const image = document.getElementById('imageInput')?.files?.length > 0;
             const latitude = document.getElementById('Latitude')?.value;
             const longitude = document.getElementById('Longitude')?.value;
 
@@ -1085,7 +603,7 @@
 
         // Add validation listeners to all form inputs
         [titleInput, descriptionInput, document.getElementById('categoryInput'),
-         document.getElementById('conditionInput'), document.getElementById('locationInput'), imageInput]
+         document.getElementById('conditionInput'), document.getElementById('locationInput'), document.getElementById('imageInput')]
         .forEach(input => {
             if (input) {
                 input.addEventListener('change', validateForm);
