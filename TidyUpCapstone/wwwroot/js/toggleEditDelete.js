@@ -1,7 +1,15 @@
-﻿// External dropdown system - completely isolated from post layout
+﻿// Complete enhanced dropdown system - replaces toggleEditDelete.js entirely
+// Preserves all original functionality while fixing positioning and event issues
 let currentActiveButton = null;
 
-function showExternalDropdown(button) {
+function showExternalDropdown(button, event) {
+    // Prevent event bubbling to avoid post-header reactions
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+    }
+
     // Close any existing dropdown first
     hideExternalDropdown();
 
@@ -18,38 +26,49 @@ function showExternalDropdown(button) {
         return;
     }
 
-    // Calculate button position
+    // Enhanced position calculation with better viewport handling
     const buttonRect = button.getBoundingClientRect();
-    const position = calculateOptimalPosition(buttonRect, 200, 150);
+    const dropdownWidth = 200;
+    const dropdownHeight = 120; // Estimated height
 
-    // Create dropdown content based on ownership
+    const position = calculateOptimalPosition(buttonRect, dropdownWidth, dropdownHeight);
+
+    // Create dropdown content
     const dropdownContent = createDropdownContent(itemId, isOwner);
 
-    // Set up container positioning
-    container.style.position = 'fixed';
-    container.style.top = position.top + 'px';
-    container.style.left = position.left + 'px';
-    container.style.zIndex = '2100';
-    container.style.display = 'block';
-    container.style.opacity = '0';
-    container.style.transform = 'scale(0.95) translateY(-10px)';
-    container.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-    container.style.pointerEvents = 'auto';
+    // Set up container with enhanced positioning
+    container.style.cssText = `
+        position: fixed;
+        top: ${position.top}px;
+        left: ${position.left}px;
+        z-index: 99999;
+        display: block;
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        pointer-events: auto;
+        will-change: transform, opacity;
+    `;
+
     container.innerHTML = dropdownContent;
 
-    // Show backdrop
-    backdrop.style.display = 'block';
-    backdrop.style.opacity = '0';
-    backdrop.style.transition = 'opacity 0.3s ease';
+    // Show backdrop with enhanced styling
+    backdrop.style.cssText = `
+        display: block;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 99998;
+        pointer-events: auto;
+    `;
 
-    // Animate in
+    // Force reflow and animate in
     requestAnimationFrame(() => {
         backdrop.style.opacity = '1';
         container.style.opacity = '1';
         container.style.transform = 'scale(1) translateY(0)';
     });
 
-    // Set active state
+    // Set active state on button
     button.classList.add('active');
     button.style.transform = 'scale(1.05)';
     const img = button.querySelector('img');
@@ -60,10 +79,25 @@ function showExternalDropdown(button) {
 
     currentActiveButton = button;
 
-    // Add event listeners
-    backdrop.addEventListener('click', hideExternalDropdown);
-    document.addEventListener('click', handleOutsideClick);
-    document.addEventListener('keydown', handleEscapeKey);
+    // Enhanced event listeners with better cleanup
+    const hideHandler = (e) => {
+        hideExternalDropdown();
+    };
+
+    const outsideClickHandler = (e) => {
+        handleOutsideClick(e);
+    };
+
+    const keyHandler = (e) => {
+        handleEscapeKey(e);
+    };
+
+    backdrop.addEventListener('click', hideHandler, { once: true });
+    document.addEventListener('click', outsideClickHandler);
+    document.addEventListener('keydown', keyHandler);
+
+    // Store handlers for cleanup
+    container._eventHandlers = { outsideClickHandler, keyHandler };
 }
 
 function hideExternalDropdown() {
@@ -71,19 +105,22 @@ function hideExternalDropdown() {
     const container = document.getElementById('dropdown-container');
 
     if (backdrop && container) {
-        // Animate out
+        // Animate out with better timing
+        backdrop.style.transition = 'opacity 0.2s ease';
         backdrop.style.opacity = '0';
+
+        container.style.transition = 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
         container.style.opacity = '0';
-        container.style.transform = 'scale(0.95) translateY(-10px)';
+        container.style.transform = 'scale(0.95) translateY(-5px)';
 
         setTimeout(() => {
             backdrop.style.display = 'none';
             container.style.display = 'none';
             container.innerHTML = '';
-        }, 300);
+        }, 200);
     }
 
-    // Reset active button
+    // Reset active button state
     if (currentActiveButton) {
         currentActiveButton.classList.remove('active');
         currentActiveButton.style.transform = '';
@@ -94,9 +131,12 @@ function hideExternalDropdown() {
         currentActiveButton = null;
     }
 
-    // Remove event listeners
-    document.removeEventListener('click', handleOutsideClick);
-    document.removeEventListener('keydown', handleEscapeKey);
+    // Clean up event listeners
+    if (container && container._eventHandlers) {
+        document.removeEventListener('click', container._eventHandlers.outsideClickHandler);
+        document.removeEventListener('keydown', container._eventHandlers.keyHandler);
+        delete container._eventHandlers;
+    }
 }
 
 function createDropdownContent(itemId, isOwner) {
@@ -106,11 +146,11 @@ function createDropdownContent(itemId, isOwner) {
     if (isOwner) {
         return `
             <div class="external-dropdown-content">
-                <button class="${baseClasses}" onclick="handleEditItem(${itemId}); hideExternalDropdown();">
+                <button class="${baseClasses}" onclick="handleEditItem(${itemId}); hideExternalDropdown();" tabindex="0">
                     <i class="${iconClasses} bx-edit"></i>
                     Edit
                 </button>
-                <button class="${baseClasses} delete" onclick="handleDeleteItem(${itemId}); hideExternalDropdown();">
+                <button class="${baseClasses} delete" onclick="handleDeleteItem(${itemId}); hideExternalDropdown();" tabindex="0">
                     <i class="${iconClasses} bx-trash"></i>
                     Delete
                 </button>
@@ -119,7 +159,7 @@ function createDropdownContent(itemId, isOwner) {
     } else {
         return `
             <div class="external-dropdown-content">
-                <button class="${baseClasses} report" onclick="handleReportItem(${itemId}); hideExternalDropdown();">
+                <button class="${baseClasses} report" onclick="handleReportItem(${itemId}); hideExternalDropdown();" tabindex="0">
                     <i class="${iconClasses} bx-flag"></i>
                     Report
                 </button>
@@ -129,13 +169,16 @@ function createDropdownContent(itemId, isOwner) {
 }
 
 function handleOutsideClick(event) {
-    // Don't close if clicking inside the external dropdown system
-    if (event.target.closest('#external-dropdown-system')) {
+    // More precise outside click detection
+    const dropdownSystem = document.getElementById('external-dropdown-system');
+    const dropdownBtn = event.target.closest('.external-dropdown-btn');
+
+    // Don't close if clicking inside dropdown or on dropdown button
+    if (dropdownSystem && dropdownSystem.contains(event.target)) {
         return;
     }
 
-    // Don't close if clicking on an external dropdown button
-    if (event.target.closest('.external-dropdown-btn')) {
+    if (dropdownBtn) {
         return;
     }
 
@@ -144,8 +187,10 @@ function handleOutsideClick(event) {
 
 function handleEscapeKey(event) {
     if (event.key === 'Escape') {
+        event.preventDefault();
         hideExternalDropdown();
-        // Focus the button that opened the dropdown
+
+        // Return focus to button
         if (currentActiveButton) {
             currentActiveButton.focus();
         }
@@ -155,39 +200,36 @@ function handleEscapeKey(event) {
 function calculateOptimalPosition(buttonRect, dropdownWidth, dropdownHeight) {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
+    const scrollX = window.scrollX || window.pageXOffset;
+    const scrollY = window.scrollY || window.pageYOffset;
 
+    // Default position (bottom-right of button)
     let position = {
-        top: buttonRect.bottom + 8,
-        left: buttonRect.right - dropdownWidth,
+        top: buttonRect.bottom + scrollY + 8,
+        left: buttonRect.right + scrollX - dropdownWidth,
         placement: 'bottom-right'
     };
 
     // Check if dropdown fits below button
-    if (position.top + dropdownHeight > viewportHeight - 10) {
-        position.top = buttonRect.top - dropdownHeight - 8;
+    if (position.top + dropdownHeight > viewportHeight + scrollY - 20) {
+        position.top = buttonRect.top + scrollY - dropdownHeight - 8;
         position.placement = position.placement.replace('bottom', 'top');
     }
 
     // Check if dropdown fits to the right
-    if (position.left + dropdownWidth > viewportWidth - 10) {
-        position.left = buttonRect.left - 8;
+    if (position.left + dropdownWidth > viewportWidth + scrollX - 20) {
+        position.left = buttonRect.left + scrollX - 8;
         position.placement = position.placement.replace('right', 'left');
     }
 
-    // Ensure dropdown doesn't go off the left edge
-    if (position.left < 10) {
-        position.left = 10;
-    }
-
-    // Ensure dropdown doesn't go off the top edge
-    if (position.top < 10) {
-        position.top = 10;
-    }
+    // Ensure dropdown doesn't go off edges
+    position.left = Math.max(20 + scrollX, Math.min(position.left, viewportWidth + scrollX - dropdownWidth - 20));
+    position.top = Math.max(20 + scrollY, Math.min(position.top, viewportHeight + scrollY - dropdownHeight - 20));
 
     return position;
 }
 
-// Action handlers - these call your existing functions
+// Action handlers remain the same
 function handleEditItem(itemId) {
     if (typeof openEditModal !== 'undefined') {
         openEditModal(itemId);
@@ -212,17 +254,40 @@ function handleReportItem(itemId) {
     }
 }
 
-// Close dropdowns on various events
-window.addEventListener('scroll', hideExternalDropdown);
+// Enhanced event listeners with all original functionality preserved
+window.addEventListener('scroll', hideExternalDropdown, { passive: true });
 window.addEventListener('resize', hideExternalDropdown);
 window.addEventListener('orientationchange', () => {
     setTimeout(hideExternalDropdown, 100);
 });
 window.addEventListener('blur', hideExternalDropdown);
 
+// Enhanced touch handling for mobile (from original)
+let touchStartY = 0;
+let touchStartX = 0;
+
+document.addEventListener('touchstart', function (event) {
+    touchStartY = event.touches[0].clientY;
+    touchStartX = event.touches[0].clientX;
+}, { passive: true });
+
+document.addEventListener('touchmove', function (event) {
+    if (!currentActiveButton) return;
+
+    const touchY = event.touches[0].clientY;
+    const touchX = event.touches[0].clientX;
+    const deltaY = Math.abs(touchY - touchStartY);
+    const deltaX = Math.abs(touchX - touchStartX);
+
+    // If significant movement detected, close dropdown
+    if (deltaY > 50 || deltaX > 50) {
+        hideExternalDropdown();
+    }
+}, { passive: true });
+
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function () {
-    // Ensure external dropdown system exists
+    // Create or ensure external dropdown system exists
     let dropdownSystem = document.getElementById('external-dropdown-system');
     if (!dropdownSystem) {
         dropdownSystem = document.createElement('div');
@@ -234,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.body.appendChild(dropdownSystem);
     }
 
-    // Add keyboard navigation support
+    // Enhanced keyboard navigation
     document.addEventListener('keydown', function (event) {
         const container = document.getElementById('dropdown-container');
         if (!container || container.style.display === 'none') return;
@@ -264,45 +329,28 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Add ARIA attributes to external dropdown buttons
+    // Enhanced ARIA attributes and event handlers
     document.querySelectorAll('.external-dropdown-btn').forEach(button => {
         button.setAttribute('aria-haspopup', 'true');
         button.setAttribute('aria-expanded', 'false');
+        button.setAttribute('role', 'button');
+
+        // Add proper click handler with event object (replaces onclick)
+        button.addEventListener('click', function (event) {
+            showExternalDropdown(this, event);
+        });
     });
 });
 
-// Touch handling for mobile
-let touchStartY = 0;
-let touchStartX = 0;
-
-document.addEventListener('touchstart', function (event) {
-    touchStartY = event.touches[0].clientY;
-    touchStartX = event.touches[0].clientX;
-}, { passive: true });
-
-document.addEventListener('touchmove', function (event) {
-    if (!currentActiveButton) return;
-
-    const touchY = event.touches[0].clientY;
-    const touchX = event.touches[0].clientX;
-    const deltaY = Math.abs(touchY - touchStartY);
-    const deltaX = Math.abs(touchX - touchStartX);
-
-    // If significant movement detected, close dropdown
-    if (deltaY > 50 || deltaX > 50) {
-        hideExternalDropdown();
+// Debug function (preserved from original - remove in production)
+function debugExternalDropdown(message, data = {}) {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        console.log(`[External Dropdown Debug] ${message}`, data);
     }
-}, { passive: true });
+}
 
 // Export functions for global access
 if (typeof window !== 'undefined') {
     window.showExternalDropdown = showExternalDropdown;
     window.hideExternalDropdown = hideExternalDropdown;
-}
-
-// Debug function (remove in production)
-function debugExternalDropdown(message, data = {}) {
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        console.log(`[External Dropdown Debug] ${message}`, data);
-    }
 }

@@ -1246,6 +1246,10 @@ async function deletePost(postId) {
     }
 }
 
+// ============================================================================
+// IMPROVED EDIT POST FUNCTION WITH TAILWIND UI
+// ============================================================================
+
 function editPost(postId) {
     const postElement = document.querySelector(`div.community-post[data-post-id="${postId}"]`);
     if (!postElement) {
@@ -1260,66 +1264,184 @@ function editPost(postId) {
     const currentImageUrl = imageElement ? imageElement.src : null;
 
     const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm p-4';
     modal.innerHTML = `
-        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-                    background: rgba(0,0,0,0.7); z-index: 10000; display: flex; 
-                    align-items: center; justify-content: center;">
-            <div style="background: white; padding: 30px; border-radius: 15px; 
-                       max-width: 600px; width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-                       max-height: 80vh; overflow-y: auto;">
-                <h3 style="margin: 0 0 20px 0;">Edit Community Post ${postId}</h3>
-                
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: bold;">Post Content:</label>
-                    <textarea id="editText-${postId}" style="width: 100%; height: 120px; 
-                             padding: 15px; border: 2px solid #ddd; border-radius: 8px; 
-                             font-size: 16px; resize: vertical; box-sizing: border-box;">${currentContent}</textarea>
-                </div>
-                
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: bold;">Post Image:</label>
-                    
-                    <div id="currentImageContainer-${postId}" style="margin-bottom: 15px; ${currentImageUrl ? '' : 'display: none;'}">
-                        <div style="position: relative; display: inline-block;">
-                            <img id="currentImage-${postId}" src="${currentImageUrl || ''}" 
-                                 style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 2px solid #ddd;">
-                            <button type="button" onclick="removeCurrentImage(${postId})" 
-                                   style="position: absolute; top: -8px; right: -8px; 
-                                          background: #dc3545; color: white; border: none; 
-                                          border-radius: 50%; width: 24px; height: 24px; 
-                                          cursor: pointer; font-size: 14px;">×</button>
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-95 opacity-0 animate-in" id="editModal-${postId}">
+            <!-- Header -->
+            <div class="relative bg-gradient-to-r from-emerald-500 to-teal-500 rounded-t-2xl p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                            <i class="bx bx-edit text-white text-xl"></i>
                         </div>
-                        <p style="margin: 8px 0 0 0; font-size: 12px; color: #666;">Current image - click × to remove</p>
-                    </div>
-                    
-                    <div>
-                        <input type="file" id="newImageInput-${postId}" accept="image/*" 
-                               style="margin-bottom: 10px;" onchange="previewNewImage(${postId})">
-                        <div id="newImagePreview-${postId}" style="display: none; margin-top: 10px;">
-                            <img id="newImagePreviewImg-${postId}" style="max-width: 100%; max-height: 200px; 
-                                 border-radius: 8px; border: 2px solid #28a745;">
-                            <p style="margin: 8px 0 0 0; font-size: 12px; color: #28a745;">New image preview</p>
+                        <div>
+                            <h2 class="text-2xl font-bold text-white">Edit Post</h2>
+                            <p class="text-emerald-100 text-sm">Update your community post</p>
                         </div>
                     </div>
-                </div>
-                
-                <div style="text-align: right;">
                     <button onclick="closeEditModal(${postId})" 
-                           style="padding: 12px 25px; margin-right: 10px; background: #6c757d; 
-                                  color: white; border: none; border-radius: 6px; cursor: pointer;">Cancel</button>
+                            class="w-10 h-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full flex items-center justify-center transition-all duration-200 backdrop-blur-sm group">
+                        <i class="bx bx-x text-white text-xl group-hover:rotate-90 transition-transform duration-200"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="p-6 space-y-6">
+                <!-- Current Image Display -->
+                ${currentImageUrl ? `
+                <div class="relative">
+                    <label class="block text-sm font-semibold text-gray-700 mb-3">Current Image</label>
+                    <div class="relative group rounded-xl overflow-hidden bg-gray-50 border-2 border-gray-200">
+                        <img id="currentImage-${postId}" src="${currentImageUrl}" 
+                             class="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105" 
+                             alt="Current post image" />
+                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                            <button type="button" onclick="removeCurrentImage(${postId})" 
+                                    class="opacity-0 group-hover:opacity-100 bg-red-500 hover:bg-red-600 text-white p-3 rounded-full transition-all duration-200 transform scale-90 hover:scale-100 shadow-lg">
+                                <i class="bx bx-trash text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+
+                <!-- Content Editor -->
+                <div class="space-y-4">
+                    <label class="block text-sm font-semibold text-gray-700">Post Content</label>
+                    <div class="relative">
+                        <textarea id="editText-${postId}" 
+                                  class="w-full min-h-32 p-4 border-2 border-gray-300 rounded-xl focus:border-emerald-500 focus:ring-0 resize-none transition-all duration-200 bg-gray-50 focus:bg-white"
+                                  placeholder="Share your thoughts..."
+                                  maxlength="1000">${currentContent}</textarea>
+                        <div class="absolute bottom-3 right-3 text-xs text-gray-400 bg-white px-2 py-1 rounded-md shadow-sm" id="charCounter-${postId}">
+                            <span id="currentCount-${postId}">${currentContent.length}</span>/1000
+                        </div>
+                    </div>
+                </div>
+
+                <!-- New Image Upload -->
+                <div class="space-y-4">
+                    <label class="block text-sm font-semibold text-gray-700">Update Image (Optional)</label>
+                    <div class="relative">
+                        <input type="file" id="newImageInput-${postId}" accept="image/*" 
+                               class="hidden" onchange="previewNewImage(${postId})">
+                        <label for="newImageInput-${postId}" 
+                               class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 hover:border-emerald-400 transition-all duration-200 group">
+                            <div class="flex flex-col items-center justify-center space-y-2">
+                                <i class="bx bx-cloud-upload text-3xl text-gray-400 group-hover:text-emerald-500 transition-colors duration-200"></i>
+                                <p class="text-sm text-gray-500 group-hover:text-emerald-600 transition-colors duration-200">
+                                    <span class="font-semibold">Click to upload</span> or drag and drop
+                                </p>
+                                <p class="text-xs text-gray-400">PNG, JPG, GIF up to 10MB</p>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <!-- New Image Preview -->
+                    <div id="newImagePreview-${postId}" class="hidden">
+                        <div class="relative rounded-xl overflow-hidden bg-gray-50 border-2 border-emerald-300">
+                            <img id="newImagePreviewImg-${postId}" class="w-full h-48 object-cover" />
+                            <div class="absolute top-3 right-3">
+                                <button type="button" onclick="clearNewImage(${postId})"
+                                        class="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-all duration-200 shadow-lg">
+                                    <i class="bx bx-x text-sm"></i>
+                                </button>
+                            </div>
+                            <div class="absolute bottom-3 left-3 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                                New Image
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="bg-gray-50 px-6 py-4 rounded-b-2xl flex items-center justify-between border-t border-gray-200">
+                <div class="flex items-center space-x-2 text-sm text-gray-500">
+                    <i class="bx bx-info-circle"></i>
+                    <span>Changes will be saved immediately</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="closeEditModal(${postId})" 
+                            class="px-6 py-2.5 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 hover:border-gray-400 transition-all duration-200 font-semibold">
+                        Cancel
+                    </button>
                     <button onclick="savePostEdit(${postId})" 
-                           style="padding: 12px 25px; background: #007bff; color: white; 
-                                  border: none; border-radius: 6px; cursor: pointer;">Save Changes</button>
+                            class="px-8 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center space-x-2">
+                        <i class="bx bx-save text-lg"></i>
+                        <span>Save Changes</span>
+                    </button>
                 </div>
             </div>
         </div>
     `;
+
     document.body.appendChild(modal);
+
+    // Animate modal in
+    setTimeout(() => {
+        const modalContent = modal.querySelector(`#editModal-${postId}`);
+        modalContent.classList.remove('scale-95', 'opacity-0');
+        modalContent.classList.add('scale-100', 'opacity-100');
+    }, 10);
+
+    // Setup character counter
+    const textarea = modal.querySelector(`#editText-${postId}`);
+    const charCounter = modal.querySelector(`#currentCount-${postId}`);
+
+    textarea.addEventListener('input', function () {
+        const currentLength = this.value.length;
+        charCounter.textContent = currentLength;
+
+        // Update counter color based on length
+        if (currentLength > 900) {
+            charCounter.parentElement.className = 'absolute bottom-3 right-3 text-xs text-red-500 bg-red-50 px-2 py-1 rounded-md shadow-sm font-semibold';
+        } else if (currentLength > 800) {
+            charCounter.parentElement.className = 'absolute bottom-3 right-3 text-xs text-yellow-600 bg-yellow-50 px-2 py-1 rounded-md shadow-sm font-semibold';
+        } else {
+            charCounter.parentElement.className = 'absolute bottom-3 right-3 text-xs text-gray-400 bg-white px-2 py-1 rounded-md shadow-sm';
+        }
+
+        // Auto-resize textarea
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+    });
+
+    // Focus on textarea
+    setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+    }, 300);
+
+    // Close on backdrop click
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) {
+            closeEditModal(postId);
+        }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function escapeHandler(e) {
+        if (e.key === 'Escape') {
+            closeEditModal(postId);
+            document.removeEventListener('keydown', escapeHandler);
+        }
+    });
 }
 
 function removeCurrentImage(postId) {
-    document.getElementById(`currentImageContainer-${postId}`).style.display = 'none';
-    document.getElementById(`currentImage-${postId}`).setAttribute('data-remove', 'true');
+    const currentImageContainer = document.querySelector(`#editModal-${postId} .relative.group`);
+    if (currentImageContainer) {
+        // Add removal animation
+        currentImageContainer.style.transform = 'scale(0.95)';
+        currentImageContainer.style.opacity = '0.5';
+
+        setTimeout(() => {
+            currentImageContainer.parentElement.style.display = 'none';
+            document.getElementById(`currentImage-${postId}`).setAttribute('data-remove', 'true');
+        }, 200);
+    }
 }
 
 function previewNewImage(postId) {
@@ -1328,20 +1450,71 @@ function previewNewImage(postId) {
     const img = document.getElementById(`newImagePreviewImg-${postId}`);
 
     if (input.files && input.files[0]) {
+        const file = input.files[0];
+
+        // Validate file size (10MB)
+        if (file.size > 10 * 1024 * 1024) {
+            communityHub.showNotification('Image file size must be less than 10MB', 'error');
+            input.value = '';
+            return;
+        }
+
+        // Validate file type
+        if (!['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) {
+            communityHub.showNotification('Please select a valid image file (JPEG, PNG, GIF, or WebP)', 'error');
+            input.value = '';
+            return;
+        }
+
         const reader = new FileReader();
         reader.onload = function (e) {
             img.src = e.target.result;
-            preview.style.display = 'block';
+            preview.classList.remove('hidden');
+
+            // Animate preview in
+            preview.style.transform = 'scale(0.95)';
+            preview.style.opacity = '0';
+            setTimeout(() => {
+                preview.style.transform = 'scale(1)';
+                preview.style.opacity = '1';
+                preview.style.transition = 'all 0.3s ease';
+            }, 10);
         };
-        reader.readAsDataURL(input.files[0]);
+        reader.readAsDataURL(file);
     } else {
-        preview.style.display = 'none';
+        preview.classList.add('hidden');
     }
 }
 
+function clearNewImage(postId) {
+    const input = document.getElementById(`newImageInput-${postId}`);
+    const preview = document.getElementById(`newImagePreview-${postId}`);
+
+    // Animate out
+    preview.style.transform = 'scale(0.95)';
+    preview.style.opacity = '0';
+
+    setTimeout(() => {
+        input.value = '';
+        preview.classList.add('hidden');
+    }, 200);
+}
+
 function closeEditModal(postId) {
-    const modal = document.querySelector('[style*="rgba(0,0,0,0.7)"]');
-    if (modal) modal.remove();
+    const modal = document.querySelector('.fixed.inset-0.z-50');
+    if (!modal) return;
+
+    const modalContent = modal.querySelector(`#editModal-${postId}`);
+
+    // Animate out
+    modalContent.classList.add('scale-95', 'opacity-0');
+    modalContent.classList.remove('scale-100', 'opacity-100');
+
+    setTimeout(() => {
+        if (modal.parentNode) {
+            modal.remove();
+        }
+    }, 300);
 }
 
 async function savePostEdit(postId) {
@@ -1351,14 +1524,14 @@ async function savePostEdit(postId) {
         const removeCurrentImage = document.getElementById(`currentImage-${postId}`)?.getAttribute('data-remove') === 'true';
 
         if (!content) {
-            alert('Post content is required!');
+            communityHub.showNotification('Post content is required!', 'error');
             return;
         }
 
         const saveBtn = document.querySelector(`button[onclick="savePostEdit(${postId})"]`);
-        const originalText = saveBtn.textContent;
+        const originalText = saveBtn.innerHTML;
         saveBtn.disabled = true;
-        saveBtn.textContent = 'Saving...';
+        saveBtn.innerHTML = '<i class="bx bx-loader-alt animate-spin text-lg"></i> <span>Saving...</span>';
 
         const formData = new FormData();
         formData.append('PostContent', content);
@@ -1391,7 +1564,7 @@ async function savePostEdit(postId) {
         const saveBtn = document.querySelector(`button[onclick="savePostEdit(${postId})"]`);
         if (saveBtn) {
             saveBtn.disabled = false;
-            saveBtn.textContent = 'Save Changes';
+            saveBtn.innerHTML = '<i class="bx bx-save text-lg"></i> <span>Save Changes</span>';
         }
     }
 }
@@ -1563,7 +1736,20 @@ async function saveCommentEdit(commentId, newContent, commentElement) {
 
 function updateCommentInDOM(commentElement, newContent) {
     const commentTextContainer = commentElement.querySelector('.comment-text-container');
-    commentTextContainer.innerHTML = `<p class="comment-text">${communityHub.escapeHtml(newContent)}</p>`;
+    commentTextContainer.innerHTML = `
+        <div class="comment-bubble" style="
+            background: #f0f2f5; 
+            padding: 8px 12px; 
+            border-radius: 16px; 
+            display: inline-block;
+            max-width: 100%;
+            word-wrap: break-word;
+        ">
+            <p class="comment-text" style="font-size: 14px; margin: 0; color: #050505; line-height: 1.3;">
+                ${communityHub.escapeHtml(newContent)}
+            </p>
+        </div>
+    `;
 
     const commentHeader = commentElement.querySelector('.comment-header');
     let editedSpan = commentHeader.querySelector('.comment-edited');
@@ -1571,8 +1757,8 @@ function updateCommentInDOM(commentElement, newContent) {
         editedSpan = document.createElement('span');
         editedSpan.className = 'comment-edited';
         editedSpan.textContent = '(edited)';
-        editedSpan.style.color = '#666';
-        editedSpan.style.fontSize = '12px';
+        editedSpan.style.color = '#65676b';
+        editedSpan.style.fontSize = '11px';
         editedSpan.style.marginLeft = '8px';
         commentHeader.appendChild(editedSpan);
     }
@@ -1580,13 +1766,39 @@ function updateCommentInDOM(commentElement, newContent) {
 
 function cancelCommentEdit(commentElement, originalText) {
     const commentTextContainer = commentElement.querySelector('.comment-text-container');
-    commentTextContainer.innerHTML = `<p class="comment-text">${communityHub.escapeHtml(originalText)}</p>`;
+    commentTextContainer.innerHTML = `
+        <div class="comment-bubble" style="
+            background: #f0f2f5; 
+            padding: 8px 12px; 
+            border-radius: 16px; 
+            display: inline-block;
+            max-width: 100%;
+            word-wrap: break-word;
+        ">
+            <p class="comment-text" style="font-size: 14px; margin: 0; color: #050505; line-height: 1.3;">
+                ${communityHub.escapeHtml(originalText)}
+            </p>
+        </div>
+    `;
 }
 
 function restoreOriginalCommentText(commentElement) {
     const originalText = commentElement.getAttribute('data-original-text') || 'Error loading comment';
     const commentTextContainer = commentElement.querySelector('.comment-text-container');
-    commentTextContainer.innerHTML = `<p class="comment-text">${communityHub.escapeHtml(originalText)}</p>`;
+    commentTextContainer.innerHTML = `
+        <div class="comment-bubble" style="
+            background: #f0f2f5; 
+            padding: 8px 12px; 
+            border-radius: 16px; 
+            display: inline-block;
+            max-width: 100%;
+            word-wrap: break-word;
+        ">
+            <p class="comment-text" style="font-size: 14px; margin: 0; color: #050505; line-height: 1.3;">
+                ${communityHub.escapeHtml(originalText)}
+            </p>
+        </div>
+    `;
 }
 
 async function deleteComment(commentId) {
@@ -1626,7 +1838,7 @@ function updateDeletedCommentInDOM(commentId) {
 
     const commentText = commentElement.querySelector('.comment-text');
     if (commentText) {
-        commentText.innerHTML = '<em>This comment was deleted</em>';
+        commentText.innerHTML = '<em style="color: #65676b;">This comment was deleted</em>';
         commentText.style.fontStyle = 'italic';
         commentText.style.color = '#666';
     }
@@ -1917,6 +2129,7 @@ window.deletePost = deletePost;
 window.editPost = editPost;
 window.removeCurrentImage = removeCurrentImage;
 window.previewNewImage = previewNewImage;
+window.clearNewImage = clearNewImage;
 window.closeEditModal = closeEditModal;
 window.savePostEdit = savePostEdit;
 window.editComment = editComment;

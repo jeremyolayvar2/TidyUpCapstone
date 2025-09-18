@@ -15,7 +15,7 @@
     <link href='https://cdn.boxicons.com/fonts/brands/boxicons-brands.min.css' rel='stylesheet'>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
    
-
+     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body data-userid="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value"
       data-username="@User.Identity?.Name">
@@ -74,7 +74,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="nav-link" data-page="token">
+                           <a href="#" class="open-token">
                                 <img class="icon" alt="Token" src="~/assets/VectorToken.svg" />
                                 <span>Token Balance</span>
                             </a>
