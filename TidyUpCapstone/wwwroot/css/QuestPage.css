@@ -72,6 +72,9 @@ body {
 
 /* Header Styles */
 .quest-header {
+    display: flex;
+    flex-direction: column;
+    background: none;
     text-align: center;
     margin-bottom: var(--spacing-2xl);
 }

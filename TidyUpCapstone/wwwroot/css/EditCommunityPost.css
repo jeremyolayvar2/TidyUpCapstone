@@ -373,3 +373,46 @@
 .space-x-3 > * + * {
     margin-left: 0.75rem;
 }
+
+
+/* MODAL BACKDROP FIX */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+    .modal-backdrop.show {
+        opacity: 1;
+    }
+
+/* BLUR BACKGROUND WHEN MODAL IS OPEN */
+body.modal-open .filter-tabs-container {
+    filter: blur(2px);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+body.modal-open .community-post {
+    filter: blur(2px);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+body.modal-open .post-creator {
+    filter: blur(2px);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* ENSURE MODAL IS ABOVE EVERYTHING */
+.edit-modal {
+    z-index: 10000 !important;
+}

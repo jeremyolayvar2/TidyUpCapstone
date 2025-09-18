@@ -838,20 +838,20 @@ class CommunityHub {
 
     getPostOptionsHTML(postId) {
         return `
-            <div class="post-options-dropdown">
-                <button class="post-options-btn" onclick="togglePostOptions(${postId})">
-                    <span class="material-symbols-outlined">more_horiz</span>
+        <div class="post-options-dropdown">
+            <button class="post-options-btn" onclick="togglePostOptions(${postId})" type="button">
+                <span class="material-symbols-outlined">more_horiz</span>
+            </button>
+            <div class="post-dropdown-menu" id="postOptions-${postId}">
+                <button class="dropdown-item" onclick="editPost(${postId}, event); event.stopPropagation(); return false;" type="button">
+                    <i class="bx bx-edit"></i> Edit
                 </button>
-                <div class="post-dropdown-menu" id="postOptions-${postId}" style="display: none;">
-                    <button class="dropdown-item" onclick="editPost(${postId})">
-                        <i class="bx bx-edit"></i> Edit
-                    </button>
-                    <button class="dropdown-item delete-item" onclick="deletePost(${postId})">
-                        <i class="bx bx-trash"></i> Delete
-                    </button>
-                </div>
+                <button class="dropdown-item delete-item" onclick="deletePost(${postId}, event); event.stopPropagation(); return false;" type="button">
+                    <i class="bx bx-trash"></i> Delete
+                </button>
             </div>
-        `;
+        </div>
+    `;
     }
 
     autoResize(element, maxHeight = 120) {
@@ -1198,6 +1198,7 @@ async function switchTestUser() {
 // ============================================================================
 
 function togglePostOptions(postId) {
+    // Close other dropdowns
     document.querySelectorAll('.post-dropdown-menu').forEach(menu => {
         if (menu.id !== `postOptions-${postId}`) {
             menu.style.display = 'none';
@@ -1206,7 +1207,8 @@ function togglePostOptions(postId) {
 
     const dropdown = document.getElementById(`postOptions-${postId}`);
     if (dropdown) {
-        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        const isVisible = dropdown.style.display === 'block';
+        dropdown.style.display = isVisible ? 'none' : 'block';
     }
 }
 
@@ -1250,11 +1252,29 @@ async function deletePost(postId) {
 // IMPROVED EDIT POST FUNCTION WITH TAILWIND UI
 // ============================================================================
 
-function editPost(postId) {
+function editPost(postId, event) {
+    // Prevent event propagation
+    if (event) {
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        event.preventDefault();
+    }
+
+    // Close dropdown first
+    const dropdown = document.getElementById(`postOptions-${postId}`);
+    if (dropdown) {
+        dropdown.style.display = 'none';
+    }
+
+    // Close all other dropdowns
+    document.querySelectorAll('.post-dropdown-menu').forEach(menu => {
+        menu.style.display = 'none';
+    });
+
     const postElement = document.querySelector(`div.community-post[data-post-id="${postId}"]`);
     if (!postElement) {
         communityHub.showNotification('Community post not found', 'error');
-        return;
+        return false;
     }
 
     const contentElement = postElement.querySelector('.post-content p');
@@ -1263,191 +1283,395 @@ function editPost(postId) {
     const imageElement = postElement.querySelector('.post-image img, .post-content img');
     const currentImageUrl = imageElement ? imageElement.src : null;
 
+    // Remove any existing edit modals first
+    const existingModal = document.querySelector('.edit-modal-overlay');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    // Create modal with enhanced image upload
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm p-4';
+    modal.className = 'edit-modal-overlay';
+    modal.style.cssText = `
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: rgba(37, 36, 34, 0.7) !important;
+        backdrop-filter: blur(4px) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        z-index: 999999 !important;
+        padding: 20px !important;
+        box-sizing: border-box !important;
+    `;
+
     modal.innerHTML = `
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-95 opacity-0 animate-in" id="editModal-${postId}">
-            <!-- Header -->
-            <div class="relative bg-gradient-to-r from-emerald-500 to-teal-500 rounded-t-2xl p-6">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                            <i class="bx bx-edit text-white text-xl"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-bold text-white">Edit Post</h2>
-                            <p class="text-emerald-100 text-sm">Update your community post</p>
-                        </div>
-                    </div>
-                    <button onclick="closeEditModal(${postId})" 
-                            class="w-10 h-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full flex items-center justify-center transition-all duration-200 backdrop-blur-sm group">
-                        <i class="bx bx-x text-white text-xl group-hover:rotate-90 transition-transform duration-200"></i>
-                    </button>
-                </div>
+        <div class="modal-content" id="editModal-${postId}" style="
+            position: relative !important;
+            background: white !important;
+            border-radius: 24px !important;
+            width: 100% !important;
+            max-width: 600px !important;
+            max-height: 85vh !important;
+            overflow-y: auto !important;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3) !important;
+            transform: scale(0.9) !important;
+            opacity: 0 !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            z-index: 1000000 !important;
+            display: block !important;
+            visibility: visible !important;
+        ">
+            <!-- Modal Header -->
+            <div class="modal-header" style="
+                padding: 24px 24px 16px 24px !important;
+                border-bottom: 1px solid #e2e8f0 !important;
+                position: relative !important;
+                text-align: center !important;
+            ">
+                <h2 style="
+                    font-size: 2.5rem !important;
+                    font-weight: 700 !important;
+                    color: var(--text-color) !important;
+                    margin: 0 !important;
+                    font-family: inherit !important;
+                ">Edit Post</h2>
+                
+                <button onclick="closeEditModal(${postId})" class="close-modal" style="
+                    position: absolute !important;
+                    top: 16px !important;
+                    right: 24px !important;
+                    background: none !important;
+                    border: none !important;
+                    font-size: 32px !important;
+                    color: #999 !important;
+                    cursor: pointer !important;
+                    padding: 8px !important;
+                    border-radius: 50% !important;
+                    width: 48px !important;
+                    height: 48px !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    transition: all 0.2s ease !important;
+                    z-index: 1000001 !important;
+                    line-height: 1 !important;
+                " onmouseover="this.style.background='#f5f5f5'; this.style.color='#666';" 
+                   onmouseout="this.style.background='none'; this.style.color='#999';">
+                    ×
+                </button>
             </div>
 
-            <!-- Content -->
-            <div class="p-6 space-y-6">
-                <!-- Current Image Display -->
-                ${currentImageUrl ? `
-                <div class="relative">
-                    <label class="block text-sm font-semibold text-gray-700 mb-3">Current Image</label>
-                    <div class="relative group rounded-xl overflow-hidden bg-gray-50 border-2 border-gray-200">
-                        <img id="currentImage-${postId}" src="${currentImageUrl}" 
-                             class="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105" 
-                             alt="Current post image" />
-                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-                            <button type="button" onclick="removeCurrentImage(${postId})" 
-                                    class="opacity-0 group-hover:opacity-100 bg-red-500 hover:bg-red-600 text-white p-3 rounded-full transition-all duration-200 transform scale-90 hover:scale-100 shadow-lg">
-                                <i class="bx bx-trash text-lg"></i>
+            <!-- Modal Content -->
+            <div style="padding: 24px !important;">
+                <div style="display: flex !important; flex-direction: column !important; gap: 24px !important;">
+                    
+                    <!-- Current Image Section -->
+                    ${currentImageUrl ? `
+                    <div id="currentImageSection-${postId}" style="display: block !important;">
+                        <label style="
+                            display: block !important;
+                            font-weight: 600 !important;
+                            color: var(--text-color) !important;
+                            margin-bottom: 12px !important;
+                            font-size: 14px !important;
+                        ">Current Image</label>
+                        <div style="
+                            position: relative !important;
+                            border: 2px dashed var(--secondary-color) !important;
+                            border-radius: 16px !important;
+                            padding: 16px !important;
+                            background: var(--accent-color) !important;
+                        ">
+                            <img id="currentImage-${postId}" src="${currentImageUrl}" style="
+                                width: 100% !important;
+                                height: 200px !important;
+                                object-fit: cover !important;
+                                border-radius: 12px !important;
+                                margin-bottom: 12px !important;
+                                display: block !important;
+                            " alt="Current post image" />
+                            <button type="button" onclick="removeCurrentImage(${postId})" style="
+                                position: absolute !important;
+                                top: 24px !important;
+                                right: 24px !important;
+                                background: rgba(220, 53, 69, 0.9) !important;
+                                color: white !important;
+                                border: none !important;
+                                border-radius: 50% !important;
+                                width: 36px !important;
+                                height: 36px !important;
+                                display: flex !important;
+                                align-items: center !important;
+                                justify-content: center !important;
+                                cursor: pointer !important;
+                                font-size: 18px !important;
+                                transition: all 0.2s ease !important;
+                                z-index: 10 !important;
+                            " onmouseover="this.style.background='rgba(220, 53, 69, 1)'" 
+                               onmouseout="this.style.background='rgba(220, 53, 69, 0.9)'">
+                                ×
                             </button>
                         </div>
                     </div>
-                </div>
-                ` : ''}
+                    ` : ''}
 
-                <!-- Content Editor -->
-                <div class="space-y-4">
-                    <label class="block text-sm font-semibold text-gray-700">Post Content</label>
-                    <div class="relative">
-                        <textarea id="editText-${postId}" 
-                                  class="w-full min-h-32 p-4 border-2 border-gray-300 rounded-xl focus:border-emerald-500 focus:ring-0 resize-none transition-all duration-200 bg-gray-50 focus:bg-white"
-                                  placeholder="Share your thoughts..."
-                                  maxlength="1000">${currentContent}</textarea>
-                        <div class="absolute bottom-3 right-3 text-xs text-gray-400 bg-white px-2 py-1 rounded-md shadow-sm" id="charCounter-${postId}">
-                            <span id="currentCount-${postId}">${currentContent.length}</span>/1000
+                    <!-- Content Input -->
+                    <div style="display: block !important;">
+                        <label style="
+                            display: block !important;
+                            font-weight: 600 !important;
+                            color: var(--text-color) !important;
+                            margin-bottom: 12px !important;
+                            font-size: 14px !important;
+                        ">Post Content</label>
+                        <div style="position: relative !important;">
+                            <textarea id="editText-${postId}" 
+                                placeholder="Share your thoughts..."
+                                maxlength="1000"
+                                style="
+                                    width: 100% !important;
+                                    min-height: 120px !important;
+                                    max-height: 200px !important;
+                                    padding: 16px !important;
+                                    border: 2px solid #e2e8f0 !important;
+                                    border-radius: 12px !important;
+                                    font-size: 16px !important;
+                                    font-family: inherit !important;
+                                    color: var(--text-color) !important;
+                                    background: white !important;
+                                    resize: vertical !important;
+                                    transition: all 0.2s ease !important;
+                                    box-sizing: border-box !important;
+                                    display: block !important;
+                                    outline: none !important;
+                                "
+                                onfocus="this.style.borderColor='var(--primary-color)';"
+                                onblur="this.style.borderColor='#e2e8f0';">${currentContent}</textarea>
+                            <div id="charCounter-${postId}" style="
+                                position: absolute !important;
+                                bottom: 12px !important;
+                                right: 16px !important;
+                                font-size: 12px !important;
+                                color: #666 !important;
+                                background: rgba(255, 255, 255, 0.9) !important;
+                                padding: 4px 8px !important;
+                                border-radius: 12px !important;
+                                backdrop-filter: blur(4px) !important;
+                                pointer-events: none !important;
+                            ">
+                                <span id="currentCount-${postId}">${currentContent.length}</span>/1000
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- New Image Upload -->
-                <div class="space-y-4">
-                    <label class="block text-sm font-semibold text-gray-700">Update Image (Optional)</label>
-                    <div class="relative">
+                    <!-- New Image Upload -->
+                    <div style="display: block !important;">
+                        <label style="
+                            display: block !important;
+                            font-weight: 600 !important;
+                            color: var(--text-color) !important;
+                            margin-bottom: 12px !important;
+                            font-size: 14px !important;
+                        ">Update Image (Optional)</label>
+                        
                         <input type="file" id="newImageInput-${postId}" accept="image/*" 
-                               class="hidden" onchange="previewNewImage(${postId})">
-                        <label for="newImageInput-${postId}" 
-                               class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 hover:border-emerald-400 transition-all duration-200 group">
-                            <div class="flex flex-col items-center justify-center space-y-2">
-                                <i class="bx bx-cloud-upload text-3xl text-gray-400 group-hover:text-emerald-500 transition-colors duration-200"></i>
-                                <p class="text-sm text-gray-500 group-hover:text-emerald-600 transition-colors duration-200">
-                                    <span class="font-semibold">Click to upload</span> or drag and drop
-                                </p>
-                                <p class="text-xs text-gray-400">PNG, JPG, GIF up to 10MB</p>
+                               onchange="previewNewImage(${postId})" style="display: none !important;">
+                        
+                        <!-- Enhanced Upload Label -->
+                        <label for="newImageInput-${postId}" style="
+                            display: flex !important;
+                            flex-direction: column !important;
+                            align-items: center !important;
+                            justify-content: center !important;
+                            height: 120px !important;
+                            border: 2px dashed var(--secondary-color) !important;
+                            border-radius: 16px !important;
+                            cursor: pointer !important;
+                            transition: all 0.2s ease !important;
+                            background: var(--accent-color) !important;
+                            position: relative !important;
+                            overflow: hidden !important;
+                        " onmouseover="this.style.borderColor='var(--primary-color)'; this.style.background='var(--background)';"
+                           onmouseout="this.style.borderColor='var(--secondary-color)'; this.style.background='var(--accent-color)';">
+                            <div style="
+                                display: flex !important;
+                                flex-direction: column !important;
+                                align-items: center !important;
+                                gap: 8px !important;
+                                color: var(--text-color) !important;
+                            ">
+                   
+                                <span style="font-weight: 600 !important; font-size: 14px !important;">Click to upload image</span>
+                                <span style="font-size: 12px !important; color: #666 !important;">PNG, JPG, GIF up to 10MB</span>
                             </div>
                         </label>
                     </div>
-                    
-                    <!-- New Image Preview -->
-                    <div id="newImagePreview-${postId}" class="hidden">
-                        <div class="relative rounded-xl overflow-hidden bg-gray-50 border-2 border-emerald-300">
-                            <img id="newImagePreviewImg-${postId}" class="w-full h-48 object-cover" />
-                            <div class="absolute top-3 right-3">
-                                <button type="button" onclick="clearNewImage(${postId})"
-                                        class="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-all duration-200 shadow-lg">
-                                    <i class="bx bx-x text-sm"></i>
-                                </button>
-                            </div>
-                            <div class="absolute bottom-3 left-3 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                                New Image
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Footer -->
-            <div class="bg-gray-50 px-6 py-4 rounded-b-2xl flex items-center justify-between border-t border-gray-200">
-                <div class="flex items-center space-x-2 text-sm text-gray-500">
-                    <i class="bx bx-info-circle"></i>
-                    <span>Changes will be saved immediately</span>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <button onclick="closeEditModal(${postId})" 
-                            class="px-6 py-2.5 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 hover:border-gray-400 transition-all duration-200 font-semibold">
-                        Cancel
-                    </button>
-                    <button onclick="savePostEdit(${postId})" 
-                            class="px-8 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center space-x-2">
-                        <i class="bx bx-save text-lg"></i>
-                        <span>Save Changes</span>
-                    </button>
+                    <!-- Action Buttons -->
+                    <div style="
+                        display: flex !important;
+                        gap: 12px !important;
+                        justify-content: flex-end !important;
+                        padding-top: 16px !important;
+                        border-top: 1px solid #e2e8f0 !important;
+                        margin-top: 8px !important;
+                    ">
+                        <button onclick="closeEditModal(${postId})" style="
+                            padding: 12px 24px !important;
+                            border: 2px solid var(--secondary-color) !important;
+                            background: transparent !important;
+                            color: var(--text-color) !important;
+                            border-radius: 12px !important;
+                            font-weight: 600 !important;
+                            cursor: pointer !important;
+                            transition: all 0.2s ease !important;
+                            font-size: 14px !important;
+                            display: inline-block !important;
+                        " onmouseover="this.style.background='var(--background)'; this.style.borderColor='var(--primary-color)';"
+                           onmouseout="this.style.background='transparent'; this.style.borderColor='var(--secondary-color)';">
+                            Cancel
+                        </button>
+                        <button onclick="savePostEdit(${postId})" style="
+                            padding: 12px 32px !important;
+                            background: var(--primary-color) !important;
+                            color: white !important;
+                            border: 2px solid var(--primary-color) !important;
+                            border-radius: 12px !important;
+                            font-weight: 600 !important;
+                            cursor: pointer !important;
+                            transition: all 0.2s ease !important;
+                            font-size: 14px !important;
+                            display: inline-flex !important;
+                            align-items: center !important;
+                            gap: 8px !important;
+                        " onmouseover="this.style.background='var(--dark-primary)'; this.style.borderColor='var(--dark-primary)';"
+                           onmouseout="this.style.background='var(--primary-color)'; this.style.borderColor='var(--primary-color)';">
+                            Save Changes
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     `;
 
+    // Add to document body and show
     document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
 
-    // Animate modal in
+    // Force reflow and animate in
+    modal.offsetHeight;
+
     setTimeout(() => {
         const modalContent = modal.querySelector(`#editModal-${postId}`);
-        modalContent.classList.remove('scale-95', 'opacity-0');
-        modalContent.classList.add('scale-100', 'opacity-100');
+        if (modalContent) {
+            modalContent.style.transform = 'scale(1)';
+            modalContent.style.opacity = '1';
+        }
     }, 10);
 
-    // Setup character counter
-    const textarea = modal.querySelector(`#editText-${postId}`);
-    const charCounter = modal.querySelector(`#currentCount-${postId}`);
-
-    textarea.addEventListener('input', function () {
-        const currentLength = this.value.length;
-        charCounter.textContent = currentLength;
-
-        // Update counter color based on length
-        if (currentLength > 900) {
-            charCounter.parentElement.className = 'absolute bottom-3 right-3 text-xs text-red-500 bg-red-50 px-2 py-1 rounded-md shadow-sm font-semibold';
-        } else if (currentLength > 800) {
-            charCounter.parentElement.className = 'absolute bottom-3 right-3 text-xs text-yellow-600 bg-yellow-50 px-2 py-1 rounded-md shadow-sm font-semibold';
-        } else {
-            charCounter.parentElement.className = 'absolute bottom-3 right-3 text-xs text-gray-400 bg-white px-2 py-1 rounded-md shadow-sm';
-        }
-
-        // Auto-resize textarea
-        this.style.height = 'auto';
-        this.style.height = Math.min(this.scrollHeight, 200) + 'px';
-    });
-
-    // Focus on textarea
+    // Setup character counter and other event handlers
     setTimeout(() => {
-        textarea.focus();
-        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-    }, 300);
+        const textarea = modal.querySelector(`#editText-${postId}`);
+        const charCounter = modal.querySelector(`#currentCount-${postId}`);
 
-    // Close on backdrop click
+        if (textarea && charCounter) {
+            textarea.addEventListener('input', function () {
+                const currentLength = this.value.length;
+                charCounter.textContent = currentLength;
+
+                const counterElement = charCounter.parentElement;
+                if (currentLength > 900) {
+                    counterElement.style.background = 'rgba(220, 53, 69, 0.1)';
+                    counterElement.style.color = '#dc3545';
+                } else if (currentLength > 800) {
+                    counterElement.style.background = 'rgba(245, 158, 11, 0.1)';
+                    counterElement.style.color = '#f59e0b';
+                } else {
+                    counterElement.style.background = 'rgba(255, 255, 255, 0.9)';
+                    counterElement.style.color = '#666';
+                }
+
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+            });
+
+            setTimeout(() => {
+                textarea.focus();
+                textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+            }, 300);
+        }
+    }, 100);
+
+    // Event listeners for modal closing
     modal.addEventListener('click', function (e) {
         if (e.target === modal) {
             closeEditModal(postId);
         }
     });
 
-    // Close on Escape key
-    document.addEventListener('keydown', function escapeHandler(e) {
+    const escapeHandler = function (e) {
         if (e.key === 'Escape') {
             closeEditModal(postId);
             document.removeEventListener('keydown', escapeHandler);
         }
-    });
+    };
+    document.addEventListener('keydown', escapeHandler);
+
+    return false;
 }
 
+// Updated closeEditModal function
+function closeEditModal(postId) {
+    const modal = document.querySelector('.edit-modal-overlay');
+    if (!modal) {
+        console.warn('Edit modal not found for closing');
+        return;
+    }
+
+    const modalContent = modal.querySelector(`#editModal-${postId}`);
+    if (modalContent) {
+        modalContent.style.transform = 'scale(0.9)';
+        modalContent.style.opacity = '0';
+    }
+
+    setTimeout(() => {
+        if (modal.parentNode) {
+            modal.remove();
+        }
+        document.body.style.overflow = '';
+    }, 300);
+
+    console.log('Edit modal closed');
+}
+
+
 function removeCurrentImage(postId) {
-    const currentImageContainer = document.querySelector(`#editModal-${postId} .relative.group`);
-    if (currentImageContainer) {
+    const currentImageSection = document.getElementById(`currentImageSection-${postId}`);
+    const currentImage = document.getElementById(`currentImage-${postId}`);
+
+    if (currentImageSection && currentImage) {
         // Add removal animation
-        currentImageContainer.style.transform = 'scale(0.95)';
-        currentImageContainer.style.opacity = '0.5';
+        currentImageSection.style.opacity = '0';
+        currentImageSection.style.transform = 'scale(0.95)';
+        currentImageSection.style.transition = 'all 0.3s ease';
 
         setTimeout(() => {
-            currentImageContainer.parentElement.style.display = 'none';
-            document.getElementById(`currentImage-${postId}`).setAttribute('data-remove', 'true');
-        }, 200);
+            currentImageSection.style.display = 'none';
+            // Mark for removal when saving
+            currentImage.setAttribute('data-remove', 'true');
+        }, 300);
     }
 }
 
 function previewNewImage(postId) {
     const input = document.getElementById(`newImageInput-${postId}`);
-    const preview = document.getElementById(`newImagePreview-${postId}`);
-    const img = document.getElementById(`newImagePreviewImg-${postId}`);
+    const uploadLabel = input.nextElementSibling; // The label element
 
     if (input.files && input.files[0]) {
         const file = input.files[0];
@@ -1460,7 +1684,8 @@ function previewNewImage(postId) {
         }
 
         // Validate file type
-        if (!['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) {
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
             communityHub.showNotification('Please select a valid image file (JPEG, PNG, GIF, or WebP)', 'error');
             input.value = '';
             return;
@@ -1468,52 +1693,170 @@ function previewNewImage(postId) {
 
         const reader = new FileReader();
         reader.onload = function (e) {
-            img.src = e.target.result;
-            preview.classList.remove('hidden');
+            // Transform the upload label to show the image
+            uploadLabel.innerHTML = `
+                <div style="
+                    position: relative !important;
+                    width: 100% !important;
+                    height: 100% !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                ">
+                    <img style="
+                        width: 100% !important;
+                        height: 100% !important;
+                        object-fit: cover !important;
+                        border-radius: 12px !important;
+                        display: block !important;
+                    " src="${e.target.result}" alt="Selected image" />
+                    
+                    <!-- Remove button -->
+                    <button type="button" onclick="clearNewImage(${postId})" style="
+                        position: absolute !important;
+                        top: 8px !important;
+                        right: 8px !important;
+                        background: rgba(220, 53, 69, 0.9) !important;
+                        color: white !important;
+                        border: none !important;
+                        border-radius: 50% !important;
+                        width: 32px !important;
+                        height: 32px !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        cursor: pointer !important;
+                        font-size: 16px !important;
+                        transition: all 0.2s ease !important;
+                        z-index: 10 !important;
+                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+                    " onmouseover="this.style.background='rgba(220, 53, 69, 1)'"
+                       onmouseout="this.style.background='rgba(220, 53, 69, 0.9)'">
+                        ×
+                    </button>
+                    
+                    <!-- Replace button -->
+                    <button type="button" onclick="document.getElementById('newImageInput-${postId}').click()" style="
+                        position: absolute !important;
+                        bottom: 8px !important;
+                        right: 8px !important;
+                        background: rgba(107, 144, 128, 0.9) !important;
+                        color: white !important;
+                        border: none !important;
+                        border-radius: 16px !important;
+                        padding: 6px 12px !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        cursor: pointer !important;
+                        font-size: 12px !important;
+                        font-weight: 600 !important;
+                        transition: all 0.2s ease !important;
+                        z-index: 10 !important;
+                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+                        gap: 4px !important;
+                    " onmouseover="this.style.background='var(--dark-primary)'"
+                       onmouseout="this.style.background='rgba(107, 144, 128, 0.9)'">
+                        Replace
+                    </button>
+                </div>
+            `;
 
-            // Animate preview in
-            preview.style.transform = 'scale(0.95)';
-            preview.style.opacity = '0';
-            setTimeout(() => {
-                preview.style.transform = 'scale(1)';
-                preview.style.opacity = '1';
-                preview.style.transition = 'all 0.3s ease';
-            }, 10);
+            // Update the label styling to show it has an image
+            uploadLabel.style.border = '2px solid var(--primary-color)';
+            uploadLabel.style.background = 'white';
+            uploadLabel.style.padding = '0';
         };
         reader.readAsDataURL(file);
-    } else {
-        preview.classList.add('hidden');
     }
 }
 
 function clearNewImage(postId) {
     const input = document.getElementById(`newImageInput-${postId}`);
-    const preview = document.getElementById(`newImagePreview-${postId}`);
+    const uploadLabel = input.nextElementSibling;
 
-    // Animate out
-    preview.style.transform = 'scale(0.95)';
-    preview.style.opacity = '0';
+    // Clear the input
+    input.value = '';
 
-    setTimeout(() => {
-        input.value = '';
-        preview.classList.add('hidden');
-    }, 200);
+    // Animate out the current image
+    const imageContainer = uploadLabel.querySelector('div');
+    if (imageContainer) {
+        imageContainer.style.opacity = '0';
+        imageContainer.style.transform = 'scale(0.95)';
+
+        setTimeout(() => {
+            // Reset the upload label to its original state
+            uploadLabel.innerHTML = `
+                <div style="
+                    display: flex !important;
+                    flex-direction: column !important;
+                    align-items: center !important;
+                    gap: 8px !important;
+                    color: var(--text-color) !important;
+                ">
+                    <div style="
+                        width: 48px !important;
+                        height: 48px !important;
+                        background: var(--secondary-color) !important;
+                        border-radius: 12px !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        color: white !important;
+                        font-size: 24px !important;
+                    "></div>
+                    <span style="font-weight: 600 !important; font-size: 14px !important;">Click to upload image</span>
+                    <span style="font-size: 12px !important; color: #666 !important;">PNG, JPG, GIF up to 10MB</span>
+                </div>
+            `;
+
+            // Reset label styling
+            uploadLabel.style.border = '2px dashed var(--secondary-color)';
+            uploadLabel.style.background = 'var(--accent-color)';
+            uploadLabel.style.padding = '16px';
+            uploadLabel.style.opacity = '1';
+            uploadLabel.style.transform = 'scale(1)';
+        }, 200);
+    }
 }
 
 function closeEditModal(postId) {
-    const modal = document.querySelector('.fixed.inset-0.z-50');
-    if (!modal) return;
+    // Remove modal-open class
+    document.body.classList.remove('modal-open');
+
+    // Hide backdrop with your color palette
+    const backdrop = document.getElementById('edit-modal-backdrop');
+    if (backdrop) {
+        backdrop.style.opacity = '0';
+        setTimeout(() => backdrop.remove(), 300);
+    }
+
+    // Find the modal using the correct class name
+    const modal = document.querySelector('.edit-modal-overlay');
+    if (!modal) {
+        console.warn('Edit modal not found for closing');
+        return;
+    }
 
     const modalContent = modal.querySelector(`#editModal-${postId}`);
+    if (!modalContent) {
+        console.warn(`Modal content not found for post ${postId}`);
+        // Fallback: remove the modal anyway
+        modal.remove();
+        return;
+    }
 
     // Animate out
-    modalContent.classList.add('scale-95', 'opacity-0');
-    modalContent.classList.remove('scale-100', 'opacity-100');
+    modalContent.style.transform = 'scale(0.95)';
+    modalContent.style.opacity = '0';
+    modalContent.style.transition = 'all 0.3s ease';
 
     setTimeout(() => {
         if (modal.parentNode) {
             modal.remove();
         }
+        // Restore body scroll
+        document.body.style.overflow = '';
     }, 300);
 }
 

@@ -341,60 +341,37 @@ class NavigationManager {
         // Desktop sidebar navigation
         document.querySelectorAll('#sidebar .nav-link').forEach(link => {
             link.addEventListener('click', (e) => {
-                const href = link.getAttribute('href');
                 const dataPage = link.getAttribute('data-page');
 
-                // Handle special cases
+                // Only handle special modal cases - let HTML handle regular navigation
                 if (dataPage === 'create') {
                     e.preventDefault();
                     this.openCreateModal();
                 } else if (dataPage === 'token') {
                     e.preventDefault();
                     this.showTokenModal();
-                } else if (dataPage === 'quests') {
-                    // Allow navigation to quest page
-                    this.setActiveNavItem(dataPage);
-                } else if (href && href !== '#') {
-                    // Allow normal navigation for valid hrefs
-                    this.setActiveNavItem(dataPage);
-                } else if (href === '#') {
-                    e.preventDefault();
-                    console.log(`Navigation to ${dataPage} not yet implemented`);
-                    this.setActiveNavItem(dataPage);
                 }
+                // Remove the quest handling - HTML handles it now
             });
         });
 
-        // Mobile dock navigation
+        // Mobile dock - only handle modals, let links handle navigation
         document.querySelectorAll('.dock-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                const dataPage = item.getAttribute('data-page');
-                const dataLabel = item.getAttribute('data-label');
-                const onclickAttr = item.getAttribute('onclick');
+            // Only add click handlers for items that DON'T have hrefs
+            const isLink = item.tagName === 'A';
+            if (!isLink) {
+                item.addEventListener('click', (e) => {
+                    const dataLabel = item.getAttribute('data-label');
 
-                // Handle special cases
-                if (dataPage === 'home' || dataLabel === 'Home') {
-                    window.location.href = '/Home/Main';
-                } else if (dataPage === 'settings' || dataLabel === 'Settings') {
-                    window.location.href = '/Home/SettingsPage';
-                } else if (dataPage === 'create' || dataLabel === 'Create') {
-                    e.preventDefault();
-                    this.openCreateModal();
-                } else if (dataPage === 'token' || dataLabel === 'Token') {
-                    e.preventDefault();
-                    this.showTokenModal();
-                } else if (dataLabel === 'Quests & Milestone' || dataLabel === 'Quests/Milestone') {
-                    window.location.href = '/Home/QuestPage';
-                } else if (onclickAttr) {
-                    // Execute existing onclick if present
-                    return;
-                }
-
-                const pageToActivate = dataPage || dataLabel?.toLowerCase();
-                if (pageToActivate) {
-                    this.setActiveNavItem(pageToActivate);
-                }
-            });
+                    if (dataLabel === 'Create') {
+                        e.preventDefault();
+                        this.openCreateModal();
+                    } else if (dataLabel === 'Token') {
+                        e.preventDefault();
+                        this.showTokenModal();
+                    }
+                });
+            }
         });
     }
 

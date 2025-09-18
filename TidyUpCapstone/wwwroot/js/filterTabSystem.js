@@ -178,3 +178,60 @@ document.addEventListener('DOMContentLoaded', function () {
         };
     }
 });
+
+// Fix for Post Loading Issue
+// The problem is likely in the filter initialization in Main.cshtml
+
+// 1. Update your Main.cshtml filter initialization
+// Add this script after your existing filter tabs HTML:
+
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('DOM loaded, initializing posts display...');
+
+    // Force show all posts initially
+    showAllPostsOnLoad();
+
+    // Initialize filter system after showing posts
+    setTimeout(() => {
+        if (window.FilterTabSystem) {
+            window.filterTabSystem = new FilterTabSystem();
+        }
+
+        if (window.CommunityHub) {
+            window.communityHub = new CommunityHub();
+            window.communityHub.init();
+        }
+    }, 100);
+});
+
+// Function to ensure all posts are visible on initial load
+function showAllPostsOnLoad() {
+    console.log('Showing all posts on initial load...');
+
+    // Get all post elements
+    const itemPosts = document.querySelectorAll('.item-post');
+    const communityPosts = document.querySelectorAll('.community-post');
+    const emptyState = document.getElementById('emptyState');
+
+    console.log(`Found ${itemPosts.length} item posts and ${communityPosts.length} community posts`);
+
+    // Force display all posts
+    [...itemPosts, ...communityPosts].forEach(post => {
+        post.style.display = 'block';
+        post.style.opacity = '1';
+        post.style.visibility = 'visible';
+    });
+
+    // Hide empty state if we have posts
+    if (emptyState && (itemPosts.length > 0 || communityPosts.length > 0)) {
+        emptyState.style.display = 'none';
+    }
+
+    // Ensure community post section is visible
+    const communityPostSection = document.getElementById('communityPostSection');
+    if (communityPostSection) {
+        communityPostSection.style.display = 'block';
+    }
+
+    console.log('All posts should now be visible');
+}
