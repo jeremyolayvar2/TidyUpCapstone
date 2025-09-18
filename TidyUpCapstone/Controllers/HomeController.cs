@@ -5,16 +5,14 @@ using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Security.Claims;
 using TidyUpCapstone.Data;
+using TidyUpCapstone.Filters;
 using TidyUpCapstone.Models;
-using TidyUpCapstone.Models.Entities.Gamification;
-using TidyUpCapstone.Models.Entities.User;
-using TidyUpCapstone.Models.ViewModels;
-using TidyUpCapstone.Models.ViewModels.Gamification;
-using TidyUpCapstone.Services.Interfaces;
 using TidyUpCapstone.Models.DTOs.Items;
+using TidyUpCapstone.Models.Entities.Gamification;
 using TidyUpCapstone.Models.Entities.Items;
 using TidyUpCapstone.Models.Entities.User;
 using TidyUpCapstone.Models.ViewModels;
+using TidyUpCapstone.Models.ViewModels.Gamification;
 using TidyUpCapstone.Models.ViewModels.Items;
 using TidyUpCapstone.Services.Interfaces;
 
@@ -27,33 +25,30 @@ namespace TidyUpCapstone.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
-        private readonly UserManager<AppUser> _userManager;
-        private readonly IQuestService _questService;
-        private readonly IAchievementService _achievementService;
-        private readonly IStreakService _streakService;
-        private readonly ApplicationDbContext _context;
+
+        // Gamification services - optional dependencies to prevent breaking changes
+        private readonly IQuestService? _questService;
+        private readonly IAchievementService? _achievementService;
+        private readonly IStreakService? _streakService;
 
         public HomeController(
             ILogger<HomeController> logger,
             IItemService itemService,
             ApplicationDbContext context,
             UserManager<AppUser> userManager,
-            SignInManager<AppUser> signInManager)
-            UserManager<AppUser> userManager,
-            IQuestService questService,
-            IAchievementService achievementService,
-            IStreakService streakService,
-            ApplicationDbContext context)
+            SignInManager<AppUser> signInManager,
+            IQuestService? questService = null,
+            IAchievementService? achievementService = null,
+            IStreakService? streakService = null)
         {
             _logger = logger;
             _itemService = itemService;
             _context = context;
             _userManager = userManager;
+            _signInManager = signInManager;
             _questService = questService;
             _achievementService = achievementService;
             _streakService = streakService;
-            _context = context;
-            _signInManager = signInManager;
         }
 
         public IActionResult Index(string? error = null, string? success = null)
@@ -71,16 +66,6 @@ namespace TidyUpCapstone.Controllers
 
             return View();
         }
-
-        public async Task<IActionResult> QuestPage()
-        {
-            try
-            {
-                var userId = GetUserId();
-                if (userId == 0)
-                {
-                    userId = 1; // Test user ID
-                }
 
         [Authorize]
         public async Task<IActionResult> Main()
@@ -209,16 +194,40 @@ namespace TidyUpCapstone.Controllers
             }
         }
 
+        /// <summary>
+        /// Quest page for gamification features
+        /// </summary>
         [Authorize]
-        [NoCache]
-        public async Task<IActionResult> SettingsPage()
+        public async Task<IActionResult> QuestPage()
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return RedirectToAction("Login", "Account");
+            try
+            {
+                var userId = GetUserId();
+                if (userId == 0)
+                {
+                    // For development/testing - you may want to remove this in production
+                    userId = 1; // Test user ID
+                }
 
-            // Load notification settings
-            var settings = await _context.NotificationSettings
-                .FirstOrDefaultAsync(ns => ns.UserId == user.Id);
+                // Check if gamification services are available
+                if (_questService == null || _achievementService == null || _streakService == null)
+                {
+                    _logger.LogWarning("Gamification services not available");
+                    ViewData["ErrorMessage"] = "Quest system is currently unavailable.";
+                    return View(new GamificationDashboardViewModel
+                    {
+                        LevelProgress = new UserLevelProgressViewModel
+                        {
+                            CurrentLevel = 1,
+                            CurrentLevelName = "Beginner",
+                            CurrentXp = 0,
+                            TotalXp = 0,
+                            XpToNextLevel = 100,
+                            XpProgress = 0
+                        }
+                    });
+                }
+
                 // Generate quests
                 await _questService.GenerateDailyQuestsAsync();
                 await _questService.GenerateWeeklyQuestsAsync();
@@ -246,7 +255,6 @@ namespace TidyUpCapstone.Controllers
                 viewModel.Stats.TotalXpEarned = userStats?.CurrentXp ?? 0;     // ✅ Optional: match XP from UserStats
                 viewModel.Stats.ActiveStreaksCount = userStats?.CurrentStreak ?? 0;
 
-
                 ViewData["Title"] = "Daily Quests";
                 ViewData["PageType"] = "quest";
 
@@ -254,6 +262,7 @@ namespace TidyUpCapstone.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error loading quest dashboard");
                 ViewData["ErrorMessage"] = "An error occurred while loading your quest dashboard: " + ex.Message;
                 return View(new GamificationDashboardViewModel
                 {
@@ -270,7 +279,29 @@ namespace TidyUpCapstone.Controllers
             }
         }
 
+        [Authorize]
+        [NoCache]
+        public async Task<IActionResult> SettingsPage()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login", "Account");
 
+            // Load notification settings
+            var settings = await _context.NotificationSettings
+                .FirstOrDefaultAsync(ns => ns.UserId == user.Id);
+
+            // Pass settings to view
+            ViewBag.EmailNewMessages = settings?.EmailNewMessages ?? true;
+            ViewBag.EmailItemUpdates = settings?.EmailItemUpdates ?? true;
+            ViewBag.EmailWeeklySummary = settings?.EmailWeeklySummary ?? false;
+            ViewBag.DesktopNotifications = settings?.DesktopNotifications ?? true;
+
+            return View();
+        }
+
+        /// <summary>
+        /// Gets user level progress for gamification features
+        /// </summary>
         private async Task<UserLevelProgressViewModel> GetUserLevelProgressAsync(int userId)
         {
             var userLevel = await _context.UserLevels
@@ -294,11 +325,6 @@ namespace TidyUpCapstone.Controllers
                     _context.UserLevels.Add(newUserLevel);
                     await _context.SaveChangesAsync();
 
-            // Pass settings to view
-            ViewBag.EmailNewMessages = settings?.EmailNewMessages ?? true;
-            ViewBag.EmailItemUpdates = settings?.EmailItemUpdates ?? true;
-            ViewBag.EmailWeeklySummary = settings?.EmailWeeklySummary ?? false;
-            ViewBag.DesktopNotifications = settings?.DesktopNotifications ?? true;
                     return new UserLevelProgressViewModel
                     {
                         CurrentLevel = 1,
@@ -322,31 +348,11 @@ namespace TidyUpCapstone.Controllers
                 };
             }
 
-            return View();
-        }
             var nextLevel = await _context.Levels
                 .Where(l => l.LevelNumber > userLevel.CurrentLevel.LevelNumber)
                 .OrderBy(l => l.LevelNumber)
                 .FirstOrDefaultAsync();
 
-        private List<ItemCategoryDto> GetFallbackCategories()
-        {
-            return new List<ItemCategoryDto>
-            {
-                new() { CategoryId = 1, Name = "Books & Stationery", IsActive = true, SortOrder = 1 },
-                new() { CategoryId = 2, Name = "Electronics & Gadgets", IsActive = true, SortOrder = 2 },
-                new() { CategoryId = 3, Name = "Toys & Games", IsActive = true, SortOrder = 3 },
-                new() { CategoryId = 4, Name = "Home & Kitchen", IsActive = true, SortOrder = 4 },
-                new() { CategoryId = 5, Name = "Furniture", IsActive = true, SortOrder = 5 },
-                new() { CategoryId = 6, Name = "Appliances", IsActive = true, SortOrder = 6 },
-                new() { CategoryId = 7, Name = "Health & Beauty", IsActive = true, SortOrder = 7 },
-                new() { CategoryId = 8, Name = "Crafts & DIY", IsActive = true, SortOrder = 8 },
-                new() { CategoryId = 9, Name = "School & Office", IsActive = true, SortOrder = 9 },
-                new() { CategoryId = 10, Name = "Sentimental Items", IsActive = true, SortOrder = 10 },
-                new() { CategoryId = 11, Name = "Miscellaneous", IsActive = true, SortOrder = 11 },
-                new() { CategoryId = 12, Name = "Clothing", IsActive = true, SortOrder = 12 }
-            };
-        }
             return new UserLevelProgressViewModel
             {
                 CurrentLevel = userLevel.CurrentLevel.LevelNumber,
@@ -374,6 +380,26 @@ namespace TidyUpCapstone.Controllers
             }
             return 0;
         }
+
+        private List<ItemCategoryDto> GetFallbackCategories()
+        {
+            return new List<ItemCategoryDto>
+            {
+                new() { CategoryId = 1, Name = "Books & Stationery", IsActive = true, SortOrder = 1 },
+                new() { CategoryId = 2, Name = "Electronics & Gadgets", IsActive = true, SortOrder = 2 },
+                new() { CategoryId = 3, Name = "Toys & Games", IsActive = true, SortOrder = 3 },
+                new() { CategoryId = 4, Name = "Home & Kitchen", IsActive = true, SortOrder = 4 },
+                new() { CategoryId = 5, Name = "Furniture", IsActive = true, SortOrder = 5 },
+                new() { CategoryId = 6, Name = "Appliances", IsActive = true, SortOrder = 6 },
+                new() { CategoryId = 7, Name = "Health & Beauty", IsActive = true, SortOrder = 7 },
+                new() { CategoryId = 8, Name = "Crafts & DIY", IsActive = true, SortOrder = 8 },
+                new() { CategoryId = 9, Name = "School & Office", IsActive = true, SortOrder = 9 },
+                new() { CategoryId = 10, Name = "Sentimental Items", IsActive = true, SortOrder = 10 },
+                new() { CategoryId = 11, Name = "Miscellaneous", IsActive = true, SortOrder = 11 },
+                new() { CategoryId = 12, Name = "Clothing", IsActive = true, SortOrder = 12 }
+            };
+        }
+
         private List<ItemConditionDto> GetFallbackConditions()
         {
             return new List<ItemConditionDto>

@@ -6,13 +6,14 @@ using SendGrid;
 using SendGrid.Helpers.Mail;
 using System.Security.Claims;
 using TidyUpCapstone.Data;
-using TidyUpCapstone.Models.Entities.Gamification;
 using TidyUpCapstone.Extensions;
 using TidyUpCapstone.Helpers;
 using TidyUpCapstone.Models.Configuration;
 using TidyUpCapstone.Models.DTOs.Configuration;
 using TidyUpCapstone.Models.Entities.Core;
+using TidyUpCapstone.Models.Entities.Gamification;
 using TidyUpCapstone.Models.Entities.User;
+using TidyUpCapstone.Services;
 using TidyUpCapstone.Services.Background;
 using TidyUpCapstone.Services.Helpers;
 using TidyUpCapstone.Services.Implementations;
@@ -20,12 +21,6 @@ using TidyUpCapstone.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Database Configuration
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection") ??
-        "Server=OLAYVAR\\SQLEXPRESS;Database=TidyUpdb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=True"
-    ));
 // -----------------------------------------------------
 // 1. Enhanced Logging Configuration
 // -----------------------------------------------------
@@ -48,11 +43,11 @@ builder.Services.AddLogging(logging =>
 });
 
 // -----------------------------------------------------
-// 2. Configure Core Services using Extension Methods (from feature/item-management)
+// 2. Configure Core Services using Extension Methods (from dev)
 // -----------------------------------------------------
 builder.Services
     .AddDatabaseServices(builder.Configuration)
-    .AddIdentityServices()  // This already configures Identity - don't duplicate
+    .AddIdentityServices()  // This configures Identity properly
     .AddTidyUpServices()
     .AddFileUploadConfiguration()
     .AddApiConfiguration()
@@ -62,7 +57,7 @@ builder.Services
     .AddBackgroundServices();
 
 // -----------------------------------------------------
-// 3. Register Item Management Services (from feature/item-management)
+// 3. Register Item Management Services (from dev)
 // -----------------------------------------------------
 builder.Services.AddScoped<IImageUploadService, ImageUploadService>();
 builder.Services.AddScoped<ICommunityService, CommunityService>();
@@ -84,10 +79,18 @@ catch
 }
 
 // -----------------------------------------------------
-// 4. REMOVED: Duplicate Identity Configuration
+// 4. Register Gamification Services (from quest page)
 // -----------------------------------------------------
-// This section was removed because .AddIdentityServices() already handles it
-// Keeping this would cause "Scheme already exists: Identity.Application" error
+builder.Services.AddScoped<IQuestService, QuestService>();
+builder.Services.AddScoped<IAchievementService, AchievementService>();
+builder.Services.AddScoped<IStreakService, StreakService>();
+builder.Services.AddScoped<IQuestHelperService, QuestHelperService>();
+builder.Services.AddScoped<IUserInitializationService, UserInitializationService>();
+builder.Services.AddScoped<IActivityQuestIntegrationService, ActivityQuestIntegrationService>();
+builder.Services.AddScoped<IUserStatisticsService, UserStatisticsService>();
+
+// Register Background Service for Quest Management (commented out for now)
+//builder.Services.AddHostedService<QuestBackgroundService>();
 
 // -----------------------------------------------------
 // 5. Application Cookie Configuration FOR MODAL SYSTEM (from dev)
@@ -249,7 +252,7 @@ builder.Services.AddSingleton<ISendGridClient>(provider =>
 builder.Services.AddScoped<IEmailService, EmailService>();
 
 // -----------------------------------------------------
-// 8. Google Cloud and Vision Services Configuration (from feature/item-management)
+// 8. Google Cloud and Vision Services Configuration (from dev)
 // -----------------------------------------------------
 builder.Services.Configure<GoogleCloudSetting>(
     builder.Configuration.GetSection("GoogleCloud"));
@@ -264,8 +267,9 @@ if (!string.IsNullOrEmpty(googleCloudSettings?.CredentialsPath))
 }
 
 // -----------------------------------------------------
-// 9. Session Support (from feature/item-management)
+// 9. Session Support (combined from both)
 // -----------------------------------------------------
+builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -286,17 +290,6 @@ builder.Services.AddControllersWithViews(options =>
 
 builder.Services.AddControllers(); // For API controllers
 
-// Session configuration for user testing
-builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
-
-// Add services to the container
-builder.Services.AddControllersWithViews();
 // Add antiforgery token configuration
 builder.Services.AddAntiforgery(options =>
 {
@@ -307,18 +300,9 @@ builder.Services.AddAntiforgery(options =>
     options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
-// Register Gamification Services
-builder.Services.AddScoped<IQuestService, QuestService>();
-builder.Services.AddScoped<IAchievementService, AchievementService>();
-builder.Services.AddScoped<IStreakService, StreakService>();
-builder.Services.AddScoped<IQuestHelperService, QuestHelperService>();
-builder.Services.AddScoped<IUserInitializationService, UserInitializationService>();
-builder.Services.AddScoped<IActivityQuestIntegrationService, ActivityQuestIntegrationService>();
-builder.Services.AddScoped<IUserStatisticsService, UserStatisticsService>();
-
-// Register Background Service for Quest Management
-//builder.Services.AddHostedService<QuestBackgroundService>();
-
+// -----------------------------------------------------
+// 11. Build Application
+// -----------------------------------------------------
 var app = builder.Build();
 
 // Get logger for this scope
@@ -387,55 +371,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 // -----------------------------------------------------
-// 13. Configure HTTP Request Pipeline (merged)
+// 13. Initialize Gamification System (from quest page)
 // -----------------------------------------------------
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
-}
-else
-{
-    app.UseDeveloperExceptionPage();
-}
-
-// Security headers
-app.Use(async (context, next) =>
-{
-    context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
-    context.Response.Headers.Add("X-Frame-Options", "DENY");
-    context.Response.Headers.Add("X-XSS-Protection", "1; mode=block");
-
-    // FIXED: Add referrer policy for better OAuth compatibility
-    context.Response.Headers.Add("Referrer-Policy", "strict-origin-when-cross-origin");
-
-    await next.Invoke();
-});
-
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseRouting();
-
-// Session middleware (must be after UseRouting and before UseAuthentication)
-app.UseSession();
-
-// Add session middleware (must be before UseAuthentication)
-app.UseSession();
-
-app.UseCookiePolicy();
-app.UseAuthentication();
-app.UseAuthorization();
-
-// -----------------------------------------------------
-// 14. Configure Routes (merged)
-// -----------------------------------------------------
-app.MapControllers(); // For API controllers
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-
-// Initialize gamification system
 using (var scope = app.Services.CreateScope())
 {
     try
@@ -521,7 +458,100 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Helper method for seeding levels
+// -----------------------------------------------------
+// 14. Configure HTTP Request Pipeline (merged)
+// -----------------------------------------------------
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
+else
+{
+    app.UseDeveloperExceptionPage();
+}
+
+// Security headers
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Add("X-Frame-Options", "DENY");
+    context.Response.Headers.Add("X-XSS-Protection", "1; mode=block");
+    context.Response.Headers.Add("Referrer-Policy", "strict-origin-when-cross-origin");
+
+    await next.Invoke();
+});
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+
+// Session middleware (must be after UseRouting and before UseAuthentication)
+app.UseSession();
+
+app.UseCookiePolicy();
+app.UseAuthentication();
+app.UseAuthorization();
+
+// -----------------------------------------------------
+// 15. Configure Routes (merged)
+// -----------------------------------------------------
+app.MapControllers(); // For API controllers
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapControllerRoute(
+    name: "account",
+    pattern: "Account/{action=Index}",
+    defaults: new { controller = "Account", action = "Index" });
+
+app.MapControllerRoute(
+    name: "main",
+    pattern: "Main",
+    defaults: new { controller = "Home", action = "Main" });
+
+app.MapControllerRoute(
+    name: "login",
+    pattern: "Login",
+    defaults: new { controller = "Account", action = "Login" });
+
+app.MapControllerRoute(
+    name: "register",
+    pattern: "Register",
+    defaults: new { controller = "Account", action = "Register" });
+
+// Health check endpoint
+app.MapGet("/health", async (ApplicationDbContext context) =>
+{
+    try
+    {
+        var canConnect = await context.Database.CanConnectAsync();
+        return canConnect ? Results.Ok(new
+        {
+            status = "healthy",
+            timestamp = DateTime.UtcNow,
+            database = "connected"
+        }) : Results.Problem("Database connection failed");
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem($"Health check failed: {ex.Message}");
+    }
+});
+
+// Initialize database in development using extension method (from dev)
+if (app.Environment.IsDevelopment())
+{
+    await app.InitializeDatabaseAsync();
+}
+
+// -----------------------------------------------------
+// 16. Helper Methods
+// -----------------------------------------------------
+
+// Helper method for seeding levels (from quest page)
 static async Task SeedLevelsAsync(ApplicationDbContext context)
 {
     if (!await context.Levels.AnyAsync())
@@ -548,6 +578,32 @@ static async Task SeedLevelsAsync(ApplicationDbContext context)
     else
     {
         Console.WriteLine("ℹ️  Levels already seeded");
+    }
+}
+
+static async Task SeedInitialData(IServiceProvider services, ILogger logger)
+{
+    try
+    {
+        var userManager = services.GetRequiredService<UserManager<AppUser>>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole<int>>>();
+
+        // Create default roles if they don't exist
+        var roles = new[] { "Admin", "User", "Moderator" };
+        foreach (var role in roles)
+        {
+            if (!await roleManager.RoleExistsAsync(role))
+            {
+                await roleManager.CreateAsync(new IdentityRole<int>(role));
+                logger.LogInformation("Created role: {Role}", role);
+            }
+        }
+
+        logger.LogInformation("Initial data seeding completed");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error during initial data seeding");
     }
 }
 
@@ -696,86 +752,12 @@ static decimal CalculateTokenBonus(int level)
     return (decimal)(level / 10) * 0.05m; // 0%, 5%, 10%, 15%, etc.
 }
 
-app.MapControllerRoute(
-    name: "account",
-    pattern: "Account/{action=Index}",
-    defaults: new { controller = "Account", action = "Index" });
-
-app.MapControllerRoute(
-    name: "main",
-    pattern: "Main",
-    defaults: new { controller = "Home", action = "Main" });
-
-app.MapControllerRoute(
-    name: "login",
-    pattern: "Login",
-    defaults: new { controller = "Account", action = "Login" });
-
-app.MapControllerRoute(
-    name: "register",
-    pattern: "Register",
-    defaults: new { controller = "Account", action = "Register" });
-
-// Health check endpoint
-app.MapGet("/health", async (ApplicationDbContext context) =>
-{
-    try
-    {
-        var canConnect = await context.Database.CanConnectAsync();
-        return canConnect ? Results.Ok(new
-        {
-            status = "healthy",
-            timestamp = DateTime.UtcNow,
-            database = "connected"
-        }) : Results.Problem("Database connection failed");
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem($"Health check failed: {ex.Message}");
-    }
-});
-
-// Initialize database in development using extension method (from feature/item-management)
-if (app.Environment.IsDevelopment())
-{
-    await app.InitializeDatabaseAsync();
-}
-
 // -----------------------------------------------------
-// 15. Helper Methods (from dev)
-// -----------------------------------------------------
-static async Task SeedInitialData(IServiceProvider services, ILogger logger)
-{
-    try
-    {
-        var userManager = services.GetRequiredService<UserManager<AppUser>>();
-        var roleManager = services.GetRequiredService<RoleManager<IdentityRole<int>>>();
-
-        // Create default roles if they don't exist
-        var roles = new[] { "Admin", "User", "Moderator" };
-        foreach (var role in roles)
-        {
-            if (!await roleManager.RoleExistsAsync(role))
-            {
-                await roleManager.CreateAsync(new IdentityRole<int>(role));
-                logger.LogInformation("Created role: {Role}", role);
-            }
-        }
-
-        logger.LogInformation("Initial data seeding completed");
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Error during initial data seeding");
-    }
-}
-
-// -----------------------------------------------------
-// 16. Start Application
+// 17. Start Application
 // -----------------------------------------------------
 appLogger.LogInformation("TidyUp application starting...");
 appLogger.LogInformation("Environment: {Environment}", app.Environment.EnvironmentName);
-appLogger.LogInformation("Authentication configured with modal system");
-appLogger.LogInformation("Item management features enabled");
+appLogger.LogInformation("Authentication configured with OAuth and modal system");
+appLogger.LogInformation("Item management and gamification features enabled");
 
 app.Run();

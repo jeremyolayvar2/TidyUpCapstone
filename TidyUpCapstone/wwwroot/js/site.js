@@ -1,17 +1,14 @@
-﻿// site.js - Main site functionality and core features
+﻿// MERGED site.js - Main site functionality combining theme management and enhanced navigation
 // Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
 // for details on configuring this project to bundle and minify static web assets.
 
-// FIXED: Enhanced sidebar toggle functionality with proper error handling
-function toggleSidebar() {
-    console.log('toggleSidebar called from site.js');
 // CORE SITE INITIALIZATION -----------------------------------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', function () {
+    console.log('Site.js DOM loaded');
+
     // Initialize core functionality based on page type
     const layoutWrapper = document.querySelector('.layout-wrapper');
 
-    const sidebar = document.getElementById('sidebar');
-    const toggleIcon = document.querySelector('#icon-toggle .toggle, #icon-toggle img');
     if (layoutWrapper) {
         // Pages WITH navigation
         initializeNavigationFeatures();
@@ -22,18 +19,17 @@ document.addEventListener('DOMContentLoaded', function () {
         initializeStandalonePageFeatures();
     }
 
-    if (!sidebar) {
-        console.error('Sidebar element not found');
-        return false;
-    }
     // Initialize global features
     initializeGlobalFeatures();
+
+    // Initialize navigation manager
+    window.navigationManager = new NavigationManager();
+
+    // Initialize enhanced navigation
+    initializeNavigation();
+    setCurrentPageActive();
 });
 
-    if (!toggleIcon) {
-        console.error('Toggle icon not found');
-        return false;
-    }
 // NAVIGATION FEATURES -----------------------------------------------------------------------------------------
 function initializeNavigationFeatures() {
     initializeSidebar();
@@ -41,13 +37,12 @@ function initializeNavigationFeatures() {
     initializeMessages();
 }
 
-// Sidebar functionality
+// Enhanced sidebar functionality
 function initializeSidebar() {
     const toggleButton = document.getElementById('icon-toggle');
     const sidebar = document.getElementById('sidebar');
 
     if (toggleButton && sidebar) {
-        // Initialize sidebar state
         setupSidebarToggle();
     }
 }
@@ -57,12 +52,37 @@ function setupSidebarToggle() {
     // This ensures consistent behavior across all pages
 }
 
-// Global sidebar toggle function
+// MERGED: Enhanced sidebar toggle functionality with proper error handling and theme support
 function toggleSidebar() {
+    console.log('toggleSidebar called from site.js');
+
+    const sidebar = document.getElementById('sidebar');
+    const layoutWrapper = document.querySelector('.layout-wrapper');
+    const toggleIcon = document.querySelector('#icon-toggle .toggle, #icon-toggle img');
+
+    if (!sidebar) {
+        console.error('Sidebar element not found');
+        return false;
+    }
+
+    if (!toggleIcon) {
+        console.error('Toggle icon not found');
+        return false;
+    }
+
     console.log('Toggling sidebar...');
 
     // Toggle sidebar class
     sidebar.classList.toggle('close');
+
+    // Add/remove class to layout wrapper for CSS targeting
+    if (layoutWrapper) {
+        if (sidebar.classList.contains('close')) {
+            layoutWrapper.classList.add('sidebar-closed');
+        } else {
+            layoutWrapper.classList.remove('sidebar-closed');
+        }
+    }
 
     // Toggle icon rotation
     toggleIcon.classList.toggle('rotate');
@@ -70,9 +90,9 @@ function toggleSidebar() {
     // Add smooth transition
     sidebar.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
 
-    // Update main content margins
+    // Update main content margins for responsive design
     const mainContent = document.querySelector('.main-content');
-    if (mainContent) {
+    if (mainContent && window.innerWidth > 768) {
         if (sidebar.classList.contains('close')) {
             mainContent.style.marginLeft = '82px';
             mainContent.style.width = 'calc(100vw - 82px)';
@@ -81,51 +101,21 @@ function toggleSidebar() {
             mainContent.style.width = 'calc(100vw - 250px)';
         }
     }
-    const sidebar = document.getElementById('sidebar');
-    const layoutWrapper = document.querySelector('.layout-wrapper');
-    const toggleIcon = document.querySelector('#icon-toggle img');
-
-    if (sidebar && layoutWrapper) {
-        sidebar.classList.toggle('close');
-
-        // Add/remove class to layout wrapper for CSS targeting
-        if (sidebar.classList.contains('close')) {
-            layoutWrapper.classList.add('sidebar-closed');
-        } else {
-            layoutWrapper.classList.remove('sidebar-closed');
-        }
-
-        // Toggle icon rotation
-        if (toggleIcon) {
-            toggleIcon.classList.toggle('rotate');
-        }
 
     // Update body class for responsive layouts
     document.body.classList.toggle('sidebar-collapsed');
-        // Maintain theme consistency after toggle
-        const currentPageType = getCurrentPageType();
-        setTimeout(() => {
-            applyPageTheme(currentPageType);
-        }, 300); // Wait for transition to complete
-    }
-}
+
+    // MERGED: Maintain theme consistency after toggle
+    const currentPageType = getCurrentPageType();
+    setTimeout(() => {
+        applyPageTheme(currentPageType);
+    }, 300);
 
     console.log('Sidebar toggled successfully');
     return true;
 }
 
-// Enhanced Mobile Dock with Premium Interactions
-const dockItems = document.querySelectorAll(".dock-item");
-const distance = 120;
-const maxScale = 2.0;
-const dockPanel = document.getElementById("dockPanel");
-
-if (dockPanel && dockItems.length > 0) {
-    // Enhanced hover effect with smoother animations
-    dockPanel.addEventListener("mousemove", (e) => {
-        const rect = dockPanel.getBoundingClientRect();
-        const mouseX = e.clientX;
-// Mobile dock functionality
+// MERGED: Enhanced Mobile dock functionality
 function initializeMobileDock() {
     const dockPanel = document.getElementById("dockPanel");
     const dockItems = document.querySelectorAll(".dock-item");
@@ -137,9 +127,10 @@ function initializeMobileDock() {
 }
 
 function setupDockInteractions(dockPanel, dockItems) {
-    const distance = 100;
-    const maxScale = 1.8;
+    const distance = 120;
+    const maxScale = 2.0;
 
+    // Enhanced hover effect with smoother animations
     dockPanel.addEventListener("mousemove", (e) => {
         const rect = dockPanel.getBoundingClientRect();
         const mouseX = e.clientX;
@@ -155,14 +146,16 @@ function setupDockInteractions(dockPanel, dockItems) {
         });
     });
 
+    // Reset scales when mouse leaves dock
     dockPanel.addEventListener("mouseleave", () => {
         dockItems.forEach((item) => {
             item.style.transform = "scale(1)";
+            item.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
         });
     });
 }
 
-    // Enhanced label animations
+function setupDockLabels(dockItems) {
     dockItems.forEach((item) => {
         const label = item.querySelector(".dock-label");
 
@@ -188,7 +181,120 @@ function setupDockInteractions(dockPanel, dockItems) {
     });
 }
 
-// Enhanced Navigation System with Active States
+// PAGE THEME MANAGEMENT -----------------------------------------------------------------------------------------
+function initializePageTheme() {
+    const layoutWrapper = document.querySelector('.layout-wrapper');
+    if (!layoutWrapper) return;
+
+    // Get the current page type from body class
+    const pageType = getCurrentPageType();
+
+    // Apply theme-specific behaviors
+    applyPageTheme(pageType);
+}
+
+function getCurrentPageType() {
+    const bodyClasses = document.body.classList;
+
+    if (bodyClasses.contains('quest-page')) return 'quest';
+    if (bodyClasses.contains('achievements-page')) return 'achievements';
+    if (bodyClasses.contains('streaks-page')) return 'streaks';
+    if (bodyClasses.contains('shop-page')) return 'shop';
+    if (bodyClasses.contains('main-page')) return 'main';
+
+    return 'main'; // default
+}
+
+function applyPageTheme(pageType) {
+    const sidebar = document.getElementById('sidebar');
+    const dockPanel = document.getElementById('dockPanel');
+    const mainContent = document.querySelector('.main-content');
+
+    // Add smooth transitions
+    [sidebar, dockPanel, mainContent].forEach(element => {
+        if (element) {
+            element.style.transition = 'all 0.3s ease';
+        }
+    });
+
+    // Apply page-specific adjustments
+    switch (pageType) {
+        case 'quest':
+        case 'achievements':
+        case 'streaks':
+            console.log(`${pageType} page theme applied - light sidebar`);
+            break;
+        case 'main':
+            console.log('Main page theme applied - dark sidebar');
+            break;
+        case 'shop':
+            console.log('Shop page theme applied - accent sidebar');
+            break;
+        default:
+            console.log('Default theme applied');
+    }
+}
+
+function changePageTheme(newPageType) {
+    // Remove existing page type classes
+    const bodyClasses = document.body.classList;
+    bodyClasses.remove('main-page', 'quest-page', 'achievements-page', 'streaks-page', 'shop-page');
+
+    // Add new page type class
+    bodyClasses.add(`${newPageType}-page`);
+
+    // Apply the new theme
+    applyPageTheme(newPageType);
+}
+
+// Navigation theme handling
+function setupThemeNavigation() {
+    setupSidebarNavigation();
+    setupMobileNavigation();
+}
+
+function setupSidebarNavigation() {
+    const navLinks = document.querySelectorAll('#sidebar a[href]');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function () {
+            const href = this.getAttribute('href');
+            let pageType = determinePageType(href, this.dataset.pageType);
+
+            // Theme will be handled by the new page
+            console.log(`Navigating to ${pageType} page`);
+        });
+    });
+}
+
+function setupMobileNavigation() {
+    const dockItems = document.querySelectorAll('.dock-item');
+    dockItems.forEach(item => {
+        item.addEventListener('click', function () {
+            const label = this.dataset.label?.toLowerCase();
+            let pageType = 'main';
+
+            if (label === 'quests/milestone' || label === 'quests & milestone') {
+                pageType = 'quest';
+            } else if (label === 'shop') {
+                pageType = 'shop';
+            }
+
+            // Apply theme change for visual feedback
+            changePageTheme(pageType);
+        });
+    });
+}
+
+function determinePageType(href, dataPageType) {
+    if (dataPageType) return dataPageType;
+
+    if (href && href.includes('Quest')) return 'quest';
+    if (href && href.includes('Shop')) return 'shop';
+
+    return 'main';
+}
+
+// ENHANCED NAVIGATION SYSTEM -----------------------------------------------------------------------------------------
 class NavigationManager {
     constructor() {
         this.currentPage = this.getCurrentPage();
@@ -206,8 +312,10 @@ class NavigationManager {
 
         if (path.includes('/home/main') || path === '/') {
             return 'home';
-        } else if (path.includes('/home/settings')) {
+        } else if (path.includes('/home/settings') || path.includes('/home/settingspage')) {
             return 'settings';
+        } else if (path.includes('/home/questpage')) {
+            return 'quests';
         } else if (path.includes('/browse')) {
             return 'browse';
         } else if (path.includes('/claimed')) {
@@ -217,7 +325,7 @@ class NavigationManager {
         } else if (path.includes('/shop')) {
             return 'shop';
         } else if (path.includes('/messages')) {
-            return 'message';
+            return 'messages';
         } else if (path.includes('/notifications')) {
             return 'notifications';
         } else if (path.includes('/leaderboard')) {
@@ -243,8 +351,15 @@ class NavigationManager {
                 } else if (dataPage === 'token') {
                     e.preventDefault();
                     this.showTokenModal();
+                } else if (dataPage === 'quests') {
+                    // Allow navigation to quest page
+                    this.setActiveNavItem(dataPage);
                 } else if (href && href !== '#') {
                     // Allow normal navigation for valid hrefs
+                    this.setActiveNavItem(dataPage);
+                } else if (href === '#') {
+                    e.preventDefault();
+                    console.log(`Navigation to ${dataPage} not yet implemented`);
                     this.setActiveNavItem(dataPage);
                 }
             });
@@ -254,23 +369,31 @@ class NavigationManager {
         document.querySelectorAll('.dock-item').forEach(item => {
             item.addEventListener('click', (e) => {
                 const dataPage = item.getAttribute('data-page');
+                const dataLabel = item.getAttribute('data-label');
                 const onclickAttr = item.getAttribute('onclick');
 
                 // Handle special cases
-                if (dataPage === 'home') {
+                if (dataPage === 'home' || dataLabel === 'Home') {
                     window.location.href = '/Home/Main';
-                } else if (dataPage === 'settings') {
-                    window.location.href = '/Home/Settings';
-                } else if (dataPage === 'create') {
+                } else if (dataPage === 'settings' || dataLabel === 'Settings') {
+                    window.location.href = '/Home/SettingsPage';
+                } else if (dataPage === 'create' || dataLabel === 'Create') {
+                    e.preventDefault();
                     this.openCreateModal();
-                } else if (dataPage === 'token') {
+                } else if (dataPage === 'token' || dataLabel === 'Token') {
+                    e.preventDefault();
                     this.showTokenModal();
+                } else if (dataLabel === 'Quests & Milestone' || dataLabel === 'Quests/Milestone') {
+                    window.location.href = '/Home/QuestPage';
                 } else if (onclickAttr) {
                     // Execute existing onclick if present
                     return;
                 }
 
-                this.setActiveNavItem(dataPage);
+                const pageToActivate = dataPage || dataLabel?.toLowerCase();
+                if (pageToActivate) {
+                    this.setActiveNavItem(pageToActivate);
+                }
             });
         });
     }
@@ -291,7 +414,8 @@ class NavigationManager {
         // Mobile dock
         document.querySelectorAll('.dock-item').forEach(item => {
             item.classList.remove('active');
-            if (item.getAttribute('data-page') === pageName) {
+            const itemPage = item.getAttribute('data-page') || item.getAttribute('data-label')?.toLowerCase();
+            if (itemPage === pageName.toLowerCase()) {
                 item.classList.add('active');
             }
         });
@@ -306,26 +430,18 @@ class NavigationManager {
         const modal = document.getElementById('createPostModal');
         if (modal) {
             modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
             console.log('Create modal opened from NavigationManager');
         } else {
             console.warn('Create modal not found');
         }
     }
-// PAGE THEME MANAGEMENT -----------------------------------------------------------------------------------------
-function initializePageTheme() {
-    const layoutWrapper = document.querySelector('.layout-wrapper');
-    if (!layoutWrapper) return;
 
-    // Get the current page type from body class
-    const pageType = getCurrentPageType();
     showTokenModal() {
         const tokenModal = document.getElementById('tokenModal');
         if (tokenModal) {
             tokenModal.classList.add('show');
 
-    // Apply theme-specific behaviors
-    applyPageTheme(pageType);
-}
             // Auto-close after 5 seconds
             setTimeout(() => {
                 this.hideTokenModal();
@@ -383,13 +499,8 @@ function initializePageTheme() {
     }
 }
 
-// Enhanced Messaging System
-document.addEventListener('DOMContentLoaded', function () {
-    console.log('Site.js DOM loaded');
-
-    // Initialize navigation manager
-    window.navigationManager = new NavigationManager();
-
+// ENHANCED MESSAGING SYSTEM -----------------------------------------------------------------------------------------
+function initializeMessages() {
     // Enhanced messaging overlay
     const appContainer = document.querySelector('.app-container');
     const chatWindow = document.querySelector('.chat-window');
@@ -402,71 +513,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Hide both on load
         appContainer.classList.remove('active');
         if (chatWindow) chatWindow.classList.remove('active');
-    if (bodyClasses.contains('quest-page')) return 'quest';
-    if (bodyClasses.contains('shop-page')) return 'shop';
-    if (bodyClasses.contains('main-page')) return 'main';
 
-    return 'main'; // default
-}
-
-function applyPageTheme(pageType) {
-    const sidebar = document.getElementById('sidebar');
-    const dockPanel = document.getElementById('dockPanel');
-    const mainContent = document.querySelector('.main-content');
-
-    // Add smooth transitions
-    [sidebar, dockPanel, mainContent].forEach(element => {
-        if (element) {
-            element.style.transition = 'all 0.3s ease';
-        }
-    });
-
-    // Apply page-specific adjustments
-    switch (pageType) {
-        case 'quest':
-            console.log('Quest page theme applied');
-            break;
-        case 'main':
-            console.log('Main page theme applied');
-            break;
-        case 'shop':
-            console.log('Shop page theme applied');
-            break;
-        default:
-            console.log('Default theme applied');
-    }
-}
-
-function changePageTheme(newPageType) {
-    // Remove existing page type classes
-    const bodyClasses = document.body.classList;
-    bodyClasses.remove('main-page', 'quest-page', 'shop-page');
-
-    // Add new page type class
-    bodyClasses.add(`${newPageType}-page`);
-
-    // Apply the new theme
-    applyPageTheme(newPageType);
-}
-
-// Navigation theme handling
-function setupThemeNavigation() {
-    setupSidebarNavigation();
-    setupMobileNavigation();
-}
-
-function setupSidebarNavigation() {
-    const navLinks = document.querySelectorAll('#sidebar a[href]');
-    navLinks.forEach(link => {
-        link.addEventListener('click', function () {
-            const href = this.getAttribute('href');
-            let pageType = determinePageType(href, this.dataset.pageType);
-
-            // Theme will be handled by the new page
-            console.log(`Navigating to ${pageType} page`);
-        });
-    });
-}
         // Show app-container when new-message-btn is clicked
         newMessageBtn.addEventListener('click', function (e) {
             e.preventDefault();
@@ -480,32 +527,40 @@ function setupSidebarNavigation() {
             appContainer.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
         });
 
-function setupMobileNavigation() {
-    const dockItems = document.querySelectorAll('.dock-item');
-    dockItems.forEach(item => {
-        item.addEventListener('click', function () {
-            const label = this.dataset.label?.toLowerCase();
-            let pageType = 'main';
-
-            if (label === 'quests/milestone') {
-                pageType = 'quest';
-            } else if (label === 'shop') {
-                pageType = 'shop';
-            }
-
-            // Apply theme change for visual feedback
-            changePageTheme(pageType);
+        // Show chat-window when a message-item is clicked
+        messageItems.forEach(function (item) {
+            item.addEventListener('click', function () {
+                appContainer.classList.remove('active');
+                if (chatWindow) {
+                    chatWindow.classList.add('active');
+                    chatWindow.style.transform = 'translateX(0)';
+                    chatWindow.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                }
+            });
         });
-    });
-}
 
-function determinePageType(href, dataPageType) {
-    if (dataPageType) return dataPageType;
+        // Close handlers with enhanced animations
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function () {
+                appContainer.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    appContainer.classList.remove('active');
+                }, 300);
+            });
+        }
 
-    if (href && href.includes('Quest')) return 'quest';
-    if (href && href.includes('Shop')) return 'shop';
-
-    return 'main';
+        if (closeChatBtn) {
+            closeChatBtn.addEventListener('click', function () {
+                if (chatWindow) {
+                    chatWindow.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        chatWindow.classList.remove('active');
+                        appContainer.classList.add('active');
+                    }, 300);
+                }
+            });
+        }
+    }
 }
 
 // GLOBAL FEATURES -----------------------------------------------------------------------------------------
@@ -514,6 +569,9 @@ function initializeGlobalFeatures() {
     initializeAccessibility();
     initializePerformanceOptimizations();
     setupGlobalEventListeners();
+    setupEnhancedDropdowns();
+    setupFormEnhancements();
+    setupLoadingStates();
 }
 
 function initializeAccessibility() {
@@ -575,59 +633,6 @@ function handleWindowResize() {
         item.style.transform = 'scale(1)';
     });
 }
-
-// STANDALONE PAGE FEATURES -----------------------------------------------------------------------------------------
-function initializeStandalonePageFeatures() {
-    // Features for pages without navigation (login, landing, etc.)
-    console.log('Initializing standalone page features');
-
-    // Add any standalone page specific functionality here
-    initializeStandaloneInteractions();
-}
-
-function initializeStandaloneInteractions() {
-    // Handle standalone page interactions
-    const forms = document.querySelectorAll('form');
-    forms.forEach(form => {
-        form.addEventListener('submit', function (e) {
-            // Add form validation or loading states
-            console.log('Form submitted:', form.id || form.className);
-        });
-    });
-}
-
-        // Close handlers with enhanced animations
-        if (closeBtn) {
-            closeBtn.addEventListener('click', function () {
-                appContainer.style.transform = 'translateX(100%)';
-                setTimeout(() => {
-                    appContainer.classList.remove('active');
-                }, 300);
-            });
-        }
-
-        if (closeChatBtn) {
-            closeChatBtn.addEventListener('click', function () {
-                if (chatWindow) {
-                    chatWindow.style.transform = 'translateX(100%)';
-                    setTimeout(() => {
-                        chatWindow.classList.remove('active');
-                        appContainer.classList.add('active');
-                    }, 300);
-                }
-            });
-        }
-    }
-
-    // Enhanced dropdown functionality
-    setupEnhancedDropdowns();
-
-    // Enhanced form interactions
-    setupFormEnhancements();
-
-    // Enhanced loading states
-    setupLoadingStates();
-});
 
 // Enhanced Dropdown System
 function setupEnhancedDropdowns() {
@@ -736,7 +741,143 @@ function setupLoadingStates() {
     });
 }
 
-// Utility Functions
+// STANDALONE PAGE FEATURES -----------------------------------------------------------------------------------------
+function initializeStandalonePageFeatures() {
+    // Features for pages without navigation (login, landing, etc.)
+    console.log('Initializing standalone page features');
+
+    // Add any standalone page specific functionality here
+    initializeStandaloneInteractions();
+}
+
+function initializeStandaloneInteractions() {
+    // Handle standalone page interactions
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function (e) {
+            // Add form validation or loading states
+            console.log('Form submitted:', form.id || form.className);
+        });
+    });
+}
+
+// ENHANCED NAVIGATION FUNCTIONS -----------------------------------------------------------------------------------------
+function initializeNavigation() {
+    // Desktop sidebar navigation
+    document.querySelectorAll('#sidebar .nav-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            const href = link.getAttribute('href');
+            const dataPage = link.getAttribute('data-page');
+
+            // Handle special cases that need to prevent default
+            if (dataPage === 'create') {
+                e.preventDefault();
+                openCreateModal();
+                return;
+            } else if (dataPage === 'token') {
+                e.preventDefault();
+                showTokenModal();
+                return;
+            }
+
+            // For Home and Settings, allow normal navigation
+            if (dataPage === 'home' || dataPage === 'settings' || dataPage === 'quests') {
+                // Let the browser handle normal navigation
+                setActiveNavItem(dataPage);
+                return;
+            }
+
+            // For other navigation items without specific hrefs
+            if (href === '#') {
+                e.preventDefault();
+                // Handle other navigation logic here
+                console.log(`Navigation to ${dataPage} not yet implemented`);
+                setActiveNavItem(dataPage);
+            }
+        });
+    });
+
+    // Mobile dock navigation enhancement
+    document.querySelectorAll('.dock-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            const dataPage = item.getAttribute('data-page');
+            const dataLabel = item.getAttribute('data-label');
+
+            // Handle navigation based on data-page or data-label
+            if (dataPage === 'home' || dataLabel === 'Home') {
+                window.location.href = '/Home/Main';
+            } else if (dataPage === 'settings' || dataLabel === 'Settings') {
+                window.location.href = '/Home/SettingsPage';
+            } else if (dataLabel === 'Quests & Milestone' || dataLabel === 'Quests/Milestone') {
+                window.location.href = '/Home/QuestPage';
+            } else if (dataPage === 'create' || dataLabel === 'Create') {
+                e.preventDefault();
+                openCreateModal();
+            } else if (dataPage === 'token' || dataLabel === 'Token') {
+                e.preventDefault();
+                showTokenModal();
+            }
+
+            // Set active state
+            const pageToActivate = dataPage || dataLabel?.toLowerCase();
+            if (pageToActivate) {
+                setActiveNavItem(pageToActivate);
+            }
+        });
+    });
+}
+
+function setCurrentPageActive() {
+    const currentPath = window.location.pathname.toLowerCase();
+    let currentPage = '';
+
+    // Determine current page based on URL
+    if (currentPath.includes('/home/main')) {
+        currentPage = 'home';
+    } else if (currentPath.includes('/home/settingspage')) {
+        currentPage = 'settings';
+    } else if (currentPath.includes('/home/questpage')) {
+        currentPage = 'quests';
+    } else if (currentPath.includes('/home/index') || currentPath === '/') {
+        currentPage = 'home';
+    }
+    // Add other page mappings as needed
+
+    if (currentPage) {
+        setActiveNavItem(currentPage);
+    }
+}
+
+function setActiveNavItem(pageName) {
+    // Desktop sidebar
+    document.querySelectorAll('#sidebar .nav-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('data-page') === pageName.toLowerCase()) {
+            link.classList.add('active');
+        }
+    });
+
+    // Mobile dock
+    document.querySelectorAll('.dock-item').forEach(item => {
+        item.classList.remove('active');
+        const itemPage = item.getAttribute('data-page') || item.getAttribute('data-label')?.toLowerCase();
+        if (itemPage === pageName.toLowerCase() ||
+            (pageName === 'quests' && (itemPage === 'quests & milestone' || itemPage === 'quests/milestone'))) {
+            item.classList.add('active');
+        }
+    });
+}
+
+// UTILITY FUNCTIONS -----------------------------------------------------------------------------------------
+function closeActiveModals() {
+    // Close any open modals or overlays
+    const activeModals = document.querySelectorAll('.modal.active, .overlay.active, .modal.show');
+    activeModals.forEach(modal => {
+        modal.classList.remove('active', 'show');
+        modal.style.display = 'none';
+    });
+}
+
 function showButtonLoading(button) {
     const originalText = button.textContent;
     const spinner = button.querySelector('.loading-spinner');
@@ -765,7 +906,7 @@ function hideButtonLoading(button, originalText = 'Submit') {
     }
 }
 
-// FIXED: Enhanced notification system
+// Enhanced notification system
 function showNotification(message, type = 'info', duration = 3000) {
     // Remove existing notifications
     const existingNotifications = document.querySelectorAll('.notification');
@@ -830,34 +971,7 @@ function showNotification(message, type = 'info', duration = 3000) {
     return notification;
 }
 
-// Navigation functions
-function navigateToPage(url) {
-    if (url && url !== '#') {
-        window.location.href = url;
-    } else {
-        console.warn('Invalid navigation URL:', url);
-    }
-}
-
-function setActiveNavItem(pageName) {
-    // Desktop sidebar
-    document.querySelectorAll('#sidebar .nav-link').forEach(link => {
-        link.classList.remove('active');
-        if (link.getAttribute('data-page') === pageName) {
-            link.classList.add('active');
-        }
-    });
-
-    // Mobile dock
-    document.querySelectorAll('.dock-item').forEach(item => {
-        item.classList.remove('active');
-        if (item.getAttribute('data-page') === pageName) {
-            item.classList.add('active');
-        }
-    });
-}
-
-// FIXED: Token modal functions
+// Token modal functions
 function showTokenModal() {
     console.log('showTokenModal called from site.js');
 
@@ -885,7 +999,7 @@ function hideTokenModal() {
     }
 }
 
-// FIXED: Create modal function
+// Create modal function
 function openCreateModal() {
     console.log('openCreateModal called from site.js');
 
@@ -896,6 +1010,15 @@ function openCreateModal() {
         console.log('Create modal opened');
     } else {
         console.warn('Create modal not found');
+    }
+}
+
+// Navigation functions
+function navigateToPage(url) {
+    if (url && url !== '#') {
+        window.location.href = url;
+    } else {
+        console.warn('Invalid navigation URL:', url);
     }
 }
 
@@ -953,113 +1076,12 @@ function smoothScrollTo(target, duration = 1000) {
     requestAnimationFrame(animation);
 }
 
-
-// Enhanced navigation system - Add this to your existing site.js
-document.addEventListener('DOMContentLoaded', function () {
-    initializeNavigation();
-    setCurrentPageActive();
+// Error handling
+window.addEventListener('error', function (e) {
+    console.error('Global error:', e.error);
+    // Add error reporting here if needed
 });
 
-function initializeNavigation() {
-    // Desktop sidebar navigation
-    document.querySelectorAll('#sidebar .nav-link').forEach(link => {
-        link.addEventListener('click', (e) => {
-            const href = link.getAttribute('href');
-            const dataPage = link.getAttribute('data-page');
-
-            // Handle special cases that need to prevent default
-            if (dataPage === 'create') {
-                e.preventDefault();
-                openCreateModal();
-                return;
-            } else if (dataPage === 'token') {
-                e.preventDefault();
-                showTokenModal();
-                return;
-            }
-
-            // For Home and Settings, allow normal navigation
-            if (dataPage === 'home' || dataPage === 'settings') {
-                // Let the browser handle normal navigation
-                setActiveNavItem(dataPage);
-                return;
-            }
-
-            // For other navigation items without specific hrefs
-            if (href === '#') {
-                e.preventDefault();
-                // Handle other navigation logic here
-                console.log(`Navigation to ${dataPage} not yet implemented`);
-                setActiveNavItem(dataPage);
-            }
-        });
-    });
-
-    // Mobile dock navigation enhancement
-    document.querySelectorAll('.dock-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-            const dataPage = item.getAttribute('data-page');
-            const dataLabel = item.getAttribute('data-label');
-
-            // Handle navigation based on data-page or data-label
-            if (dataPage === 'home' || dataLabel === 'Home') {
-                window.location.href = '/Home/Main';
-            } else if (dataPage === 'settings' || dataLabel === 'Settings') {
-                window.location.href = '/Home/SettingsPage';
-            } else if (dataPage === 'create' || dataLabel === 'Create') {
-                e.preventDefault();
-                openCreateModal();
-            } else if (dataPage === 'token' || dataLabel === 'Token') {
-                e.preventDefault();
-                showTokenModal();
-            }
-
-            // Set active state
-            const pageToActivate = dataPage || dataLabel?.toLowerCase();
-            if (pageToActivate) {
-                setActiveNavItem(pageToActivate);
-            }
-        });
-    });
-}
-
-function setCurrentPageActive() {
-    const currentPath = window.location.pathname.toLowerCase();
-    let currentPage = '';
-
-    // Determine current page based on URL
-    if (currentPath.includes('/home/main')) {
-        currentPage = 'home';
-    } else if (currentPath.includes('/home/settingspage')) {
-        currentPage = 'settings';
-    } else if (currentPath.includes('/home/index') || currentPath === '/') {
-        currentPage = 'home';
-    }
-    // Add other page mappings as needed
-
-    if (currentPage) {
-        setActiveNavItem(currentPage);
-    }
-}
-
-function setActiveNavItem(pageName) {
-    // Desktop sidebar
-    document.querySelectorAll('#sidebar .nav-link').forEach(link => {
-        link.classList.remove('active');
-        if (link.getAttribute('data-page') === pageName.toLowerCase()) {
-            link.classList.add('active');
-        }
-    });
-
-    // Mobile dock
-    document.querySelectorAll('.dock-item').forEach(item => {
-        item.classList.remove('active');
-        const itemPage = item.getAttribute('data-page') || item.getAttribute('data-label')?.toLowerCase();
-        if (itemPage === pageName.toLowerCase()) {
-            item.classList.add('active');
-        }
-    });
-}
 // Export functions for global use
 window.toggleSidebar = toggleSidebar;
 window.showTokenModal = showTokenModal;
@@ -1073,13 +1095,23 @@ window.debounce = debounce;
 window.throttle = throttle;
 window.navigateToPage = navigateToPage;
 window.setActiveNavItem = setActiveNavItem;
+window.getCurrentPageType = getCurrentPageType;
+window.changePageTheme = changePageTheme;
+window.applyPageTheme = applyPageTheme;
+window.closeActiveModals = closeActiveModals;
 
-console.log('Site.js loaded successfully');
-// Export functions for use in other files
+// Export for use in other files
 window.TidyUpSite = {
     toggleSidebar,
     getCurrentPageType,
     changePageTheme,
     applyPageTheme,
-    closeActiveModals
+    closeActiveModals,
+    showTokenModal,
+    hideTokenModal,
+    openCreateModal,
+    showNotification,
+    setActiveNavItem
 };
+
+console.log('Site.js loaded successfully');
