@@ -49,7 +49,7 @@ namespace TidyUpCapstone.Models.ViewModels.Gamification
         public int TotalQuestsCompleted { get; set; }
         public int AchievementsEarned { get; set; }
         public int TotalAchievements { get; set; }
-        public decimal TotalTokensEarned { get; set; }
+        public decimal TokenBalance{ get; set; } //changed from TotalTokensEarned to TokenBalance
         public int TotalXpEarned { get; set; }
         public int ActiveStreaksCount { get; set; }
         public int HighestRank { get; set; }

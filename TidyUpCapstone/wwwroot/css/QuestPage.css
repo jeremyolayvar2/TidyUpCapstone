@@ -1,0 +1,979 @@
+﻿:root {
+    --background: #F5F5F5;
+    --primary-color: #6B9080;
+    --dark-primary: #344e41;
+    --secondary-color: #A4C3B2;
+    --accent-color: #EAF4F4;
+    --text-color: #000000;
+    --text-secondary: #6B7280;
+    --hover-effect: rgba(217, 217, 217, 0.6);
+    --success-color: #10B981;
+    --warning-color: #F59E0B;
+    --danger-color: #EF4444;
+    --info-color: #3B82F6;
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --border-radius: 16px;
+    --border-radius-sm: 8px;
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 0.75rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
+}
+
+html {
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(135deg, #344e41 0%, #588157 25%, #6b9080 50%, #a3b18a 75%, #cad2c5 100%) !important;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+    
+    body.quest-page {
+        background: linear-gradient(135deg, #344e41 0%, #588157 25%, #6b9080 50%, #a3b18a 75%, #cad2c5 100%) !important;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        background-size: cover;
+        font-family: 'Montserrat', sans-serif;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        min-height: 100vh;
+    }
+
+.righteous-font {
+    font-family: "Righteous", sans-serif;
+}
+
+/* Main Dashboard Container */
+.quest-dashboard {
+    width: 100%;
+    min-height: 100vh;
+    padding: var(--spacing-lg);
+    padding-bottom: 120px;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Header Styles */
+.quest-header {
+    text-align: center;
+    margin-bottom: var(--spacing-2xl);
+}
+
+.quest-title {
+    font-size: clamp(2.5rem, 8vw, 6rem);
+    color: var(--background);
+    font-weight: bold;
+    transform: rotate(-2deg);
+    margin: var(--spacing-lg) 0;
+    line-height: 0.9;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-stats {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-xl);
+    margin-top: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    text-align: center;
+    color: var(--background);
+}
+
+.stat-value {
+    display: block;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-weight: 700;
+    font-family: 'Righteous', cursive;
+}
+
+.stat-label {
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    opacity: 0.9;
+}
+
+/* Bento Grid Layout */
+.bento-grid {
+    display: grid;
+    gap: var(--spacing-lg);
+    max-width: 1400px;
+    margin: 0 auto;
+    grid-template-columns: repeat(12, 1fr);
+    grid-auto-rows: minmax(200px, auto);
+}
+
+/* Base Card Styles */
+.bento-card {
+    background: var(--background);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    position: relative;
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+    .bento-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--card-shadow-hover);
+    }
+
+/* Grid Item Positioning */
+.level-card {
+    grid-column: span 12;
+    grid-row: span 1;
+}
+
+.checkin-card {
+    grid-column: span 6;
+    grid-row: span 1;
+}
+
+.daily-quests,
+.weekly-quests {
+    grid-column: span 6;
+    grid-row: span 3;
+}
+
+.special-quests,
+.achievement-card {
+    grid-column: span 6;
+    grid-row: span 2;
+}
+
+.browse-card {
+    grid-column: span 6;
+    grid-row: span 1;
+}
+
+/* Level Card Styles */
+.level-card {
+    background: linear-gradient(135deg, #F4A261 0%, #E76F51 100%);
+    color: white;
+}
+
+.level-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+}
+
+.level-display {
+    display: flex;
+    align-items: baseline;
+    gap: var(--spacing-md);
+}
+
+.level-number {
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: bold;
+    color: var(--background);
+    font-family: 'Righteous', cursive;
+}
+
+.level-name {
+    font-size: clamp(1rem, 3vw, 1.5rem);
+    font-weight: 600;
+}
+
+.xp-display {
+    font-size: clamp(0.875rem, 2vw, 1.125rem);
+    color: #E8E8E8;
+    text-align: right;
+}
+
+.xp-separator {
+    margin: 0 var(--spacing-xs);
+}
+
+.level-progress-bar {
+    position: relative;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    height: 12px;
+    overflow: hidden;
+}
+
+.level-progress-fill {
+    background: linear-gradient(90deg, #FFD700, #FFA500);
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.level-progress-text {
+    position: absolute;
+    top: -25px;
+    right: 0;
+    font-size: 0.875rem;
+    color: #E8E8E8;
+}
+
+/* Check-in Card Styles */
+.checkin-card {
+    background: linear-gradient(135deg, #2A9D8F 0%, #264653 100%);
+    color: white;
+}
+
+.checkin-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: var(--spacing-md);
+}
+
+.checkin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+    .checkin-header h3 {
+        margin: 0;
+        font-size: clamp(1.25rem, 3vw, 1.5rem);
+    }
+
+.streak-display {
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    opacity: 0.9;
+    font-weight: 600;
+}
+
+.check-in-timer {
+    background: rgba(255, 255, 255, 0.1);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+#timerDisplay {
+    font-family: monospace;
+    font-weight: bold;
+    color: #FFD700;
+}
+
+.checkin-button {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--border-radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: auto;
+}
+
+    .checkin-button:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-1px);
+    }
+
+    .checkin-button:disabled {
+        background: var(--success-color);
+        border-color: var(--success-color);
+        cursor: default;
+        transform: none;
+    }
+
+/* Quest Cards Glass Styles */
+.quests-card {
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+    .quests-card:hover {
+        background: rgba(255, 255, 255, 0.15) !important;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+    }
+
+.quests-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+    .quests-header h2 {
+        margin: 0;
+        font-size: clamp(1.25rem, 3vw, 1.75rem);
+        color: white !important;
+    }
+
+.quest-count {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: 50%;
+    font-weight: 600;
+    min-width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+}
+
+.quests-container {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    max-height: 600px;
+    padding-right: var(--spacing-xs);
+}
+
+    .quests-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .quests-container::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+    }
+
+    .quests-container::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+.quest-item {
+    background: rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: white;
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-md);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+    .quest-item:hover {
+        background: rgba(255, 255, 255, 0.25) !important;
+        border-color: rgba(255, 255, 255, 0.4) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+.quest-timer {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--spacing-xs);
+}
+
+.quest-name {
+    font-size: clamp(1rem, 2.5vw, 1.125rem);
+    font-weight: 700;
+    margin: var(--spacing-xs) 0;
+    color: white !important;
+    line-height: 1.3;
+}
+
+.quest-description {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.9) !important;
+    margin: var(--spacing-xs) 0 var(--spacing-md) 0;
+    line-height: 1.4;
+}
+
+.quest-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: var(--spacing-md) 0;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+.quest-badges {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.difficulty-badge,
+.type-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.difficulty-easy {
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+.difficulty-medium {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.difficulty-hard {
+    background: #FEE2E2;
+    color: #991B1B;
+}
+
+.type-daily {
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
+.type-weekly {
+    background: #EDE9FE;
+    color: #5B21B6;
+}
+
+.type-special {
+    background: #FCE7F3;
+    color: #BE185D;
+}
+
+.quest-rewards {
+    display: flex;
+    gap: var(--spacing-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.quests-card .reward-tokens {
+    color: #FCD34D !important;
+}
+
+.quests-card .reward-xp {
+    color: #93C5FD !important;
+}
+
+.quest-progress {
+    margin: var(--spacing-md) 0;
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xs);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: white !important;
+}
+
+.progress-bar {
+    background: rgba(255, 255, 255, 0.2) !important;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: var(--spacing-md);
+}
+
+.progress-fill {
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    height: 100%;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 4px;
+}
+
+.claim-button {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--border-radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+}
+
+    .claim-button.active {
+        background: rgba(107, 144, 128, 0.8) !important;
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        border: 1px solid rgba(107, 144, 128, 0.9) !important;
+    }
+
+        .claim-button.active:hover {
+            background: rgba(107, 144, 128, 0.9) !important;
+            transform: translateY(-1px);
+        }
+
+    .claim-button.completed {
+        background: rgba(16, 185, 129, 0.8) !important;
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        border: 1px solid rgba(16, 185, 129, 0.9) !important;
+        cursor: default;
+    }
+
+    .claim-button.disabled {
+        cursor: default;
+    }
+
+.no-quests {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 200px;
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+    .no-quests p {
+        color: rgba(255, 255, 255, 0.8) !important;
+    }
+
+.generate-quest-btn {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--border-radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: var(--spacing-md);
+    transition: all 0.3s ease;
+}
+
+    .generate-quest-btn:hover {
+        background: rgba(255, 255, 255, 0.2) !important;
+        transform: translateY(-1px);
+    }
+
+/* Achievement Card Styles */
+.achievement-card {
+    background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
+}
+
+.achievement-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: var(--spacing-md);
+}
+
+.profile-section {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.profile-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary-color);
+}
+
+.achievement-info {
+    flex: 1;
+}
+
+.achievement-title {
+    margin: 0;
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    color: var(--primary-color);
+}
+
+.achievement-subtitle {
+    margin: var(--spacing-xs) 0 0 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.achievement-icon {
+    align-self: center;
+    margin: var(--spacing-md) 0;
+}
+
+    .achievement-icon img {
+        max-width: 80px;
+        height: auto;
+    }
+
+.streak-info {
+    text-align: center;
+    background: white;
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+}
+
+.streak-title {
+    margin: 0;
+    font-size: clamp(1.25rem, 3vw, 1.5rem);
+    color: var(--primary-color);
+}
+
+.streak-description {
+    margin: var(--spacing-xs) 0 0 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.achievement-stats {
+    display: flex;
+    justify-content: space-around;
+    background: white;
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+    margin-top: auto;
+}
+
+    .achievement-stats .stat-item {
+        text-align: center;
+        color: var(--text-color);
+    }
+
+    .achievement-stats .stat-value {
+        font-size: clamp(1.125rem, 2.5vw, 1.25rem);
+        color: var(--primary-color);
+    }
+
+    .achievement-stats .stat-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+.achievement-links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.achievement-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm);
+    background: rgba(107, 144, 128, 0.1);
+    border-radius: var(--border-radius-sm);
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+}
+
+    .achievement-link span {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+
+    .achievement-link:hover {
+        background: rgba(107, 144, 128, 0.2);
+        transform: translateX(4px);
+        color: var(--primary-color);
+    }
+
+/* Browse Card Styles */
+.browse-card {
+    background: linear-gradient(135deg, #E9C46A 0%, #E76F51 100%);
+    padding: 0;
+    overflow: hidden;
+}
+
+.browse-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: var(--spacing-lg);
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+    .browse-link:hover {
+        color: white;
+        transform: scale(1.02);
+    }
+
+.browse-content {
+    text-align: center;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.browse-icon {
+    margin-bottom: var(--spacing-sm);
+}
+
+    .browse-icon i {
+        font-size: 2.5rem;
+        opacity: 0.9;
+    }
+
+.browse-content h3 {
+    margin: 0;
+    font-size: clamp(1.25rem, 3vw, 1.5rem);
+}
+
+.browse-content p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.875rem;
+}
+
+.browse-arrow {
+    margin-top: var(--spacing-sm);
+    transition: transform 0.3s ease;
+}
+
+.browse-link:hover .browse-arrow {
+    transform: translateX(4px);
+}
+
+/* Backdrop blur support fallback */
+@supports not (backdrop-filter: blur(10px)) {
+    .quests-card {
+        background: rgba(255, 255, 255, 0.25) !important;
+    }
+
+        .quests-card .quest-item {
+            background: rgba(255, 255, 255, 0.35) !important;
+        }
+}
+
+/* Responsive Design */
+@media (min-width: 1200px) {
+    .quest-dashboard {
+        padding: var(--spacing-2xl);
+    }
+
+    .bento-grid {
+        gap: var(--spacing-xl);
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .bento-grid {
+        grid-template-columns: repeat(8, 1fr);
+    }
+
+    .level-card {
+        grid-column: span 8;
+    }
+
+    .checkin-card {
+        grid-column: span 4;
+    }
+
+    .daily-quests,
+    .weekly-quests {
+        grid-column: span 4;
+        grid-row: span 3;
+    }
+
+    .special-quests {
+        grid-column: span 8;
+        grid-row: span 2;
+    }
+
+    .achievement-card {
+        grid-column: span 8;
+        grid-row: span 2;
+    }
+
+    .browse-card {
+        grid-column: span 4;
+    }
+}
+
+@media (min-width: 480px) and (max-width: 767px) {
+    .quest-dashboard {
+        padding: var(--spacing-md);
+        padding-bottom: 140px;
+    }
+
+    .bento-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--spacing-md);
+    }
+
+    .level-card,
+    .checkin-card,
+    .daily-quests,
+    .weekly-quests,
+    .special-quests,
+    .achievement-card,
+    .browse-card {
+        grid-column: span 4;
+        grid-row: span 1;
+    }
+
+    .daily-quests,
+    .weekly-quests,
+    .special-quests {
+        grid-row: span 2;
+    }
+
+    .achievement-card {
+        grid-row: span 2;
+    }
+
+    .quests-container {
+        max-height: 400px;
+    }
+}
+
+@media (min-width: 320px) and (max-width: 479px) {
+    .quest-dashboard {
+        padding: var(--spacing-sm);
+        padding-bottom: 140px;
+    }
+
+    .bento-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .level-card,
+    .checkin-card,
+    .daily-quests,
+    .weekly-quests,
+    .special-quests,
+    .achievement-card,
+    .browse-card {
+        grid-column: span 1;
+        grid-row: span 1;
+    }
+
+    .quest-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-xs);
+    }
+
+    .profile-section {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .achievement-stats {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .quests-container {
+        max-height: 300px;
+    }
+
+    .bento-card {
+        padding: var(--spacing-md);
+    }
+}
+
+@media (max-width: 319px) {
+    .quest-dashboard {
+        padding: var(--spacing-xs);
+        padding-bottom: 120px;
+    }
+
+    .quest-title {
+        font-size: 2rem;
+    }
+
+    .bento-card {
+        padding: var(--spacing-sm);
+    }
+
+    .header-stats {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .quests-container {
+        max-height: 250px;
+    }
+}
+
+@media (max-width: 767px) and (orientation: landscape) {
+    .quest-dashboard {
+        padding-bottom: 100px;
+    }
+
+    .quest-title {
+        font-size: clamp(1.5rem, 6vw, 2.5rem);
+        margin: var(--spacing-md) 0;
+    }
+
+    .bento-grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+
+    .level-card {
+        grid-column: span 6;
+    }
+
+    .checkin-card {
+        grid-column: span 3;
+    }
+
+    .daily-quests,
+    .weekly-quests {
+        grid-column: span 3;
+        grid-row: span 2;
+    }
+
+    .special-quests,
+    .achievement-card {
+        grid-column: span 6;
+        grid-row: span 1;
+    }
+
+    .browse-card {
+        grid-column: span 3;
+    }
+}

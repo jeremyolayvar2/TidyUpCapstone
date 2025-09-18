@@ -69,6 +69,10 @@ namespace TidyUpCapstone.Data
         public DbSet<Leaderboard> Leaderboards { get; set; }
         public DbSet<LeaderboardEntry> LeaderboardEntries { get; set; }
 
+        // MERGED: Gamification stats entities from quest page branch
+        public DbSet<UserStats> UserStats { get; set; }
+        public DbSet<CheckIn> CheckIns { get; set; }
+
         // Notification entities
         public DbSet<NotificationType> NotificationTypes { get; set; }
         public DbSet<Notification> Notifications { get; set; }
@@ -84,7 +88,7 @@ namespace TidyUpCapstone.Data
         public DbSet<UserReport> UserReports { get; set; }
         public DbSet<AdminReport> AdminReports { get; set; }
 
-        // NEW: Support entities (from dev branch)
+        // MERGED: Support entities from dev branch
         public DbSet<UserPrivacySettings> UserPrivacySettings { get; set; }
         public DbSet<ContactMessage> ContactMessages { get; set; }
         public DbSet<NotificationSettings> NotificationSettings { get; set; }
@@ -108,7 +112,7 @@ namespace TidyUpCapstone.Data
                 entity.Property(e => e.Status).HasColumnName("status");
                 entity.Property(e => e.LastLogin).HasColumnName("last_login");
 
-                // MERGED: Both FirstName/LastName and additional profile fields from dev
+                // MERGED: Profile fields from dev branch
                 entity.Property(e => e.FirstName).HasColumnName("first_name");
                 entity.Property(e => e.LastName).HasColumnName("last_name");
                 entity.Property(e => e.Gender).HasColumnName("gender");
@@ -117,7 +121,7 @@ namespace TidyUpCapstone.Data
                 entity.Property(e => e.ProfilePictureUrl).HasColumnName("profile_picture_url");
                 entity.Property(e => e.PhoneNumber).HasColumnName("PhoneNumber");
 
-                // Language & Accessibility Properties (from dev)
+                // MERGED: Language & Accessibility Properties from dev branch
                 entity.Property(e => e.Language).HasColumnName("language");
                 entity.Property(e => e.Timezone).HasColumnName("timezone");
                 entity.Property(e => e.HighContrast).HasColumnName("high_contrast");
@@ -125,7 +129,7 @@ namespace TidyUpCapstone.Data
                 entity.Property(e => e.ReduceMotion).HasColumnName("reduce_motion");
                 entity.Property(e => e.ScreenReader).HasColumnName("screen_reader");
 
-                // KEPT: OAuth-related properties from feature/user-authentication
+                // MERGED: OAuth/Identity properties from dev branch
                 entity.Property(e => e.NormalizedUserName).HasColumnName("NormalizedUserName");
                 entity.Property(e => e.NormalizedEmail).HasColumnName("NormalizedEmail");
                 entity.Property(e => e.EmailConfirmed).HasColumnName("EmailConfirmed");
@@ -138,7 +142,7 @@ namespace TidyUpCapstone.Data
                 entity.Property(e => e.AccessFailedCount).HasColumnName("AccessFailedCount");
             });
 
-            // CRITICAL: Configure Identity tables - these are REQUIRED for OAuth
+            // MERGED: Identity table configuration from dev branch (required for OAuth)
             builder.Entity<IdentityRole<int>>().ToTable("app_roles");
             builder.Entity<IdentityUserRole<int>>().ToTable("app_user_roles");
             builder.Entity<IdentityUserClaim<int>>().ToTable("app_user_claims");
@@ -210,6 +214,12 @@ namespace TidyUpCapstone.Data
             builder.Entity<UserLevel>().ToTable("user_levels");
             builder.Entity<Leaderboard>().ToTable("leaderboards");
             builder.Entity<LeaderboardEntry>().ToTable("leaderboard_entries");
+            builder.Entity<UserStats>().ToTable("user_stats");
+            builder.Entity<CheckIn>().ToTable("check_ins");
+
+            // MERGED: Gamification stats tables from quest page branch
+            builder.Entity<UserStats>().ToTable("user_stats");
+            builder.Entity<CheckIn>().ToTable("check_ins");
 
             // Notification entities
             builder.Entity<NotificationType>().ToTable("notification_types");
@@ -226,7 +236,7 @@ namespace TidyUpCapstone.Data
             builder.Entity<UserReport>().ToTable("user_reports");
             builder.Entity<AdminReport>().ToTable("admin_reports");
 
-            // NEW: Support entities table mappings (from dev)
+            // MERGED: Support entities table mappings from dev branch
             builder.Entity<UserPrivacySettings>().ToTable("user_privacy_settings");
             builder.Entity<ContactMessage>().ToTable("contact_messages");
             builder.Entity<NotificationSettings>().ToTable("notification_settings");
@@ -382,6 +392,7 @@ namespace TidyUpCapstone.Data
                 .WithMany(i => i.TensorflowPredictions)
                 .HasForeignKey(tp => tp.ItemId)
                 .OnDelete(DeleteBehavior.NoAction);
+
             builder.Entity<AiProcessingPipeline>()
                 .HasOne(app => app.Analysis)
                 .WithMany(aca => aca.ProcessingPipelines)
@@ -459,6 +470,20 @@ namespace TidyUpCapstone.Data
                 .HasForeignKey<UserLevel>(ul => ul.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // MERGED: UserStats relationship from quest page branch (one-to-one)
+            builder.Entity<UserStats>()
+                .HasOne(us => us.User)
+                .WithOne(u => u.UserStats)
+                .HasForeignKey<UserStats>(us => us.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // MERGED: CheckIn relationship from quest page branch
+            builder.Entity<CheckIn>()
+                .HasOne(ci => ci.User)
+                .WithMany(u => u.CheckIns)
+                .HasForeignKey(ci => ci.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // UserLocationPreference relationship (one-to-one)
             builder.Entity<UserLocationPreference>()
                 .HasOne(ulp => ulp.User)
@@ -520,7 +545,7 @@ namespace TidyUpCapstone.Data
                 .HasForeignKey(ev => ev.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // NEW: Support entity relationships (from dev)
+            // MERGED: Support entity relationships from dev branch
             builder.Entity<UserPrivacySettings>()
                 .HasOne(ups => ups.User)
                 .WithOne(u => u.PrivacySettings)
@@ -584,7 +609,7 @@ namespace TidyUpCapstone.Data
                 .HasIndex(n => new { n.UserId, n.IsRead })
                 .HasDatabaseName("idx_notification_user_read");
 
-            // NEW: Support entity indexes (from dev)
+            // MERGED: Support entity indexes from dev branch
             builder.Entity<NotificationSettings>()
                 .HasIndex(ns => ns.UserId)
                 .IsUnique()

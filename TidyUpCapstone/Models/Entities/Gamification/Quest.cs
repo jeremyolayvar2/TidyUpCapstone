@@ -57,4 +57,12 @@ namespace TidyUpCapstone.Models.Entities.Gamification
         Medium,
         Hard
     }
+
+    public enum QuestStatus
+    {
+        Active,
+        Completed,
+        Expired,
+        Abandoned
+    }
 }

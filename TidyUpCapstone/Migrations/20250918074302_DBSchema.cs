@@ -446,6 +446,28 @@ namespace TidyUpCapstone.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "check_ins",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    CheckInDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TokensEarned = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    StreakDay = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_check_ins", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_check_ins_app_user_UserId",
+                        column: x => x.UserId,
+                        principalTable: "app_user",
+                        principalColumn: "user_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "email_verifications",
                 columns: table => new
                 {
@@ -554,9 +576,11 @@ namespace TidyUpCapstone.Migrations
                 {
                     UserId = table.Column<int>(type: "int", nullable: false),
                     AchievementId = table.Column<int>(type: "int", nullable: false),
-                    EarnedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EarnedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Progress = table.Column<int>(type: "int", nullable: false),
-                    IsNotified = table.Column<bool>(type: "bit", nullable: false)
+                    IsNotified = table.Column<bool>(type: "bit", nullable: false),
+                    IsUnlocked = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -622,6 +646,31 @@ namespace TidyUpCapstone.Migrations
                     table.ForeignKey(
                         name: "FK_user_privacy_settings_app_user_user_id",
                         column: x => x.user_id,
+                        principalTable: "app_user",
+                        principalColumn: "user_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "user_stats",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    CurrentLevel = table.Column<int>(type: "int", nullable: false),
+                    CurrentXp = table.Column<int>(type: "int", nullable: false),
+                    TotalTokens = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    CurrentStreak = table.Column<int>(type: "int", nullable: false),
+                    LongestStreak = table.Column<int>(type: "int", nullable: false),
+                    LastCheckIn = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_user_stats", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_user_stats_app_user_UserId",
+                        column: x => x.UserId,
                         principalTable: "app_user",
                         principalColumn: "user_id",
                         onDelete: ReferentialAction.Cascade);
@@ -856,7 +905,9 @@ namespace TidyUpCapstone.Migrations
                     CurrentProgress = table.Column<int>(type: "int", nullable: false),
                     DateClaimed = table.Column<DateTime>(type: "datetime2", nullable: true),
                     StartedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CompletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    CompletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1599,6 +1650,11 @@ namespace TidyUpCapstone.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_check_ins_UserId",
+                table: "check_ins",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_comments_ParentCommentId",
                 table: "comments",
                 column: "ParentCommentId");
@@ -1801,6 +1857,12 @@ namespace TidyUpCapstone.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_user_stats_UserId",
+                table: "user_stats",
+                column: "UserId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_user_streaks_StreakTypeId",
                 table: "user_streaks",
                 column: "StreakTypeId");
@@ -1868,6 +1930,9 @@ namespace TidyUpCapstone.Migrations
                 name: "chat_messages");
 
             migrationBuilder.DropTable(
+                name: "check_ins");
+
+            migrationBuilder.DropTable(
                 name: "comments");
 
             migrationBuilder.DropTable(
@@ -1923,6 +1988,9 @@ namespace TidyUpCapstone.Migrations
 
             migrationBuilder.DropTable(
                 name: "user_sso_links");
+
+            migrationBuilder.DropTable(
+                name: "user_stats");
 
             migrationBuilder.DropTable(
                 name: "user_streaks");

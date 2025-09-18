@@ -120,6 +120,11 @@ namespace TidyUpCapstone.Models.Entities.User
 
         public virtual UserLocationPreference? LocationPreference { get; set; }
 
+
+    
+        public virtual UserStats? UserStats { get; set; }
+        public virtual ICollection<CheckIn> CheckIns { get; set; } = new List<CheckIn>();
+
         public virtual ICollection<UserReport> ReportsMade { get; set; } = new List<UserReport>();
         public virtual ICollection<UserReport> ReportsReceived { get; set; } = new List<UserReport>();
 

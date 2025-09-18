@@ -12,7 +12,7 @@ using TidyUpCapstone.Data;
 namespace TidyUpCapstone.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250916172635_DBSchema")]
+    [Migration("20250918074302_DBSchema")]
     partial class DBSchema
     {
         /// <inheritdoc />
@@ -755,6 +755,33 @@ namespace TidyUpCapstone.Migrations
                     b.ToTable("achievements", (string)null);
                 });
 
+            modelBuilder.Entity("TidyUpCapstone.Models.Entities.Gamification.CheckIn", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CheckInDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("StreakDay")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TokensEarned")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("check_ins", (string)null);
+                });
+
             modelBuilder.Entity("TidyUpCapstone.Models.Entities.Gamification.Leaderboard", b =>
                 {
                     b.Property<int>("LeaderboardId")
@@ -1011,10 +1038,16 @@ namespace TidyUpCapstone.Migrations
                     b.Property<int>("AchievementId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("EarnedDate")
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("EarnedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsNotified")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsUnlocked")
                         .HasColumnType("bit");
 
                     b.Property<int>("Progress")
@@ -1074,6 +1107,9 @@ namespace TidyUpCapstone.Migrations
                     b.Property<DateTime?>("DateClaimed")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("bit");
 
@@ -1082,6 +1118,9 @@ namespace TidyUpCapstone.Migrations
 
                     b.Property<DateTime>("StartedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -1094,6 +1133,43 @@ namespace TidyUpCapstone.Migrations
                         .IsUnique();
 
                     b.ToTable("userquests", (string)null);
+                });
+
+            modelBuilder.Entity("TidyUpCapstone.Models.Entities.Gamification.UserStats", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CurrentLevel")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CurrentStreak")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CurrentXp")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("LastCheckIn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("LongestStreak")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalTokens")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("user_stats", (string)null);
                 });
 
             modelBuilder.Entity("TidyUpCapstone.Models.Entities.Gamification.UserStreak", b =>
@@ -2672,6 +2748,17 @@ namespace TidyUpCapstone.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("TidyUpCapstone.Models.Entities.Gamification.CheckIn", b =>
+                {
+                    b.HasOne("TidyUpCapstone.Models.Entities.User.AppUser", "User")
+                        .WithMany("CheckIns")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("TidyUpCapstone.Models.Entities.Gamification.LeaderboardEntry", b =>
                 {
                     b.HasOne("TidyUpCapstone.Models.Entities.Gamification.Leaderboard", "Leaderboard")
@@ -2755,6 +2842,17 @@ namespace TidyUpCapstone.Migrations
                         .IsRequired();
 
                     b.Navigation("Quest");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TidyUpCapstone.Models.Entities.Gamification.UserStats", b =>
+                {
+                    b.HasOne("TidyUpCapstone.Models.Entities.User.AppUser", "User")
+                        .WithOne("UserStats")
+                        .HasForeignKey("TidyUpCapstone.Models.Entities.Gamification.UserStats", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -3229,6 +3327,8 @@ namespace TidyUpCapstone.Migrations
 
                     b.Navigation("ChatMessages");
 
+                    b.Navigation("CheckIns");
+
                     b.Navigation("Comments");
 
                     b.Navigation("EmailVerifications");
@@ -3264,6 +3364,8 @@ namespace TidyUpCapstone.Migrations
                     b.Navigation("UserLevel");
 
                     b.Navigation("UserQuests");
+
+                    b.Navigation("UserStats");
 
                     b.Navigation("UserStreaks");
 
