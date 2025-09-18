@@ -51,9 +51,7 @@ body {
 
 /* Desktop styles - ONLY apply sidebar margins on screens larger than 768px */
 @media (min-width: 769px) {
-    .layout-wrapper .main-content {
-        margin-left: 250px; /* Default expanded sidebar width */
-    }
+  
 
     /* When sidebar is closed - ONLY for desktop */
     .layout-wrapper:has(#sidebar.close) .main-content,

@@ -214,6 +214,8 @@ namespace TidyUpCapstone.Data
             builder.Entity<UserLevel>().ToTable("user_levels");
             builder.Entity<Leaderboard>().ToTable("leaderboards");
             builder.Entity<LeaderboardEntry>().ToTable("leaderboard_entries");
+            builder.Entity<UserStats>().ToTable("user_stats");
+            builder.Entity<CheckIn>().ToTable("check_ins");
 
             // MERGED: Gamification stats tables from quest page branch
             builder.Entity<UserStats>().ToTable("user_stats");
