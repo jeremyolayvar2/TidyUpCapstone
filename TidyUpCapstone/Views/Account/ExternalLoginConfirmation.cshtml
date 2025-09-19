@@ -49,14 +49,12 @@
 
                 <!-- Email (Read-only) -->
                 <div class="mb-4">
-                    <div class="flex flex-col">
-                        <div class="input-wrapper">
-                            <input asp-for="Email"
-                                   class="login-form-control bg-light"
-                                   readonly
-                                   placeholder=" " />
-                        </div>
-                        
+                    <div class="form-input-wrapper">
+                        <input asp-for="Email"
+                               class="login-form-control bg-light"
+                               readonly
+                               placeholder=" " />
+                        <label asp-for="Email" class="login-form-label">Email Address</label>
                     </div>
                     <small class="provider-text">Connected via @Model.Provider</small>
                     <span asp-validation-for="Email" class="text-danger small"></span>
@@ -64,37 +62,46 @@
 
                 <!-- Username -->
                 <div class="mb-4">
-                    <div class="flex flex-col">
+                    <div class="form-input-wrapper">
                         <input asp-for="Username"
                                class="login-form-control @(Html.ViewData.ModelState["Username"]?.Errors.Count > 0 ? "is-invalid" : "")"
                                placeholder=" "
                                required />
-                        <label asp-for="Username" class="login-form-label">Username</label>
+                        <label asp-for="Username" class="login-form-label">
+                            <i class="fas fa-user label-icon"></i>
+                            Username
+                        </label>
                     </div>
                     <span asp-validation-for="Username" class="text-danger small"></span>
-                    <small class="text-muted">This will be your unique identifier on TidyUp.</small>
+                    <small class="text-muted helper-text">This will be your unique identifier on TidyUp.</small>
                 </div>
 
                 <!-- First Name -->
                 <div class="mb-4">
-                    <div class="flex flex-col">
+                    <div class="form-input-wrapper">
                         <input asp-for="FirstName"
                                class="login-form-control @(Html.ViewData.ModelState["FirstName"]?.Errors.Count > 0 ? "is-invalid" : "")"
                                placeholder=" "
                                required />
-                        <label asp-for="FirstName" class="login-form-label">First Name</label>
+                        <label asp-for="FirstName" class="login-form-label">
+                            <i class="fas fa-id-badge label-icon"></i>
+                            First Name
+                        </label>
                     </div>
                     <span asp-validation-for="FirstName" class="text-danger small"></span>
                 </div>
 
                 <!-- Last Name -->
                 <div class="mb-4">
-                    <div class="flex flex-col">
+                    <div class="form-input-wrapper">
                         <input asp-for="LastName"
                                class="login-form-control @(Html.ViewData.ModelState["LastName"]?.Errors.Count > 0 ? "is-invalid" : "")"
                                placeholder=" "
                                required />
-                        <label asp-for="LastName" class="login-form-label">Last Name</label>
+                        <label asp-for="LastName" class="login-form-label">
+                            <i class="fas fa-id-badge label-icon"></i>
+                            Last Name
+                        </label>
                     </div>
                     <span asp-validation-for="LastName" class="text-danger small"></span>
                 </div>
@@ -140,7 +147,7 @@
                 <div class="d-grid mb-3">
                     <button type="submit" class="btn-complete-registration" id="completeRegistrationBtn">
                         <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                       
+                        <i class="fas fa-check-circle btn-icon"></i>
                         Complete Registration
                     </button>
                 </div>
@@ -171,6 +178,7 @@
             const btn = document.getElementById('completeRegistrationBtn');
             btn.disabled = true;
             btn.querySelector('.spinner-border').classList.remove('d-none');
+            btn.querySelector('.btn-icon').style.display = 'none';
         });
 
         // Enhanced form validation feedback
@@ -184,6 +192,14 @@
                     this.classList.remove('is-valid');
                 }
             });
+
+            // Real-time validation feedback
+            input.addEventListener('input', function() {
+                if (this.classList.contains('is-invalid') && this.checkValidity()) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                }
+            });
         });
 
         // Custom checkbox animations
@@ -195,6 +211,17 @@
                 } else {
                     checkmark.classList.remove('checked');
                 }
+            });
+        });
+
+        // Form field focus animations
+        document.querySelectorAll('.login-form-control').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+            });
+
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('focused');
             });
         });
     </script>

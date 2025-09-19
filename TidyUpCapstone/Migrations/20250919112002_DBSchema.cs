@@ -6,11 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TidyUpCapstone.Migrations
 {
     /// <inheritdoc />
-<<<<<<<< HEAD:TidyUpCapstone/Migrations/20250918074302_DBSchema.cs
     public partial class DBSchema : Migration
-========
-    public partial class InitialCreate : Migration
->>>>>>>> feature/chat-page:TidyUpCapstone/Migrations/20250814002719_InitialCreate.cs
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -69,6 +65,7 @@ namespace TidyUpCapstone.Migrations
                     verification_code = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: true),
                     verification_code_expiry = table.Column<DateTime>(type: "datetime2", nullable: true),
                     token_balance = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    EscrowedBalance = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
                     date_created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     managed_by_admin_id = table.Column<int>(type: "int", nullable: true),
                     admin_notes = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -1372,6 +1369,10 @@ namespace TidyUpCapstone.Migrations
                     TokenAmount = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
                     TransactionStatus = table.Column<int>(type: "int", nullable: false),
                     DeliveryMethod = table.Column<int>(type: "int", nullable: false),
+                    BuyerConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    SellerConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    BuyerConfirmedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    SellerConfirmedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CompletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CancelledAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -1487,6 +1488,28 @@ namespace TidyUpCapstone.Migrations
                     table.PrimaryKey("PK_chats", x => x.ChatId);
                     table.ForeignKey(
                         name: "FK_chats_transactions_TransactionId",
+                        column: x => x.TransactionId,
+                        principalTable: "transactions",
+                        principalColumn: "TransactionId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "escrows",
+                columns: table => new
+                {
+                    EscrowId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TransactionId = table.Column<int>(type: "int", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_escrows", x => x.EscrowId);
+                    table.ForeignKey(
+                        name: "FK_escrows_transactions_TransactionId",
                         column: x => x.TransactionId,
                         principalTable: "transactions",
                         principalColumn: "TransactionId",
@@ -1677,6 +1700,11 @@ namespace TidyUpCapstone.Migrations
                 name: "IX_email_verifications_UserId",
                 table: "email_verifications",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_escrows_TransactionId",
+                table: "escrows",
+                column: "TransactionId");
 
             migrationBuilder.CreateIndex(
                 name: "idx_item_category_status",
@@ -1944,6 +1972,9 @@ namespace TidyUpCapstone.Migrations
 
             migrationBuilder.DropTable(
                 name: "email_verifications");
+
+            migrationBuilder.DropTable(
+                name: "escrows");
 
             migrationBuilder.DropTable(
                 name: "leaderboard_entries");

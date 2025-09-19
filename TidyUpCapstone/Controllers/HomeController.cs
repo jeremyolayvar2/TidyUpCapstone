@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
@@ -7,15 +8,17 @@ using TidyUpCapstone.Data;
 using TidyUpCapstone.Filters;
 using TidyUpCapstone.Models;
 using TidyUpCapstone.Models.DTOs.Items;
+using TidyUpCapstone.Models.DTOs.Transactions;
 using TidyUpCapstone.Models.Entities.Gamification;
 using TidyUpCapstone.Models.Entities.Items;
+using TidyUpCapstone.Models.Entities.Transactions;
 using TidyUpCapstone.Models.Entities.User;
 using TidyUpCapstone.Models.ViewModels;
 using TidyUpCapstone.Models.ViewModels.Gamification;
 using TidyUpCapstone.Models.ViewModels.Items;
+using TidyUpCapstone.Services;
 using TidyUpCapstone.Services.Interfaces;
 using TidyUpCapstone.Helpers;
-
 
 namespace TidyUpCapstone.Controllers
 {
@@ -26,6 +29,7 @@ namespace TidyUpCapstone.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly IServiceProvider _serviceProvider;
 
         // Gamification services - optional dependencies to prevent breaking changes
         private readonly IQuestService? _questService;
@@ -38,6 +42,7 @@ namespace TidyUpCapstone.Controllers
             ApplicationDbContext context,
             UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager,
+            IServiceProvider serviceProvider,
             IQuestService? questService = null,
             IAchievementService? achievementService = null,
             IStreakService? streakService = null)
@@ -48,6 +53,7 @@ namespace TidyUpCapstone.Controllers
             _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
+            _serviceProvider = serviceProvider;
             _questService = questService;
             _achievementService = achievementService;
             _streakService = streakService;
@@ -171,9 +177,6 @@ namespace TidyUpCapstone.Controllers
                     TotalItems = items.Count,
                 };
 
-
-
-
                 decimal userTokenBalance = 0m;
 
                 try
@@ -207,8 +210,6 @@ namespace TidyUpCapstone.Controllers
                             CurrentXp = 0,
                             CurrentStreak = 0,
                             LastCheckIn = null,
-                            //TotalQuestsCompleted = 0,
-                            //TotalAchievementsUnlocked = 0
                         };
 
                         _context.UserStats.Add(newUserStats);
@@ -223,7 +224,7 @@ namespace TidyUpCapstone.Controllers
                 }
 
                 // Set ViewBag data for the view
-                ViewBag.CurrentUserTokenBalance = userTokenBalance; // Replace with actual logic
+                ViewBag.CurrentUserTokenBalance = userTokenBalance;
                 ViewBag.CurrentUserAvatar = UserHelper.GetUserAvatarUrl(currentUser);
                 ViewBag.UserName = currentUser.UserName;
                 ViewBag.FirstName = currentUser.FirstName;
@@ -247,7 +248,82 @@ namespace TidyUpCapstone.Controllers
             }
         }
 
+        // MessagePage action from chat-page branch
+        public async Task<IActionResult> MessagePage(int? otherUserId, int? itemId)
+        {
+            // Replace test user session logic with real authentication
+            var currentUserId = GetCurrentAuthenticatedUserId();
+            if (currentUserId == 0)
+            {
+                return RedirectToAction("Login", "Account"); // Redirect to your login page
+            }
 
+            var currentUser = await _context.Users.FindAsync(currentUserId);
+            var otherUser = otherUserId.HasValue ? await _context.Users.FindAsync(otherUserId.Value) : null;
+
+            var viewModel = new MessagePageViewModel
+            {
+                CurrentUser = currentUser,
+                OtherUser = otherUser
+            };
+
+            // Item-based escrow logic (replaces hardcoded test user logic)
+            if (currentUser != null && itemId.HasValue)
+            {
+                var item = await _context.Items
+                    .Include(i => i.User)
+                    .FirstOrDefaultAsync(i => i.ItemId == itemId.Value);
+
+                if (item != null && currentUser.Id != item.UserId) // Only if user is not the item owner
+                {
+                    try
+                    {
+                        var escrowService = HttpContext.RequestServices.GetRequiredService<IEscrowService>();
+                        await escrowService.AutoEscrowOnChatAsync(currentUser.Id, item.UserId, item.FinalTokenPrice);
+
+                        // Set the other user as the item owner (seller)
+                        otherUser = item.User;
+                        viewModel.OtherUser = otherUser;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error during auto-escrow");
+                    }
+                }
+            }
+
+            // Load existing transaction (keep this logic unchanged)
+            if (currentUser != null && otherUser != null)
+            {
+                var transaction = await _context.Transactions
+                    .Include(t => t.Item)
+                    .Include(t => t.Escrows)
+                    .FirstOrDefaultAsync(t =>
+                        (t.BuyerId == currentUser.Id && t.SellerId == otherUser.Id) ||
+                        (t.BuyerId == otherUser.Id && t.SellerId == currentUser.Id));
+
+                if (transaction != null)
+                {
+                    viewModel.CurrentTransactionId = transaction.TransactionId;
+                    viewModel.HasActiveTransaction = true;
+                    viewModel.TransactionItemTitle = transaction.Item?.ItemTitle ?? "Item";
+                    viewModel.TransactionAmount = transaction.TokenAmount;
+
+                    viewModel.TransactionStatus = new TransactionStatusDto
+                    {
+                        TransactionId = transaction.TransactionId,
+                        Status = transaction.TransactionStatus,
+                        BuyerConfirmed = transaction.BuyerConfirmed,
+                        SellerConfirmed = transaction.SellerConfirmed,
+                        CanConfirm = transaction.TransactionStatus == TransactionStatus.Escrowed,
+                        CanCancel = transaction.TransactionStatus == TransactionStatus.Escrowed,
+                        UserRole = currentUser.Id == transaction.BuyerId ? "buyer" : "seller"
+                    };
+                }
+            }
+
+            return View(viewModel);
+        }
 
         /// <summary>
         /// Quest page for gamification features
@@ -334,8 +410,6 @@ namespace TidyUpCapstone.Controllers
             }
         }
 
-
-
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetUserTokenBalance()
@@ -378,7 +452,7 @@ namespace TidyUpCapstone.Controllers
                 return Json(new { success = false, message = "Internal server error" });
             }
         }
-        
+
         [Authorize]
         [NoCache]
         public async Task<IActionResult> SettingsPage()
@@ -481,6 +555,16 @@ namespace TidyUpCapstone.Controllers
             return 0;
         }
 
+        // Add this authentication method from chat-page branch
+        private int GetCurrentAuthenticatedUserId()
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                return int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
+            }
+            return 0;
+        }
+
         private List<ItemCategoryDto> GetFallbackCategories()
         {
             return new List<ItemCategoryDto>
@@ -510,17 +594,10 @@ namespace TidyUpCapstone.Controllers
             };
         }
 
-        // Add this authentication method
-        private int GetCurrentAuthenticatedUserId()
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
         {
-            if (User.Identity.IsAuthenticated)
-            {
-                return int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
-            }
-            return 0;
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
-
-
     }
-
 }

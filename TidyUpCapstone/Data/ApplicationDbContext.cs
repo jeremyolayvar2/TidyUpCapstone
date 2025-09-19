@@ -48,8 +48,7 @@ namespace TidyUpCapstone.Data
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Chat> Chats { get; set; }
         public DbSet<ChatMessage> ChatMessages { get; set; }
-        public DbSet<Escrow> Escrows { get; set; }
-
+        public DbSet<Escrow> Escrows { get; set; } // From chat-page branch
 
         // Community entities
         public DbSet<Post> Posts { get; set; }
@@ -71,7 +70,7 @@ namespace TidyUpCapstone.Data
         public DbSet<Leaderboard> Leaderboards { get; set; }
         public DbSet<LeaderboardEntry> LeaderboardEntries { get; set; }
 
-        // MERGED: Gamification stats entities from quest page branch
+        // Gamification stats entities from dev branch
         public DbSet<UserStats> UserStats { get; set; }
         public DbSet<CheckIn> CheckIns { get; set; }
 
@@ -90,7 +89,7 @@ namespace TidyUpCapstone.Data
         public DbSet<UserReport> UserReports { get; set; }
         public DbSet<AdminReport> AdminReports { get; set; }
 
-        // MERGED: Support entities from dev branch
+        // Support entities from dev branch
         public DbSet<UserPrivacySettings> UserPrivacySettings { get; set; }
         public DbSet<ContactMessage> ContactMessages { get; set; }
         public DbSet<NotificationSettings> NotificationSettings { get; set; }
@@ -114,7 +113,7 @@ namespace TidyUpCapstone.Data
                 entity.Property(e => e.Status).HasColumnName("status");
                 entity.Property(e => e.LastLogin).HasColumnName("last_login");
 
-                // MERGED: Profile fields from dev branch
+                // Profile fields from dev branch
                 entity.Property(e => e.FirstName).HasColumnName("first_name");
                 entity.Property(e => e.LastName).HasColumnName("last_name");
                 entity.Property(e => e.Gender).HasColumnName("gender");
@@ -123,7 +122,7 @@ namespace TidyUpCapstone.Data
                 entity.Property(e => e.ProfilePictureUrl).HasColumnName("profile_picture_url");
                 entity.Property(e => e.PhoneNumber).HasColumnName("PhoneNumber");
 
-                // MERGED: Language & Accessibility Properties from dev branch
+                // Language & Accessibility Properties from dev branch
                 entity.Property(e => e.Language).HasColumnName("language");
                 entity.Property(e => e.Timezone).HasColumnName("timezone");
                 entity.Property(e => e.HighContrast).HasColumnName("high_contrast");
@@ -131,7 +130,7 @@ namespace TidyUpCapstone.Data
                 entity.Property(e => e.ReduceMotion).HasColumnName("reduce_motion");
                 entity.Property(e => e.ScreenReader).HasColumnName("screen_reader");
 
-                // MERGED: OAuth/Identity properties from dev branch
+                // OAuth/Identity properties from dev branch
                 entity.Property(e => e.NormalizedUserName).HasColumnName("NormalizedUserName");
                 entity.Property(e => e.NormalizedEmail).HasColumnName("NormalizedEmail");
                 entity.Property(e => e.EmailConfirmed).HasColumnName("EmailConfirmed");
@@ -144,7 +143,7 @@ namespace TidyUpCapstone.Data
                 entity.Property(e => e.AccessFailedCount).HasColumnName("AccessFailedCount");
             });
 
-            // MERGED: Identity table configuration from dev branch (required for OAuth)
+            // Identity table configuration from dev branch (required for OAuth)
             builder.Entity<IdentityRole<int>>().ToTable("app_roles");
             builder.Entity<IdentityUserRole<int>>().ToTable("app_user_roles");
             builder.Entity<IdentityUserClaim<int>>().ToTable("app_user_claims");
@@ -196,8 +195,7 @@ namespace TidyUpCapstone.Data
             builder.Entity<Transaction>().ToTable("transactions");
             builder.Entity<Chat>().ToTable("chats");
             builder.Entity<ChatMessage>().ToTable("chat_messages");
-            builder.Entity<Escrow>().ToTable("escrows");
-
+            builder.Entity<Escrow>().ToTable("escrows"); // From chat-page branch
 
             // Community entities
             builder.Entity<Post>().ToTable("posts");
@@ -218,10 +216,8 @@ namespace TidyUpCapstone.Data
             builder.Entity<UserLevel>().ToTable("user_levels");
             builder.Entity<Leaderboard>().ToTable("leaderboards");
             builder.Entity<LeaderboardEntry>().ToTable("leaderboard_entries");
-            builder.Entity<UserStats>().ToTable("user_stats");
-            builder.Entity<CheckIn>().ToTable("check_ins");
 
-            // MERGED: Gamification stats tables from quest page branch
+            // Gamification stats tables from dev branch
             builder.Entity<UserStats>().ToTable("user_stats");
             builder.Entity<CheckIn>().ToTable("check_ins");
 
@@ -240,7 +236,7 @@ namespace TidyUpCapstone.Data
             builder.Entity<UserReport>().ToTable("user_reports");
             builder.Entity<AdminReport>().ToTable("admin_reports");
 
-            // MERGED: Support entities table mappings from dev branch
+            // Support entities table mappings from dev branch
             builder.Entity<UserPrivacySettings>().ToTable("user_privacy_settings");
             builder.Entity<ContactMessage>().ToTable("contact_messages");
             builder.Entity<NotificationSettings>().ToTable("notification_settings");
@@ -311,13 +307,12 @@ namespace TidyUpCapstone.Data
                 .HasForeignKey<Chat>(c => c.TransactionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // TransactionMethodHistory relationships
-
+            // Escrow relationship from chat-page branch
             builder.Entity<Escrow>()
-    .HasOne(e => e.Transaction)
-    .WithMany(t => t.Escrows)
-    .HasForeignKey(e => e.TransactionId)
-    .OnDelete(DeleteBehavior.Cascade);
+                .HasOne(e => e.Transaction)
+                .WithMany(t => t.Escrows)
+                .HasForeignKey(e => e.TransactionId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Comment relationships - ALL set to NoAction to prevent cascade cycles
             builder.Entity<Comment>()
@@ -482,14 +477,14 @@ namespace TidyUpCapstone.Data
                 .HasForeignKey<UserLevel>(ul => ul.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // MERGED: UserStats relationship from quest page branch (one-to-one)
+            // UserStats relationship from dev branch (one-to-one)
             builder.Entity<UserStats>()
                 .HasOne(us => us.User)
                 .WithOne(u => u.UserStats)
                 .HasForeignKey<UserStats>(us => us.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // MERGED: CheckIn relationship from quest page branch
+            // CheckIn relationship from dev branch
             builder.Entity<CheckIn>()
                 .HasOne(ci => ci.User)
                 .WithMany(u => u.CheckIns)
@@ -557,7 +552,7 @@ namespace TidyUpCapstone.Data
                 .HasForeignKey(ev => ev.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // MERGED: Support entity relationships from dev branch
+            // Support entity relationships from dev branch
             builder.Entity<UserPrivacySettings>()
                 .HasOne(ups => ups.User)
                 .WithOne(u => u.PrivacySettings)
@@ -604,7 +599,6 @@ namespace TidyUpCapstone.Data
                 .HasIndex(t => new { t.SellerId, t.TransactionStatus })
                 .HasDatabaseName("idx_transaction_seller_status");
 
-
             // SSO indexes
             builder.Entity<UserSsoLink>()
                 .HasIndex(usl => new { usl.ProviderName, usl.ProviderUserId })
@@ -622,7 +616,7 @@ namespace TidyUpCapstone.Data
                 .HasIndex(n => new { n.UserId, n.IsRead })
                 .HasDatabaseName("idx_notification_user_read");
 
-            // MERGED: Support entity indexes from dev branch
+            // Support entity indexes from dev branch
             builder.Entity<NotificationSettings>()
                 .HasIndex(ns => ns.UserId)
                 .IsUnique()

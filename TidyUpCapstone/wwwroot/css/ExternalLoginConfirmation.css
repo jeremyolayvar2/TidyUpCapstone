@@ -173,19 +173,18 @@ body {
     animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.7s forwards;
 }
 
-.flex {
+/* Improved Form Input Wrapper */
+.form-input-wrapper {
+    position: relative;
     display: flex;
-}
-
-.flex-col {
     flex-direction: column;
 }
 
-.input-wrapper {
-    position: relative;
-}
+    .form-input-wrapper.focused .login-form-label {
+        color: var(--primary-color);
+    }
 
-/* Improved floating label styles with better responsiveness */
+/* Enhanced Floating Label Styles */
 .login-form-label {
     position: absolute;
     left: 1rem;
@@ -197,80 +196,107 @@ body {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 2;
     background: var(--background);
-    padding: 0 0.5rem;
-    font-weight: 400;
+    padding: 0 0.25rem;
+    font-weight: 500;
     white-space: nowrap;
     border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-/* Active/focused label state with improved positioning */
+/* Label Icons */
+.label-icon {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+/* Active/focused label state */
 .login-form-control:not(:placeholder-shown) + .login-form-label,
 .login-form-control:focus + .login-form-label {
-    top: 0;
-    left: 1rem;
-    font-size: 0.85rem;
+    top: -12px;
+    left: 0.75rem;
+    font-size: 0.8rem;
     color: var(--primary-color);
-    font-weight: 500;
-    transform: translateY(-50%);
+    font-weight: 600;
+    transform: translateY(0);
     background: var(--background);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+   
+    padding: 0.25rem 0.5rem;
 }
+
+    .login-form-control:not(:placeholder-shown) + .login-form-label .label-icon,
+    .login-form-control:focus + .login-form-label .label-icon {
+        opacity: 1;
+        color: var(--primary-color);
+        font-size: 0.75rem;
+    }
 
 .login-form-control {
     width: 100%;
     padding: 1.25rem 1rem;
-    border: 1px solid #e0e0e0;
+    border: 2px solid #e0e0e0;
     border-radius: 12px;
     font-size: 1rem;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     background-color: var(--background);
     font-family: "Montserrat", sans-serif;
     position: relative;
     z-index: 1;
+    font-weight: 500;
 }
 
     .login-form-control:focus {
         outline: none;
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(107, 144, 128, 0.1);
-        transform: translateY(-2px);
+        box-shadow: 0 0 0 3px rgba(107, 144, 128, 0.15);
+        transform: translateY(-1px);
+        background-color: rgba(107, 144, 128, 0.02);
     }
 
-    .login-form-control:hover {
-        border-color: var(--primary-color);
+    .login-form-control:hover:not(:focus) {
+        border-color: var(--secondary-color);
         transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     .login-form-control.bg-light {
         background-color: #f8f9fa !important;
         color: #666;
+        border-color: #d0d0d0;
     }
 
     .login-form-control.is-invalid {
         border-color: #dc3545;
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15);
     }
 
     .login-form-control.is-valid {
-        border-color: var(--success-color);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.15);
     }
-
-.provider-badge {
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    background: var(--google-color);
-    color: white;
-    padding: 0.5rem;
-    border-radius: 6px;
-    font-size: 0.8rem;
-}
 
 .provider-text {
     color: var(--secondary-color);
     font-size: 0.9rem;
     margin-top: 0.5rem;
     font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+    .provider-text::before {
+        content: "🔗";
+        font-size: 0.8rem;
+    }
+
+.helper-text {
+    font-size: 0.85rem !important;
+    margin-top: 0.5rem;
+    color: #666 !important;
+    font-style: italic;
 }
 
 /* Custom Checkbox Styles */
@@ -295,29 +321,35 @@ body {
     cursor: pointer;
     font-size: 0.95rem;
     line-height: 1.5;
-    padding-left: 2rem;
+    padding-left: 2.25rem;
     position: relative;
+    font-weight: 500;
+    color: var(--text-color);
 }
 
 .checkbox-checkmark {
     position: absolute;
     left: 0;
     top: 2px;
-    height: 20px;
-    width: 20px;
+    height: 22px;
+    width: 22px;
     background-color: #fff;
     border: 2px solid #ddd;
-    border-radius: 4px;
-    transition: all 0.3s ease;
+    border-radius: 6px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .custom-checkbox:hover ~ .custom-checkbox-label .checkbox-checkmark {
     border-color: var(--primary-color);
+    box-shadow: 0 4px 8px rgba(107, 144, 128, 0.2);
+    transform: translateY(-1px);
 }
 
 .custom-checkbox:checked ~ .custom-checkbox-label .checkbox-checkmark {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
+    transform: scale(1.05);
 }
 
 .checkbox-checkmark:after {
@@ -331,10 +363,10 @@ body {
 }
 
 .custom-checkbox-label .checkbox-checkmark:after {
-    left: 6px;
-    top: 2px;
+    left: 7px;
+    top: 3px;
     width: 6px;
-    height: 10px;
+    height: 11px;
     border: solid white;
     border-width: 0 3px 3px 0;
     transform: rotate(45deg);
@@ -346,32 +378,32 @@ body {
 
 @keyframes checkboxCheck {
     0% {
-        transform: scale(1);
+        transform: scale(1.05);
     }
 
     50% {
-        transform: scale(1.1);
+        transform: scale(1.15);
     }
 
     100% {
-        transform: scale(1);
+        transform: scale(1.05);
     }
 }
 
 /* Button Styles */
 .btn-complete-registration {
     width: 100%;
-    padding: 1rem 1.5rem;
+    padding: 1.25rem 1.5rem;
     border-radius: 12px;
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 1.1rem;
     border: none;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
     font-family: "Montserrat", sans-serif;
     position: relative;
     overflow: hidden;
@@ -379,38 +411,48 @@ body {
     color: white;
     text-decoration: none;
     margin-top: 1rem;
+    box-shadow: 0 4px 15px rgba(107, 144, 128, 0.2);
 }
 
-    .btn-complete-registration:hover:not(:disabled) {
-        background: linear-gradient(135deg, #5a7d6b 0%, #8fb19e 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(107, 144, 128, 0.3);
+.btn-icon {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.btn-complete-registration:hover:not(:disabled) {
+    background: linear-gradient(135deg, #5a7d6b 0%, #8fb19e 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(107, 144, 128, 0.3);
+}
+
+    .btn-complete-registration:hover:not(:disabled) .btn-icon {
+        transform: scale(1.1);
     }
 
-    .btn-complete-registration:disabled {
-        opacity: 0.7;
-        cursor: not-allowed;
-        transform: none !important;
-    }
+.btn-complete-registration:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none !important;
+}
 
-    /* Ripple Effect */
-    .btn-complete-registration::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 0;
-        height: 0;
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 50%;
-        transform: translate(-50%, -50%);
-        transition: width 0.6s, height 0.6s;
-    }
+/* Ripple Effect */
+.btn-complete-registration::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
 
-    .btn-complete-registration:active::before {
-        width: 300px;
-        height: 300px;
-    }
+.btn-complete-registration:active::before {
+    width: 300px;
+    height: 300px;
+}
 
 /* Spinner */
 .spinner-border {
@@ -423,8 +465,8 @@ body {
 }
 
 .spinner-border-sm {
-    width: 0.875rem;
-    height: 0.875rem;
+    width: 1rem;
+    height: 1rem;
     border-width: 0.125em;
 }
 
@@ -444,6 +486,7 @@ body {
     left: 0;
     width: 100%;
     min-height: 1.2rem;
+    font-weight: 500;
 }
 
 .text-primary {
@@ -476,11 +519,13 @@ a[href^="mailto:"] {
 a.text-primary {
     text-decoration: none;
     transition: all 0.3s ease;
+    font-weight: 600;
 }
 
     a.text-primary:hover {
         text-decoration: underline;
         color: #5a7d6b !important;
+        transform: translateY(-1px);
     }
 
 /* Border and spacing utilities */
@@ -586,10 +631,9 @@ a.text-primary {
 
     .login-form-control:not(:placeholder-shown) + .login-form-label,
     .login-form-control:focus + .login-form-label {
-        left: 0.875rem;
-        font-size: 0.8rem;
-        top: 0;
-        transform: translateY(-50%);
+        left: 0.75rem;
+        font-size: 0.75rem;
+        top: -12px;
     }
 
     .alert-danger-custom {
@@ -622,8 +666,8 @@ a.text-primary {
     }
 
     .btn-complete-registration {
-        padding: 0.875rem 1.25rem;
-        font-size: 0.95rem;
+        padding: 1rem 1.25rem;
+        font-size: 1rem;
     }
 
     .login-form-control {
@@ -638,10 +682,9 @@ a.text-primary {
 
     .login-form-control:not(:placeholder-shown) + .login-form-label,
     .login-form-control:focus + .login-form-label {
-        left: 0.75rem;
-        font-size: 0.75rem;
-        top: 0;
-        transform: translateY(-50%);
+        left: 0.625rem;
+        font-size: 0.7rem;
+        top: -10px;
     }
 
     .provider-icon i {
@@ -650,6 +693,12 @@ a.text-primary {
 
     .custom-checkbox-label {
         font-size: 0.9rem;
+        padding-left: 2rem;
+    }
+
+    .checkbox-checkmark {
+        height: 20px;
+        width: 20px;
     }
 }
 
@@ -676,10 +725,9 @@ a.text-primary {
 
     .login-form-control:not(:placeholder-shown) + .login-form-label,
     .login-form-control:focus + .login-form-label {
-        left: 0.625rem;
-        font-size: 0.7rem;
-        top: 0;
-        transform: translateY(-50%);
+        left: 0.5rem;
+        font-size: 0.65rem;
+        top: -8px;
     }
 
     .custom-checkbox-label {
@@ -718,10 +766,9 @@ a.text-primary {
 
     .login-form-control:not(:placeholder-shown) + .login-form-label,
     .login-form-control:focus + .login-form-label {
-        left: 0.5rem;
-        font-size: 0.65rem;
-        top: 0;
-        transform: translateY(-50%);
+        left: 0.375rem;
+        font-size: 0.6rem;
+        top: -6px;
     }
 
     .registration-header {

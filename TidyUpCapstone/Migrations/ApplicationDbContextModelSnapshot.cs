@@ -2420,6 +2420,10 @@ namespace TidyUpCapstone.Migrations
                         .HasColumnType("bit")
                         .HasColumnName("EmailConfirmed");
 
+                    b.Property<decimal>("EscrowedBalance")
+                        .HasColumnType("decimal(10,2)")
+                        .HasColumnName("EscrowedBalance");
+
                     b.Property<string>("FirstName")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
@@ -2443,10 +2447,6 @@ namespace TidyUpCapstone.Migrations
                     b.Property<bool>("LargeText")
                         .HasColumnType("bit")
                         .HasColumnName("large_text");
-
-                    b.Property<decimal>("EscrowedBalance")
-                        .HasColumnType("decimal(10,2)")
-                        .HasColumnName("EscrowedBalance");
 
                     b.Property<DateTime?>("LastLogin")
                         .HasColumnType("datetime2")

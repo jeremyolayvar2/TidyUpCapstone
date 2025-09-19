@@ -199,7 +199,7 @@ function getCurrentPageType() {
     if (bodyClasses.contains('quest-page')) return 'quest';
     if (bodyClasses.contains('achievements-page')) return 'achievements';
     if (bodyClasses.contains('streaks-page')) return 'streaks';
-    if (bodyClasses.contains('shop-page')) return 'shop';
+    if (bodyClasses.contains('message')) return 'message';
     if (bodyClasses.contains('main-page')) return 'main';
 
     return 'main'; // default
@@ -238,7 +238,7 @@ function applyPageTheme(pageType) {
 function changePageTheme(newPageType) {
     // Remove existing page type classes
     const bodyClasses = document.body.classList;
-    bodyClasses.remove('main-page', 'quest-page', 'achievements-page', 'streaks-page', 'shop-page');
+    bodyClasses.remove('main-page', 'quest-page', 'achievements-page', 'streaks-page', 'message');
 
     // Add new page type class
     bodyClasses.add(`${newPageType}-page`);
@@ -324,7 +324,7 @@ class NavigationManager {
             return 'community';
         } else if (path.includes('/shop')) {
             return 'shop';
-        } else if (path.includes('/messages')) {
+        } else if (path.includes('/message')) {
             return 'messages';
         } else if (path.includes('/notifications')) {
             return 'notifications';
