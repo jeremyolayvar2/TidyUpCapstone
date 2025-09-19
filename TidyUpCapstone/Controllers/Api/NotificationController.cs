@@ -129,7 +129,7 @@ namespace TidyUpCapstone.Controllers.Api
         }
 
         // TESTING ENDPOINTS
-
+        /*
         // POST: api/notification/test/transaction
         [HttpPost("test/transaction")]
         public async Task<ActionResult> CreateTestTransactionNotification([FromBody] TestNotificationRequestDto request)
@@ -463,5 +463,6 @@ namespace TidyUpCapstone.Controllers.Api
             var user = await _context.Users.FirstAsync();
             return user.Id;
         }
+        */
     }
 }
