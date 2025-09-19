@@ -1,16 +1,18 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using TidyUpCapstone.Models.DTOs.Items;
-using TidyUpCapstone.Services.Interfaces;
 using System.Security.Claims;
-using TidyUpCapstone.Models.Entities.Reporting;
 using TidyUpCapstone.Data;
+using TidyUpCapstone.Models.DTOs.Items;
+using TidyUpCapstone.Models.Entities.Reporting;
+using TidyUpCapstone.Models.Entities.User;
+using TidyUpCapstone.Services.Interfaces;
 
 namespace TidyUpCapstone.Controllers
 {
     [Route("[controller]")]
     [Authorize] // Require authentication for all actions
-    public class ItemController : Controller
+    public class ItemController : BaseController
     {
         private readonly IItemService _itemService;
         private readonly ILogger<ItemController> _logger;
@@ -21,7 +23,9 @@ namespace TidyUpCapstone.Controllers
         IItemService itemService,
         ILogger<ItemController> logger,
         IFileService fileService,
+        UserManager<AppUser> userManager,
         ApplicationDbContext context)
+            : base(userManager)
         {
             _itemService = itemService;
             _logger = logger;

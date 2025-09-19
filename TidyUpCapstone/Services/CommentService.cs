@@ -154,19 +154,24 @@ namespace TidyUpCapstone.Services
                 .Select(r => MapToCommentDto(r, currentUserId))
                 .ToList() ?? new List<CommentDto>();
 
+            // FIXED: Get the actual user profile picture URL for comments
+            string userAvatarUrl = "/assets/default-avatar.svg"; // Default fallback
+
+            if (comment.User != null && !string.IsNullOrEmpty(comment.User.ProfilePictureUrl))
+            {
+                // User has uploaded a profile picture - use it
+                userAvatarUrl = comment.User.ProfilePictureUrl;
+            }
+
             return new CommentDto
             {
                 CommentId = comment.CommentId,
                 PostId = comment.PostId,
                 UserId = comment.UserId,
                 Username = comment.User.UserName ?? "Unknown User",
-                UserAvatarUrl = "/assets/default-avatar.svg",
+                UserAvatarUrl = userAvatarUrl, // Now uses actual profile picture
                 ParentCommentId = comment.ParentCommentId,
-
-                // TEMPORARILY COMMENT OUT THESE LINES:
-                // ParentCommenterName = comment.ParentComment?.User?.UserName,
-                // ParentCommenterId = comment.ParentComment?.UserId,
-
+                // Note: Parent info handled in MapToCommentDtoWithParentLookup
                 Content = comment.Content,
                 DateCommented = comment.DateCommented,
                 LastEdited = comment.LastEdited,
@@ -190,13 +195,22 @@ namespace TidyUpCapstone.Services
                 parentComment = commentLookup[comment.ParentCommentId.Value];
             }
 
+            // FIXED: Get the actual user profile picture URL for comments
+            string userAvatarUrl = "/assets/default-avatar.svg"; // Default fallback
+
+            if (comment.User != null && !string.IsNullOrEmpty(comment.User.ProfilePictureUrl))
+            {
+                // User has uploaded a profile picture - use it
+                userAvatarUrl = comment.User.ProfilePictureUrl;
+            }
+
             return new CommentDto
             {
                 CommentId = comment.CommentId,
                 PostId = comment.PostId,
                 UserId = comment.UserId,
                 Username = comment.User.UserName ?? "Unknown User",
-                UserAvatarUrl = "/assets/default-avatar.svg",
+                UserAvatarUrl = userAvatarUrl, // Now uses actual profile picture
                 ParentCommentId = comment.ParentCommentId,
 
                 // Add parent commenter information safely

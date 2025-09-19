@@ -15,10 +15,12 @@ using TidyUpCapstone.Models.ViewModels;
 using TidyUpCapstone.Models.ViewModels.Gamification;
 using TidyUpCapstone.Models.ViewModels.Items;
 using TidyUpCapstone.Services.Interfaces;
+using TidyUpCapstone.Helpers;
+
 
 namespace TidyUpCapstone.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IItemService _itemService;
@@ -40,6 +42,7 @@ namespace TidyUpCapstone.Controllers
             IQuestService? questService = null,
             IAchievementService? achievementService = null,
             IStreakService? streakService = null)
+            : base(userManager)
         {
             _logger = logger;
             _itemService = itemService;
@@ -222,7 +225,7 @@ namespace TidyUpCapstone.Controllers
 
                 // Set ViewBag data for the view
                 ViewBag.CurrentUserTokenBalance = userTokenBalance; // Replace with actual logic
-                ViewBag.CurrentUserAvatar = "/assets/default-avatar.svg";
+                ViewBag.CurrentUserAvatar = UserHelper.GetUserAvatarUrl(currentUser);
                 ViewBag.UserName = currentUser.UserName;
                 ViewBag.FirstName = currentUser.FirstName;
                 ViewBag.LastName = currentUser.LastName;

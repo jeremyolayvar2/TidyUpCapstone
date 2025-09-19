@@ -9,12 +9,12 @@ using TidyUpCapstone.Models.Entities.User;
 namespace TidyUpCapstone.Controllers
 {
     [Authorize]
-    public class NotificationSettingsController : Controller
+    public class NotificationSettingsController : BaseController
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<AppUser> _userManager;
 
-        public NotificationSettingsController(ApplicationDbContext context, UserManager<AppUser> userManager)
+        public NotificationSettingsController(ApplicationDbContext context, UserManager<AppUser> userManager) : base(userManager)
         {
             _context = context;
             _userManager = userManager;
