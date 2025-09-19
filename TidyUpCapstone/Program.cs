@@ -14,7 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection") ??
-        "Server=OLAYVAR\\SQLEXPRESS;Database=TidyUpdb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=True"
+        "Data Source=Raven-PC\\SQLEXPRESS;Initial Catalog=DBcapstone;Integrated Security=True;Trust Server Certificate=True"
     ));
 
 // Identity Configuration
@@ -67,7 +67,8 @@ builder.Services.AddScoped<IActivityQuestIntegrationService, ActivityQuestIntegr
 builder.Services.AddScoped<IUserStatisticsService, UserStatisticsService>();
 
 // Register Background Service for Quest Management
-//builder.Services.AddHostedService<QuestBackgroundService>();
+builder.Services.AddHostedService<QuestBackgroundService>();
+builder.Services.AddHostedService<UserSpecialQuestService>();
 
 var app = builder.Build();
 

@@ -36,8 +36,8 @@ namespace TidyUpCapstone.Services.Background
             _maintenanceTimer = new Timer(RunMaintenanceTasks, null, TimeSpan.Zero, TimeSpan.FromHours(1));
 
             // Generate special quests bi-weekly (every 15 days) instead of monthly
-            var timeUntilNextSpecial = TimeSpan.FromDays(15);
-            _specialQuestTimer = new Timer(GenerateSpecialQuests, null, timeUntilNextSpecial, TimeSpan.FromDays(15));
+            //var timeUntilNextSpecial = TimeSpan.FromDays(15);
+            //_specialQuestTimer = new Timer(GenerateSpecialQuests, null, timeUntilNextSpecial, TimeSpan.FromDays(15));
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -108,54 +108,14 @@ namespace TidyUpCapstone.Services.Background
         private async Task InitializeAllUsersAsync(ApplicationDbContext context)
         {
             var users = await context.Users.ToListAsync();
+            var userInitService = _serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IUserInitializationService>();
 
             foreach (var user in users)
             {
-                await InitializeUserIfNeededAsync(context, user.Id);
+                await userInitService.InitializeUserAsync(user.Id);
             }
         }
 
-        private async Task InitializeUserIfNeededAsync(ApplicationDbContext context, int userId)
-        {
-            var hasAchievements = await context.UserAchievements.AnyAsync(ua => ua.UserId == userId);
-
-            if (!hasAchievements)
-            {
-                // Only seed achievements and stats - remove quest assignment
-                var allAchievements = await context.Achievements.Where(a => a.IsActive).ToListAsync();
-
-                var userAchievements = allAchievements.Select(a => new UserAchievement
-                {
-                    UserId = userId,
-                    AchievementId = a.AchievementId,
-                    IsUnlocked = false,
-                    Progress = 0,
-                    EarnedDate = null,
-                    CreatedAt = DateTime.UtcNow
-                }).ToList();
-
-                context.UserAchievements.AddRange(userAchievements);
-
-                // Create user stats if not exists
-                var hasStats = await context.UserStats.AnyAsync(us => us.UserId == userId);
-                if (!hasStats)
-                {
-                    var userStats = new UserStats
-                    {
-                        UserId = userId,
-                        CurrentLevel = 1,
-                        CurrentXp = 0,
-                        TotalTokens = 0,
-                        CurrentStreak = 0,
-                        LongestStreak = 0
-                    };
-                    context.UserStats.Add(userStats);
-                }
-
-                await context.SaveChangesAsync();
-                _logger.LogInformation($"Initialized user {userId} with achievements and stats");
-            }
-        }
 
         private async void GenerateDailyQuests(object? state)
         {

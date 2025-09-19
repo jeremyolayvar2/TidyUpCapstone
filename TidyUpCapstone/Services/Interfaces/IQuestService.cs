@@ -18,6 +18,7 @@ namespace TidyUpCapstone.Services.Interfaces
         Task GenerateDailyQuestsAsync();
         Task GenerateWeeklyQuestsAsync();
         Task GenerateSpecialQuestAsync();
+        Task GenerateNextSpecialQuestForUserAsync(int userId); // 🆕 Add this line
         Task<bool> CheckAndExpireQuestsAsync();
 
         // User Progress
