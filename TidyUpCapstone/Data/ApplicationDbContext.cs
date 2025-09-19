@@ -48,6 +48,8 @@ namespace TidyUpCapstone.Data
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Chat> Chats { get; set; }
         public DbSet<ChatMessage> ChatMessages { get; set; }
+        public DbSet<Escrow> Escrows { get; set; }
+
 
         // Community entities
         public DbSet<Post> Posts { get; set; }
@@ -194,6 +196,8 @@ namespace TidyUpCapstone.Data
             builder.Entity<Transaction>().ToTable("transactions");
             builder.Entity<Chat>().ToTable("chats");
             builder.Entity<ChatMessage>().ToTable("chat_messages");
+            builder.Entity<Escrow>().ToTable("escrows");
+
 
             // Community entities
             builder.Entity<Post>().ToTable("posts");
@@ -306,6 +310,14 @@ namespace TidyUpCapstone.Data
                 .WithOne(t => t.Chat)
                 .HasForeignKey<Chat>(c => c.TransactionId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // TransactionMethodHistory relationships
+
+            builder.Entity<Escrow>()
+    .HasOne(e => e.Transaction)
+    .WithMany(t => t.Escrows)
+    .HasForeignKey(e => e.TransactionId)
+    .OnDelete(DeleteBehavior.Cascade);
 
             // Comment relationships - ALL set to NoAction to prevent cascade cycles
             builder.Entity<Comment>()
@@ -591,6 +603,7 @@ namespace TidyUpCapstone.Data
             builder.Entity<Transaction>()
                 .HasIndex(t => new { t.SellerId, t.TransactionStatus })
                 .HasDatabaseName("idx_transaction_seller_status");
+
 
             // SSO indexes
             builder.Entity<UserSsoLink>()

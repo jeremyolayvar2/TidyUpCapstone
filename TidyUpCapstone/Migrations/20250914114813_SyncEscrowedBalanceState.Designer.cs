@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TidyUpCapstone.Data;
 
@@ -11,9 +12,11 @@ using TidyUpCapstone.Data;
 namespace TidyUpCapstone.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250914114813_SyncEscrowedBalanceState")]
+    partial class SyncEscrowedBalanceState
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,7 +52,7 @@ namespace TidyUpCapstone.Migrations
                         .HasDatabaseName("RoleNameIndex")
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
-                    b.ToTable("app_roles", (string)null);
+                    b.ToTable("AspNetRoles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -73,7 +76,7 @@ namespace TidyUpCapstone.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("app_role_claims", (string)null);
+                    b.ToTable("AspNetRoleClaims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
@@ -97,7 +100,7 @@ namespace TidyUpCapstone.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("app_user_claims", (string)null);
+                    b.ToTable("AspNetUserClaims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
@@ -118,7 +121,7 @@ namespace TidyUpCapstone.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("app_user_logins", (string)null);
+                    b.ToTable("AspNetUserLogins", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
@@ -133,7 +136,7 @@ namespace TidyUpCapstone.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("app_user_roles", (string)null);
+                    b.ToTable("AspNetUserRoles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
@@ -152,7 +155,7 @@ namespace TidyUpCapstone.Migrations
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable("app_user_tokens", (string)null);
+                    b.ToTable("AspNetUserTokens", (string)null);
                 });
 
             modelBuilder.Entity("TidyUpCapstone.Models.Entities.AI.AiProcessingPipeline", b =>
@@ -269,9 +272,6 @@ namespace TidyUpCapstone.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AnalysisId"));
 
-                    b.Property<string>("AnalysisResult")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("ApiRequestId")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
@@ -298,15 +298,8 @@ namespace TidyUpCapstone.Migrations
                     b.Property<int>("ItemId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("ProcessedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<int?>("ProcessingTimeMs")
                         .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("AnalysisId");
 
@@ -421,9 +414,6 @@ namespace TidyUpCapstone.Migrations
                     b.Property<string>("ImageUrl")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
 
                     b.Property<bool>("IsPinned")
                         .HasColumnType("bit");
@@ -627,77 +617,6 @@ namespace TidyUpCapstone.Migrations
                     b.ToTable("login_logs", (string)null);
                 });
 
-            modelBuilder.Entity("TidyUpCapstone.Models.Entities.Core.UserPrivacySettings", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ActivityHistory")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)")
-                        .HasColumnName("activity_history");
-
-                    b.Property<string>("ActivityStreaksVisibility")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)")
-                        .HasColumnName("activity_streaks_visibility");
-
-                    b.Property<string>("ContactVisibility")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)")
-                        .HasColumnName("contact_visibility");
-
-                    b.Property<DateTime>("DateCreated")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("date_created");
-
-                    b.Property<DateTime>("DateUpdated")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("date_updated");
-
-                    b.Property<string>("LocationVisibility")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)")
-                        .HasColumnName("location_visibility");
-
-                    b.Property<string>("OnlineStatus")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)")
-                        .HasColumnName("online_status");
-
-                    b.Property<string>("ProfileVisibility")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)")
-                        .HasColumnName("profile_visibility");
-
-                    b.Property<string>("SearchIndexing")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)")
-                        .HasColumnName("search_indexing");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("user_privacy_settings", (string)null);
-                });
-
             modelBuilder.Entity("TidyUpCapstone.Models.Entities.Gamification.Achievement", b =>
                 {
                     b.Property<int>("AchievementId")
@@ -750,33 +669,6 @@ namespace TidyUpCapstone.Migrations
                     b.HasKey("AchievementId");
 
                     b.ToTable("achievements", (string)null);
-                });
-
-            modelBuilder.Entity("TidyUpCapstone.Models.Entities.Gamification.CheckIn", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CheckInDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("StreakDay")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("TokensEarned")
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("check_ins", (string)null);
                 });
 
             modelBuilder.Entity("TidyUpCapstone.Models.Entities.Gamification.Leaderboard", b =>
@@ -1035,16 +927,10 @@ namespace TidyUpCapstone.Migrations
                     b.Property<int>("AchievementId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("EarnedDate")
+                    b.Property<DateTime>("EarnedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsNotified")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsUnlocked")
                         .HasColumnType("bit");
 
                     b.Property<int>("Progress")
@@ -1104,9 +990,6 @@ namespace TidyUpCapstone.Migrations
                     b.Property<DateTime?>("DateClaimed")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("ExpiresAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("bit");
 
@@ -1115,9 +998,6 @@ namespace TidyUpCapstone.Migrations
 
                     b.Property<DateTime>("StartedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -1130,43 +1010,6 @@ namespace TidyUpCapstone.Migrations
                         .IsUnique();
 
                     b.ToTable("userquests", (string)null);
-                });
-
-            modelBuilder.Entity("TidyUpCapstone.Models.Entities.Gamification.UserStats", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CurrentLevel")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CurrentStreak")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CurrentXp")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("LastCheckIn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("LongestStreak")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("TotalTokens")
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("user_stats", (string)null);
                 });
 
             modelBuilder.Entity("TidyUpCapstone.Models.Entities.Gamification.UserStreak", b =>
@@ -1531,45 +1374,6 @@ namespace TidyUpCapstone.Migrations
                         .HasDatabaseName("idx_notification_user_read");
 
                     b.ToTable("notifications", (string)null);
-                });
-
-            modelBuilder.Entity("TidyUpCapstone.Models.Entities.Notifications.NotificationSettings", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int")
-                        .HasColumnName("user_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
-
-                    b.Property<bool>("DesktopNotifications")
-                        .HasColumnType("bit")
-                        .HasColumnName("desktop_notifications");
-
-                    b.Property<bool>("EmailItemUpdates")
-                        .HasColumnType("bit")
-                        .HasColumnName("email_item_updates");
-
-                    b.Property<bool>("EmailNewMessages")
-                        .HasColumnType("bit")
-                        .HasColumnName("email_new_messages");
-
-                    b.Property<bool>("EmailWeeklySummary")
-                        .HasColumnType("bit")
-                        .HasColumnName("email_weekly_summary");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("UserId");
-
-                    b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasDatabaseName("idx_notification_settings_user");
-
-                    b.ToTable("notification_settings", (string)null);
                 });
 
             modelBuilder.Entity("TidyUpCapstone.Models.Entities.Notifications.NotificationType", b =>
@@ -1986,58 +1790,6 @@ namespace TidyUpCapstone.Migrations
                     b.ToTable("user_sso_links", (string)null);
                 });
 
-            modelBuilder.Entity("TidyUpCapstone.Models.Entities.Support.ContactMessage", b =>
-                {
-                    b.Property<int>("ContactId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("contact_id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ContactId"));
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("category");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
-                        .HasColumnName("email");
-
-                    b.Property<bool>("IsResolved")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_resolved");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)")
-                        .HasColumnName("message");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("name");
-
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("subject");
-
-                    b.HasKey("ContactId");
-
-                    b.ToTable("contact_messages", (string)null);
-                });
-
             modelBuilder.Entity("TidyUpCapstone.Models.Entities.System.AuditLog", b =>
                 {
                     b.Property<long>("AuditId")
@@ -2391,21 +2143,15 @@ namespace TidyUpCapstone.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int")
-                        .HasColumnName("AccessFailedCount");
+                        .HasColumnType("int");
 
                     b.Property<string>("AdminNotes")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("admin_notes");
 
-                    b.Property<DateTime?>("Birthday")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("birthday");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("ConcurrencyStamp");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2")
@@ -2417,32 +2163,7 @@ namespace TidyUpCapstone.Migrations
                         .HasColumnName("email");
 
                     b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit")
-                        .HasColumnName("EmailConfirmed");
-
-                    b.Property<string>("FirstName")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("first_name");
-
-                    b.Property<string>("Gender")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("gender");
-
-                    b.Property<bool>("HighContrast")
-                        .HasColumnType("bit")
-                        .HasColumnName("high_contrast");
-
-                    b.Property<string>("Language")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)")
-                        .HasColumnName("language");
-
-                    b.Property<bool>("LargeText")
-                        .HasColumnType("bit")
-                        .HasColumnName("large_text");
+                        .HasColumnType("bit");
 
                     b.Property<decimal>("EscrowedBalance")
                         .HasColumnType("decimal(10,2)")
@@ -2452,23 +2173,11 @@ namespace TidyUpCapstone.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("last_login");
 
-                    b.Property<string>("LastName")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("last_name");
-
-                    b.Property<string>("Location")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("location");
-
                     b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit")
-                        .HasColumnName("LockoutEnabled");
+                        .HasColumnType("bit");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset")
-                        .HasColumnName("LockoutEnd");
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<int?>("ManagedByAdminId")
                         .HasColumnType("int")
@@ -2476,42 +2185,24 @@ namespace TidyUpCapstone.Migrations
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)")
-                        .HasColumnName("NormalizedEmail");
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)")
-                        .HasColumnName("NormalizedUserName");
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("password_hash");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("PhoneNumber");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit")
-                        .HasColumnName("PhoneNumberConfirmed");
-
-                    b.Property<string>("ProfilePictureUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("profile_picture_url");
-
-                    b.Property<bool>("ReduceMotion")
-                        .HasColumnType("bit")
-                        .HasColumnName("reduce_motion");
-
-                    b.Property<bool>("ScreenReader")
-                        .HasColumnType("bit")
-                        .HasColumnName("screen_reader");
+                        .HasColumnType("bit");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("SecurityStamp");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -2519,33 +2210,17 @@ namespace TidyUpCapstone.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("status");
 
-                    b.Property<string>("Timezone")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("timezone");
-
                     b.Property<decimal>("TokenBalance")
                         .HasColumnType("decimal(10,2)")
                         .HasColumnName("token_balance");
 
                     b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit")
-                        .HasColumnName("TwoFactorEnabled");
+                        .HasColumnType("bit");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)")
                         .HasColumnName("username");
-
-                    b.Property<string>("VerificationCode")
-                        .HasMaxLength(6)
-                        .HasColumnType("nvarchar(6)")
-                        .HasColumnName("verification_code");
-
-                    b.Property<DateTime?>("VerificationCodeExpiry")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("verification_code_expiry");
 
                     b.HasKey("Id");
 
@@ -2777,28 +2452,6 @@ namespace TidyUpCapstone.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TidyUpCapstone.Models.Entities.Core.UserPrivacySettings", b =>
-                {
-                    b.HasOne("TidyUpCapstone.Models.Entities.User.AppUser", "User")
-                        .WithOne("PrivacySettings")
-                        .HasForeignKey("TidyUpCapstone.Models.Entities.Core.UserPrivacySettings", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TidyUpCapstone.Models.Entities.Gamification.CheckIn", b =>
-                {
-                    b.HasOne("TidyUpCapstone.Models.Entities.User.AppUser", "User")
-                        .WithMany("CheckIns")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("TidyUpCapstone.Models.Entities.Gamification.LeaderboardEntry", b =>
                 {
                     b.HasOne("TidyUpCapstone.Models.Entities.Gamification.Leaderboard", "Leaderboard")
@@ -2882,17 +2535,6 @@ namespace TidyUpCapstone.Migrations
                         .IsRequired();
 
                     b.Navigation("Quest");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TidyUpCapstone.Models.Entities.Gamification.UserStats", b =>
-                {
-                    b.HasOne("TidyUpCapstone.Models.Entities.User.AppUser", "User")
-                        .WithOne("UserStats")
-                        .HasForeignKey("TidyUpCapstone.Models.Entities.Gamification.UserStats", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -2985,17 +2627,6 @@ namespace TidyUpCapstone.Migrations
                         .IsRequired();
 
                     b.Navigation("Type");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TidyUpCapstone.Models.Entities.Notifications.NotificationSettings", b =>
-                {
-                    b.HasOne("TidyUpCapstone.Models.Entities.User.AppUser", "User")
-                        .WithOne("NotificationSettings")
-                        .HasForeignKey("TidyUpCapstone.Models.Entities.Notifications.NotificationSettings", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -3380,8 +3011,6 @@ namespace TidyUpCapstone.Migrations
 
                     b.Navigation("ChatMessages");
 
-                    b.Navigation("CheckIns");
-
                     b.Navigation("Comments");
 
                     b.Navigation("EmailVerifications");
@@ -3394,13 +3023,9 @@ namespace TidyUpCapstone.Migrations
 
                     b.Navigation("ManagedUsers");
 
-                    b.Navigation("NotificationSettings");
-
                     b.Navigation("Notifications");
 
                     b.Navigation("Posts");
-
-                    b.Navigation("PrivacySettings");
 
                     b.Navigation("Reactions");
 
@@ -3417,8 +3042,6 @@ namespace TidyUpCapstone.Migrations
                     b.Navigation("UserLevel");
 
                     b.Navigation("UserQuests");
-
-                    b.Navigation("UserStats");
 
                     b.Navigation("UserStreaks");
 

@@ -1,0 +1,359 @@
+﻿@model TidyUpCapstone.Models.ViewModels.MessagePageViewModel
+@{
+    ViewData["Title"] = "Message";
+    ViewData["PageType"] = "message";
+}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Righteous&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="~/css/MessagePage.css" asp-append-version="true" />
+
+<!-- SignalR JavaScript Library -->
+<script src="https://unpkg.com/@@microsoft/signalr@latest/dist/browser/signalr.min.js"></script>
+
+<!-- User Data for JavaScript -->
+<script type="application/json" id="userData">
+    {
+        "currentUser": @if (Model.CurrentUser != null)
+    {
+            @Html.Raw(Json.Serialize(new { id = Model.CurrentUser.Id, name = Model.CurrentUser.UserName }))
+    }
+        else
+    {
+            @Html.Raw("null")
+    }
+,
+        "otherUser": @if (Model.OtherUser != null)
+    {
+            @Html.Raw(Json.Serialize(new { id = Model.OtherUser.Id, name = Model.OtherUser.UserName }))
+    }
+        else
+    {
+            @Html.Raw("null")
+    }
+,
+        
+        "currentTransactionId": @(Model.CurrentTransactionId?.ToString() ?? "null"),
+        "hasActiveTransaction": @Json.Serialize(Model.HasActiveTransaction),
+        "transactionStatus": @if (Model.TransactionStatus != null)
+    {
+            @Html.Raw(Json.Serialize(Model.TransactionStatus))
+    }
+        else
+    {
+            @Html.Raw("null")
+    }
+    }
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.classList.add('message-page');
+    });
+</script>
+}
+
+<div class="flex h-[calc(100vh-4rem)] font-['Montserrat'] min-h-screen">
+    <!-- Sidebar -->
+    <div class="w-1/3 max-w-sm bg-[#F5F5F5] border-r border-gray-300 flex flex-col sidebar">
+        <div class="flex justify-center m-2 pb-2">
+            <img class="w-[50px] h-[50px]" src="~/assets/logo-tidyup.png" alt="TidyUp Logo" />
+        </div>
+
+        <div class="px-4 pb-2">
+            <input type="text" placeholder="Search conversations..." class="w-full px-4 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6B9080]" />
+        </div>
+
+        <!-- Conversations List -->
+        <div class="overflow-y-auto conversations-list">
+            <div class="p-4 text-center text-gray-500">
+                <p>Your conversations will appear here</p>
+                <p class="text-xs mt-2">Conversations start when you express interest in items</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Section -->
+    <div class="flex-1 bg-[#6B9080] text-white flex flex-col relative chat-section">
+        <!-- Header -->
+        <div class="flex items-center justify-between p-6 chat-header">
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <div class="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-2xl font-bold text-gray-600">
+                        @if (Model.OtherUser != null)
+                        {
+                            @Model.OtherUser.UserName.First()
+                        }
+                        else
+                        {
+                            <span>?</span>
+                        }
+                    </div>
+                    @if (Model.OtherUser != null)
+                    {
+                        <div class="status-indicator absolute bottom-0 right-0 w-5 h-5 bg-gray-400 rounded-full border-2 border-white" data-user-id="@Model.OtherUser.Id"></div>
+                    }
+                </div>
+                <div>
+                    <div class="text-lg font-semibold">@(Model.OtherUser?.UserName ?? "Select a conversation")</div>
+                    @if (Model.OtherUser != null)
+                    {
+                        <div class="text-sm opacity-75" id="userStatus">Online</div>
+                        @if (Model.HasActiveTransaction)
+                        {
+                            <div class="text-xs bg-white/20 px-2 py-1 rounded mt-1">
+                                💼 Transaction: @Model.TransactionItemTitle
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button class="text-white p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all">
+                    <i class='bx bx-info-circle text-xl'></i>
+                </button>
+                @if (Model.HasActiveTransaction)
+                {
+                    <button class="text-white toggle-delivery-button p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all" id="toggleDeliveryBtn" title="Transaction Options">
+                        <i class='bx bx-transfer-alt text-xl'></i>
+                    </button>
+                }
+            </div>
+        </div>
+
+        
+
+        <!-- Escrow Controls -->
+        @if (Model.HasActiveTransaction)
+        {
+            <div id="escrowControls" class="escrow-buttons bg-white/10 backdrop-blur-sm rounded-lg p-4 mx-6 mb-4">
+                <div class="text-center mb-3 text-sm text-white/90">
+                    Tokens are now held in escrow by the system.
+                </div>
+                <div class="flex gap-3 justify-center">
+                    <button onclick="confirmTransaction()"
+                            class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-md transition-all">
+                        Confirm Transaction
+                    </button>
+                    <button onclick="cancelTransaction()"
+                            class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-md transition-all">
+                        Cancel Transaction
+                    </button>
+                </div>
+            </div>
+        }
+
+        <!-- Chat Messages -->
+        <div class="flex-1 px-6 py-4 overflow-y-auto w-full chat-messages" id="chatMessages">
+            @if (Model.CurrentUser == null || Model.OtherUser == null)
+            {
+                <div class="flex justify-center items-center h-full">
+                    <div class="text-center text-white opacity-75">
+                        <i class='bx bx-message-square-dots text-6xl mb-4'></i>
+                        <p class="text-lg">Select a conversation to start messaging</p>
+                        <p class="text-sm mt-2">Real-time chat with transaction support</p>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Messages will be loaded dynamically via JavaScript and SignalR -->
+                <div class="flex justify-center items-center h-full" id="loadingIndicator">
+                    <div class="text-center text-white opacity-75">
+                        <i class='bx bx-loader-alt bx-spin text-4xl mb-2'></i>
+                        <p>Connecting to real-time chat...</p>
+                        @if (Model.HasActiveTransaction)
+                        {
+                            <p class="text-sm mt-1">Transaction system ready</p>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Desktop Message Input (hidden on mobile) -->
+        @if (Model.CurrentUser != null && Model.OtherUser != null)
+        {
+            <div class="p-4 flex gap-3 items-center message-input-container">
+                <input type="text" placeholder="Type a message..." class="flex-1 px-6 py-3 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-white message-input" maxlength="500" />
+                <button class="bg-white text-[#6B9080] rounded-full w-12 h-12 flex items-center justify-center send-button hover:bg-gray-100 transition-all" title="Send message">
+                    <i class='bx bx-send'></i>
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Fixed Message Input for Mobile (positioned above dock) -->
+@if (Model.CurrentUser != null && Model.OtherUser != null)
+{
+    <div class="message-input-container-fixed">
+        <input type="text" placeholder="Type a message..." class="message-input" id="mobileMessageInput" maxlength="500" />
+        <button class="send-button" id="mobileSendButton" title="Send message">
+            <i class='bx bx-send'></i>
+        </button>
+    </div>
+}
+
+<!-- Connection Status Indicator -->
+<div id="connectionStatusIndicator" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 text-white px-4 py-2 rounded-lg text-sm hidden">
+    <i class='bx bx-wifi text-lg mr-2'></i>
+    <span id="connectionStatusText">Connecting...</span>
+</div>
+
+<!-- Anti-forgery token for AJAX requests -->
+@Html.AntiForgeryToken()
+
+<!-- JavaScript Files - Transaction.js MUST load first -->
+<script src="~/js/EscrowManager.js" asp-append-version="true"></script>
+<script src="~/js/MessagePage.js" asp-append-version="true"></script>
+
+<!-- Connection Status Monitoring -->
+<script>
+    // Update connection status in UI
+    function updateConnectionStatus(status, isConnected) {
+        const statusElement = document.getElementById('connectionStatus');
+        const indicator = document.getElementById('connectionStatusIndicator');
+
+        if (statusElement) {
+            statusElement.textContent = status;
+            statusElement.className = isConnected ? 'text-green-600 font-semibold' : 'text-red-600';
+        }
+
+        if (indicator) {
+            const statusText = document.getElementById('connectionStatusText');
+            statusText.textContent = status;
+
+            if (isConnected) {
+                indicator.classList.add('hidden');
+            } else {
+                indicator.classList.remove('hidden');
+            }
+        }
+    }
+
+    // Monitor SignalR connection status
+    document.addEventListener('DOMContentLoaded', function() {
+        // Wait for SignalR to initialize
+        setTimeout(() => {
+            if (window.connection) {
+                // Update status based on connection state
+                const updateStatus = () => {
+                    const state = window.connection.state;
+                    switch (state) {
+                        case signalR.HubConnectionState.Connected:
+                            updateConnectionStatus('Connected ✓', true);
+                            break;
+                        case signalR.HubConnectionState.Connecting:
+                            updateConnectionStatus('Connecting...', false);
+                            break;
+                        case signalR.HubConnectionState.Reconnecting:
+                            updateConnectionStatus('Reconnecting...', false);
+                            break;
+                        case signalR.HubConnectionState.Disconnected:
+                            updateConnectionStatus('Disconnected ✗', false);
+                            break;
+                        default:
+                            updateConnectionStatus('Unknown', false);
+                    }
+                };
+
+                // Initial status update
+                updateStatus();
+
+                // Monitor connection state changes
+                window.connection.onreconnecting(() => updateStatus());
+                window.connection.onreconnected(() => updateStatus());
+                window.connection.onclose(() => updateStatus());
+            }
+        }, 1000);
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const userData = JSON.parse(document.getElementById('userData').textContent);
+
+        console.log('=== ESCROW DEBUG ===');
+        console.log('Current User:', userData.currentUser);
+        console.log('Other User:', userData.otherUser);
+        console.log('HasActiveTransaction:', userData.hasActiveTransaction);
+        console.log('TransactionStatus:', userData.transactionStatus);
+        console.log('TransactionStatus.Status:', userData.transactionStatus?.Status);
+        console.log('EscrowManager exists:', !!window.escrowManager);
+
+        if (userData.hasActiveTransaction && userData.currentTransactionId && window.escrowManager) {
+            console.log('Initializing EscrowManager...');
+            setTimeout(() => {
+                escrowManager.initialize(
+                    userData.currentUser,
+                    userData.currentTransactionId,
+                    userData.transactionStatus
+                );
+            }, 1000);
+        } else {
+            console.log('Escrow initialization skipped - missing requirements');
+        }
+    });
+</script>
+
+<script>
+    async function confirmTransaction() {
+        const confirmed = confirm('Are you sure you want to confirm this transaction? Tokens will be released once both parties confirm.');
+        if (!confirmed) return;
+
+        try {
+            const response = await fetch('/api/escrow/confirm', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: JSON.stringify({ transactionId: @(Model.CurrentTransactionId ?? 0) })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                if (result.bothConfirmed) {
+                    alert('Transaction completed. Tokens released to Seller.');
+                    location.reload();
+                } else {
+                    alert('Your confirmation recorded. Waiting for other party to confirm.');
+                }
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error confirming transaction:', error);
+            alert('Error confirming transaction');
+        }
+    }
+
+    async function cancelTransaction() {
+        const confirmed = confirm('Are you sure you want to cancel this transaction? Escrowed tokens will be refunded to the Buyer.');
+        if (!confirmed) return;
+
+        try {
+            const response = await fetch('/api/escrow/cancel', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: JSON.stringify({ transactionId: @(Model.CurrentTransactionId ?? 0) })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                alert('Transaction cancelled. Tokens refunded to Buyer.');
+                location.reload();
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error cancelling transaction:', error);
+            alert('Error cancelling transaction');
+        }
+    }
+</script>

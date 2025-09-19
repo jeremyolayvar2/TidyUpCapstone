@@ -31,7 +31,7 @@ namespace TidyUpCapstone.Models.Entities.Transactions
         public DateTime? CompletionDate { get; set; }
 
         [Required]
-        public EscrowStatus EscrowStatus { get; set; } = EscrowStatus.Pending;
+        public EscrowStatus EscrowStatus { get; set; } = EscrowStatus.Held;
 
         // Navigation properties
         [ForeignKey("TransactionId")]
@@ -42,7 +42,7 @@ namespace TidyUpCapstone.Models.Entities.Transactions
 
     public enum EscrowStatus
     {
-        Pending,
+        Held,
         Released,
         Disputed,
         Refunded
