@@ -31,8 +31,11 @@
                 <span class="stat-label">Tokens</span>
             </div>
             <div class="stat-item">
-                <span class="stat-value">@(Model?.Stats?.ActiveStreaksCount ?? 0)</span>
-                <span class="stat-label">Streaks</span>
+                @foreach (var streak in Model.ActiveStreaks.OrderByDescending(s => s.IsActive).ThenByDescending(s => s.CurrentStreak))
+                {
+                    <span class="stat-value">@streak.CurrentStreak</span>
+                    <span class="stat-label">Streaks</span>
+                }
             </div>
         </div>
     </header>
@@ -51,7 +54,7 @@
                     <div class="xp-display">
                         <span class="current-xp">@Model.LevelProgress.CurrentXp XP</span>
                         <span class="xp-separator">/</span>
-                        <span class="next-level-xp">@(Model.LevelProgress.CurrentXp + Model.LevelProgress.XpToNextLevel) XP</span>
+                        <span class="next-level-xp">@Model.LevelProgress.XpToNextLevel XP</span>
                     </div>
                 </div>
                 <div class="level-progress-bar">

@@ -30,6 +30,12 @@ builder.Services.AddLogging(logging =>
     logging.AddConsole();
     logging.AddDebug();
     logging.AddEventSourceLogger();
+// Database Configuration
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection") ??
+        "Data Source=Raven-PC\\SQLEXPRESS;Initial Catalog=DBcapstone;Integrated Security=True;Trust Server Certificate=True"
+    ));
 
     if (builder.Environment.IsDevelopment())
     {
@@ -299,6 +305,9 @@ builder.Services.AddAntiforgery(options =>
         : CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.Lax;
 });
+// Register Background Service for Quest Management
+builder.Services.AddHostedService<QuestBackgroundService>();
+builder.Services.AddHostedService<UserSpecialQuestService>();
 
 // -----------------------------------------------------
 // 11. Build Application

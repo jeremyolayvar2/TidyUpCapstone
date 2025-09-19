@@ -3419,5 +3419,25 @@ namespace TidyUpCapstone.Controllers
                 return Json(new { success = false, message = ex.Message, stackTrace = ex.StackTrace });
             }
         }
+        [HttpPost]
+        public async Task<IActionResult> DebugGenerateUserSpecialQuest(int? userId = null)
+        {
+            try
+            {
+                var targetUserId = userId ?? GetUserId();
+                await _questService.GenerateNextSpecialQuestForUserAsync(targetUserId);
+
+                return Json(new
+                {
+                    success = true,
+                    message = $"Special quest generated for user {targetUserId}",
+                    userId = targetUserId
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
     }
 }
