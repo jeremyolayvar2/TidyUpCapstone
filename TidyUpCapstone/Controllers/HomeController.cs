@@ -6,7 +6,9 @@ using System.Diagnostics;
 using System.Security.Claims;
 using TidyUpCapstone.Data;
 using TidyUpCapstone.Filters;
+using TidyUpCapstone.Helpers;
 using TidyUpCapstone.Models;
+using TidyUpCapstone.Models.DTOs.Community;
 using TidyUpCapstone.Models.DTOs.Items;
 using TidyUpCapstone.Models.DTOs.Transactions;
 using TidyUpCapstone.Models.Entities.Gamification;
@@ -18,7 +20,6 @@ using TidyUpCapstone.Models.ViewModels.Gamification;
 using TidyUpCapstone.Models.ViewModels.Items;
 using TidyUpCapstone.Services;
 using TidyUpCapstone.Services.Interfaces;
-using TidyUpCapstone.Helpers;
 
 namespace TidyUpCapstone.Controllers
 {
@@ -75,7 +76,6 @@ namespace TidyUpCapstone.Controllers
             return View();
         }
 
-        [Authorize]
         public async Task<IActionResult> Main()
         {
             try

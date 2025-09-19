@@ -1,12 +1,15 @@
-﻿// filterTabSystem.js - Complete filter tab management system
+﻿// Updated FilterTabSystem.js - Fixed version that doesn't hide posts on initial load
 
 class FilterTabSystem {
     constructor() {
         this.currentFilter = 'all';
+        this.initialized = false;
         this.initializeFilterTabs();
     }
 
     initializeFilterTabs() {
+        console.log('FilterTabSystem: Initializing...');
+
         const filterTabs = document.querySelectorAll('.filter-tab');
 
         filterTabs.forEach(tab => {
@@ -17,15 +20,30 @@ class FilterTabSystem {
             });
         });
 
-        // Set initial filter based on active tab
+        // Set initial filter based on active tab - but DON'T apply it immediately
         const activeTab = document.querySelector('.filter-tab.active');
         if (activeTab) {
             this.currentFilter = activeTab.getAttribute('data-filter') || 'all';
-            this.applyFilter(this.currentFilter);
         }
+
+        // Mark as initialized but don't apply filter yet
+        this.initialized = true;
+        console.log('FilterTabSystem: Initialized with filter:', this.currentFilter);
+
+        // Only apply filter after a short delay to ensure posts are rendered
+        setTimeout(() => {
+            if (this.currentFilter === 'all') {
+                // For 'all' filter, use the safe method that doesn't hide posts first
+                this.applyFilterSafely(this.currentFilter);
+            } else {
+                this.applyFilter(this.currentFilter);
+            }
+        }, 300);
     }
 
     switchFilter(filter, clickedTab) {
+        console.log('FilterTabSystem: Switching to filter:', filter);
+
         // Update active tab
         document.querySelectorAll('.filter-tab').forEach(tab => {
             tab.classList.remove('active');
@@ -46,6 +64,8 @@ class FilterTabSystem {
     }
 
     applyFilter(filter) {
+        console.log('FilterTabSystem: Applying filter:', filter);
+
         const itemPosts = document.querySelectorAll('.item-post');
         const communityPosts = document.querySelectorAll('.community-post');
         const emptyState = document.getElementById('emptyState');
@@ -53,24 +73,18 @@ class FilterTabSystem {
 
         let visibleCount = 0;
 
-        // Reset all posts to hidden
+        // For 'all' filter, use the safe method
+        if (filter === 'all') {
+            this.applyFilterSafely(filter);
+            return;
+        }
+
+        // For specific filters, hide posts first then show relevant ones
         [...itemPosts, ...communityPosts].forEach(post => {
             post.style.display = 'none';
         });
 
         switch (filter) {
-            case 'all':
-                // Show all posts
-                [...itemPosts, ...communityPosts].forEach(post => {
-                    post.style.display = 'block';
-                    visibleCount++;
-                });
-                // Show community post creation section
-                if (communityPostSection) {
-                    communityPostSection.style.display = 'block';
-                }
-                break;
-
             case 'items':
                 // Show only item posts
                 itemPosts.forEach(post => {
@@ -105,6 +119,41 @@ class FilterTabSystem {
         this.updateFilterCounts();
     }
 
+    // Safe apply filter method that doesn't hide posts first (used for 'all' filter)
+    applyFilterSafely(filter) {
+        console.log('FilterTabSystem: Applying filter safely:', filter);
+
+        const itemPosts = document.querySelectorAll('.item-post');
+        const communityPosts = document.querySelectorAll('.community-post');
+        const emptyState = document.getElementById('emptyState');
+        const communityPostSection = document.getElementById('communityPostSection');
+
+        let visibleCount = 0;
+
+        if (filter === 'all') {
+            // Show all posts without hiding them first
+            [...itemPosts, ...communityPosts].forEach(post => {
+                post.style.display = 'block';
+                post.style.opacity = '1';
+                post.style.visibility = 'visible';
+                visibleCount++;
+            });
+
+            // Show community post creation section
+            if (communityPostSection) {
+                communityPostSection.style.display = 'block';
+            }
+        }
+
+        // Show/hide empty state
+        if (emptyState) {
+            emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+
+        // Update filter counts
+        this.updateFilterCounts();
+    }
+
     updateFilterCounts() {
         const itemPosts = document.querySelectorAll('.item-post').length;
         const communityPosts = document.querySelectorAll('.community-post').length;
@@ -126,7 +175,8 @@ class FilterTabSystem {
         }
 
         if (communityTab) {
-            const icon = communityTab.querySelector('i') ? communityTab.querySelector('i').outerHTML : '';
+            const icon = communityTab.querySelector('i') ?
+                communityTab.querySelector('i').outerHTML : '';
             communityTab.innerHTML = `${icon} Community`;
         }
     }
@@ -144,7 +194,11 @@ class FilterTabSystem {
 
     // Method to refresh current filter after adding new content
     refreshCurrentFilter() {
-        this.applyFilter(this.currentFilter);
+        if (this.currentFilter === 'all') {
+            this.applyFilterSafely(this.currentFilter);
+        } else {
+            this.applyFilter(this.currentFilter);
+        }
     }
 
     // Get current filter
@@ -158,80 +212,31 @@ class FilterTabSystem {
     }
 }
 
-// Initialize filter system
+// Initialize filter system with improved timing
 document.addEventListener('DOMContentLoaded', function () {
-    window.filterTabSystem = new FilterTabSystem();
+    console.log('FilterTabSystem: DOM loaded, initializing...');
 
-    // Integration with UI Update System
-    if (window.uiUpdateSystem) {
-        // Override the addItemToUI method to work with filters
-        const originalAddItemToUI = window.uiUpdateSystem.addItemToUI;
-
-        window.uiUpdateSystem.addItemToUI = function (itemData) {
-            // Call original method
-            originalAddItemToUI.call(this, itemData);
-
-            // Refresh filter after adding item
-            if (window.filterTabSystem) {
-                window.filterTabSystem.refreshCurrentFilter();
-            }
-        };
-    }
-});
-
-// Fix for Post Loading Issue
-// The problem is likely in the filter initialization in Main.cshtml
-
-// 1. Update your Main.cshtml filter initialization
-// Add this script after your existing filter tabs HTML:
-
-document.addEventListener('DOMContentLoaded', function () {
-    console.log('DOM loaded, initializing posts display...');
-
-    // Force show all posts initially
-    showAllPostsOnLoad();
-
-    // Initialize filter system after showing posts
+    // Wait a bit for posts to be rendered
     setTimeout(() => {
-        if (window.FilterTabSystem) {
-            window.filterTabSystem = new FilterTabSystem();
-        }
+        window.filterTabSystem = new FilterTabSystem();
 
-        if (window.CommunityHub) {
-            window.communityHub = new CommunityHub();
-            window.communityHub.init();
+        // Integration with UI Update System
+        if (window.uiUpdateSystem) {
+            // Override the addItemToUI method to work with filters
+            const originalAddItemToUI = window.uiUpdateSystem.addItemToUI;
+
+            window.uiUpdateSystem.addItemToUI = function (itemData) {
+                // Call original method
+                originalAddItemToUI.call(this, itemData);
+
+                // Refresh filter after adding item
+                if (window.filterTabSystem) {
+                    window.filterTabSystem.refreshCurrentFilter();
+                }
+            };
         }
     }, 100);
 });
 
-// Function to ensure all posts are visible on initial load
-function showAllPostsOnLoad() {
-    console.log('Showing all posts on initial load...');
-
-    // Get all post elements
-    const itemPosts = document.querySelectorAll('.item-post');
-    const communityPosts = document.querySelectorAll('.community-post');
-    const emptyState = document.getElementById('emptyState');
-
-    console.log(`Found ${itemPosts.length} item posts and ${communityPosts.length} community posts`);
-
-    // Force display all posts
-    [...itemPosts, ...communityPosts].forEach(post => {
-        post.style.display = 'block';
-        post.style.opacity = '1';
-        post.style.visibility = 'visible';
-    });
-
-    // Hide empty state if we have posts
-    if (emptyState && (itemPosts.length > 0 || communityPosts.length > 0)) {
-        emptyState.style.display = 'none';
-    }
-
-    // Ensure community post section is visible
-    const communityPostSection = document.getElementById('communityPostSection');
-    if (communityPostSection) {
-        communityPostSection.style.display = 'block';
-    }
-
-    console.log('All posts should now be visible');
-}
+// Expose for global use
+window.FilterTabSystem = FilterTabSystem;
