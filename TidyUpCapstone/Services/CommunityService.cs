@@ -221,12 +221,10 @@ namespace TidyUpCapstone.Services
 
         private async Task<PostDto> MapToPostDtoAsync(Post post, int? currentUserId)
         {
-            var reactionCount = await _context.Reactions
-                .CountAsync(r => r.PostId == post.PostId);
+            var reactionCount = await _context.Reactions.CountAsync(r => r.PostId == post.PostId);
+            var commentCount = await _context.Comments.CountAsync(c => c.PostId == post.PostId && c.Content != "[deleted]");
 
-            var commentCount = await _context.Comments
-                .CountAsync(c => c.PostId == post.PostId && c.Content != "[deleted]");
-
+            // Get user reaction if logged in
             ReactionType? userReaction = null;
             if (currentUserId.HasValue)
             {
@@ -235,22 +233,25 @@ namespace TidyUpCapstone.Services
                 userReaction = reaction?.ReactionType;
             }
 
-            var reactionSummary = await _context.Reactions
-                .Where(r => r.PostId == post.PostId)
-                .GroupBy(r => r.ReactionType)
-                .Select(g => new ReactionSummaryDto
-                {
-                    ReactionType = g.Key,
-                    Count = g.Count()
-                })
-                .ToListAsync();
+            // FIXED: Get the actual user profile picture URL
+            string authorAvatarUrl = "/assets/default-avatar.svg"; // Default fallback
+
+            if (post.Author != null && !string.IsNullOrEmpty(post.Author.ProfilePictureUrl))
+            {
+                // User has uploaded a profile picture - use it
+                authorAvatarUrl = post.Author.ProfilePictureUrl;
+            }
+
+            // Debug logging to see what avatar is being used
+            _logger.LogInformation("Avatar mapping for user {Username} (ID: {UserId}): ProfilePictureUrl='{ProfileUrl}', Final Avatar='{Avatar}'",
+                post.Author?.UserName, post.AuthorId, post.Author?.ProfilePictureUrl, authorAvatarUrl);
 
             return new PostDto
             {
                 PostId = post.PostId,
                 AuthorId = post.AuthorId,
-                AuthorUsername = post.Author.UserName ?? "Unknown User",
-                AuthorAvatarUrl = "/assets/default-avatar.svg",
+                AuthorUsername = post.Author?.UserName ?? "Unknown User",
+                AuthorAvatarUrl = authorAvatarUrl, // Now correctly uses actual profile picture
                 PostContent = post.PostContent,
                 PostType = post.PostType,
                 ImageUrl = post.ImageUrl,
@@ -260,7 +261,7 @@ namespace TidyUpCapstone.Services
                 CommentCount = commentCount,
                 ReactionCount = reactionCount,
                 UserReaction = userReaction,
-                ReactionSummary = reactionSummary
+                ReactionSummary = new List<ReactionSummaryDto>()
             };
         }
 

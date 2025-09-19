@@ -656,20 +656,25 @@
             method: 'POST',
             body: formData
         })
-            .then(response => {
-                console.log('Response status:', response.status);
+            .then(response => response.json())
+            .then(data => {
                 button.innerHTML = originalText;
                 button.disabled = false;
 
-                if (response.status === 200 || response.status === 302) {
+                if (data.success) {
                     this.showNotification('Profile updated successfully!', 'success');
 
-                    // Reload profile data to show updated values
+                    // 🔥 CRITICAL: Update ALL avatar locations globally
+                    if (data.profilePictureUrl) {
+                        this.updateAllGlobalAvatars(data.profilePictureUrl);
+                    }
+
+                    // Reload profile data
                     setTimeout(() => {
                         this.loadProfileData();
                     }, 1000);
                 } else {
-                    throw new Error(`Server responded with status: ${response.status}`);
+                    throw new Error(data.message || 'Failed to update profile');
                 }
             })
             .catch(error => {
@@ -678,6 +683,66 @@
                 console.error('Error:', error);
                 this.showNotification('Error updating profile. Please try again.', 'error');
             });
+    }
+
+    // 🔥 ADD THIS NEW METHOD at the end of your settings class (before the closing brace):
+    updateAllGlobalAvatars(newAvatarUrl) {
+        const cacheBustUrl = `${newAvatarUrl}?v=${Date.now()}`;
+
+        console.log('🔄 Updating all global avatars with:', cacheBustUrl);
+
+        // 1. Update settings page profile picture
+        const settingsAvatar = document.getElementById('profile-avatar-upload');
+        if (settingsAvatar) {
+            settingsAvatar.style.backgroundImage = `url(${cacheBustUrl})`;
+            settingsAvatar.style.backgroundSize = 'cover';
+            settingsAvatar.style.backgroundPosition = 'center';
+            settingsAvatar.innerHTML = '';
+            console.log('✅ Settings avatar updated');
+        }
+
+        // 2. Update sidebar avatar (use global function if available)
+        if (window.updateAllUserAvatars) {
+            window.updateAllUserAvatars(newAvatarUrl);
+            console.log('✅ Global avatar update function called');
+        } else {
+            // Fallback direct update
+            const sidebarAvatar = document.getElementById('rectangle2');
+            if (sidebarAvatar) {
+                sidebarAvatar.style.backgroundImage = `url(${cacheBustUrl})`;
+                sidebarAvatar.style.backgroundSize = 'cover';
+                sidebarAvatar.style.backgroundPosition = 'center';
+                console.log('✅ Sidebar avatar updated (fallback)');
+            }
+        }
+
+        // 3. Update community post creator avatar
+        const communityAvatar = document.querySelector('.user-avatar img');
+        if (communityAvatar) {
+            communityAvatar.src = cacheBustUrl;
+            console.log('✅ Community post avatar updated');
+        }
+
+        // 4. Update comment section avatar
+        const commentAvatar = document.querySelector('.new-comment-avatar');
+        if (commentAvatar) {
+            commentAvatar.src = cacheBustUrl;
+            console.log('✅ Comment avatar updated');
+        }
+
+        // 5. Update any other avatar instances
+        const allAvatarImages = document.querySelectorAll('[data-user-avatar], .profile-avatar img');
+        allAvatarImages.forEach(avatar => {
+            if (avatar.tagName === 'IMG') {
+                avatar.src = cacheBustUrl;
+            } else {
+                avatar.style.backgroundImage = `url(${cacheBustUrl})`;
+                avatar.style.backgroundSize = 'cover';
+                avatar.style.backgroundPosition = 'center';
+            }
+        });
+
+        console.log('✅ All global profile pictures updated successfully!');
     }
 
     initSaveButtonClick() {

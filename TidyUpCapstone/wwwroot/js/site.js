@@ -961,6 +961,11 @@ function showTokenModal() {
     tokenModal.classList.add('show');
     console.log('Token modal shown');
 
+    // Refresh token balance when showing
+    if (window.refreshTokenBalance) {
+        window.refreshTokenBalance();
+    }
+
     // Auto-close after 5 seconds
     setTimeout(() => {
         hideTokenModal();
@@ -968,7 +973,6 @@ function showTokenModal() {
 
     return true;
 }
-
 function hideTokenModal() {
     const tokenModal = document.getElementById('tokenModal');
     if (tokenModal) {

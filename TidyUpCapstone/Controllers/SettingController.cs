@@ -8,29 +8,35 @@ using TidyUpCapstone.Models.DTOs.User;
 using TidyUpCapstone.Models.Entities.User;
 using TidyUpCapstone.Models.ViewModels.Account;
 using TidyUpCapstone.Services;
+using TidyUpCapstone.Helpers;
+
 
 namespace TidyUpCapstone.Controllers
 {
     [Authorize]
-    public class SettingsController : Controller
+    public class SettingsController : BaseController
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly IWebHostEnvironment _environment;
         private readonly ApplicationDbContext _context;
         private readonly ILanguageService _languageService;
+        private readonly SignInManager<AppUser> _signInManager;
 
-        public SettingsController(UserManager<AppUser> userManager, IWebHostEnvironment environment, ApplicationDbContext context, ILanguageService languageService)
+        public SettingsController(UserManager<AppUser> userManager, IWebHostEnvironment environment, ApplicationDbContext context, ILanguageService languageService, SignInManager<AppUser> signInManager) : base(userManager)
         {
             _userManager = userManager;
             _environment = environment;
             _context = context;
             _languageService = languageService;
+            _signInManager = signInManager;
+            
         }
 
         // GET: Settings
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
+            
             if (user == null)
             {
                 return RedirectToAction("Login", "Account");
@@ -178,7 +184,7 @@ namespace TidyUpCapstone.Controllers
                             }
                         }
 
-                        var fileName = $"{user.Id}_{Guid.NewGuid()}{Path.GetExtension(ProfilePicture.FileName)}";
+                        var fileName = UserHelper.GenerateProfilePictureFileName(user.Id, ProfilePicture.FileName);
                         var filePath = Path.Combine(uploadsDir, fileName);
                         Console.WriteLine($"Full file path: {filePath}");
 
@@ -232,7 +238,17 @@ namespace TidyUpCapstone.Controllers
                 if (result.Succeeded)
                 {
                     Console.WriteLine("✅ User update succeeded");
-                    return Json(new { success = true, message = "Profile updated successfully!" });
+
+                    // 🔥 ADD THIS: Refresh authentication claims for global avatar sync
+                    await _signInManager.RefreshSignInAsync(user);
+                    Console.WriteLine("✅ Authentication claims refreshed");
+
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Profile updated successfully!",
+                        profilePictureUrl = user.ProfilePictureUrl  // Add this for JavaScript
+                    });
                 }
                 else
                 {

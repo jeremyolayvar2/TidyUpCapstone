@@ -15,10 +15,12 @@ using TidyUpCapstone.Models.ViewModels;
 using TidyUpCapstone.Models.ViewModels.Gamification;
 using TidyUpCapstone.Models.ViewModels.Items;
 using TidyUpCapstone.Services.Interfaces;
+using TidyUpCapstone.Helpers;
+
 
 namespace TidyUpCapstone.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IItemService _itemService;
@@ -40,6 +42,7 @@ namespace TidyUpCapstone.Controllers
             IQuestService? questService = null,
             IAchievementService? achievementService = null,
             IStreakService? streakService = null)
+            : base(userManager)
         {
             _logger = logger;
             _itemService = itemService;
@@ -169,9 +172,60 @@ namespace TidyUpCapstone.Controllers
                     TotalItems = items.Count,
                 };
 
+
+
+
+                decimal userTokenBalance = 0m;
+
+                try
+                {
+                    // First try to get from UserStats (gamification system)
+                    var userStats = await _context.UserStats
+                        .Where(us => us.UserId == currentUser.Id)
+                        .FirstOrDefaultAsync();
+
+                    if (userStats != null)
+                    {
+                        userTokenBalance = userStats.TotalTokens;
+
+                        // Sync with AppUser.TokenBalance if they differ
+                        if (currentUser.TokenBalance != userTokenBalance)
+                        {
+                            currentUser.TokenBalance = userTokenBalance;
+                            await _userManager.UpdateAsync(currentUser);
+                        }
+                    }
+                    else
+                    {
+                        // Fallback to AppUser.TokenBalance if UserStats doesn't exist
+                        userTokenBalance = currentUser.TokenBalance;
+
+                        // Create UserStats if it doesn't exist for this user
+                        var newUserStats = new UserStats
+                        {
+                            UserId = currentUser.Id,
+                            TotalTokens = userTokenBalance,
+                            CurrentXp = 0,
+                            CurrentStreak = 0,
+                            LastCheckIn = null,
+                            //TotalQuestsCompleted = 0,
+                            //TotalAchievementsUnlocked = 0
+                        };
+
+                        _context.UserStats.Add(newUserStats);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+                catch (Exception tokenEx)
+                {
+                    _logger.LogError(tokenEx, "Error fetching user token balance for user {UserId}", currentUser.Id);
+                    // Fallback to AppUser.TokenBalance
+                    userTokenBalance = currentUser.TokenBalance;
+                }
+
                 // Set ViewBag data for the view
-                ViewBag.CurrentUserTokenBalance = 0; // Replace with actual logic
-                ViewBag.CurrentUserAvatar = "/assets/default-avatar.svg";
+                ViewBag.CurrentUserTokenBalance = userTokenBalance; // Replace with actual logic
+                ViewBag.CurrentUserAvatar = UserHelper.GetUserAvatarUrl(currentUser);
                 ViewBag.UserName = currentUser.UserName;
                 ViewBag.FirstName = currentUser.FirstName;
                 ViewBag.LastName = currentUser.LastName;
@@ -193,6 +247,8 @@ namespace TidyUpCapstone.Controllers
                 return View(fallbackViewModel);
             }
         }
+
+
 
         /// <summary>
         /// Quest page for gamification features
@@ -279,6 +335,51 @@ namespace TidyUpCapstone.Controllers
             }
         }
 
+
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetUserTokenBalance()
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Json(new { success = false, message = "User not found" });
+                }
+
+                decimal tokenBalance = 0m;
+
+                // Try to get from UserStats first (gamification system)
+                var userStats = await _context.UserStats
+                    .Where(us => us.UserId == currentUser.Id)
+                    .FirstOrDefaultAsync();
+
+                if (userStats != null)
+                {
+                    tokenBalance = userStats.TotalTokens;
+                }
+                else
+                {
+                    // Fallback to AppUser.TokenBalance
+                    tokenBalance = currentUser.TokenBalance;
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    tokenBalance = tokenBalance,
+                    formattedBalance = tokenBalance.ToString("N0") // Format with commas
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching user token balance");
+                return Json(new { success = false, message = "Internal server error" });
+            }
+        }
+        
         [Authorize]
         [NoCache]
         public async Task<IActionResult> SettingsPage()

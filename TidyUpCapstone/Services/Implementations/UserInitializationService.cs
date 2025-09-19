@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TidyUpCapstone.Data;
 using TidyUpCapstone.Models.Entities.Gamification;
+using TidyUpCapstone.Services.Data;
 using TidyUpCapstone.Services.Interfaces;
 
 namespace TidyUpCapstone.Services.Implementations
@@ -8,10 +9,14 @@ namespace TidyUpCapstone.Services.Implementations
     public class UserInitializationService : IUserInitializationService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IQuestService _questService;
+        private readonly ILogger<UserInitializationService> _logger;
 
-        public UserInitializationService(ApplicationDbContext context)
+        public UserInitializationService(ApplicationDbContext context, IQuestService questService, ILogger<UserInitializationService> logger)
         {
             _context = context;
+            _questService = questService;
+            _logger = logger;
         }
 
         public async Task<bool> IsUserInitializedAsync(int userId)
@@ -55,6 +60,22 @@ namespace TidyUpCapstone.Services.Implementations
             }
 
             await _context.SaveChangesAsync();
+
+            // 🆕 Generate first special quest for new user
+            try
+            {
+                await _questService.GenerateNextSpecialQuestForUserAsync(userId);
+                _logger.LogInformation($"Generated first special quest for new user {userId}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Failed to generate first special quest for user {userId}");
+            }
         }
+
+        /// <summary>
+        /// Generates the first special quest specifically for a new user
+        /// </summary>
+       
     }
 }

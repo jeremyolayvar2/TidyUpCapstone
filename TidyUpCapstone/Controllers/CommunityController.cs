@@ -14,7 +14,7 @@ namespace TidyUpCapstone.Controllers
     /// Production version - requires authentication for all operations
     /// </summary>
     [Authorize]
-    public class CommunityController : Controller
+    public class CommunityController : BaseController
     {
         private readonly ICommunityService _communityService;
         private readonly ICommentService _commentService;
@@ -32,6 +32,7 @@ namespace TidyUpCapstone.Controllers
             IViewModelService viewModelService,
             UserManager<AppUser> userManager,
             ILogger<CommunityController> logger)
+            : base(userManager)
         {
             _communityService = communityService;
             _commentService = commentService;

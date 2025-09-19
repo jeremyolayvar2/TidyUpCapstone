@@ -3752,3 +3752,73 @@ select.invalid {
     display: none !important;
     visibility: hidden !important;
 }
+
+/* Add this CSS to your main.css or posting-styles.css to fix the image preview */
+
+/* Image Preview Override - Higher Specificity */
+.upload-section .image-preview {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    background: var(--accent-color) !important;
+    z-index: 5 !important;
+}
+
+    /* When shown by JavaScript */
+    .upload-section .image-preview[style*="flex"] {
+        display: flex !important;
+    }
+
+/* Hide upload label when image is shown */
+.upload-section:has(.image-preview[style*="flex"]) .upload-label {
+    display: none !important;
+}
+
+/* Alternative approach if :has() not supported */
+.upload-section.has-preview .upload-label {
+    display: none !important;
+}
+
+.upload-section.has-preview .image-preview {
+    display: flex !important;
+}
+
+/* Image within preview */
+.upload-section .image-preview img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 8px !important;
+}
+
+/* Remove button */
+.upload-section .remove-image {
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    background: rgba(244, 67, 54, 0.9) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 50% !important;
+    width: 32px !important;
+    height: 32px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    backdrop-filter: blur(4px) !important;
+    z-index: 10 !important;
+}
+
+    .upload-section .remove-image:hover {
+        background: rgba(244, 67, 54, 1) !important;
+        transform: scale(1.1) !important;
+    }

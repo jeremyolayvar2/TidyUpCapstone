@@ -10,6 +10,7 @@ class CommunityHub {
         this.maxCommentLength = 1000;
         this.maxImageSize = 10 * 1024 * 1024; // 10MB
         this.allowedImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        this.currentModalPostId = null;
     }
 
     init() {
@@ -467,6 +468,12 @@ class CommunityHub {
 
         if (sendBtn) sendBtn.setAttribute('data-post-id', postId);
 
+        // Store post ID in modal as backup
+        modal.setAttribute('data-post-id', postId);
+
+        // Store in class instance for reliability  
+        this.currentModalPostId = postId;
+
         this.showModal(modal);
         this.showCommentsLoading(true);
 
@@ -516,7 +523,7 @@ class CommunityHub {
 
         if (sendBtn) {
             sendBtn.disabled = true;
-            sendBtn.removeAttribute('data-post-id');
+            
         }
     }
 
@@ -668,7 +675,7 @@ class CommunityHub {
             if (result.success) {
                 this.resetCommentForm();
                 await this.loadCommentsForPost(postId);
-                this.updatePostCommentCount(postId);
+                this.updatePostCommentCount(postId, 1);
                 this.showNotification('Comment added successfully!', 'success');
             } else {
                 this.showNotification(result.message || 'Error adding comment', 'error');
@@ -803,18 +810,26 @@ class CommunityHub {
         const likeButtonClass = isLiked ? 'interaction-btn like-btn liked' : 'interaction-btn like-btn';
         const likeButtonStyle = isLiked ? 'color: #e74c3c;' : '';
 
+        // DEBUG: Log avatar URL to see what's being used
+        console.log('🎭 Avatar Debug:', {
+            authorUsername: post.authorUsername,
+            authorAvatarUrl: post.authorAvatarUrl,
+            fallbackPath: '/assets/default-avatar.svg',
+            finalUrl: post.authorAvatarUrl || '/assets/default-avatar.svg'
+        });
+
         return `
-            <div class="post-header">
-                <div class="post-user-info">
-                    <img src="${post.authorAvatarUrl || '~/assets/default-avatar.svg'}" alt="User" class="post-avatar" />
-                    <div class="post-user-details">
-                        <span class="post-username">${this.escapeHtml(post.authorUsername)}</span>
-                        <span class="post-time">${timeAgo}</span>
-                        ${post.lastEdited ? '<span class="post-edited">(edited)</span>' : ''}
-                    </div>
+        <div class="post-header">
+            <div class="post-user-info">
+                <img src="${post.authorAvatarUrl || '/assets/default-avatar.svg'}" alt="User" class="post-avatar" />
+                <div class="post-user-details">
+                    <span class="post-username">${this.escapeHtml(post.authorUsername)}</span>
+                    <span class="post-time">${timeAgo}</span>
+                    ${post.lastEdited ? '<span class="post-edited">(edited)</span>' : ''}
                 </div>
-                ${isOwner ? this.getPostOptionsHTML(post.postId) : ''}
             </div>
+            ${isOwner ? this.getPostOptionsHTML(post.postId) : ''}
+        </div>
 
             <div class="post-content">
                 ${post.imageUrl ? `<div class="post-image"><img src="${post.imageUrl}" alt="Post image" style="width: 100%; border-radius: 12px; margin-bottom: 10px;" /></div>` : ''}
@@ -892,13 +907,16 @@ class CommunityHub {
         }
     }
 
-    updatePostCommentCount(postId) {
+    updatePostCommentCount(postId, increment = 1) {
         const communityPost = document.querySelector(`.community-post[data-post-id="${postId}"]`);
         if (communityPost) {
             const commentCountElement = communityPost.querySelector('.comment-count');
             if (commentCountElement) {
                 const currentCount = parseInt(commentCountElement.textContent) || 0;
-                commentCountElement.textContent = currentCount + 1;
+                const newCount = Math.max(0, currentCount + increment);
+                commentCountElement.textContent = newCount;
+
+                console.log(`Updated post ${postId} comment count: ${currentCount} -> ${newCount} (${increment > 0 ? '+' : ''}${increment})`);
             }
         }
     }
@@ -954,9 +972,9 @@ class CommunityHub {
             <div class="comment-wrapper" style="display: flex; align-items: flex-start; gap: 8px;">
                 <div class="comment-avatar-wrapper" style="flex-shrink: 0;">
                     <img src="${comment.userAvatarUrl || '/assets/default-avatar.svg'}" 
-                         alt="User" 
-                         class="comment-avatar" 
-                         style="width: ${depth > 1 ? '28px' : '32px'}; height: ${depth > 1 ? '28px' : '32px'}; border-radius: 50%; object-fit: cover;">
+     alt="User" 
+     class="comment-avatar" 
+     style="width: ${depth > 1 ? '28px' : '32px'}; height: ${depth > 1 ? '28px' : '32px'}; border-radius: 50%; object-fit: cover;">
                 </div>
                 <div class="comment-content" style="flex: 1; min-width: 0;">
                     ${this.getCommentHeaderHTML(comment, timeAgo, isCurrentUser, isDeleted)}
@@ -2150,6 +2168,15 @@ async function deleteComment(commentId) {
     }
 
     try {
+        // Get the current post ID before deletion
+        const postId = communityHub.currentModalPostId ||
+            document.getElementById('sendCommentBtn')?.getAttribute('data-post-id') ||
+            document.getElementById('commentsModal')?.getAttribute('data-post-id');
+
+        // Calculate how many comments will be removed (parent + all replies)
+        const commentElement = document.querySelector(`[data-comment-id="${commentId}"]`);
+        const deletedCommentsCount = calculateCommentsToDelete(commentElement);
+
         const formData = new FormData();
         formData.append('commentId', commentId);
 
@@ -2164,7 +2191,17 @@ async function deleteComment(commentId) {
         const result = await response.json();
 
         if (result.success) {
+            // Update the DOM to show deletion
             updateDeletedCommentInDOM(commentId);
+
+            // 🔥 FIX: Update the post's comment count
+            if (postId) {
+                updatePostCommentCountAfterDeletion(postId, deletedCommentsCount);
+
+                // Also refresh the comments modal count
+                await communityHub.loadCommentsForPost(postId);
+            }
+
             communityHub.showNotification('Comment deleted successfully!', 'success');
         } else {
             communityHub.showNotification(result.message || 'Error deleting comment', 'error');
@@ -2172,6 +2209,34 @@ async function deleteComment(commentId) {
     } catch (error) {
         console.error('Error deleting comment:', error);
         communityHub.showNotification('Error deleting comment. Please try again.', 'error');
+    }
+}
+// Helper function to calculate total comments that will be deleted
+function calculateCommentsToDelete(commentElement) {
+    if (!commentElement) return 0;
+
+    let count = 1; // Count the parent comment
+
+    // Count all replies recursively
+    const repliesContainer = commentElement.querySelector('.comment-replies');
+    if (repliesContainer) {
+        const replyElements = repliesContainer.querySelectorAll('.comment-item');
+        count += replyElements.length;
+    }
+
+    return count;
+}
+
+// Helper function to update post comment count after deletion
+function updatePostCommentCountAfterDeletion(postId, deletedCount) {
+    const communityPost = document.querySelector(`.community-post[data-post-id="${postId}"]`);
+    if (communityPost) {
+        const commentCountElement = communityPost.querySelector('.comment-count');
+        if (commentCountElement) {
+            const currentCount = parseInt(commentCountElement.textContent) || 0;
+            const newCount = Math.max(0, currentCount - deletedCount);
+            commentCountElement.textContent = newCount;
+        }
     }
 }
 
@@ -2247,7 +2312,7 @@ function createReplyForm(parentCommentId, parentUsername) {
                 <span>Replying to ${communityHub.escapeHtml(parentUsername)}</span>
             </div>
             <div style="display: flex; align-items: flex-start; gap: 8px;">
-                <img src="/assets/default-avatar.svg" alt="Your avatar" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover;">
+                <img src="${window.currentUserAvatar || '/assets/default-avatar.svg'}" alt="Your avatar" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover;">
                 <div style="flex: 1;">
                     <div class="reply-input-container" style="
                         background: #f0f2f5; 
@@ -2366,7 +2431,15 @@ async function submitReply(parentCommentId, content, replyForm) {
             communityHub.showNotification('Error: Post ID not found', 'error');
             return;
         }
-
+        if (!postId) {
+            console.error('Post ID sources:', {
+                instance: communityHub.currentModalPostId,
+                button: document.getElementById('sendCommentBtn')?.getAttribute('data-post-id'),
+                modal: document.getElementById('commentsModal')?.getAttribute('data-post-id')
+            });
+            communityHub.showNotification('Error: Post ID not found. Please close and reopen comments.', 'error');
+            return;
+        }
         const formData = new FormData();
         formData.append('postId', postId);
         formData.append('content', content);
@@ -2385,7 +2458,7 @@ async function submitReply(parentCommentId, content, replyForm) {
         if (result.success) {
             replyForm.remove();
             await communityHub.loadCommentsForPost(postId);
-            communityHub.updatePostCommentCount(postId);
+            communityHub.updatePostCommentCount(postId, 1);
             communityHub.showNotification('Reply added successfully!', 'success');
         } else {
             communityHub.showNotification(result.message || 'Error adding reply', 'error');

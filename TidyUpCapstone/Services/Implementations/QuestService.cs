@@ -394,7 +394,7 @@ namespace TidyUpCapstone.Services.Implementations
                                q.IsActive)
                     .CountAsync();
 
-                if (existingDailyQuests >= 3)
+                if (existingDailyQuests >= 5)
                 {
                     _logger.LogInformation("Daily quests already exist for today");
                     return;
@@ -604,7 +604,131 @@ namespace TidyUpCapstone.Services.Implementations
                 _logger.LogError(ex, "Error generating special quest");
             }
         }
+        public async Task GenerateNextSpecialQuestForUserAsync(int userId)
+        {
+            try
+            {
+                // Check if user already has an active special quest
+                var existingSpecialQuest = await _context.UserQuests
+                    .Include(uq => uq.Quest)
+                    .AnyAsync(uq => uq.UserId == userId &&
+                                   uq.Quest.QuestType == QuestType.Special &&
+                                   uq.Quest.IsActive &&
+                                   !uq.IsCompleted);
 
+                if (existingSpecialQuest)
+                {
+                    _logger.LogInformation($"User {userId} already has an active special quest");
+                    return;
+                }
+
+                // Get user's completed quest count to determine difficulty
+                var completedQuests = await _context.UserQuests
+                    .Where(uq => uq.UserId == userId && uq.IsCompleted)
+                    .CountAsync();
+
+                // Get available special quest templates
+                var specialTemplates = KonMariQuestTemplates.GetSpecialQuestTemplates();
+
+                // Filter out templates that user has already completed
+                var completedQuestTitles = await _context.UserQuests
+                    .Include(uq => uq.Quest)
+                    .Where(uq => uq.UserId == userId &&
+                                uq.IsCompleted &&
+                                uq.Quest.QuestType == QuestType.Special)
+                    .Select(uq => uq.Quest.QuestTitle)
+                    .ToListAsync();
+
+                var availableTemplates = specialTemplates
+                    .Where(t => !completedQuestTitles.Contains(t.QuestTitle))
+                    .ToList();
+
+                if (!availableTemplates.Any())
+                {
+                    _logger.LogInformation($"No new special quest templates available for user {userId}");
+                    return;
+                }
+
+                // Select appropriate template based on user progress
+                QuestTemplate selectedTemplate = null;
+
+                if (completedQuests >= 20) // High-level users
+                {
+                    selectedTemplate = availableTemplates
+                        .Where(t => t.Difficulty == QuestDifficulty.Hard)
+                        .OrderBy(r => Guid.NewGuid())
+                        .FirstOrDefault();
+                }
+                else if (completedQuests >= 10) // Mid-level users  
+                {
+                    selectedTemplate = availableTemplates
+                        .Where(t => t.Difficulty == QuestDifficulty.Medium)
+                        .OrderBy(r => Guid.NewGuid())
+                        .FirstOrDefault();
+                }
+                else if (completedQuests >= 3) // Entry-level users
+                {
+                    selectedTemplate = availableTemplates
+                        .Where(t => t.Difficulty == QuestDifficulty.Easy)
+                        .OrderBy(r => Guid.NewGuid())
+                        .FirstOrDefault();
+                }
+
+                // If no suitable template found, pick any available easy one
+                if (selectedTemplate == null)
+                {
+                    selectedTemplate = availableTemplates
+                        .Where(t => t.Difficulty == QuestDifficulty.Easy)
+                        .FirstOrDefault();
+                }
+
+                if (selectedTemplate == null)
+                {
+                    _logger.LogInformation($"No suitable special quest template for user {userId} progress level");
+                    return;
+                }
+
+                // Create quest from template
+                var specialQuest = new Quest
+                {
+                    QuestTitle = selectedTemplate.QuestTitle,
+                    QuestDescription = selectedTemplate.QuestDescription,
+                    QuestObjective = selectedTemplate.QuestObjective,
+                    QuestType = QuestType.Special,
+                    Difficulty = selectedTemplate.Difficulty,
+                    TargetValue = selectedTemplate.TargetValue,
+                    TokenReward = selectedTemplate.TokenReward,
+                    XpReward = selectedTemplate.XpReward,
+                    IsActive = true,
+                    StartDate = DateTime.UtcNow,
+                    EndDate = DateTime.UtcNow.AddDays(GetSpecialQuestDurationDays(selectedTemplate.Difficulty)),
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.Quests.Add(specialQuest);
+                await _context.SaveChangesAsync();
+
+                // Assign to the specific user
+                var userQuest = new UserQuest
+                {
+                    UserId = userId,
+                    QuestId = specialQuest.QuestId,
+                    CurrentProgress = 0,
+                    IsCompleted = false,
+                    StartedAt = DateTime.UtcNow,
+                    Status = QuestStatus.Active
+                };
+
+                _context.UserQuests.Add(userQuest);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Generated next special quest for user {userId}: {specialQuest.QuestTitle}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error generating next special quest for user {userId}");
+            }
+        }
         private static int GetSpecialQuestDurationDays(QuestDifficulty difficulty)
         {
             return difficulty switch

@@ -26,7 +26,7 @@
 <script>
     window.currentUserId = '@currentUserId';
     window.currentUserName = '@currentUserName';
-
+    window.currentUserAvatar = '@(ViewBag.CurrentUserAvatar ?? "/assets/default-avatar.svg")';
     function getCurrentUserId() {
         return window.currentUserId || document.body.dataset.userid || null;
     }
@@ -76,7 +76,12 @@
         <div class="post-creator">
             <div class="post-creator-header">
                 <div class="user-avatar">
-                    <img src="@(ViewBag.CurrentUserAvatar ?? "~/assets/default-avatar.svg")" alt="Your avatar" />
+                    
+                    <!-- 🔥 FIX: Remove the tilde and ensure proper ViewBag usage -->
+                    <img src="@(ViewBag.CurrentUserAvatar ?? "/assets/default-avatar.svg")"
+                         alt="Your avatar"
+                         id="main-community-avatar"
+                         onerror="this.src='/assets/default-avatar.svg'" />
                 </div>
                 <div class="post-input-container">
                     <textarea class="post-input"
@@ -506,8 +511,11 @@
         {
             <div class="new-comment-section">
                 <div class="new-comment-container">
-                    <img src="@(ViewBag.CurrentUserAvatar ?? "~/assets/default-avatar.svg")"
-                         alt="Your avatar" class="new-comment-avatar">
+                    <!-- 🔥 FIX: Same issue here -->
+                    <img src="@ViewBag.CurrentUserAvatar"
+                         alt="Your avatar"
+                         class="new-comment-avatar"
+                         onerror="this.src='/assets/default-avatar.svg'" />
                     <div class="new-comment-input-wrapper">
                         <textarea class="new-comment-input"
                               placeholder="Write a comment..."
