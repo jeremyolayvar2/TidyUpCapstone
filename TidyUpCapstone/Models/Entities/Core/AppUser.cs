@@ -6,7 +6,7 @@ using TidyUpCapstone.Models.Entities.Gamification;
 using TidyUpCapstone.Models.Entities.Items;
 using TidyUpCapstone.Models.Entities.Notifications;
 using TidyUpCapstone.Models.Entities.Reporting;
-using TidyUpCapstone.Models.Entities.System;
+using TidyUpCapstone.Models.Entities.System; 
 using TidyUpCapstone.Models.Entities.Transactions;
 
 namespace TidyUpCapstone.Models.Entities.User
