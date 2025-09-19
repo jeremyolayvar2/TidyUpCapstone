@@ -55,7 +55,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="@Url.Action("ItemsClaimedPage", "Home")">
                             <img class="icon" alt="Claimed" src="~/assets/VectorClaimed.svg" />
                             <span>Claimed Items</span>
                         </a>
@@ -132,7 +132,7 @@
                         </div>
                         <div class="dock-label">Browse Item</div>
                     </div>
-                    <div class="dock-item" data-label="Claimed">
+                    <div class="dock-item" data-label="Claimed" onclick="window.location.href='@Url.Action("ItemsClaimedPage", "Home")'">
                         <div class="dock-icon">
                             <img src="~/assets/VectorClaimed.svg" />
                         </div>

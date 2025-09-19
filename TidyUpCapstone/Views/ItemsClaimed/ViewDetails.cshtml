@@ -1,0 +1,98 @@
+﻿@model TidyUpCapstone.Models.DTOs.Transactions.TransactionDto
+@{
+    ViewData["Title"] = "Transaction Details";
+}
+<link rel="stylesheet" href="~/css/ItemsClaimedPage.css" asp-append-version="true" />
+
+<div class="items-claimed-container">
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1 class="page-title">
+                    <i class="fas fa-file-alt title-icon"></i>
+                    Transaction Details
+                </h1>
+                <p class="page-subtitle">View details for claimed item</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="transaction-details">
+        <div class="details-card">
+            <div class="item-image-large">
+                <img src="@Model.ItemImageUrl" alt="@Model.ItemTitle" />
+            </div>
+            <div class="details-content">
+                <h2>@Model.ItemTitle</h2>
+                <div class="detail-row">
+                    <strong>Seller:</strong> @Model.SellerUsername
+                </div>
+                <div class="detail-row">
+                    <strong>Amount:</strong> @Model.TokenAmount tokens
+                </div>
+                <div class="detail-row">
+                    <strong>Status:</strong>
+                    <span class="status-badge status-@Model.TransactionStatus.ToString().ToLower()">
+                        @switch (Model.TransactionStatus)
+                        {
+                            case TidyUpCapstone.Models.Entities.Transactions.TransactionStatus.Pending:
+                                <i class="fas fa-clock"></i>
+                                <span>Pending</span>
+                                break;
+                            case TidyUpCapstone.Models.Entities.Transactions.TransactionStatus.Disputed:
+                                <i class="fas fa-sync-alt"></i>
+                                <span>In Progress</span>
+                                break;
+                            case TidyUpCapstone.Models.Entities.Transactions.TransactionStatus.Completed:
+                                <i class="fas fa-check"></i>
+                                <span>Completed</span>
+                                break;
+                            case TidyUpCapstone.Models.Entities.Transactions.TransactionStatus.Cancelled:
+                                <i class="fas fa-ban"></i>
+                                <span>Cancelled</span>
+                                break;
+                        }
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <strong>Claimed:</strong> @Model.CreatedAt.ToString("MMM dd, yyyy 'at' h:mm tt")
+                </div>
+                @if (Model.CompletedAt.HasValue)
+                {
+                    <div class="detail-row">
+                        <strong>Completed:</strong> @Model.CompletedAt.Value.ToString("MMM dd, yyyy 'at' h:mm tt")
+                    </div>
+                }
+                @if (Model.CancelledAt.HasValue)
+                {
+                    <div class="detail-row">
+                        <strong>Cancelled:</strong> @Model.CancelledAt.Value.ToString("MMM dd, yyyy 'at' h:mm tt")
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.CancellationReason))
+                    {
+                        <div class="detail-row">
+                            <strong>Reason:</strong> @Model.CancellationReason
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        <div class="actions-section">
+            @{
+                var statusString = Model.TransactionStatus.ToString().ToLower();
+            }
+            @if (statusString == "pending" || statusString == "disputed")
+            {
+                <a href="@Url.Action("ContactSeller", new { transactionId = Model.TransactionId })" class="btn btn-primary">
+                    <i class="fas fa-comments"></i>
+                    Contact Seller
+                </a>
+            }
+            <a href="@Url.Action("ItemsClaimedPage", "Home")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Back to Claims
+            </a>
+        </div>
+    </div>
+</div>
