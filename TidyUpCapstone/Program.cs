@@ -55,8 +55,8 @@ builder.Services.AddControllersWithViews();
 // CRITICAL: Register ALL Missing Services
 builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
 builder.Services.AddScoped<IGamificationService, GamificationService>();
-builder.Services.AddScoped<IUserSessionService, UserSessionService>();
-builder.Services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
+//builder.Services.AddScoped<IUserSessionService, UserSessionService>();
+//builder.Services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
 
 // Add CORS for API calls
 builder.Services.AddCors(options =>
@@ -97,6 +97,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // Initialize database with demo data on startup
+/*
 if (app.Environment.IsDevelopment())
 {
     using (var scope = app.Services.CreateScope())
@@ -119,7 +120,7 @@ if (app.Environment.IsDevelopment())
         }
     }
 }
-
+*/
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

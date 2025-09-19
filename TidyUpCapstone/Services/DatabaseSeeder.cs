@@ -19,7 +19,7 @@ namespace TidyUpCapstone.Services
         {
             _context = context;
         }
-
+        
         public async Task SeedAsync()
         {
             try
