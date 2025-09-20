@@ -1,8 +1,8 @@
-﻿@{
+﻿@model TidyUpCapstone.Models.ViewModels.Transactions.ClaimedItemsViewModel
+@{
     ViewBag.HideNavigation = false;
     ViewData["Title"] = "Items Claimed";
 }
-
 
 <link rel="stylesheet" href="~/css/ItemsClaimedPage.css" asp-append-version="true" />
 
@@ -33,15 +33,15 @@
             <div class="header-right">
                 <div class="stats-summary">
                     <div class="stat-card">
-                        <div class="stat-number">12</div>
+                        <div class="stat-number">@Model.Statistics.TotalClaimed</div>
                         <div class="stat-label">Total Claimed</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number">3</div>
+                        <div class="stat-number">@Model.Statistics.PendingCount</div>
                         <div class="stat-label">Pending</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number">9</div>
+                        <div class="stat-number">@Model.Statistics.CompletedCount</div>
                         <div class="stat-label">Completed</div>
                     </div>
                 </div>
@@ -54,34 +54,27 @@
         <div class="filter-content">
             <div class="search-container">
                 <i class="fas fa-search search-icon"></i>
-                <input type="text" id="searchInput" placeholder="Search claimed items..." class="search-input">
+                <input type="text" id="searchInput" placeholder="Search claimed items..." class="search-input" value="@Model.SearchCriteria.Search">
             </div>
             <div class="filter-controls">
                 <select id="statusFilter" class="filter-select">
-                    <option value="">All Status</option>
-                    <option value="pending">Pending</option>
-                    <option value="in-progress">In Progress</option>
-                    <option value="completed">Completed</option>
-                    <option value="cancelled">Cancelled</option>
+                    @foreach (var status in Model.StatusOptions)
+                    {
+                        <option value="@status.Key" selected="@(Model.SearchCriteria.Status == status.Key)">@status.Value</option>
+                    }
                 </select>
                 <select id="categoryFilter" class="filter-select">
                     <option value="">All Categories</option>
-                    <option value="books_stationary">Books & Stationery</option>
-                    <option value="clothing_accessories">Clothing & Accessories</option>
-                    <option value="electronics_gadgets">Electronics & Gadgets</option>
-                    <option value="toys_games">Toys & Games</option>
-                    <option value="home_kitchen">Home & Kitchen</option>
-                    <option value="furniture">Furniture</option>
-                    <option value="appliances">Appliances</option>
-                    <option value="health_beauty">Health & Beauty</option>
-                    <option value="crafts_diy">Crafts & DIY</option>
-                    <option value="school_office">School & Office</option>
-                    <option value="sentimental_items">Sentimental Items</option>
+                    @foreach (var category in Model.Categories)
+                    {
+                        <option value="@category.Key" selected="@(Model.SearchCriteria.CategoryId == category.Key)">@category.Value</option>
+                    }
                 </select>
                 <select id="sortFilter" class="filter-select">
-                    <option value="new">New</option>
-                    <option value="good">Good</option>
-                    <option value="fair">Fair</option>
+                    @foreach (var sort in Model.SortOptions)
+                    {
+                        <option value="@sort.Key" selected="@(Model.SearchCriteria.SortBy == sort.Key)">@sort.Value</option>
+                    }
                 </select>
             </div>
         </div>
@@ -89,305 +82,166 @@
 
     <!-- Items Grid -->
     <div class="items-grid">
-        <!-- Sample Claimed Item Cards -->
-        <div class="item-card" data-status="pending" data-category="electronics">
-            <div class="item-image">
-                <img src="~/assets/image-uploaded.jpg" alt="MacBook Pro" loading="lazy">
-                <div class="status-badge status-pending">
-                    <i class="fas fa-clock"></i>
-                    Pending
-                </div>
-            </div>
-            <div class="item-content">
-                <div class="item-header">
-                    <h3 class="item-title">MacBook Pro 13" M2</h3>
-                    <div class="item-price">200</div>
-                </div>
-                <div class="item-details">
-                    <p class="item-description">Like new condition, includes original charger and box</p>
-                    <div class="item-meta">
-                        <span class="meta-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            Quezon City
-                        </span>
-                        <span class="meta-item">
-                            <i class="fas fa-calendar"></i>
-                            Claimed 2 days ago
-                        </span>
+        @if (Model.Transactions.Any())
+        {
+            @foreach (var transaction in Model.Transactions)
+            {
+                <div class="item-card" data-status="@transaction.TransactionStatus.ToString().ToLower()" data-category="@transaction.ItemId">
+                    <div class="item-image">
+                        <img src="@transaction.ItemImageUrl" alt="@transaction.ItemTitle" loading="lazy">
+                        <div class="status-badge status-@transaction.TransactionStatus.ToString().ToLower()">
+                            @switch (transaction.TransactionStatus)
+                            {
+                                case TidyUpCapstone.Models.Entities.Transactions.TransactionStatus.Pending:
+                                    <i class="fas fa-clock"></i>
+                                    <span>Pending</span>
+                                    break;
+                                case TidyUpCapstone.Models.Entities.Transactions.TransactionStatus.Disputed:
+                                    <i class="fas fa-sync-alt"></i>
+                                    <span>In Progress</span>
+                                    break;
+                                case TidyUpCapstone.Models.Entities.Transactions.TransactionStatus.Completed:
+                                    <i class="fas fa-check"></i>
+                                    <span>Completed</span>
+                                    break;
+                                case TidyUpCapstone.Models.Entities.Transactions.TransactionStatus.Cancelled:
+                                    <i class="fas fa-ban"></i>
+                                    <span>Cancelled</span>
+                                    break;
+                            }
+                        </div>
+                    </div>
+                    <div class="item-content">
+                        <div class="item-header">
+                            <h3 class="item-title">@transaction.ItemTitle</h3>
+                            <div class="item-price">@transaction.TokenAmount</div>
+                        </div>
+                        <div class="item-details">
+                            <div class="item-meta">
+                                <span class="meta-item">
+                                    <i class="fas fa-user"></i>
+                                    @transaction.SellerUsername
+                                </span>
+                                <span class="meta-item">
+                                    <i class="fas fa-calendar"></i>
+                                    @transaction.CreatedAt.ToString("MMM dd, yyyy")
+                                </span>
+                            </div>
+                        </div>
+                        <div class="item-actions">
+                            @if (transaction.TransactionStatus == TidyUpCapstone.Models.Entities.Transactions.TransactionStatus.Pending ||
+                                 transaction.TransactionStatus == TidyUpCapstone.Models.Entities.Transactions.TransactionStatus.Disputed)
+                            {
+                                <a href="@Url.Action("ContactSeller", "ItemsClaimed", new { transactionId = transaction.TransactionId })" class="btn btn-primary btn-sm contact-seller">
+                                    <i class="fas fa-comments"></i>
+                                    Contact Seller
+                                </a>
+                            }
+                            <a href="@Url.Action("ViewDetails", "ItemsClaimed", new { transactionId = transaction.TransactionId })" class="btn btn-outline btn-sm view-details">
+                                <i class="fas fa-eye"></i>
+                                View Details
+                            </a>
+                        </div>
                     </div>
                 </div>
-                <div class="item-actions">
-                    <button class="btn btn-primary btn-sm contact-seller">
-                        <i class="fas fa-comments"></i>
-                        Contact Seller
-                    </button>
-                    <button class="btn btn-outline btn-sm view-details">
-                        <i class="fas fa-eye"></i>
-                        View Details
-                    </button>
-                    <button class="btn btn-danger btn-sm cancel-claim">
-                        <i class="fas fa-times"></i>
-                        Cancel
-                    </button>
+            }
+        }
+        else
+        {
+            <div class="empty-state" style="display: block;">
+                <div class="empty-icon">
+                    <i class="fas fa-inbox"></i>
                 </div>
+                <h3 class="empty-title">No claimed items found</h3>
+                <p class="empty-description">You haven't claimed any items yet. Start browsing items to find something you'd like!</p>
+                <a href="/Items/Browse" class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                    Browse Items
+                </a>
             </div>
-        </div>
-
-        <div class="item-card" data-status="in-progress" data-category="furniture">
-            <div class="item-image">
-                <img src="~/assets/image-uploaded.jpg" alt="Office Chair" loading="lazy">
-                <div class="status-badge status-in-progress">
-                    <i class="fas fa-sync-alt"></i>
-                    In Progress
-                </div>
-            </div>
-            <div class="item-content">
-                <div class="item-header">
-                    <h3 class="item-title">Ergonomic Office Chair</h3>
-                    <div class="item-price">500</div>
-                </div>
-                <div class="item-details">
-                    <p class="item-description">Herman Miller Aeron chair, excellent condition</p>
-                    <div class="item-meta">
-                        <span class="meta-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            Makati City
-                        </span>
-                        <span class="meta-item">
-                            <i class="fas fa-calendar"></i>
-                            Claimed 1 week ago
-                        </span>
-                    </div>
-                </div>
-                <div class="item-actions">
-                    <button class="btn btn-primary btn-sm contact-seller">
-                        <i class="fas fa-comments"></i>
-                        Contact Seller
-                    </button>
-                    <button class="btn btn-outline btn-sm view-details">
-                        <i class="fas fa-eye"></i>
-                        View Details
-                    </button>
-                    <button class="btn btn-success btn-sm mark-complete">
-                        <i class="fas fa-check"></i>
-                        Mark Complete
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="item-card" data-status="completed" data-category="electronics">
-            <div class="item-image">
-                <img src="~/assets/image-uploaded.jpg" alt="iPhone 14" loading="lazy">
-                <div class="status-badge status-completed">
-                    <i class="fas fa-check"></i>
-                    Completed
-                </div>
-            </div>
-            <div class="item-content">
-                <div class="item-header">
-                    <h3 class="item-title">iPhone 14 Pro Max</h3>
-                    <div class="item-price">1000</div>
-                </div>
-                <div class="item-details">
-                    <p class="item-description">256GB, Space Black, excellent condition</p>
-                    <div class="item-meta">
-                        <span class="meta-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            Manila
-                        </span>
-                        <span class="meta-item">
-                            <i class="fas fa-calendar"></i>
-                            Completed 3 days ago
-                        </span>
-                    </div>
-                </div>
-                <div class="item-actions">
-                    <button class="btn btn-outline btn-sm rate-seller">
-                        <i class="fas fa-star"></i>
-                        Rate Seller
-                    </button>
-                    <button class="btn btn-outline btn-sm view-details">
-                        <i class="fas fa-eye"></i>
-                        View Details
-                    </button>
-                    <button class="btn btn-secondary btn-sm download-receipt">
-                        <i class="fas fa-download"></i>
-                        Receipt
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="item-card" data-status="pending" data-category="books">
-            <div class="item-image">
-                <img src="~/assets/image-uploaded.jpg" alt="Programming Books" loading="lazy">
-                <div class="status-badge status-pending">
-                    <i class="fas fa-clock"></i>
-                    Pending
-                </div>
-            </div>
-            <div class="item-content">
-                <div class="item-header">
-                    <h3 class="item-title">Programming Books Set</h3>
-                    <div class="item-price">300</div>
-                </div>
-                <div class="item-details">
-                    <p class="item-description">5 programming books including Clean Code, Design Patterns</p>
-                    <div class="item-meta">
-                        <span class="meta-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            Pasig City
-                        </span>
-                        <span class="meta-item">
-                            <i class="fas fa-calendar"></i>
-                            Claimed 5 hours ago
-                        </span>
-                    </div>
-                </div>
-                <div class="item-actions">
-                    <button class="btn btn-primary btn-sm contact-seller">
-                        <i class="fas fa-comments"></i>
-                        Contact Seller
-                    </button>
-                    <button class="btn btn-outline btn-sm view-details">
-                        <i class="fas fa-eye"></i>
-                        View Details
-                    </button>
-                    <button class="btn btn-danger btn-sm cancel-claim">
-                        <i class="fas fa-times"></i>
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="item-card" data-status="completed" data-category="clothing">
-            <div class="item-image">
-                <img src="~/assets/image-uploaded.jpg" alt="Winter Jacket" loading="lazy">
-                <div class="status-badge status-completed">
-                    <i class="fas fa-check"></i>
-                    Completed
-                </div>
-            </div>
-            <div class="item-content">
-                <div class="item-header">
-                    <h3 class="item-title">Winter Jacket - North Face</h3>
-                    <div class="item-price">200</div>
-                </div>
-                <div class="item-details">
-                    <p class="item-description">Size M, barely used, perfect for cold weather</p>
-                    <div class="item-meta">
-                        <span class="meta-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            Taguig City
-                        </span>
-                        <span class="meta-item">
-                            <i class="fas fa-calendar"></i>
-                            Completed 1 week ago
-                        </span>
-                    </div>
-                </div>
-                <div class="item-actions">
-                    <button class="btn btn-outline btn-sm rate-seller">
-                        <i class="fas fa-star"></i>
-                        Rate Seller
-                    </button>
-                    <button class="btn btn-outline btn-sm view-details">
-                        <i class="fas fa-eye"></i>
-                        View Details
-                    </button>
-                    <button class="btn btn-secondary btn-sm download-receipt">
-                        <i class="fas fa-download"></i>
-                        Receipt
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="item-card" data-status="cancelled" data-category="electronics">
-            <div class="item-image">
-                <img src="~/assets/image-uploaded.jpg" alt="Wireless Headphones" loading="lazy">
-                <div class="status-badge status-cancelled">
-                    <i class="fas fa-ban"></i>
-                    Cancelled
-                </div>
-            </div>
-            <div class="item-content">
-                <div class="item-header">
-                    <h3 class="item-title">Sony WH-1000XM4 Headphones</h3>
-                    <div class="item-price">600</div>
-                </div>
-                <div class="item-details">
-                    <p class="item-description">Noise-cancelling wireless headphones, black</p>
-                    <div class="item-meta">
-                        <span class="meta-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            Quezon City
-                        </span>
-                        <span class="meta-item">
-                            <i class="fas fa-calendar"></i>
-                            Cancelled yesterday
-                        </span>
-                    </div>
-                </div>
-                <div class="item-actions">
-                    <button class="btn btn-outline btn-sm view-details">
-                        <i class="fas fa-eye"></i>
-                        View Details
-                    </button>
-                    <button class="btn btn-primary btn-sm reclaim-item">
-                        <i class="fas fa-redo"></i>
-                        Claim Again
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Empty State -->
-    <div class="empty-state" id="emptyState" style="display: none;">
-        <div class="empty-icon">
-            <i class="fas fa-inbox"></i>
-        </div>
-        <h3 class="empty-title">No claimed items found</h3>
-        <p class="empty-description">You haven't claimed any items yet. Start browsing items to find something you'd like!</p>
-        <a href="/Items/Browse" class="btn btn-primary">
-            <i class="fas fa-search"></i>
-            Browse Items
-        </a>
+        }
     </div>
 
     <!-- Pagination -->
-    <div class="pagination-container">
-        <nav aria-label="Items pagination">
-            <ul class="pagination">
-                <li class="page-item disabled">
-                    <span class="page-link">
-                        <i class="fas fa-chevron-left"></i>
-                        Previous
-                    </span>
-                </li>
-                <li class="page-item active">
-                    <span class="page-link">1</span>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="#">2</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="#">3</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="#">
-                        Next
-                        <i class="fas fa-chevron-right"></i>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </div>
-</div>
+    @if (Model.TotalPages > 1)
+    {
+        <div class="pagination-container">
+            <nav aria-label="Items pagination">
+                <ul class="pagination">
+                    @if (Model.HasPreviousPage)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("ItemsClaimedPage", "Home", new { 
+                                status = Model.SearchCriteria.Status, 
+                                categoryId = Model.SearchCriteria.CategoryId, 
+                                search = Model.SearchCriteria.Search, 
+                                sortBy = Model.SearchCriteria.SortBy, 
+                                page = Model.CurrentPage - 1 
+                            })">
+                                <i class="fas fa-chevron-left"></i>
+                                Previous
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link">
+                                <i class="fas fa-chevron-left"></i>
+                                Previous
+                            </span>
+                        </li>
+                    }
 
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                            @if (i == Model.CurrentPage)
+                            {
+                                <span class="page-link">@i</span>
+                            }
+                            else
+                            {
+                                <a class="page-link" href="@Url.Action("ItemsClaimedPage", "Home", new { 
+                                    status = Model.SearchCriteria.Status, 
+                                    categoryId = Model.SearchCriteria.CategoryId, 
+                                    search = Model.SearchCriteria.Search, 
+                                    sortBy = Model.SearchCriteria.SortBy, 
+                                    page = i 
+                                })">@i</a>
+                            }
+                        </li>
+                    }
+
+                    @if (Model.HasNextPage)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("ItemsClaimedPage", "Home", new { 
+                                status = Model.SearchCriteria.Status, 
+                                categoryId = Model.SearchCriteria.CategoryId, 
+                                search = Model.SearchCriteria.Search, 
+                                sortBy = Model.SearchCriteria.SortBy, 
+                                page = Model.CurrentPage + 1 
+                            })">
+                                Next
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link">
+                                Next
+                                <i class="fas fa-chevron-right"></i>
+                            </span>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    }
+</div>
 
 <script src="~/js/ItemsClaimedPage.js" asp-append-version="true"></script>
 <script src="https://cdn.tailwindcss.com"></script>

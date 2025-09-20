@@ -75,6 +75,18 @@ namespace TidyUpCapstone.Controllers
 
             return View();
         }
+        [Authorize]
+        public async Task<IActionResult> ItemsClaimedPage(string? status = null, int? categoryId = null,
+            string? search = null, string? sortBy = "newest", int page = 1, int pageSize = 12)
+        {
+           
+
+            
+            var currentUserId = GetCurrentAuthenticatedUserId();
+            if (currentUserId == 0)
+            {
+                return RedirectToAction("Login", "Account");
+            }
 
         /// <summary>
         /// Items claimed page action from feature/claimed-items branch
