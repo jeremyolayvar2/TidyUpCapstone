@@ -114,8 +114,8 @@ namespace TidyUpCapstone.Controllers
                 var statusEnum = status.ToLower() switch
                 {
                     "pending" => TransactionStatus.Pending,
-                    "escrowed" => TransactionStatus.Disputed, // Map "escrowed" to Disputed
-                    "confirmed" => TransactionStatus.Completed, // Map "confirmed" to Completed  
+                    "escrowed" => TransactionStatus.Escrowed,
+                    "confirmed" => TransactionStatus.Confirmed,
                     "cancelled" => TransactionStatus.Cancelled,
                     _ => (TransactionStatus?)null
                 };
@@ -150,9 +150,9 @@ namespace TidyUpCapstone.Controllers
             // Calculate stats - using actual enum values
             var totalClaimed = await query.CountAsync();
             var pendingCount = await query.CountAsync(t => t.TransactionStatus == TransactionStatus.Pending);
-            var completedCount = await query.CountAsync(t => t.TransactionStatus == TransactionStatus.Completed);
+            var completedCount = await query.CountAsync(t => t.TransactionStatus == TransactionStatus.Confirmed);
             var cancelledCount = await query.CountAsync(t => t.TransactionStatus == TransactionStatus.Cancelled);
-            var disputedCount = await query.CountAsync(t => t.TransactionStatus == TransactionStatus.Disputed);
+            var disputedCount = await query.CountAsync(t => t.TransactionStatus == TransactionStatus.Escrowed);
 
             // Apply pagination
             var totalItems = await query.CountAsync();

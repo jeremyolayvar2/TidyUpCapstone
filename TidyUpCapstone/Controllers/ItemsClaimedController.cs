@@ -102,15 +102,9 @@ namespace TidyUpCapstone.Controllers
         [HttpGet]
         public async Task<IActionResult> GetStats()
         {
-            
-
-            
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Json(new { success = false });
             var userId = user.Id;
-            
-
-           
 
             var stats = await _context.Transactions
                 .Where(t => t.BuyerId == userId)
@@ -119,9 +113,9 @@ namespace TidyUpCapstone.Controllers
                 {
                     TotalClaimed = g.Count(),
                     PendingCount = g.Count(t => t.TransactionStatus == TransactionStatus.Pending),
-                    CompletedCount = g.Count(t => t.TransactionStatus == TransactionStatus.Completed),
+                    CompletedCount = g.Count(t => t.TransactionStatus == TransactionStatus.Confirmed), 
                     CancelledCount = g.Count(t => t.TransactionStatus == TransactionStatus.Cancelled),
-                    InProgressCount = g.Count(t => t.TransactionStatus == TransactionStatus.Disputed)
+                    InProgressCount = g.Count(t => t.TransactionStatus == TransactionStatus.Escrowed) 
                 })
                 .FirstOrDefaultAsync();
 

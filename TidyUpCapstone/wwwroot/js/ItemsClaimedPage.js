@@ -326,15 +326,6 @@ function setupLazyLoading() {
     }
 }
 
-// Initialize features
-document.addEventListener('DOMContentLoaded', function () {
-    setupLazyLoading();
-
-    // Show welcome message after a delay
-    setTimeout(() => {
-        alertSystem.info('Welcome Back!', 'Here are your claimed items. Use filters to find specific items quickly.', 4000);
-    }, 1000);
-});
 
 // URL parameter handling for maintaining filter state
 function getUrlParameter(name) {

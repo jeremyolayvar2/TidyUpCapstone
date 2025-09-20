@@ -90,25 +90,25 @@
                     <div class="item-image">
                         <img src="@transaction.ItemImageUrl" alt="@transaction.ItemTitle" loading="lazy">
                         <div class="status-badge status-@transaction.TransactionStatus.ToString().ToLower()">
-                            @switch (transaction.TransactionStatus)
-                            {
-                                case TidyUpCapstone.Models.Entities.Transactions.TransactionStatus.Pending:
-                                    <i class="fas fa-clock"></i>
-                                    <span>Pending</span>
-                                    break;
-                                case TidyUpCapstone.Models.Entities.Transactions.TransactionStatus.Disputed:
-                                    <i class="fas fa-sync-alt"></i>
-                                    <span>In Progress</span>
-                                    break;
-                                case TidyUpCapstone.Models.Entities.Transactions.TransactionStatus.Completed:
-                                    <i class="fas fa-check"></i>
-                                    <span>Completed</span>
-                                    break;
-                                case TidyUpCapstone.Models.Entities.Transactions.TransactionStatus.Cancelled:
-                                    <i class="fas fa-ban"></i>
-                                    <span>Cancelled</span>
-                                    break;
-                            }
+                          @switch (transaction.TransactionStatus)
+                        {
+                            case TidyUpCapstone.Models.Entities.Transactions.TransactionStatus.Pending:
+                                <i class="fas fa-clock"></i>
+                                <span>Pending</span>
+                                break;
+                            case TidyUpCapstone.Models.Entities.Transactions.TransactionStatus.Escrowed: 
+                                <i class="fas fa-sync-alt"></i>
+                                <span>In Progress</span>
+                                break;
+                            case TidyUpCapstone.Models.Entities.Transactions.TransactionStatus.Confirmed: 
+                                <i class="fas fa-check"></i>
+                                <span>Completed</span>
+                                break;
+                            case TidyUpCapstone.Models.Entities.Transactions.TransactionStatus.Cancelled:
+                                <i class="fas fa-ban"></i>
+                                <span>Cancelled</span>
+                                break;
+                        }
                         </div>
                     </div>
                     <div class="item-content">
@@ -129,8 +129,8 @@
                             </div>
                         </div>
                         <div class="item-actions">
-                            @if (transaction.TransactionStatus == TidyUpCapstone.Models.Entities.Transactions.TransactionStatus.Pending ||
-                                 transaction.TransactionStatus == TidyUpCapstone.Models.Entities.Transactions.TransactionStatus.Disputed)
+                           @if (transaction.TransactionStatus == TidyUpCapstone.Models.Entities.Transactions.TransactionStatus.Pending ||
+                                 transaction.TransactionStatus == TidyUpCapstone.Models.Entities.Transactions.TransactionStatus.Escrowed) 
                             {
                                 <a href="@Url.Action("ContactSeller", "ItemsClaimed", new { transactionId = transaction.TransactionId })" class="btn btn-primary btn-sm contact-seller">
                                     <i class="fas fa-comments"></i>
