@@ -84,6 +84,16 @@ namespace TidyUpCapstone.Controllers
             return View();
         }
 
+        /// <summary>
+        /// Leaderboard page action from feature/leaderboards branch
+        /// </summary>
+        public IActionResult LeaderboardPage()
+        {
+            ViewData["Title"] = "Leaderboards";
+            ViewData["PageType"] = "leaderboard";
+            return View();
+        }
+
         public async Task<IActionResult> Main()
         {
             try

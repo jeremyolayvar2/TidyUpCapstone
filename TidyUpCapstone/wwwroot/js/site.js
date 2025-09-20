@@ -320,16 +320,16 @@ class NavigationManager {
             return 'messages';
         } else if (path.includes('/home/notificationpage') || path.includes('/notification')) {
             return 'notifications';
-        } else if (path.includes('/browse')) {
-            return 'browse';
+        } else if (path.includes('/home/itemsclaimedpage') || path.includes('/claimed')) {
+            return 'claimed';
         } else if (path.includes('/claimed')) {
             return 'claimed';
         } else if (path.includes('/community')) {
             return 'community';
         } else if (path.includes('/shop')) {
             return 'shop';
-        } else if (path.includes('/leaderboard')) {
-            return 'leaderboard';
+        } else if (path.includes('/home/leaderboardpage') || path.includes('/leaderboards')) {
+            return 'leaderboards';
         }
 
         return 'home'; // default
@@ -757,7 +757,8 @@ function initializeNavigation() {
 
             // For Home and Settings, allow normal navigation
             if (dataPage === 'home' || dataPage === 'settings' || dataPage === 'quests'
-                || dataPage === 'message' || dataPage === 'notifications') {
+                || dataPage === 'message' || dataPage === 'notifications' || dataPage === 'leaderboards'
+                || dataPage === 'claimed') {
                 // Let the browser handle normal navigation
                 setActiveNavItem(dataPage);
                 return;

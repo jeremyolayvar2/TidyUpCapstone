@@ -91,12 +91,19 @@ builder.Services.AddScoped<IActivityQuestIntegrationService, ActivityQuestIntegr
 builder.Services.AddScoped<IUserStatisticsService, UserStatisticsService>();
 
 // -----------------------------------------------------
-// 5. MERGED: Transaction and Chat Services (from chat-page branch)
+// 5. MERGED: Add Leaderboard Services (from feature/leaderboards branch)
+// -----------------------------------------------------
+builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
+builder.Services.AddScoped<IGamificationService, GamificationService>();
+builder.Services.AddScoped<IUserSessionService, UserSessionService>();
+
+// -----------------------------------------------------
+// 6. MERGED: Transaction and Chat Services (from chat-page branch)
 // -----------------------------------------------------
 builder.Services.AddScoped<IEscrowService, EscrowService>();
 
 // -----------------------------------------------------
-// 6. MERGED: Add SignalR (from chat-page branch)
+// 7. MERGED: Add SignalR (from chat-page branch)
 // -----------------------------------------------------
 builder.Services.AddSignalR(options =>
 {
@@ -107,7 +114,7 @@ builder.Services.AddSignalR(options =>
 });
 
 // -----------------------------------------------------
-// 7. Application Cookie Configuration FOR MODAL SYSTEM (from dev)
+// 8. Application Cookie Configuration FOR MODAL SYSTEM (from dev)
 // -----------------------------------------------------
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -171,7 +178,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 // -----------------------------------------------------
-// 8. Enhanced External Authentication Configuration (from dev)
+// 9. Enhanced External Authentication Configuration (from dev)
 // -----------------------------------------------------
 builder.Services.AddAuthentication(options =>
 {
@@ -241,7 +248,7 @@ builder.Services.AddAuthentication(options =>
 });
 
 // -----------------------------------------------------
-// 9. Email Service Configuration (SendGrid) (from dev)
+// 10. Email Service Configuration (SendGrid) (from dev)
 // -----------------------------------------------------
 builder.Services.Configure<SendGridSettingsDto>(builder.Configuration.GetSection("SendGrid"));
 builder.Services.Configure<EmailSettingsDto>(builder.Configuration.GetSection("EmailSettings"));
@@ -266,7 +273,7 @@ builder.Services.AddSingleton<ISendGridClient>(provider =>
 builder.Services.AddScoped<IEmailService, EmailService>();
 
 // -----------------------------------------------------
-// 10. Google Cloud and Vision Services Configuration (from dev)
+// 11. Google Cloud and Vision Services Configuration (from dev)
 // -----------------------------------------------------
 builder.Services.Configure<GoogleCloudSetting>(
     builder.Configuration.GetSection("GoogleCloud"));
@@ -281,7 +288,7 @@ if (!string.IsNullOrEmpty(googleCloudSettings?.CredentialsPath))
 }
 
 // -----------------------------------------------------
-// 11. MERGED: Session Support and CORS (combined from both)
+// 12. MERGED: Session Support and CORS (combined from both)
 // -----------------------------------------------------
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -305,7 +312,7 @@ builder.Services.AddCors(options =>
 });
 
 // -----------------------------------------------------
-// 12. MVC Configuration (combined)
+// 13. MVC Configuration (combined)
 // -----------------------------------------------------
 builder.Services.AddControllersWithViews(options =>
 {
@@ -328,7 +335,7 @@ builder.Services.AddAntiforgery(options =>
 });
 
 // -----------------------------------------------------
-// 13. Build Application
+// 14. Build Application
 // -----------------------------------------------------
 var app = builder.Build();
 
@@ -336,7 +343,7 @@ var app = builder.Build();
 var appLogger = app.Services.GetRequiredService<ILogger<Program>>();
 
 // -----------------------------------------------------
-// 14. Database Initialization with Enhanced Error Handling (merged approach)
+// 15. Database Initialization with Enhanced Error Handling (merged approach)
 // -----------------------------------------------------
 using (var scope = app.Services.CreateScope())
 {
@@ -360,10 +367,9 @@ using (var scope = app.Services.CreateScope())
         {
             if (app.Environment.IsDevelopment())
             {
-                // In development, ensure database is created and seed data
+                // In development, ensure database is created (no automatic seeding)
                 await context.Database.EnsureCreatedAsync();
-                await DatabaseSeeder.SeedAsync(context);
-                scopeLogger.LogInformation("Database seeding completed successfully");
+                scopeLogger.LogInformation("Database created successfully");
             }
             else
             {
@@ -398,7 +404,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 // -----------------------------------------------------
-// 15. Initialize Gamification System (from dev branch)
+// 16. Initialize Gamification System (from dev branch)
 // -----------------------------------------------------
 using (var scope = app.Services.CreateScope())
 {
@@ -410,7 +416,7 @@ using (var scope = app.Services.CreateScope())
         var questService = scope.ServiceProvider.GetRequiredService<IQuestService>();
         var userInitService = scope.ServiceProvider.GetRequiredService<IUserInitializationService>();
 
-        Console.WriteLine("🚀 Starting gamification system initialization...");
+        appLogger.LogInformation("Starting gamification system initialization...");
 
         // Seed levels first (required for user level progress)
         await SeedLevelsAsync(context);
@@ -419,30 +425,30 @@ using (var scope = app.Services.CreateScope())
         if (!await achievementService.AreAchievementsSeededAsync())
         {
             await achievementService.SeedAchievementsAsync();
-            Console.WriteLine("✅ Achievements seeded successfully");
+            appLogger.LogInformation("Achievements seeded successfully");
         }
         else
         {
-            Console.WriteLine("ℹ️  Achievements already seeded");
+            appLogger.LogInformation("Achievements already seeded");
         }
 
         // Seed streak types if not already seeded
         if (!await streakService.AreStreakTypesSeededAsync())
         {
             await streakService.SeedStreakTypesAsync();
-            Console.WriteLine("✅ Streak types seeded successfully");
+            appLogger.LogInformation("Streak types seeded successfully");
         }
         else
         {
-            Console.WriteLine("ℹ️  Streak types already seeded");
+            appLogger.LogInformation("Streak types already seeded");
         }
 
         // Generate initial quests
         await questService.GenerateDailyQuestsAsync();
-        Console.WriteLine("✅ Daily quests generated");
+        appLogger.LogInformation("Daily quests generated");
 
         await questService.GenerateWeeklyQuestsAsync();
-        Console.WriteLine("✅ Weekly quests generated");
+        appLogger.LogInformation("Weekly quests generated");
 
         // Auto-initialize all existing users with achievements and stats
         var users = await context.Users.ToListAsync();
@@ -460,33 +466,31 @@ using (var scope = app.Services.CreateScope())
 
         if (initializedCount > 0)
         {
-            Console.WriteLine($"✅ Auto-initialized {initializedCount} users with achievements and stats");
+            appLogger.LogInformation("Auto-initialized {Count} users with achievements and stats", initializedCount);
         }
         else
         {
-            Console.WriteLine($"ℹ️  All {users.Count} users already initialized");
+            appLogger.LogInformation("All {Count} users already initialized", users.Count);
         }
 
-        Console.WriteLine("🎉 Gamification system initialized successfully!");
-        Console.WriteLine("📊 System Status:");
-        Console.WriteLine($"   - Users: {users.Count}");
-        Console.WriteLine($"   - Achievements: {await context.Achievements.CountAsync()}");
-        Console.WriteLine($"   - Active Quests: {await context.Quests.CountAsync(q => q.IsActive)}");
-        Console.WriteLine($"   - Levels: {await context.Levels.CountAsync()}");
+        appLogger.LogInformation("Gamification system initialized successfully!");
+        appLogger.LogInformation("System Status:");
+        appLogger.LogInformation("   - Users: {UserCount}", users.Count);
+        appLogger.LogInformation("   - Achievements: {AchievementCount}", await context.Achievements.CountAsync());
+        appLogger.LogInformation("   - Active Quests: {QuestCount}", await context.Quests.CountAsync(q => q.IsActive));
+        appLogger.LogInformation("   - Levels: {LevelCount}", await context.Levels.CountAsync());
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"❌ Error during gamification system initialization: {ex.Message}");
-        Console.WriteLine($"Stack trace: {ex.StackTrace}");
+        appLogger.LogError(ex, "Error during gamification system initialization: {Message}", ex.Message);
 
         // Don't stop the application, just log the error
-        var logger = scope.ServiceProvider.GetService<ILogger<Program>>();
-        logger?.LogError(ex, "Failed to initialize gamification system");
+        appLogger.LogWarning("Failed to initialize gamification system");
     }
 }
 
 // -----------------------------------------------------
-// 16. Configure HTTP Request Pipeline (merged)
+// 17. Configure HTTP Request Pipeline (merged)
 // -----------------------------------------------------
 if (!app.Environment.IsDevelopment())
 {
@@ -524,7 +528,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // -----------------------------------------------------
-// 17. MERGED: Configure Routes and SignalR Hub (combined)
+// 18. MERGED: Configure Routes and SignalR Hub (combined)
 // -----------------------------------------------------
 app.MapControllers(); // For API controllers
 
@@ -581,7 +585,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // -----------------------------------------------------
-// 18. Helper Methods (from dev branch)
+// 19. Helper Methods (from dev branch)
 // -----------------------------------------------------
 
 // Helper method for seeding levels
@@ -606,11 +610,11 @@ static async Task SeedLevelsAsync(ApplicationDbContext context)
 
         context.Levels.AddRange(levels);
         await context.SaveChangesAsync();
-        Console.WriteLine("✅ Levels seeded successfully (100 levels)");
+        Console.WriteLine("Levels seeded successfully (100 levels)");
     }
     else
     {
-        Console.WriteLine("ℹ️  Levels already seeded");
+        Console.WriteLine("Levels already seeded");
     }
 }
 
@@ -649,7 +653,13 @@ static string GetLevelName(int levelNumber)
         3 => "Clutter Buster",
         4 => "Space Cadet",
         5 => "Order Keeper",
-        // ... (truncated for brevity - include all level names from original)
+        10 => "Organization Novice",
+        15 => "Tidiness Expert",
+        20 => "Space Master",
+        25 => "Declutter Champion",
+        30 => "Organization Guru",
+        50 => "Tidiness Legend",
+        75 => "Organization Virtuoso",
         100 => "Marie Kondo Incarnate",
         _ => $"Organization Level {levelNumber}"
     };
@@ -693,11 +703,11 @@ static decimal CalculateTokenBonus(int level)
 }
 
 // -----------------------------------------------------
-// 19. Start Application
+// 20. Start Application
 // -----------------------------------------------------
 appLogger.LogInformation("TidyUp application starting...");
 appLogger.LogInformation("Environment: {Environment}", app.Environment.EnvironmentName);
 appLogger.LogInformation("Authentication configured with OAuth and modal system");
-appLogger.LogInformation("Item management, gamification, and chat features enabled");
+appLogger.LogInformation("Item management, gamification, leaderboards, and chat features enabled");
 
 app.Run();
