@@ -98,7 +98,7 @@ body:has(.layout-wrapper).shop-page {
     align-self: start;
     border-top-right-radius: 20px;
     border-bottom-right-radius: 20px;
-    transition: all 300ms ease-in-out;
+    transition: 300ms ease-in-out;
     overflow: hidden;
     text-wrap: nowrap;
     display: block;
@@ -146,7 +146,6 @@ body:has(.layout-wrapper).shop-page #sidebar {
     background: none;
     background-color: inherit;
     cursor: pointer;
-    transition: all 0.3s ease;
 }
 
     .toggle:hover {
@@ -179,6 +178,8 @@ body.main-page .toggle {
     scrollbar-color: var(--background) transparent;
 }
 
+
+    /*di pa to naganaa*/
     #tab-container li span {
         width: 200px;
     }
@@ -192,7 +193,6 @@ body.main-page .toggle {
     width: 20px;
     height: 20px;
     object-fit: contain;
-    transition: filter 0.3s ease;
 }
 
 /* MERGED: Icon styles for different page types - ONLY for pages with navigation */
@@ -235,6 +235,7 @@ body:has(.layout-wrapper).main-page .icon {
     justify-content: flex-end;
 }
 
+
 #sidebar a {
     border-radius: 0.5em;
     text-decoration: none;
@@ -244,7 +245,6 @@ body:has(.layout-wrapper).main-page .icon {
     align-items: center;
     gap: 1em;
     padding: 0.85em;
-    transition: all 0.3s ease;
 }
 
     #sidebar a:hover {
@@ -318,6 +318,18 @@ body:has(.layout-wrapper).main-page #sidebar a {
     .main-container {
         width: 100vw;
         margin: 0;
+        display: none;
+    }
+
+  
+
+    #verification-v2 {
+        display: none;
+    }
+
+    #sidebar.close {
+        height: 80px;
+        width: 100%;
         padding: 0;
     }
 }
@@ -333,7 +345,6 @@ body:has(.layout-wrapper).main-page #sidebar a {
     justify-content: center;
     width: 100%;
     pointer-events: none;
-    z-index: 1000;
 }
 
 .dock-panel {
@@ -373,7 +384,7 @@ body:has(.layout-wrapper).shop-page .dock-panel {
     /* Default dock item background */
     background-color: var(--primary-color);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: transform 0.15s ease;
 }
 
     .dock-item:hover {

@@ -1,0 +1,139 @@
+﻿@{
+    ViewBag.Title = "Leaderboard - TidyUp";
+    ViewBag.HideNavigation = false;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/LeaderboardPage.css" asp-append-version="true" />
+
+<div class="leaderboard-container">
+    
+
+    <!-- Filter Buttons -->
+    <div class="filter-container">
+        <button class="filter-btn active" data-filter="all-time">All-Time</button>
+        <button class="filter-btn" data-filter="weekly">Weekly</button>
+        <button class="filter-btn" data-filter="daily">Daily</button>
+    </div>
+
+    <div class="background-text">TOP DECLUTTERERS</div>
+
+    <!-- Top 3 Winners Cards -->
+    <div class="top-three-container">
+        <!-- Second Place -->
+        <div class="winner-card second-place">
+            <div class="profile-circle">
+                <div class="profile-image"></div>
+            </div>
+            <h3 class="winner-name">Deither Arias <span class="rank-number">#2</span></h3>
+            <div class="stats-container">
+                <div class="stat">
+                    <div class="stat-number">178</div>
+                    <div class="stat-label">Items Decluttered</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">19d</div>
+                    <div class="stat-label">Streak</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">472</div>
+                    <div class="stat-label">Level</div>
+                </div>
+            </div>
+            <button class="profile-btn">Profile</button>
+        </div>
+
+        <!-- First Place -->
+        <div class="winner-card first-place">
+            <div class="profile-circle">
+                <div class="profile-image"></div>
+            </div>
+            <h3 class="winner-name">Kate Gonzales <span class="rank-number">#1</span></h3>
+            <div class="stats-container">
+                <div class="stat">
+                    <div class="stat-number">251</div>
+                    <div class="stat-label">Items Decluttered</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">24d</div>
+                    <div class="stat-label">Streak</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">602</div>
+                    <div class="stat-label">Level</div>
+                </div>
+            </div>
+            <button class="profile-btn">Profile</button>
+        </div>
+
+        <!-- Third Place -->
+        <div class="winner-card third-place">
+            <div class="profile-circle">
+                <div class="profile-image"></div>
+            </div>
+            <h3 class="winner-name">Jiro Llaguno <span class="rank-number">#3</span></h3>
+            <div class="stats-container">
+                <div class="stat">
+                    <div class="stat-number">142</div>
+                    <div class="stat-label">Items Decluttered</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">11d</div>
+                    <div class="stat-label">Streak</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">401</div>
+                    <div class="stat-label">Level</div>
+                </div>
+            </div>
+            <button class="profile-btn">Profile</button>
+        </div>
+    </div>
+
+    <!-- Leaderboard Table -->
+    <div class="leaderboard-table-container">
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>Items Decluttered</th>
+                    <th>Streak</th>
+                    <th>Level</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="rank-badge">#4</span></td>
+                    <td>Russel Saldivar</td>
+                    <td>98</td>
+                    <td>10</td>
+                    <td>373</td>
+                </tr>
+                <tr>
+                    <td><span class="rank-badge">#5</span></td>
+                    <td>Joaquin Bordado</td>
+                    <td>80</td>
+                    <td>11</td>
+                    <td>371</td>
+                </tr>
+                <tr>
+                    <td><span class="rank-badge">#6</span></td>
+                    <td>Nardong Putik</td>
+                    <td>78</td>
+                    <td>8</td>
+                    <td>302</td>
+                </tr>
+                <tr>
+                    <td><span class="rank-badge">#7</span></td>
+                    <td>Tonyong Bayawak</td>
+                    <td>58</td>
+                    <td>8</td>
+                    <td>290</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="~/js/LeaderboardPage.js" asp-append-version="true"></script>
