@@ -1,0 +1,257 @@
+﻿@{
+    ViewBag.HideNavigation = false;
+    ViewData["Title"] = "Notifications";
+}
+
+@section Styles {
+    <link href="~/css/NotificationPage.css" rel="stylesheet" />
+}
+
+<div class="notification-page-container">
+
+    <div class="notification-page-container-child1">
+        <!-- Header -->
+        <div class="notification-header">
+            <h1 class="notification-title">Notification</h1>
+
+            <!-- Filter Tabs -->
+            <div class="notification-tabs">
+                <button id="tab-all" class="tab-button active" onclick="switchTab('all')">All</button>
+                <button id="tab-unread" class="tab-button" onclick="switchTab('unread')">Unread</button>
+            </div>
+        </div>
+
+        <!-- Notifications List -->
+        <div class="notifications-container" id="notifications-container">
+
+            <!-- Transaction Confirmation Notification -->
+            <div class="notification-card transaction-notification"
+                 data-category="all"
+                 data-read="false"
+                 data-type="transaction">
+                <div class="notification-content">
+      
+                    <div class="notification-main">
+                        <div class="notification-title-section">
+                            <h3 class="notification-card-title">Confirmation Meet-up Transaction</h3>
+                            <span class="notification-time">5/24/2025 1:17 AM</span>
+                        </div>
+                        <div class="notification-message">
+                            <p class="message-text">You have selected Meet-up as the transaction method for the item: "Wireless Headphones". Please confirm completion.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Post Reaction Notification -->
+            <div class="notification-card reaction-notification"
+                 data-category="all"
+                 data-read="false"
+                 data-type="reaction">
+                <div class="notification-content">
+               
+                    <div class="notification-main">
+                        <div class="notification-title-section">
+                            <h3 class="notification-card-title">New Reaction on Your Post</h3>
+                            <span class="notification-time">5/24/2025 12:45 PM</span>
+                        </div>
+                        <div class="notification-message">
+                            <p class="message-text"><strong>Ana Santos</strong> liked your post about "Vintage Camera Collection"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Post Comment Notification -->
+            <div class="notification-card comment-notification"
+                 data-category="all"
+                 data-read="false"
+                 data-type="comment">
+                <div class="notification-content">
+             
+                    <div class="notification-main">
+                        <div class="notification-title-section">
+                            <h3 class="notification-card-title">New Comment on Your Post</h3>
+                            <span class="notification-time">5/24/2025 11:30 AM</span>
+                        </div>
+                        <div class="notification-message">
+                            <p class="message-text"><strong>Juan Dela Cruz</strong> commented: "This looks amazing! Is it still available?"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Item Delivered Notification -->
+            <div class="notification-card delivery-notification"
+                 data-category="all"
+                 data-read="true"
+                 data-type="delivery">
+                <div class="notification-content">
+             
+                    <div class="notification-main">
+                        <div class="notification-title-section">
+                            <h3 class="notification-card-title">Item Successfully Delivered</h3>
+                            <span class="notification-time">5/23/2025 3:15 PM</span>
+                        </div>
+                        <div class="notification-message">
+                            <p class="message-text">Your item "Bluetooth Speaker" has been successfully delivered to Maria Rodriguez. Transaction completed!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- More Transaction Confirmations -->
+            <div class="notification-card transaction-notification"
+                 data-category="all"
+                 data-read="true"
+                 data-type="transaction">
+                <div class="notification-content">
+           
+                    <div class="notification-main">
+                        <div class="notification-title-section">
+                            <h3 class="notification-card-title">Transaction Completed</h3>
+                            <span class="notification-time">5/23/2025 2:00 PM</span>
+                        </div>
+                        <div class="notification-message">
+                            <p class="message-text">Your meet-up transaction for "Gaming Mouse" has been completed successfully.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- More Reaction Notifications -->
+            <div class="notification-card reaction-notification"
+                 data-category="all"
+                 data-read="true"
+                 data-type="reaction">
+                <div class="notification-content">
+       
+                    <div class="notification-main">
+                        <div class="notification-title-section">
+                            <h3 class="notification-card-title">Multiple Reactions</h3>
+                            <span class="notification-time">5/23/2025 10:15 AM</span>
+                        </div>
+                        <div class="notification-message">
+                            <p class="message-text"><strong>Carlos Miguel</strong> and <strong>2 others</strong> liked your post</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- More Comment Notifications -->
+            <div class="notification-card comment-notification"
+                 data-category="all"
+                 data-read="true"
+                 data-type="comment">
+                <div class="notification-content">
+           
+                    <div class="notification-main">
+                        <div class="notification-title-section">
+                            <h3 class="notification-card-title">New Comment Thread</h3>
+                            <span class="notification-time">5/22/2025 8:45 PM</span>
+                        </div>
+                        <div class="notification-message">
+                            <p class="message-text">There are <strong>3 new replies</strong> to your comment on "Laptop for Sale"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="empty-state hidden">
+            <div class="empty-icon">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="#A4C3B2" />
+                </svg>
+            </div>
+            <h3>No notifications</h3>
+            <p>You're all caught up! Check back later for new updates.</p>
+        </div>
+    </div>
+
+    <div class="notification-page-container-child2">
+        <!-- Modal Content (Desktop) -->
+        <div id="confirm-meetup-modal" class="modal-wrapper hidden">
+            <div class="modal-container">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Confirm Meet-up Transaction</h2>
+                        <span class="modal-time">5/24/2025 1:17 AM</span>
+                    </div>
+
+                    <div class="modal-body">
+                        <p class="modal-message-label">Message:</p>
+                        <p class="modal-message">You have selected Meet-up as the transaction method for the item:</p>
+
+                        <div class="transaction-details">
+                            <p><strong>Item:</strong> "Wireless Headphones"</p>
+                            <p><strong>Buyer:</strong> Juan Dela Cruz</p>
+                            <p><strong>Seller:</strong> Ana Santos</p>
+                        </div>
+
+                        <p class="confirmation-text">
+                            Please confirm that the item has been successfully exchanged.
+                        </p>
+
+                        <p class="confirmation-text">
+                            Once both parties click "Confirm", the transaction will be marked as complete and tokens will be released to the seller.
+                        </p>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button onclick="confirmTransaction()" class="confirm-button">Confirm</button>
+                        <button onclick="closeModal('confirm-meetup-modal')" class="cancel-button">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Mobile Modal Overlay (Hidden by default) -->
+<div id="mobile-confirm-modal" class="modal-overlay hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-container">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Confirm Meet-up Transaction</h2>
+                <button class="modal-close" onclick="closeModal('mobile-confirm-modal')" aria-label="Close modal">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <p class="modal-message-label">Message:</p>
+                <p class="modal-message">You have selected Meet-up as the transaction method for the item:</p>
+
+                <div class="transaction-details">
+                    <p><strong>Item:</strong> "Wireless Headphones"</p>
+                    <p><strong>Buyer:</strong> Juan Dela Cruz</p>
+                    <p><strong>Seller:</strong> Ana Santos</p>
+                </div>
+
+                <p class="confirmation-text">
+                    Please confirm that the item has been successfully exchanged.
+                </p>
+
+                <p class="confirmation-text">
+                    Once both parties click "Confirm", the transaction will be marked as complete and tokens will be released to the seller.
+                </p>
+            </div>
+
+            <div class="modal-actions">
+                <button onclick="confirmTransaction()" class="confirm-button">Confirm</button>
+                <button onclick="closeModal('mobile-confirm-modal')" class="cancel-button">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/NotificationPage.js"></script>
+}
