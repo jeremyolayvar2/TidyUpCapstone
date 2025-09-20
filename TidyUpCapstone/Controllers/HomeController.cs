@@ -77,6 +77,14 @@ namespace TidyUpCapstone.Controllers
         }
 
         /// <summary>
+        /// Items claimed page action from feature/claimed-items branch
+        /// </summary>
+        public IActionResult ItemsClaimedPage()
+        {
+            return View();
+        }
+
+        /// <summary>
         /// Notification page action from feature/notification branch
         /// </summary>
         public IActionResult NotificationPage()

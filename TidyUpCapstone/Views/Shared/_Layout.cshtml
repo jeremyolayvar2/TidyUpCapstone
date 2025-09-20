@@ -64,7 +64,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="nav-link" data-page="claimed">
+                            <a href="@Url.Action("ItemsClaimedPage", "Home")" class="nav-link" data-page="claimed">
                                 <img class="icon" alt="Claimed" src="~/assets/VectorClaimed.svg" />
                                 <span>Claimed Items</span>
                             </a>
@@ -80,6 +80,12 @@
                             <a href="#" class="open-token">
                                 <img class="icon" alt="Token" src="~/assets/VectorToken.svg" />
                                 <span>Token Balance</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="@Url.Action("QuestPage", "Home")" class="nav-link" data-page="quests">
+                                <img class="icon" alt="Quest/Milestone" src="~/assets/VectorQuests.svg" />
+                                <span>Quest & Milestones</span>
                             </a>
                         </li>
                         <li>
@@ -107,12 +113,6 @@
                             </a>
                         </li>
                         <li>
-                            <a href="@Url.Action("QuestPage", "Home")" class="nav-link" data-page="quests">
-                                <img class="icon" alt="Quest/Milestone" src="~/assets/VectorQuests.svg" />
-                                <span>Quest & Milestones</span>
-                            </a>
-                        </li>
-                        <li>
                             <a href="@Url.Action("SettingsPage", "Home")" class="nav-link" data-page="settings">
                                 <img class="icon" alt="Settings" src="~/assets/VectorSettings.svg" />
                                 <span>Settings</span>
@@ -130,12 +130,12 @@
                             </div>
                             <div class="dock-label">Home</div>
                         </a>
-                        <div class="dock-item" data-label="Claimed">
+                        <a href="@Url.Action("ItemsClaimedPage", "Home")" class="dock-item" data-page="claimed" data-label="Claimed" style="text-decoration: none; color: inherit;">
                             <div class="dock-icon">
                                 <img src="~/assets/VectorClaimed.svg" />
                             </div>
                             <div class="dock-label">Claimed</div>
-                        </div>
+                        </a>
                         <div class="dock-item" data-label="Create">
                             <div class="dock-icon">
                                 <img src="~/assets/VectorCreate.svg" />
@@ -148,6 +148,12 @@
                             </div>
                             <div class="dock-label">Token</div>
                         </div>
+                        <a href="@Url.Action("QuestPage", "Home")" class="dock-item" data-page="quests" data-label="Quest & Milestone" style="text-decoration: none; color: inherit;">
+                            <div class="dock-icon">
+                                <img src="~/assets/VectorQuests.svg" />
+                            </div>
+                            <div class="dock-label">Quests & Milestone</div>
+                        </a>
                         <div class="dock-item" data-label="Shop">
                             <div class="dock-icon">
                                 <img src="~/assets/VectorShop.svg" />
@@ -172,12 +178,6 @@
                             </div>
                             <div class="dock-label">Leaderboards</div>
                        </a>
-                       <a href="@Url.Action("QuestPage", "Home")" class="dock-item" data-page="quests" data-label="Quest & Milestone" style="text-decoration: none; color: inherit;">
-                            <div class="dock-icon">
-                                <img src="~/assets/VectorQuests.svg" />
-                            </div>
-                            <div class="dock-label">Quests & Milestone</div>
-                        </a>
                         <a href="@Url.Action("SettingsPage", "Home")" class="dock-item" data-page="settings" data-label="Settings" style="text-decoration: none; color: inherit;">
                             <div class="dock-icon">
                                 <img src="~/assets/VectorSettings.svg" />

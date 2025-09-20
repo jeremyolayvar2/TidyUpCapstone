@@ -312,9 +312,9 @@ class NavigationManager {
 
         if (path.includes('/home/main') || path === '/') {
             return 'home';
-        } else if (path.includes('/home/settings') || path.includes('/home/settingspage')) {
+        } else if (path.includes('/home/settingspage') || path.includes('/settings')) {
             return 'settings';
-        } else if (path.includes('/home/questpage')) {
+        } else if (path.includes('/home/questpage') || path.includes('/quest')) {
             return 'quests';
         } else if (path.includes('/home/messagepage') || path.includes('/message')) {
             return 'messages';
@@ -322,12 +322,6 @@ class NavigationManager {
             return 'notifications';
         } else if (path.includes('/home/itemsclaimedpage') || path.includes('/claimed')) {
             return 'claimed';
-        } else if (path.includes('/claimed')) {
-            return 'claimed';
-        } else if (path.includes('/community')) {
-            return 'community';
-        } else if (path.includes('/shop')) {
-            return 'shop';
         } else if (path.includes('/home/leaderboardpage') || path.includes('/leaderboards')) {
             return 'leaderboards';
         }
