@@ -106,7 +106,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="nav-link" data-page="notifications">
+                            <a href="@Url.Action("NotificationPage", "Home")" class="nav-link" data-page="notifications">
                                 <img class="icon" alt="Notifications" src="~/assets/VectorNotif.svg" />
                                 <span>Notifications</span>
                             </a>
@@ -177,18 +177,18 @@
                             </div>
                             <div class="dock-label">Shop</div>
                         </div>
-                        <div class="dock-item" data-label="Message">
+                        <a href="@Url.Action("MessagePage", "Home")" class="dock-item" data-page="message" data-label="Message" style="text-decoration: none; color: inherit;">
                             <div class="dock-icon">
                                 <img src="~/assets/VectorMsg.svg" />
                             </div>
                             <div class="dock-label">Message</div>
-                        </div>
-                        <div class="dock-item" data-label="Notification">
+                        </a>
+                        <a href="@Url.Action("NotificationPage", "Home")" class="dock-item" data-page="notifications" data-label="Notification" style="text-decoration: none; color: inherit;">
                             <div class="dock-icon">
                                 <img src="~/assets/VectorNotif.svg" />
                             </div>
                             <div class="dock-label">Notification</div>
-                        </div>
+                        </a>
                         <div class="dock-item" data-label="Leaderboards">
                             <div class="dock-icon">
                                 <img src="~/assets/VectorLB.svg" />
