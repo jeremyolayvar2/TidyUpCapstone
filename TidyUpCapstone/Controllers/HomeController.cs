@@ -76,6 +76,14 @@ namespace TidyUpCapstone.Controllers
             return View();
         }
 
+        /// <summary>
+        /// Notification page action from feature/notification branch
+        /// </summary>
+        public IActionResult NotificationPage()
+        {
+            return View();
+        }
+
         public async Task<IActionResult> Main()
         {
             try
